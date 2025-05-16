@@ -1,5 +1,5 @@
 [package]
-name = "gui_windows"
+name = "food_suggestions"
 version = "0.1.0"
 edition = "2021"
 
