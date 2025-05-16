@@ -22,6 +22,7 @@ Requires:
 * Thermic Effect of Food (Toggleable)
 * Baseline Activity Enum (Toggleable)
 * Custom Energy Target (Toggleable)
+* Show Nutrient Balances (Which ones, Toggleable)
 * Track Nutrient Targets (Select Which Are Wanted, Customise Ranges (Based on chosen range options), Toggle default values)
     * General
     * Vitamins
