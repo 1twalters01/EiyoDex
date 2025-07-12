@@ -223,7 +223,7 @@ impl Div for Mass {
 
 impl PartialOrd for Mass {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.as_kcal().partial_cmp(&other.as_grams())
+        self.as_grams().partial_cmp(&other.as_grams())
     }
 }
 

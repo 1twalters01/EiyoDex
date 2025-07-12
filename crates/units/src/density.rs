@@ -135,7 +135,7 @@ impl Div<Density> for Mass {
 
 impl PartialOrd for Density {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.as_kcal().partial_cmp(&other.as_g_per_ml())
+        self.as_g_per_ml().partial_cmp(&other.as_g_per_ml())
     }
 }
 

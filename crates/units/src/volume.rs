@@ -145,34 +145,34 @@ impl fmt::Display for Volume {
 impl Add for Volume {
     type Output = Self;
     fn add(self, rhs: Self) -> Self {
-        Self::from_liters(self.as_l() + rhs.as_l())
+        Self::from_l(self.as_l() + rhs.as_l())
     }
 }
 
 impl Sub for Volume {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self {
-        Self::from_liters(self.as_l() - rhs.as_l())
+        Self::from_l(self.as_l() - rhs.as_l())
     }
 }
 
 impl Mul for Volume {
     type Output = Self;
     fn mul(self, rhs: f64) -> Self {
-        Self::from_liters(self.as_l() * rhs)
+        Self::from_l(self.as_l() * rhs)
     }
 }
 
 impl Div for Volume {
     type Output = Self;
     fn div(self, rhs: f64) -> Self {
-        Self::from_liters(self.as_l() / rhs)
+        Self::from_l(self.as_l() / rhs)
     }
 }
 
 impl PartialOrd for Volume {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.as_kcal().partial_cmp(&other.as_ml())
+        self.as_ml().partial_cmp(&other.as_ml())
     }
 }
 
