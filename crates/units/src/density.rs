@@ -2,7 +2,7 @@ use std::{
     cmp::Ordering,
     convert::TryFrom,
     fmt,
-    ops::Mul,
+    ops::{Div, Mul},
     str::FromStr,
 };
 
@@ -119,6 +119,17 @@ impl Mul<Density> for Volume {
 
     fn mul(self, density: Density) -> Mass {
         density.get_mass_for_volume(self)
+    }
+}
+
+impl Div<Density> for Mass {
+    type Output = Density;
+
+    fn div(self, volume: Volume) -> Density {
+        grams = self.as_g();
+        milliliters = volume.as_ml();
+        grams_per_milliliter = grams / milliliters;
+        density.from_g_per_ml(grams_per_milliliter)
     }
 }
 
