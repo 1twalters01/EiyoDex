@@ -1,10 +1,10 @@
 use std::{
     cmp::Ordering,
+    convert::TryFrom,
     fmt,
-    ops::{Add, Sub, Mul, Div}
+    ops::{Add, Sub, Mul, Div},
+    str::FromStr,
 };
-use std::str::FromStr;
-use std::convert::TryFrom;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -113,6 +113,10 @@ impl Energy {
 
     pub fn is_negative(&self) -> bool {
         self.value < 0.0
+    }
+
+    pub fn get_unit(&self) -> EnergyUnit {
+        self.unit
     }
 
     pub fn get_symbol(&self) -> &'static str {
