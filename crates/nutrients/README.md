@@ -1,3 +1,22 @@
+# Features
+* Has comprehensive default nutrient profile
+    * Nutrients can be toggled on/off, thus not counting them
+    * Nutrients can be hidden, which does effect counting
+    * Nothing can be moved, deleted or added on default profile
+    * Equations for max and min value (or none)
+        * Can be hidden for each nutrient (or all)
+    * Equations for Top and Bottom ideal range (or none)
+        * Can be hidden for each nutrient (or all)
+
+* User can create their own nutrient profiles
+    * These have the same basic rules as the default
+    * User created nutrient profiles can be renamed (no duplicate names are allowed)
+    * All fields can be renamed in a nutrient profile
+    * Can add or remove new nutrients
+    * User can add or remove guide bars (max min)
+    * Allows user to move where nutrients are in hierarchy
+
+# Default Fields
 * Energy
     * Carbohydrates
         * Fiber
