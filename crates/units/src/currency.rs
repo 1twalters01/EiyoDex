@@ -1,5 +1,6 @@
 use std::{
     cmp::Ordering,
+    collections::HashMap,
     convert::TryFrom,
     fmt,
     ops::{Add, Sub, Mul, Div},
@@ -12,42 +13,47 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum CurrencyUnit {
-    GBP,
-    EUR,
     USD,
+    EUR,
+    JYP,
+    GBP,
 }
 
 // Use json config file? No if stand alone library
 impl CurrencyUnit {
     pub fn as_symbol(&self) -> &'static str {
         match self {
-            CurrencyUnit::GBP => "£",
-            CurrencyUnit::EUR => "€",
             CurrencyUnit::USD => "$",
+            CurrencyUnit::EUR => "€",
+            CurrencyUnit::JYP => "¥",
+            CurrencyUnit::GBP => "£",
         }
     }
 
     pub fn as_code(&self) -> &'static str {
         match self {
-            CurrencyUnit::GBP => "GBP",
-            CurrencyUnit::EUR => "EUR",
             CurrencyUnit::USD => "USD",
+            CurrencyUnit::EUR => "EUR",
+            CurrencyUnit::JYP => "JYP",
+            CurrencyUnit::GBP => "GBP",
         }
     }
 
     pub fn as_unit_type(&self) -> &'static str {
         match self {
-            CurrencyUnit::GBP => "pound",
-            CurrencyUnit::EUR => "Euro",
             CurrencyUnit::USD => "dollar",
+            CurrencyUnit::EUR => "Euro",
+            CurrencyUnit::JYP => "Yen",
+            CurrencyUnit::GBP => "pound",
         }
     }
 
     pub fn as_unit_type_plural(&self) -> &'static str {
         match self {
-            CurrencyUnit::GBP => "pounds",
-            CurrencyUnit::EUR => "Euro",
             CurrencyUnit::USD => "dollars",
+            CurrencyUnit::EUR => "Euro",
+            CurrencyUnit::JYP => "Yen",
+            CurrencyUnit::GBP => "pounds",
         }
     }
 }
@@ -57,9 +63,10 @@ impl FromStr for CurrencyUnit {
 
     fn from_str(s: &str) -> Result<Self, &'static str> {
         match s.trim().to_uppercase().as_str() {
-            "£" | "GBP" => Ok(CurrencyUnit::GBP),
-            "€" | "EUR" => Ok(CurrencyUnit::EUR),
             "$" | "USD" => Ok(CurrencyUnit::USD),
+            "€" | "EUR" => Ok(CurrencyUnit::EUR),
+            "¥" | "JYP" => Ok(CurrencyUnit::JYP),
+            "£" | "GBP" => Ok(CurrencyUnit::GBP),
             _ => Err("Unknown currency unit"),
         }
     }
@@ -131,9 +138,10 @@ impl Mul<f64> for Currency {
     fn mul(self, rhs: f64) -> Self {
         // Match to avoid unnecessary conversion
         match self.unit {
-            CurrencyUnit::GBP => Self::from_gbp(self.as_gbp() * rhs),
-            CurrencyUnit::EUR => Self::from_eur(self.as_eur() * rhs),
             CurrencyUnit::USD => Self::from_usd(self.as_usd() * rhs),
+            CurrencyUnit::EUR => Self::from_eur(self.as_eur() * rhs),
+            CurrencyUnit::YEN => Self::from_yen(self.as_yen() * rhs),
+            CurrencyUnit::GBP => Self::from_gbp(self.as_gbp() * rhs),
         }
     }
 }
@@ -143,9 +151,10 @@ impl Div<f64> for Currency {
     fn div(self, rhs: f64) -> Self {
         // Match to avoid unnecessary conversion
         match self.unit {
-            CurrencyUnit::GBP => Self::from_gbp(self.as_gbp() / rhs),
-            CurrencyUnit::EUR => Self::from_eur(self.as_eur() / rhs),
             CurrencyUnit::USD => Self::from_usd(self.as_usd() / rhs),
+            CurrencyUnit::EUR => Self::from_eur(self.as_eur() / rhs),
+            CurrencyUnit::YEN => Self::from_yen(self.as_yen() / rhs),
+            CurrencyUnit::GBP => Self::from_gbp(self.as_gbp() / rhs),
         }
     }
 }
@@ -155,15 +164,17 @@ impl Add for Currency {
     fn add(self, rhs: Self) -> Self {
         if self.unit == rhs.unit {
             match self.unit {
-                CurrencyUnit::GBP => return Self::from_gbp(self.as_gbp() + rhs.as_gbp()),
-                CurrencyUnit::EUR => return Self::from_eur(self.as_eur() + rhs.as_eur()),
                 CurrencyUnit::USD => return Self::from_usd(self.as_usd() + rhs.as_usd()),
+                CurrencyUnit::EUR => return Self::from_eur(self.as_eur() + rhs.as_eur()),
+                CurrencyUnit::YEN => return Self::from_yen(self.as_yen() + rhs.as_yen()),
+                CurrencyUnit::GBP => return Self::from_gbp(self.as_gbp() + rhs.as_gbp()),
             }
         } else {
             match self.unit {
-                CurrencyUnit::GBP => return Self::from_gbp(self.as_gbp() + rhs.as_gbp()),
-                CurrencyUnit::EUR => return Self::from_eur(self.as_eur() + rhs.as_eur()),
                 CurrencyUnit::USD => return Self::from_usd(self.as_usd() + rhs.as_usd()),
+                CurrencyUnit::EUR => return Self::from_eur(self.as_eur() + rhs.as_eur()),
+                CurrencyUnit::YEN => return Self::from_yen(self.as_yen() + rhs.as_yen()),
+                CurrencyUnit::GBP => return Self::from_gbp(self.as_gbp() + rhs.as_gbp()),
             }
         }
     }
@@ -174,15 +185,17 @@ impl Sub for Currency {
     fn sub(self, rhs: Self) -> Self {
         if self.unit == rhs.unit {
             match self.unit {
-                CurrencyUnit::GBP => return Self::from_gbp(self.as_gbp() - rhs.as_gbp()),
-                CurrencyUnit::EUR => return Self::from_eur(self.as_eur() - rhs.as_eur()),
                 CurrencyUnit::USD => return Self::from_usd(self.as_usd() - rhs.as_usd()),
+                CurrencyUnit::EUR => return Self::from_eur(self.as_eur() - rhs.as_eur()),
+                CurrencyUnit::YEN => return Self::from_yen(self.as_yen() - rhs.as_yen()),
+                CurrencyUnit::GBP => return Self::from_gbp(self.as_gbp() - rhs.as_gbp()),
             }
         } else {
             match self.unit {
-                CurrencyUnit::GBP => return Self::from_gbp(self.as_gbp() - rhs.as_gbp()),
-                CurrencyUnit::EUR => return Self::from_eur(self.as_eur() - rhs.as_eur()),
                 CurrencyUnit::USD => return Self::from_usd(self.as_usd() - rhs.as_usd()),
+                CurrencyUnit::EUR => return Self::from_eur(self.as_eur() - rhs.as_eur()),
+                CurrencyUnit::YEN => return Self::from_yen(self.as_yen() - rhs.as_yen()),
+                CurrencyUnit::GBP => return Self::from_gbp(self.as_gbp() - rhs.as_gbp()),
             }
         }
     }
@@ -194,15 +207,17 @@ impl PartialOrd for Currency {
 
         if self.unit == other.unit {
             match self.unit {
-                CurrencyUnit::GBP => return self.as_gbp().partial_cmp(&other.as_gbp()),
-                CurrencyUnit::EUR => return self.as_eur().partial_cmp(&other.as_eur()),
                 CurrencyUnit::USD => return self.as_usd().partial_cmp(&other.as_usd()),
+                CurrencyUnit::EUR => return self.as_eur().partial_cmp(&other.as_eur()),
+                CurrencyUnit::YEN => return self.as_yen().partial_cmp(&other.as_yen()),
+                CurrencyUnit::GBP => return self.as_gbp().partial_cmp(&other.as_gbp()),
             }
         } else {
             match self.unit {
-                CurrencyUnit::GBP => return self.as_gbp().partial_cmp(&other.as_gbp()),
-                CurrencyUnit::EUR => return self.as_eur().partial_cmp(&other.as_eur()),
                 CurrencyUnit::USD => return self.as_usd().partial_cmp(&other.as_usd()),
+                CurrencyUnit::EUR => return self.as_eur().partial_cmp(&other.as_eur()),
+                CurrencyUnit::YEN => return self.as_yen().partial_cmp(&other.as_yen()),
+                CurrencyUnit::GBP => return self.as_gbp().partial_cmp(&other.as_gbp()),
             }
         }
     }
