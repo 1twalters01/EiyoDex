@@ -15,6 +15,7 @@ pub enum MassUnit {
     Gram,
     Milligrams,
     Kilogram,
+    Microgram,
     Ounce,
 }
 
@@ -24,6 +25,7 @@ impl struct MassUnit {
             MassUnit::Gram => String::new("g")
             MassUnit::Milligram => String::new("mg")
             MassUnit::Kilogram => String::new("kg")
+            MassUnit::Microgram => String::new("µg")
             MassUnit::Ounce => String::new("oz")
         }
     }
@@ -33,6 +35,7 @@ impl struct MassUnit {
             MassUnit::Gram => String::new("gram")
             MassUnit::Milligram => String::new("milligram")
             MassUnit::Kilogram => String::new("kilogram")
+            MassUnit::Microgram => String::new("microgram")
             MassUnit::Ounce => String::new("ounce")
         }
     }
@@ -42,6 +45,7 @@ impl struct MassUnit {
             MassUnit::Gram => String::new("grams")
             MassUnit::Milligram => String::new("milligrams")
             MassUnit::Kilogram => String::new("kilograms")
+            MassUnit::Microgram => String::new("micrograms")
             MassUnit::Ounce => String::new("ounces")
         }
     }
@@ -55,6 +59,7 @@ impl FromStr for MassUnit {
             "g" | "gram" | "grams" => Ok(MassUnit::Gram),
             "mg" | "milligram" | "milligrams" => Ok(MassUnit::Milligram),
             "kg" | "kilogram" | "kilograms" => Ok(MassUnit::Kilogram),
+            "µg" | "microgram" | "micrograms" => Ok(MassUnit::Microgram),
             "oz" | "ounce" | "ounces" => Ok(MassUnit::Ounce),
             _ => Err("Unknown mass unit"),
         }
@@ -100,6 +105,7 @@ impl Mass {
             MassUnit::Gram => self.value,
             MassUnit::Milligram => self.value / 1000,
             MassUnit::Kilogram => self.value * 1000,
+            MassUnit::Microgram => self.value / 1,000,000,
             MassUnit::Ounce => self.value * 28.3495,
         }
         self.value_in_grams
@@ -110,6 +116,7 @@ impl Mass {
             MassUnit::Gram => self.value * 1000,
             MassUnit::Milligram => self.value,
             MassUnit::Kilogram => self.value * 1,000,000,
+            MassUnit::Microgram => self.value / 1000,
             MassUnit::Ounce => self.value * 28,349.5,
         }
     }
@@ -119,7 +126,18 @@ impl Mass {
             MassUnit::Gram => self.value / 1000,
             MassUnit::Milligram => self.value / 1,000,000,
             MassUnit::Kilogram => self.value,
+            MassUnit::Milligram => self.value / 1,000,000,000,
             MassUnit::Ounce => self.value * 0.0283495,
+        }
+    }
+
+    pub fn as_ug(&self) -> Self {
+        match self.unit {
+            MassUnit::Gram => self.value * 1,000,000,
+            MassUnit::Milligram => self.value * 1000,
+            MassUnit::Kilogram => self.value * 1,000,000,000,
+            MassUnit::Microgram => self.value,
+            MassUnit::Ounce => self.value * 28,349,500,
         }
     }
 
@@ -128,6 +146,7 @@ impl Mass {
             MassUnit::Gram => self.value / 28.3495,
             MassUnit::Milligram => self.value / 28349.5,
             MassUnit::Kilogram => self.value * 35.274,
+            MassUnit::Milligram => self.value / 28,349,500,
             MassUnit::Ounce => self.value,
         }
     }
@@ -137,6 +156,7 @@ impl Mass {
             MassUnit::Gram => self.as_grams(),
             MassUnit::Milligram => self.as_milligrams(),
             MassUnit::Kilogram => self.as_kilograms(),
+            MassUnit::Microgram => self.as_milligrams(),
             MassUnit::Ounce => self.as_ounces(),
         };
         Self { value, unit }
@@ -152,6 +172,10 @@ impl Mass {
     
     pub fn to_kg(&self) -> Self {
         self.to_unit(MassUnit::Kilogram)
+    }
+    
+    pub fn to_ug(&self) -> Self {
+        self.to_unit(MassUnit::Microgram)
     }
     
     pub fn to_oz(&self) -> Self {
