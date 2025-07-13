@@ -3,4 +3,4 @@ Datatypes for:
 * Mass (g, mg, kg, oz)
 * Volume (l, ml)
 * Density (g/ml, g/l)
-* Currency (gbp, usd)
+* Currency (usd, eur, jyp, gbp)
