@@ -10,6 +10,13 @@ use std::{
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+pub struct CurrencyMetadata {
+    symbol: &'static str
+    code: &'static str
+    unit_type: &'static str
+    unit_type_plural: &'static str
+}
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum CurrencyUnit {
@@ -21,57 +28,84 @@ pub enum CurrencyUnit {
 
 // Use json config file? No if stand alone library
 impl CurrencyUnit {
-    pub fn as_symbol(&self) -> &'static str {
+    pub fn metadata(&self) -> CurrencyMetadata {
         match self {
-            CurrencyUnit::USD => "$",
-            CurrencyUnit::EUR => "€",
-            CurrencyUnit::JYP => "¥",
-            CurrencyUnit::GBP => "£",
+            CurrencyUnit::USD => CurrencyMetadata {
+                symbol: "$",
+                code: "USD",
+                unit_type: "Dollar",
+                unit_type_plural: "Dollars",
+            },
+            CurrencyUnit::EUR => CurrencyMetadata {
+                symbol: "€",
+                code: "EUR",
+                unit_type: "Euro",
+                unit_type_plural: "Euros",
+            },
+            CurrencyUnit::JYP => CurrencyMetadata {
+                symbol: "¥",
+                code: "JYP",
+                unit_type: "Yen",
+                unit_type_plural: "Yen",
+            },
+            CurrencyUnit::GBP => CurrencyMetadata {
+                symbol: "£",
+                code: "GBP",
+                unit_type: "Pounds",
+                unit_type_plural: "Pounds",
+            },
         }
+    }
+
+    pub fn variants() -> &'static [CurrencyUnit] {
+        const VARIANTS: &[CurrencyUnit] = &[
+            CurrencyUnit::USD,
+            CurrencyUnit::EUR,
+            CurrencyUnit::JPY,
+            CurrencyUnit::GBP,
+        ];
+        VARIANTS
+    }
+
+    pub fn as_symbol(&self) -> &'static str {
+        self.metadata().symbol
     }
 
     pub fn as_code(&self) -> &'static str {
-        match self {
-            CurrencyUnit::USD => "USD",
-            CurrencyUnit::EUR => "EUR",
-            CurrencyUnit::JYP => "JYP",
-            CurrencyUnit::GBP => "GBP",
-        }
+        self.metadata().code
     }
 
     pub fn as_unit_type(&self) -> &'static str {
-        match self {
-            CurrencyUnit::USD => "dollar",
-            CurrencyUnit::EUR => "Euro",
-            CurrencyUnit::JYP => "Yen",
-            CurrencyUnit::GBP => "pound",
-        }
+        self.metadata().unit_type
     }
 
     pub fn as_unit_type_plural(&self) -> &'static str {
-        match self {
-            CurrencyUnit::USD => "dollars",
-            CurrencyUnit::EUR => "Euro",
-            CurrencyUnit::JYP => "Yen",
-            CurrencyUnit::GBP => "pounds",
-        }
+        self.metadata().unit_type_plural
     }
 }
+
+
 
 impl FromStr for CurrencyUnit {
     type Err = &'static str;
 
     fn from_str(s: &str) -> Result<Self, &'static str> {
-        match s.trim().to_uppercase().as_str() {
-            "$" | "USD" => Ok(CurrencyUnit::USD),
-            "€" | "EUR" => Ok(CurrencyUnit::EUR),
-            "¥" | "JYP" => Ok(CurrencyUnit::JYP),
-            "£" | "GBP" => Ok(CurrencyUnit::GBP),
-            _ => Err("Unknown currency unit"),
+        let formatted_s = trim().uppercase();
+        for variant in CurrencyUnit::variants() {
+            let variant_metadata = variant.metadata();
+            if formatted_s == variant_metadata.code || formatted_s == variant_metadata.symbol {
+                return Ok(*variant);
+            }
         }
+        Err("Unknown currency unit")
     }
 }
 
+impl fmt::Display for CurrencyUnit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.as_code())
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -203,8 +237,6 @@ impl Sub for Currency {
 
 impl PartialOrd for Currency {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.as_gbp().partial_cmp(&other.as_gbp())
-
         if self.unit == other.unit {
             match self.unit {
                 CurrencyUnit::USD => return self.as_usd().partial_cmp(&other.as_usd()),
