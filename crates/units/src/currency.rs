@@ -19,29 +19,29 @@ pub enum CurrencyUnit {
 impl CurrencyUnit {
     pub fn as_symbol(&self) -> &'static str {
         match self {
-            CurrencyUnit::GBP => "£"
-            CurrencyUnit::USD => "$"
+            CurrencyUnit::GBP => "£",
+            CurrencyUnit::USD => "$",
         }
     }
 
     pub fn as_unit_type(&self) -> &'static str {
         match self {
-            currencyunit::GBP => "pound"
-            currencyunit::USD => "dollar"
+            currencyunit::GBP => "pound",
+            currencyunit::USD => "dollar",
         }
     }
 
     pub fn as_unit_type_plural(&self) -> &'static str {
         match self {
-            currencyunit::GBP => "pounds"
-            currencyunit::USD => "dollars"
+            currencyunit::GBP => "pounds",
+            currencyunit::USD => "dollars",
         }
     }
 
     pub fn as_code(&self) -> &'static str {
         match self {
-            currencyunit::GBP => "GBP"
-            currencyunit::USD => "USD"
+            currencyunit::GBP => "GBP",
+            currencyunit::USD => "USD",
         }
     }
 }
@@ -104,11 +104,11 @@ impl Currency {
     }
 
     pub fn to_unit(&self, target_unit: CurrencyUnit) -> Self {
-        current_unit = self.unit;
+        let current_unit = self.unit;
         if current_unit == target_unit {
             self
         } else {
-            exchange_rate = Currency::get_exchange_rate(current_unit, target_unit)
+            exchange_rate = get_exchange_rate(current_unit, target_unit)
             Self {
                 value: self.value * exchange_rate,
                 unit: target_unit,
@@ -158,8 +158,8 @@ impl Mul<f64> for Currency {
     fn mul(self, rhs: f64) -> Self {
         // Match to avoid unnecessary conversion
         match self.unit {
-            CurrencyUnit::GBP => Self::from_gbp(self.as_gbp() * rhs)
-            CurrencyUnit::GBP => Self::from_usd(self.as_usd() * rhs)
+            CurrencyUnit::GBP => Self::from_gbp(self.as_gbp() * rhs),
+            CurrencyUnit::USD => Self::from_usd(self.as_usd() * rhs),
         }
     }
 }
@@ -169,8 +169,8 @@ impl Div<f64> for Currency {
     fn div(self, rhs: f64) -> Self {
         // Match to avoid unnecessary conversion
         match self.unit {
-            CurrencyUnit::GBP => Self::from_gbp(self.as_gbp() / rhs)
-            CurrencyUnit::GBP => Self::from_usd(self.as_usd() / rhs)
+            CurrencyUnit::GBP => Self::from_gbp(self.as_gbp() / rhs),
+            CurrencyUnit::USD => Self::from_usd(self.as_usd() / rhs),
         }
     }
 }
@@ -185,4 +185,50 @@ impl Ord for Currency {
     fn cmp(&self, other: &Self) -> Ordering {
         self.partial_cmp(other).unwrap()
     }
+}
+
+// Use a library for good error typing / an enum
+pub fn get_exchange_rate(current_unit: CurrencyUnit, target_unit: CurrencyUnit) -> Result<f64, String> {
+    if current_unit == target_unit{
+        return Ok(1.0)
+    }
+
+    // connect to redis
+
+    let key = format!("currency_exchange_rate:{}_to_{}", current.as_code(), target.as_code());
+
+    // get cached exchange rate
+
+    if let Ok(cached_exchange_rate) = cached_result {
+        return Ok(cached_exchange_rate)
+    }
+
+    let live_exchange_rate_result = fetch_exchange_rate(current_unit, target_unit);
+
+    match live_exchange_rate_result {
+        Err(err) => return Err(err)
+        Ok(live_exchange_rate) => {
+            let exchange_rate_expiry_in_seconds = fetch_exchange_rate_expiry_in_seconds();
+
+            // Cache result for exchange_rate_expiry_in_seconds seconds
+
+            return Ok(live_exchange_rate)
+        }
+    }
+}
+
+pub fn fetch_current_exchange_rate(current_unit: CurrencyUnit, target_unit: CurrencyUnit) -> Result<f64, String> {
+    // fetch from an api using current unit, target unit and time now using reqwest
+    // return result of fetch
+}
+
+// Don't know what datetime I will use, probably chrone
+pub fn fetch_past_exchange_rate(current_unit: CurrencyUnit, target_unit: CurrencyUnit, datetime: Datetime) -> Result<f64, String> {
+    // fetch from an api using current unit, target unit and datetime using reqwest
+    // return result of fetch
+}
+
+pub fn fetch_exchange_rate_expiry_in_seconds() -> i8{
+    // fetch from somewhere e.g. toml file
+    // success or default is 30 mins
 }
