@@ -1,9 +1,7 @@
 use std::{
     cmp::Ordering,
-    collections::HashMap,
-    convert::TryFrom,
     fmt,
-    ops::{Add, Sub, Mul, Div},
+    ops::{Add, Div, Mul, Sub},
     str::FromStr,
 };
 
@@ -11,100 +9,86 @@ use std::{
 use serde::{Deserialize, Serialize};
 
 pub struct CurrencyMetadata {
-    symbol: &'static str
-    code: &'static str
-    unit_type: &'static str
-    unit_type_plural: &'static str
+    pub symbol: &'static str,
+    pub code: &'static str,
+    pub unit_type: &'static str,
+    pub unit_type_plural: &'static str,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub enum CurrencyUnit {
-    USD,
-    EUR,
-    JYP,
-    GBP,
-}
-
-// Use json config file? No if stand alone library
-impl CurrencyUnit {
-    pub fn metadata(&self) -> CurrencyMetadata {
-        match self {
-            CurrencyUnit::USD => CurrencyMetadata {
-                symbol: "$",
-                code: "USD",
-                unit_type: "Dollar",
-                unit_type_plural: "Dollars",
-            },
-            CurrencyUnit::EUR => CurrencyMetadata {
-                symbol: "€",
-                code: "EUR",
-                unit_type: "Euro",
-                unit_type_plural: "Euros",
-            },
-            CurrencyUnit::JYP => CurrencyMetadata {
-                symbol: "¥",
-                code: "JYP",
-                unit_type: "Yen",
-                unit_type_plural: "Yen",
-            },
-            CurrencyUnit::GBP => CurrencyMetadata {
-                symbol: "£",
-                code: "GBP",
-                unit_type: "Pounds",
-                unit_type_plural: "Pounds",
-            },
+#[macro_export]
+macro_rules! define_currencies {
+    (
+        $(
+            $variant:ident => {
+                symbol: $symbol:expr,
+                code: $code:expr,
+                unit_type: $unit:expr,
+                unit_type_plural: $unit_plural:expr
+            }
+        ),+ $(,)?
+    ) => {
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+        #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+        pub enum CurrencyUnit {
+            $($variant),+
         }
-    }
 
-    pub fn variants() -> &'static [CurrencyUnit] {
-        const VARIANTS: &[CurrencyUnit] = &[
-            CurrencyUnit::USD,
-            CurrencyUnit::EUR,
-            CurrencyUnit::JPY,
-            CurrencyUnit::GBP,
-        ];
-        VARIANTS
-    }
+        impl CurrencyUnit {
+            pub fn variants() -> &'static [CurrencyUnit] {
+                &[
+                    $(CurrencyUnit::$variant),+
+                ]
+            }
 
-    pub fn as_symbol(&self) -> &'static str {
-        self.metadata().symbol
-    }
+            pub fn metadata(&self) -> CurrencyMetadata {
+                match self {
+                    $(CurrencyUnit::$variant => CurrencyMetadata {
+                        symbol: $symbol,
+                        code: $code,
+                        unit_type: $unit,
+                        unit_type_plural: $unit_plural,
+                    }),+
+                }
+            }
 
-    pub fn as_code(&self) -> &'static str {
-        self.metadata().code
-    }
+            pub fn as_symbol(&self) -> &'static str {
+                self.metadata().symbol
+            }
 
-    pub fn as_unit_type(&self) -> &'static str {
-        self.metadata().unit_type
-    }
+            pub fn as_code(&self) -> &'static str {
+                self.metadata().code
+            }
 
-    pub fn as_unit_type_plural(&self) -> &'static str {
-        self.metadata().unit_type_plural
-    }
-}
+            pub fn as_unit_type(&self) -> &'static str {
+                self.metadata().unit_type
+            }
 
-
-
-impl FromStr for CurrencyUnit {
-    type Err = &'static str;
-
-    fn from_str(s: &str) -> Result<Self, &'static str> {
-        let formatted_s = trim().uppercase();
-        for variant in CurrencyUnit::variants() {
-            let variant_metadata = variant.metadata();
-            if formatted_s == variant_metadata.code || formatted_s == variant_metadata.symbol {
-                return Ok(*variant);
+            pub fn as_unit_type_plural(&self) -> &'static str {
+                self.metadata().unit_type_plural
             }
         }
-        Err("Unknown currency unit")
-    }
-}
 
-impl fmt::Display for CurrencyUnit {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.as_code())
-    }
+        impl FromStr for CurrencyUnit {
+            type Err = &'static str;
+
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                let formatted_s = s.trim().to_uppercase();
+                for variant in Self::variants() {
+                    let variant_metadata = variant.metadata();
+                    if formatted_s == variant_metadata.code || formatted_s == variant_metadata.symbol {
+                        return Ok(*variant);
+                    }
+                }
+                Err("Unknown currency unit")
+            }
+        }
+
+        impl fmt::Display for CurrencyUnit {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                write!(f, "{}", self.as_code())
+            }
+        }
+    };
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -143,21 +127,19 @@ impl Currency {
         self.unit.as_code()
     }
 
-    pub fn to_unit(&self, target_unit: CurrencyUnit) -> Self {
-        let current_unit = self.unit;
-        if current_unit == target_unit {
-            self
-        } else {
-            exchange_rate = get_exchange_rate(current_unit, target_unit)
-            Self {
-                value: self.value * exchange_rate,
-                unit: target_unit,
-            }
-        }
-    }
-
     pub fn get_value(&self) -> f64 {
         self.value
+    }
+
+    fn convert_to(&self, target_unit: CurrencyUnit) -> Result<Currency, String> {
+        if self.unit == target_unit {
+            Ok(*self)
+        } else {
+            match fetch_current_exchange_rate(self.unit, target_unit) {
+                Ok(rate) => Ok(Currency::new(self.value * rate, target_unit)),
+                Err(err) => Err(err),
+            }
+        }
     }
 }
 
@@ -167,90 +149,48 @@ impl fmt::Display for Currency {
     }
 }
 
-impl Mul<f64> for Currency {
-    type Output = Self;
-    fn mul(self, rhs: f64) -> Self {
-        // Match to avoid unnecessary conversion
-        match self.unit {
-            CurrencyUnit::USD => Self::from_usd(self.as_usd() * rhs),
-            CurrencyUnit::EUR => Self::from_eur(self.as_eur() * rhs),
-            CurrencyUnit::YEN => Self::from_yen(self.as_yen() * rhs),
-            CurrencyUnit::GBP => Self::from_gbp(self.as_gbp() * rhs),
-        }
-    }
-}
-
-impl Div<f64> for Currency {
-    type Output = Self;
-    fn div(self, rhs: f64) -> Self {
-        // Match to avoid unnecessary conversion
-        match self.unit {
-            CurrencyUnit::USD => Self::from_usd(self.as_usd() / rhs),
-            CurrencyUnit::EUR => Self::from_eur(self.as_eur() / rhs),
-            CurrencyUnit::YEN => Self::from_yen(self.as_yen() / rhs),
-            CurrencyUnit::GBP => Self::from_gbp(self.as_gbp() / rhs),
-        }
-    }
-}
-
 impl Add for Currency {
     type Output = Self;
-    fn add(self, rhs: Self) -> Self {
-        if self.unit == rhs.unit {
-            match self.unit {
-                CurrencyUnit::USD => return Self::from_usd(self.as_usd() + rhs.as_usd()),
-                CurrencyUnit::EUR => return Self::from_eur(self.as_eur() + rhs.as_eur()),
-                CurrencyUnit::YEN => return Self::from_yen(self.as_yen() + rhs.as_yen()),
-                CurrencyUnit::GBP => return Self::from_gbp(self.as_gbp() + rhs.as_gbp()),
-            }
-        } else {
-            match self.unit {
-                CurrencyUnit::USD => return Self::from_usd(self.as_usd() + rhs.as_usd()),
-                CurrencyUnit::EUR => return Self::from_eur(self.as_eur() + rhs.as_eur()),
-                CurrencyUnit::YEN => return Self::from_yen(self.as_yen() + rhs.as_yen()),
-                CurrencyUnit::GBP => return Self::from_gbp(self.as_gbp() + rhs.as_gbp()),
-            }
+    fn add(self, rhs: Self) -> Self::Output {
+        match rhs.convert_to(self.unit) {
+            Ok(converted_rhs) => Self::new(self.value + converted_rhs.value, self.unit),
+            Err(_) => panic!("Currency conversion failed in addition"),
         }
     }
 }
 
 impl Sub for Currency {
     type Output = Self;
-    fn sub(self, rhs: Self) -> Self {
-        if self.unit == rhs.unit {
-            match self.unit {
-                CurrencyUnit::USD => return Self::from_usd(self.as_usd() - rhs.as_usd()),
-                CurrencyUnit::EUR => return Self::from_eur(self.as_eur() - rhs.as_eur()),
-                CurrencyUnit::YEN => return Self::from_yen(self.as_yen() - rhs.as_yen()),
-                CurrencyUnit::GBP => return Self::from_gbp(self.as_gbp() - rhs.as_gbp()),
-            }
-        } else {
-            match self.unit {
-                CurrencyUnit::USD => return Self::from_usd(self.as_usd() - rhs.as_usd()),
-                CurrencyUnit::EUR => return Self::from_eur(self.as_eur() - rhs.as_eur()),
-                CurrencyUnit::YEN => return Self::from_yen(self.as_yen() - rhs.as_yen()),
-                CurrencyUnit::GBP => return Self::from_gbp(self.as_gbp() - rhs.as_gbp()),
-            }
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        match rhs.convert_to(self.unit) {
+            Ok(converted_rhs) => Self::new(self.value - converted_rhs.value, self.unit),
+            Err(_) => panic!("Currency conversion failed in subtraction"),
         }
+    }
+}
+
+impl Mul<f64> for Currency {
+    type Output = Self;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        Self::new(self.value * rhs, self.unit)
+    }
+}
+
+impl Div<f64> for Currency {
+    type Output = Self;
+
+    fn div(self, rhs: f64) -> Self::Output {
+        Self::new(self.value / rhs, self.unit)
     }
 }
 
 impl PartialOrd for Currency {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        if self.unit == other.unit {
-            match self.unit {
-                CurrencyUnit::USD => return self.as_usd().partial_cmp(&other.as_usd()),
-                CurrencyUnit::EUR => return self.as_eur().partial_cmp(&other.as_eur()),
-                CurrencyUnit::YEN => return self.as_yen().partial_cmp(&other.as_yen()),
-                CurrencyUnit::GBP => return self.as_gbp().partial_cmp(&other.as_gbp()),
-            }
-        } else {
-            match self.unit {
-                CurrencyUnit::USD => return self.as_usd().partial_cmp(&other.as_usd()),
-                CurrencyUnit::EUR => return self.as_eur().partial_cmp(&other.as_eur()),
-                CurrencyUnit::YEN => return self.as_yen().partial_cmp(&other.as_yen()),
-                CurrencyUnit::GBP => return self.as_gbp().partial_cmp(&other.as_gbp()),
-            }
+        match other.convert_to(self.unit) {
+            Ok(converted_other) => self.value.partial_cmp(&converted_other.value),
+            Err(_) => None,
         }
     }
 }
@@ -258,36 +198,6 @@ impl PartialOrd for Currency {
 impl Ord for Currency {
     fn cmp(&self, other: &Self) -> Ordering {
         self.partial_cmp(other).unwrap()
-    }
-}
-
-// Use a library for good error typing / an enum
-pub fn get_exchange_rate(current_unit: CurrencyUnit, target_unit: CurrencyUnit) -> Result<f64, String> {
-    if current_unit == target_unit{
-        return Ok(1.0)
-    }
-
-    // connect to redis
-
-    let key = format!("currency_exchange_rate:{}_to_{}", current.as_code(), target.as_code());
-
-    // get cached exchange rate
-
-    if let Ok(cached_exchange_rate) = cached_result {
-        return Ok(cached_exchange_rate)
-    }
-
-    let live_exchange_rate_result = fetch_exchange_rate(current_unit, target_unit);
-
-    match live_exchange_rate_result {
-        Err(err) => return Err(err)
-        Ok(live_exchange_rate) => {
-            let exchange_rate_expiry_in_seconds = fetch_exchange_rate_expiry_in_seconds();
-
-            // Cache result for exchange_rate_expiry_in_seconds seconds
-
-            return Ok(live_exchange_rate)
-        }
     }
 }
 
