@@ -1,6 +1,5 @@
 use std::{
     cmp::Ordering,
-    convert::TryFrom,
     fmt,
     ops::{Add, Sub, Mul, Div},
     str::FromStr,
@@ -13,40 +12,40 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum MassUnit {
     Gram,
-    Milligrams,
+    Milligram,
     Kilogram,
     Microgram,
     Ounce,
 }
 
-impl struct MassUnit {
-    pub fn as_symbol(&self) -> String {
+impl MassUnit {
+    pub fn as_symbol(&self) -> &'static str {
         match self {
-            MassUnit::Gram => String::new("g")
-            MassUnit::Milligram => String::new("mg")
-            MassUnit::Kilogram => String::new("kg")
-            MassUnit::Microgram => String::new("µg")
-            MassUnit::Ounce => String::new("oz")
+            MassUnit::Gram => "g",
+            MassUnit::Milligram => "mg",
+            MassUnit::Kilogram => "kg",
+            MassUnit::Microgram => "µg",
+            MassUnit::Ounce => "oz",
         }
     }
 
-    pub fn as_unit_type(&self) -> String {
+    pub fn as_unit_type(&self) -> &'static str {
         match self {
-            MassUnit::Gram => String::new("gram")
-            MassUnit::Milligram => String::new("milligram")
-            MassUnit::Kilogram => String::new("kilogram")
-            MassUnit::Microgram => String::new("microgram")
-            MassUnit::Ounce => String::new("ounce")
+            MassUnit::Gram => "gram",
+            MassUnit::Milligram => "milligram",
+            MassUnit::Kilogram => "kilogram",
+            MassUnit::Microgram => "microgram",
+            MassUnit::Ounce => "ounce",
         }
     }
 
-    pub fn as_unit_type_plural(&self) -> String {
+    pub fn as_unit_type_plural(&self) -> &'static str {
         match self {
-            MassUnit::Gram => String::new("grams")
-            MassUnit::Milligram => String::new("milligrams")
-            MassUnit::Kilogram => String::new("kilograms")
-            MassUnit::Microgram => String::new("micrograms")
-            MassUnit::Ounce => String::new("ounces")
+            MassUnit::Gram => "grams",
+            MassUnit::Milligram => "milligrams",
+            MassUnit::Kilogram => "kilograms",
+            MassUnit::Microgram => "micrograms",
+            MassUnit::Ounce => "ounces",
         }
     }
 }
@@ -73,9 +72,9 @@ pub struct Mass {
     unit: MassUnit,
 }
 
-impl Default for Energy {
+impl Default for Mass {
     fn default() -> Self {
-        Mass::from_grams(0.0)
+        Mass::from_g(0.0)
     }
 }
 
@@ -103,41 +102,40 @@ impl Mass {
     pub fn as_g(&self) -> f64 {
         match self.unit {
             MassUnit::Gram => self.value,
-            MassUnit::Milligram => self.value / 1000,
-            MassUnit::Kilogram => self.value * 1000,
-            MassUnit::Microgram => self.value / 1,000,000,
+            MassUnit::Milligram => self.value / 1000 as f64,
+            MassUnit::Kilogram => self.value * 1000 as f64,
+            MassUnit::Microgram => self.value / 1_000_000 as f64,
             MassUnit::Ounce => self.value * 28.3495,
         }
-        self.value_in_grams
     }
 
-    pub fn as_mg(&self) -> Self {
+    pub fn as_mg(&self) -> f64 {
         match self.unit {
-            MassUnit::Gram => self.value * 1000,
+            MassUnit::Gram => self.value * 1000 as f64,
             MassUnit::Milligram => self.value,
-            MassUnit::Kilogram => self.value * 1,000,000,
-            MassUnit::Microgram => self.value / 1000,
-            MassUnit::Ounce => self.value * 28,349.5,
+            MassUnit::Kilogram => self.value * 1_000_000 as f64,
+            MassUnit::Microgram => self.value / 1000 as f64,
+            MassUnit::Ounce => self.value * 28_349.5,
         }
     }
 
     pub fn as_kg(&self) -> f64 {
         match self.unit {
-            MassUnit::Gram => self.value / 1000,
-            MassUnit::Milligram => self.value / 1,000,000,
+            MassUnit::Gram => self.value / 1000 as f64,
+            MassUnit::Milligram => self.value / 1_000_000 as f64,
             MassUnit::Kilogram => self.value,
-            MassUnit::Milligram => self.value / 1,000,000,000,
+            MassUnit::Microgram => self.value / 1_000_000_000 as f64,
             MassUnit::Ounce => self.value * 0.0283495,
         }
     }
 
-    pub fn as_ug(&self) -> Self {
+    pub fn as_ug(&self) -> f64 {
         match self.unit {
-            MassUnit::Gram => self.value * 1,000,000,
-            MassUnit::Milligram => self.value * 1000,
-            MassUnit::Kilogram => self.value * 1,000,000,000,
+            MassUnit::Gram => self.value * 1_000_000 as f64,
+            MassUnit::Milligram => self.value * 1000 as f64,
+            MassUnit::Kilogram => self.value * 1_000_000_000 as f64,
             MassUnit::Microgram => self.value,
-            MassUnit::Ounce => self.value * 28,349,500,
+            MassUnit::Ounce => self.value * 28_349_500 as f64,
         }
     }
 
@@ -146,18 +144,18 @@ impl Mass {
             MassUnit::Gram => self.value / 28.3495,
             MassUnit::Milligram => self.value / 28349.5,
             MassUnit::Kilogram => self.value * 35.274,
-            MassUnit::Milligram => self.value / 28,349,500,
+            MassUnit::Microgram => self.value / 28_349_500 as f64,
             MassUnit::Ounce => self.value,
         }
     }
 
-    pub fn to_unit(&self, unit: EnergyUnit) -> Self {
+    pub fn to_unit(&self, unit: MassUnit) -> Self {
         let value = match unit {
-            MassUnit::Gram => self.as_grams(),
-            MassUnit::Milligram => self.as_milligrams(),
-            MassUnit::Kilogram => self.as_kilograms(),
-            MassUnit::Microgram => self.as_milligrams(),
-            MassUnit::Ounce => self.as_ounces(),
+            MassUnit::Gram => self.as_g(),
+            MassUnit::Milligram => self.as_mg(),
+            MassUnit::Kilogram => self.as_kg(),
+            MassUnit::Microgram => self.as_mg(),
+            MassUnit::Ounce => self.as_oz(),
         };
         Self { value, unit }
     }
@@ -206,7 +204,7 @@ impl Mass {
         self.unit.as_unit_type_plural()
     }
 
-    pub fn to_string(&self) -> Strint {
+    pub fn to_string(&self) -> String {
         format!("{} {}", self.value, self.get_symbol())
     }
 }
@@ -220,39 +218,34 @@ impl fmt::Display for Mass {
 impl Add for Mass {
     type Output = Self;
     fn add(self, rhs: Self) -> Self {
-        Self::from_grams(self.as_grams() + rhs.as_grams())
+        Self::from_g(self.as_g() + rhs.as_g())
     }
 }
 
 impl Sub for Mass {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self {
-        Self::from_grams(self.as_grams() - rhs.as_grams())
+        Self::from_g(self.as_g() - rhs.as_g())
     }
 }
 
-impl Mul for Mass {
+impl Mul<f64> for Mass {
     type Output = Self;
     fn mul(self, rhs: f64) -> Self {
-        Self::from_grams(self.as_grams() * rhs)
+        Self::from_g(self.as_g() * rhs)
     }
 }
 
-impl Div for Mass {
+impl Div<f64> for Mass {
     type Output = Self;
     fn div(self, rhs: f64) -> Self {
-        Self::from_grams(self.as_grams() / rhs)
+        Self::from_g(self.as_g() / rhs)
     }
 }
 
 impl PartialOrd for Mass {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.as_grams().partial_cmp(&other.as_grams())
+        self.as_g().partial_cmp(&other.as_g())
     }
 }
 
-impl Ord for Mass {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.partial_cmp(other).unwrap()
-    }
-}

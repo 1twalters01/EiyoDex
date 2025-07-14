@@ -1,6 +1,5 @@
 use std::{
     cmp::Ordering,
-    convert::TryFrom,
     fmt,
     ops::{Add, Sub, Mul, Div},
     str::FromStr,
@@ -19,22 +18,22 @@ pub enum EnergyUnit {
 impl EnergyUnit {
     pub fn as_symbol(&self) -> &'static str {
         match self {
-            EnergyUnit::Kcal => "kcal"
-            EnergyUnit::KJ => "kJ"
+            EnergyUnit::Kcal => "kcal",
+            EnergyUnit::KJ => "kJ",
         }
     }
 
     pub fn as_unit_type(&self) -> &'static str {
         match self {
-            EnergyUnit::Kcal => "kilocalorie"
-            EnergyUnit::KJ => "kilojoule"
+            EnergyUnit::Kcal => "kilocalorie",
+            EnergyUnit::KJ => "kilojoule",
         }
     }
 
     pub fn as_unit_type_plural(&self) -> &'static str {
         match self {
-            EnergyUnit::Kcal => "kilocalories"
-            EnergyUnit::KJ => "kilojoules"
+            EnergyUnit::Kcal => "kilocalories",
+            EnergyUnit::KJ => "kilojoules",
         }
     }
 }
@@ -131,7 +130,7 @@ impl Energy {
         self.unit.as_unit_type_plural()
     }
 
-    pub fn to_string(&self) -> Strint {
+    pub fn to_string(&self) -> String {
         format!("{} {}", self.value, self.get_symbol())
     }
 }
@@ -176,8 +175,3 @@ impl PartialOrd for Energy {
     }
 }
 
-impl Ord for Energy {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.partial_cmp(other).unwrap()
-    }
-}

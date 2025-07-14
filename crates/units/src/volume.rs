@@ -1,6 +1,5 @@
 use std::{
     cmp::Ordering,
-    convert::TryFrom,
     fmt,
     ops::{Add, Sub, Mul, Div},
     str::FromStr,
@@ -16,36 +15,36 @@ pub enum VolumeUnit {
     Milliliter,
 }
 
-impl struct VolumeUnit {
-    pub fn as_symbol(&self) -> String {
+impl VolumeUnit {
+    pub fn as_symbol(&self) -> &'static str {
         match self {
-            VolumeUnit::Liter => String::new("l")
-            VolumeUnit::Milliliter => String::new("ml")
+            VolumeUnit::Liter => "l",
+            VolumeUnit::Milliliter => "ml",
         }
     }
 
-    pub fn as_unit_type(&self) -> String {
+    pub fn as_unit_type(&self) -> &'static str {
         match self {
-            VolumeUnit::Liter => String::new("liter")
-            VolumeUnit::Milliliter => String::new("milliliter")
+            VolumeUnit::Liter => "liter",
+            VolumeUnit::Milliliter => "milliliter",
         }
     }
 
-    pub fn as_unit_type_plural(&self) -> String {
+    pub fn as_unit_type_plural(&self) -> &'static str {
         match self {
-            VolumeUnit::Liter => String::new("liters")
-            VolumeUnit::Milliliter => String::new("milliliters")
+            VolumeUnit::Liter => "liters",
+            VolumeUnit::Milliliter => "milliliters",
         }
     }
 }
 
-impl FromStr for EnergyUnit {
+impl FromStr for VolumeUnit {
     type Err = &'static str;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.trim().to_lowercase().as_str() {
-            "l" | "liter" | "liters" => Ok(EnergyUnit::Kcal),
-            "ml" | "milliliter" | "milliliters" => Ok(EnergyUnit::KJ),
+            "l" | "liter" | "liters" => Ok(VolumeUnit::Liter),
+            "ml" | "milliliter" | "milliliters" => Ok(VolumeUnit::Milliliter),
             _ => Err("Unknown volume unit"),
         }
     }
@@ -58,13 +57,13 @@ pub struct Volume {
     unit: VolumeUnit,
 }
 
-impl Default for Energy {
+impl Default for Volume {
     fn default() -> Self {
-        Volume::from_milliliters(0.0)
+        Volume::from_ml(0.0)
     }
 }
 
-impl Mass {
+impl Volume {
     pub fn new(value: f64, unit: VolumeUnit) -> Self {
         Self { value, unit }
     }
@@ -79,7 +78,7 @@ impl Mass {
 
     pub fn as_ml(&self) -> f64 {
         match self.unit {
-            VolumeUnit::Liter => self.value * 1000,
+            VolumeUnit::Liter => self.value * 1000 as f64,
             VolumeUnit::Milliliter => self.value,
         }
     }
@@ -87,7 +86,7 @@ impl Mass {
     pub fn as_l(&self) -> f64 {
         match self.unit {
             VolumeUnit::Liter => self.value,
-            VolumeUnit::Milliliter => self.value / 1000,
+            VolumeUnit::Milliliter => self.value / 1000 as f64,
         }
     }
 
@@ -131,7 +130,7 @@ impl Mass {
         self.unit.as_unit_type_plural()
     }
 
-    pub fn to_string(&self) -> Strint {
+    pub fn to_string(&self) -> String {
         format!("{} {}", self.value, self.get_symbol())
     }
 }
@@ -156,14 +155,14 @@ impl Sub for Volume {
     }
 }
 
-impl Mul for Volume {
+impl Mul<f64> for Volume {
     type Output = Self;
     fn mul(self, rhs: f64) -> Self {
         Self::from_l(self.as_l() * rhs)
     }
 }
 
-impl Div for Volume {
+impl Div<f64> for Volume {
     type Output = Self;
     fn div(self, rhs: f64) -> Self {
         Self::from_l(self.as_l() / rhs)
@@ -176,8 +175,3 @@ impl PartialOrd for Volume {
     }
 }
 
-impl Ord for Energy {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.partial_cmp(other).unwrap()
-    }
-}

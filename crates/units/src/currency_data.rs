@@ -1,4 +1,4 @@
-use crate::currency;
+use crate::define_currencies;
 
 define_currencies! {
     USD => {

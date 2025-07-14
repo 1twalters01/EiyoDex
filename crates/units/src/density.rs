@@ -1,9 +1,7 @@
 use std::{
     cmp::Ordering,
-    convert::TryFrom,
     fmt,
     ops::{Div, Mul},
-    str::FromStr,
 };
 
 #[cfg(feature = "serde")]
@@ -21,6 +19,29 @@ pub enum DensityUnit {
     GramsPerL,
 }
 
+impl DensityUnit {
+    pub fn as_symbol(&self) -> &'static str {
+        match self {
+            DensityUnit::GramsPerMl => "g/ml",
+            DensityUnit::GramsPerL => "g/l",
+        }
+    }
+
+    pub fn as_unit_type(&self) -> &'static str {
+        match self {
+            DensityUnit::GramsPerMl => "gram per milliliter",
+            DensityUnit::GramsPerL => "gram per liter",
+        }
+    }
+
+    pub fn as_unit_type_plural(&self) -> &'static str {
+        match self {
+            DensityUnit::GramsPerMl => "grams per milliliter",
+            DensityUnit::GramsPerL => "grams per liter",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Density {
@@ -28,7 +49,7 @@ pub struct Density {
     unit: DensityUnit,
 }
 
-impl Default for Energy {
+impl Default for Density {
     fn default() -> Self {
         Density::from_g_per_ml(0.0)
     }
@@ -47,32 +68,32 @@ impl Density {
         Self::new(g_per_l, DensityUnit::GramsPerL)
     }
 
-    pub fn as_g_per_ml(&self) -> Self {
+    pub fn as_g_per_ml(&self) -> f64 {
         match self.unit {
             DensityUnit::GramsPerMl => self.value,
-            DensityUnit::GramsPerL => self.value / 1000
+            DensityUnit::GramsPerL => self.value / 1000 as f64,
         }
     }
 
     pub fn as_g_per_l(&self) -> f64 {
         match self.unit {
-            DensityUnit::GramsPerMl => self.value * 1000,
+            DensityUnit::GramsPerMl => self.value * 1000 as f64,
             DensityUnit::GramsPerL => self.value,
         }
     }
 
     pub fn get_mass_for_volume(&self, volume: Volume) -> Mass {
-        Mass::from_grams(self.grams_per_ml * volume.as_ml())
+        Mass::from_g(self.as_g_per_ml() * volume.as_ml())
     }
 
-    pub fn get_volume_for_mass(&self, mass: Mass) -> Mass {
-        Volume::from_ml(mass.as_grams() / self.grams_per_ml)
+    pub fn get_volume_for_mass(&self, mass: Mass) -> Volume {
+        Volume::from_ml(mass.as_g() / self.as_g_per_ml())
     }
 
-    pub fn to_unit(&self, unit: VolumeUnit) -> Self {
+    pub fn to_unit(&self, unit: DensityUnit) -> Self {
         let value = match unit {
-            DensityUnit::GramsPerMl => self.as_l(),
-            DensityUnit::GramsPerL => self.as_ml(),
+            DensityUnit::GramsPerMl => self.as_g_per_ml(),
+            DensityUnit::GramsPerL => self.as_g_per_l(),
         };
         Self { value, unit }
     }
@@ -109,8 +130,22 @@ impl Density {
         self.unit.as_unit_type_plural()
     }
 
-    pub fn to_string(&self) -> Strint {
+    pub fn to_string(&self) -> String {
         format!("{} {}", self.value, self.get_symbol())
+    }
+}
+
+impl fmt::Display for Density {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", self.value, self.get_symbol())
+    }
+}
+
+impl Mul<Volume> for Density {
+    type Output = Mass;
+
+    fn mul(self, volume: Volume) -> Mass {
+        self.get_mass_for_volume(volume)
     }
 }
 
@@ -122,14 +157,14 @@ impl Mul<Density> for Volume {
     }
 }
 
-impl Div<Density> for Mass {
+impl Div<Volume> for Mass {
     type Output = Density;
 
     fn div(self, volume: Volume) -> Density {
-        grams = self.as_g();
-        milliliters = volume.as_ml();
-        grams_per_milliliter = grams / milliliters;
-        density.from_g_per_ml(grams_per_milliliter)
+        let grams = self.as_g();
+        let milliliters = volume.as_ml();
+        let grams_per_milliliter = grams / milliliters;
+        Density::from_g_per_ml(grams_per_milliliter)
     }
 }
 
@@ -139,8 +174,3 @@ impl PartialOrd for Density {
     }
 }
 
-impl Ord for Energy {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.partial_cmp(other).unwrap()
-    }
-}
