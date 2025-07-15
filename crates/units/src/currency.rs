@@ -1,8 +1,4 @@
 
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
-
-
 #[macro_export]
 macro_rules! define_currencies {
     (
@@ -21,6 +17,8 @@ macro_rules! define_currencies {
             ops::{Add, Div, Mul, Sub},
             str::FromStr,
         };
+        #[cfg(feature = "serde")]
+        use serde::{Deserialize, Serialize};
 
         pub struct CurrencyMetadata {
             pub symbol: &'static str,
@@ -148,7 +146,7 @@ macro_rules! define_currencies {
                 write!(f, "{}{}", self.get_symbol(), self.value)
             }
         }
-        
+
         impl Add for Currency {
             type Output = Self;
             fn add(self, rhs: Self) -> Self::Output {
@@ -215,4 +213,3 @@ macro_rules! define_currencies {
         }
     };
 }
-

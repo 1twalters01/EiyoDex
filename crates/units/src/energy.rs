@@ -1,7 +1,7 @@
 use std::{
     cmp::Ordering,
     fmt,
-    ops::{Add, Sub, Mul, Div},
+    ops::{Add, Div, Mul, Sub},
     str::FromStr,
 };
 
@@ -174,4 +174,3 @@ impl PartialOrd for Energy {
         self.as_kcal().partial_cmp(&other.as_kcal())
     }
 }
-

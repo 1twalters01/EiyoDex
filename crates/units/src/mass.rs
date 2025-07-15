@@ -1,7 +1,7 @@
 use std::{
     cmp::Ordering,
     fmt,
-    ops::{Add, Sub, Mul, Div},
+    ops::{Add, Div, Mul, Sub},
     str::FromStr,
 };
 
@@ -163,19 +163,19 @@ impl Mass {
     pub fn to_g(&self) -> Self {
         self.to_unit(MassUnit::Gram)
     }
-    
+
     pub fn to_mg(&self) -> Self {
         self.to_unit(MassUnit::Milligram)
     }
-    
+
     pub fn to_kg(&self) -> Self {
         self.to_unit(MassUnit::Kilogram)
     }
-    
+
     pub fn to_ug(&self) -> Self {
         self.to_unit(MassUnit::Microgram)
     }
-    
+
     pub fn to_oz(&self) -> Self {
         self.to_unit(MassUnit::Ounce)
     }
@@ -248,4 +248,3 @@ impl PartialOrd for Mass {
         self.as_g().partial_cmp(&other.as_g())
     }
 }
-

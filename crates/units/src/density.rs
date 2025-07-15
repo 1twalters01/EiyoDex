@@ -7,10 +7,7 @@ use std::{
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    mass::Mass,
-    volume::Volume,
-};
+use crate::{mass::Mass, volume::Volume};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -173,4 +170,3 @@ impl PartialOrd for Density {
         self.as_g_per_ml().partial_cmp(&other.as_g_per_ml())
     }
 }
-
