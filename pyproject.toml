@@ -1,0 +1,9 @@
+[tool.uv.workspace]
+members = [
+    "python/*",
+]
+
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+]
