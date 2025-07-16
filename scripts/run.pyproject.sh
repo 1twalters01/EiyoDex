@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Usage: ./run.pyproject.sh ml
-# This dynamically sets PYTHONPATH and runs the main module for the given project
+# Usage: bash ./scripts/run.pyproject.sh utils
+# This dynamically sets PYTHONPATH and runs the main module for the given uv project
 
 PROJECT="$1"
 SRC_DIR="python/$PROJECT/src"
