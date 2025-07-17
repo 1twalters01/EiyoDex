@@ -1,12 +1,9 @@
 from formattoml.arrays import format_toml_arrays
-
-# from utils.path import get_workspace_root_path
-from pathlib import Path
+from utils.path import get_workspace_root_path
 
 
 def main():
-    # root = get_workspace_root_path()
-    root = Path(__file__).parents[4]
+    root = get_workspace_root_path()
     print(f"root: {root}")
     for toml_file in root.rglob("*.toml"):
         if toml_file.is_file():
