@@ -4,7 +4,6 @@ from pathlib import Path
 
 
 def reformat_array_line(indent: str, key: str, eq_spacing: str, items_block: str) -> str:
-    print(f"eq spacing: ={eq_spacing}=")
     key = key.rstrip() + " "
     eq_spacing = eq_spacing.lstrip().rstrip() + " "
     try:
@@ -15,9 +14,7 @@ def reformat_array_line(indent: str, key: str, eq_spacing: str, items_block: str
     if not parsed_array:
         return f"{indent}{key}{eq_spacing}[]"
 
-    formatted_items = "".join(
-        f"{indent}    {repr(item)},\n" for item in parsed_array
-    )
+    formatted_items = "".join(f"{indent}    {repr(item)},\n" for item in parsed_array)
     return f"{indent}{key}{eq_spacing}[\n{formatted_items}{indent}]"
 
 
@@ -29,7 +26,8 @@ def format_toml_arrays(file_path: Path):
     content = file_path.read_text(encoding="utf-8")
 
     regex_array_pattern = re.compile(
-            r"^(\s*)([\"']?[A-Za-z0-9_\- ]+[\"']?)(\s*=\s*)\[(.*?)\]", re.DOTALL | re.MULTILINE)
+        r"^(\s*)([\"']?[A-Za-z0-9_\- ]+[\"']?)(\s*=\s*)\[(.*?)\]", re.DOTALL | re.MULTILINE
+    )
 
     new_content = regex_array_pattern.sub(toml_array_replacer, content)
 
