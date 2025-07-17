@@ -1,9 +1,21 @@
 [tool.uv.workspace]
 members = [
-    "python/*",
+    'python/*',
 ]
 
 [dependency-groups]
 dev = [
-    "black>=25.1.0",
+    'black>=25.1.0',
+    'pytest>=8.4.1',
 ]
+
+[tool.black]
+line-length = 80
+exclude = '''
+/(
+    \.venv
+  | build
+  | dist
+  | __pycache__
+)/
+'''

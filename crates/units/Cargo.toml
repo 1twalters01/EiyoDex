@@ -10,5 +10,9 @@ reqwest = { version = "0.12.4", features = ["json"] }
 
 [features]
 default = []
-serde = ["dep:serde"]
-redis = ["dep:redis"]
+serde = [
+    'dep:serde',
+]
+redis = [
+    'dep:redis',
+]

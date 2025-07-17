@@ -1,7 +1,8 @@
 [workspace]
 members = [
-    "crates/*",
-    "apps/*",
-    "xtask",  "ui/gtk",
+    'crates/*',
+    'apps/*',
+    'xtask',
+    'ui/gtk',
 ]
 resolver = "2"
