@@ -1,22 +1,24 @@
-from pathlib import Path
-import re
 import ast
+import re
+from pathlib import Path
 
 
-def reformat_array_line(indent: str, key: str, items_block: str) -> str:
+def reformat_array_line(indent: str, key: str, eq_spacing: str, items_block: str) -> str:
+    print(f"eq spacing: ={eq_spacing}=")
+    key = key.rstrip() + " "
+    eq_spacing = eq_spacing.lstrip().rstrip() + " "
     try:
         parsed_array = ast.literal_eval(f"[{items_block}]")
     except (SyntaxError, ValueError):
-        return f"{indent}{key} = [\n{items_block}]"
+        return f"{indent}{key}{eq_spacing}[{items_block}]"
 
     if not parsed_array:
-        return f"{indent}{key} = []"
+        return f"{indent}{key}{eq_spacing}[]"
 
-    # Reconstruct array with 4-space indentation and trailing commas
     formatted_items = "".join(
         f"{indent}    {repr(item)},\n" for item in parsed_array
     )
-    return f"{indent}{key} = [\n{formatted_items}{indent}]"
+    return f"{indent}{key}{eq_spacing}[\n{formatted_items}{indent}]"
 
 
 def toml_array_replacer(match):
@@ -27,8 +29,7 @@ def format_toml_arrays(file_path: Path):
     content = file_path.read_text(encoding="utf-8")
 
     regex_array_pattern = re.compile(
-        r"^(\s*)(\w+)\s*=\s*\[(.*?)\]", re.DOTALL | re.MULTILINE
-    )
+            r"^(\s*)([\"']?[A-Za-z0-9_\- ]+[\"']?)(\s*=\s*)\[(.*?)\]", re.DOTALL | re.MULTILINE)
 
     new_content = regex_array_pattern.sub(toml_array_replacer, content)
 
