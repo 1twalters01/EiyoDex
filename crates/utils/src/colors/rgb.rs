@@ -1,9 +1,9 @@
-use super::hsl::HSL;
+use super::{base_types::{Angle, Normalized}, hsl::HSL, packed_rgb::PackedRGB};
 
 pub struct RGB {
-    red: u8,
-    green: u8,
-    blue: u8,
+    pub red: u8,
+    pub green: u8,
+    pub blue: u8,
 }
 
 pub fn normalise_angle(angle: f64) -> f64 {
@@ -30,29 +30,35 @@ impl RGB {
         let min = normalised_r.min(normalised_g).min(normalised_b);
         let chroma = max - min;
 
-        let l = (max + min) / 2.0;
+        let lightness = Normalized::new((max + min) / 2.0).unwrap();
 
-        let s = if chroma == 0.0 {
-            0.0
+        let saturation = if chroma == 0.0 {
+            Normalized::new(0.0).unwrap()
         } else {
-            chroma / (1.0 - (2.0 * l - 1.0).abs())
+            Normalized::new(chroma / (1.0 - (2.0 * lightness.value - 1.0).abs())).unwrap()
         };
 
-        let h = if chroma == 0.0 {
-            0.0
+        let hue = if chroma == 0.0 {
+            Angle::new(0.0)
         } else {
             if max == normalised_r {
                 let segment = (normalised_g - normalised_b) / chroma;
-                normalise_angle(60.0 * (segment % 6.0))
+                Angle::new(normalise_angle(60.0 * (segment % 6.0)))
             } else if max == normalised_g {
                 let segment = (normalised_b - normalised_r) / chroma;
-                normalise_angle(60.0 * (segment + 2.0))
+                Angle::new(normalise_angle(60.0 * (segment + 2.0)))
             } else {
                 let segment = (normalised_r - normalised_g) / chroma;
-                normalise_angle(60.0 * (segment + 4.0))
+                Angle::new(normalise_angle(60.0 * (segment + 4.0)))
             }
         };
 
-        HSL::new(h, s, l)
+        HSL { hue, saturation, lightness }
+    }
+
+    pub fn to_packed_rgb(&self) -> PackedRGB {
+        let red: u32 = (self.red as u32) << 16;
+        let green: u32 = (self.green as u32) << 8;
+        PackedRGB { value: red + green + self.blue as u32 }
     }
 }
