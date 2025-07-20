@@ -1,4 +1,4 @@
-use super::{base_types::{Angle, Normalized}, rgb::RGB, packed_rgb::PackedRGB};
+use super::{base_types::{Angle, Normalized}, hex_color::HexColor, rgb::RGB, packed_rgb::PackedRGB};
 
 // Use angle type instead of f64 for hue?
 // Create a normalised type for saturation and lightness?
@@ -41,6 +41,10 @@ impl HSL {
 
     pub fn to_packed_rgb(&self) -> PackedRGB {
         self.to_rgb().to_packed_rgb()
+    }
+
+    pub fn to_hex_color(&self) -> HexColor {
+        self.to_rgb().to_hexcolor()
     }
 }
 

@@ -1,4 +1,4 @@
-use super::{base_types::{Angle, Normalized}, hsl::HSL, packed_rgb::PackedRGB};
+use super::{base_types::{Angle, Normalized}, hex_color::HexColor, hsl::HSL, packed_rgb::PackedRGB};
 
 pub struct RGB {
     pub red: u8,
@@ -60,5 +60,9 @@ impl RGB {
         let red: u32 = (self.red as u32) << 16;
         let green: u32 = (self.green as u32) << 8;
         PackedRGB { value: red + green + self.blue as u32 }
+    }
+
+    pub fn to_hex_color(&self) -> HexColor {
+        let hex = format!("#{:02X}{:02X}{:02X}", self.red, self.green, self.blue);
     }
 }

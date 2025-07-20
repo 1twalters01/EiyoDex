@@ -1,4 +1,4 @@
-use super::{hsl::HSL, rgb::RGB};
+use super::{hex_color::HexColor, hsl::HSL, rgb::RGB};
 
 pub struct PackedRGB {
     pub value: u32,
@@ -27,5 +27,9 @@ impl PackedRGB {
 
     pub fn to_hsl(&self) -> HSL {
         self.to_rgb().to_hsl()
+    }
+
+    pub fn to_hex_color(&self) -> HexColor {
+        let hex = format!("#{:02X}", self.value);
     }
 }
