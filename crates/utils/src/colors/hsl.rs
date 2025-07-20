@@ -1,4 +1,4 @@
-use super::{base_types::{Angle, Normalized}, rgb::RGB};
+use super::{base_types::{Angle, Normalized}, rgb::RGB, packed_rgb::PackedRGB};
 
 // Use angle type instead of f64 for hue?
 // Create a normalised type for saturation and lightness?
@@ -37,6 +37,10 @@ impl HSL {
         let blue = ((normalised_b + match_value) * 255.0).round() as u8;
 
         RGB { red, green, blue }
+    }
+
+    pub fn to_packed_rgb(&self) -> PackedRGB {
+        self.to_rgb().to_packed_rgb()
     }
 }
 
