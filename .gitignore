@@ -1,7 +1,7 @@
 **/target/
 **/__pycache__/
 **/*.py[cod]
-**/build/
+python/**/build/
 **/*.egg-info/
 **/.venv/
 **/.env
