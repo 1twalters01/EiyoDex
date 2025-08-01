@@ -44,7 +44,7 @@ impl HSL {
     }
 
     pub fn to_hex_color(&self) -> HexColor {
-        self.to_rgb().to_hexcolor()
+        self.to_rgb().to_hex_color()
     }
 }
 

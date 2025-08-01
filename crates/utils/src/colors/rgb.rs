@@ -64,5 +64,6 @@ impl RGB {
 
     pub fn to_hex_color(&self) -> HexColor {
         let hex = format!("#{:02X}{:02X}{:02X}", self.red, self.green, self.blue);
+        HexColor { value: hex }
     }
 }

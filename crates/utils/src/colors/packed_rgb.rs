@@ -31,5 +31,6 @@ impl PackedRGB {
 
     pub fn to_hex_color(&self) -> HexColor {
         let hex = format!("#{:02X}", self.value);
+        HexColor { value: hex }
     }
 }
