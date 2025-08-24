@@ -1,6 +1,6 @@
 pub struct ThemeFieldInfo {
-    pub key: &'static str,       // e.g. "primary"
-    pub description: &'static str, // e.g. "Primary brand color, used for main UI elements"
+    pub key: &'static str,
+    pub description: &'static str,
 }
 
 pub struct ThemeSchema {
