@@ -1,10 +1,11 @@
 pub enum NutrientTypes {
     Energy(Energy),
-    Water(Water),
-    Vitamins(Vitamins),
-    Minerals(Minerals),
-    EssentialNutrients(OtherEssentialNutrients),
-    ConditionallyEssentialNutrients(ConditionallyEssentialNutrients),
-    Phytonutrients(Phytonutrients),
-    Antinutrients(Antinutrients),
+    Water,
+    Vitamins,
+    Minerals,
+    OtherEssentialNutrients,
+    ConditionallyEssentialNutrients,
+    Phytonutrients,
+    Antinutrients,
+    Other,
 }

@@ -1,18 +1,27 @@
+use uuid::Uuid;
+
 pub struct Nutrient {
-    id: UUID,
+    id: Uuid,
     name: String,
-    unit: Unit,
-    categories: HashSet<NutrientTypes>
+    categories: HashSet<NutrientTypes>,
+    parent: Vec<Uuid>,
+    main_unit: Unit,
+    accepted_units: Unit,
+    unit_conversions: Vec<UnitConversion>
 }
 
-pub enum Unit {
-    Mass(Mass),
-    Volume(Volume),
-}
-
-pub struct Mass {
-    value: f64,
-    unit: MassUnit,
+pub enum Unit { // Make this just the unit rather than the 
+    Mass(MassUnit),
+    Volume(VolumeUnit),
+    Energy(EnergyUnit),
+    IU, // International Unit
+    DFE, // Dietary Folate Equivalent
+    NE, // Niacin Equivalent
+    RAE, // Retinol Activity Equivalent
+    PDCAAS, // Protein Digestibility Corrected Amino Acid Score
+    DIAAS1, // Digestible Indispensable Amino Acid Score 0 to 6 months
+    DIAAS2, // Digestible Indispensable Amino Acid Score 6 months to 3 years
+    DIAAS3, // Digestible Indispensable Amino Acid Score Over 3 years
 }
 
 pub enum MassUnit {
@@ -23,12 +32,18 @@ pub enum MassUnit {
     Ounce,
 }
 
-pub struct Volume {
-    value: f64,
-    unit: VolumeUnit,
-}
-
 pub enum VolumeUnit {
     Liter,
     Milliliter,
+}
+
+pub enum EnergyUnit {
+    Kcal,
+    KJ,
+}
+
+pub struct UnitConversion {
+    from: Unit,
+    to: Unit,
+    factor: f64,
 }
