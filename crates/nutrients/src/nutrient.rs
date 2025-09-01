@@ -14,17 +14,38 @@ pub struct Nutrient {
 impl Nutrient {
     pub fn add_conversion(&mut self, from: Unit, to: Unit) -> Result((), String) {
     self.unit_conversions.insert((from, to), value);
+    if factor != 0.0 {
+        self.unit_conversions.insert((to, from), 1.0 / factor);
+    }
     if let matches!(from, Mass) {
         self.unit_conversions.insert((from, to), value);
+        if factor != 0.0 {
+            self.unit_conversions.insert((to, from), 1.0 / factor);
+        }
         self.unit_conversions.insert((from, to), value);
+        if factor != 0.0 {
+            self.unit_conversions.insert((to, from), 1.0 / factor);
+        }
     }
     if let matches!(from, Volume) {
         self.unit_conversions.insert((from, to), value);
+        if factor != 0.0 {
+            self.unit_conversions.insert((to, from), 1.0 / factor);
+        }
         self.unit_conversions.insert((from, to), value);
+        if factor != 0.0 {
+            self.unit_conversions.insert((to, from), 1.0 / factor);
+        }
     }
     if let matches!(from, Energy) {
         self.unit_conversions.insert((from, to), value);
+        if factor != 0.0 {
+            self.unit_conversions.insert((to, from), 1.0 / factor);
+        }
         self.unit_conversions.insert((from, to), value);
+        if factor != 0.0 {
+            self.unit_conversions.insert((to, from), 1.0 / factor);
+        }
     }
 }
     pub fn convert(&self, value: f64, from: Unit, to: Unit) -> Option<f64> {
