@@ -1,13 +1,37 @@
 use uuid::Uuid;
+use std::collections::BTreeMap;
 
 pub struct Nutrient {
     id: Uuid,
     name: String,
     categories: HashSet<NutrientTypes>,
     parent: Vec<Uuid>,
-    main_unit: Unit,
+    main_unit: Option<Unit>,
     accepted_units: Unit,
-    unit_conversions: Vec<UnitConversion>
+    unit_conversions: BTreeMap<(Unit, Unit), f64>
+}
+
+impl Nutrient {
+    pub fn add_conversion(&mut self, from: Unit, to: Unit) -> Result((), String) {
+    self.unit_conversions.insert((from, to), value);
+    if let matches!(from, Mass) {
+        self.unit_conversions.insert((from, to), value);
+        self.unit_conversions.insert((from, to), value);
+    }
+    if let matches!(from, Volume) {
+        self.unit_conversions.insert((from, to), value);
+        self.unit_conversions.insert((from, to), value);
+    }
+    if let matches!(from, Energy) {
+        self.unit_conversions.insert((from, to), value);
+        self.unit_conversions.insert((from, to), value);
+    }
+}
+    pub fn convert(&self, value: f64, from: Unit, to: Unit) -> Option<f64> {
+        self.unit_conversions
+            .get(&(from, to))
+            .map(|factor| value * factor)
+    }
 }
 
 pub enum Unit { // Make this just the unit rather than the 
@@ -40,10 +64,4 @@ pub enum VolumeUnit {
 pub enum EnergyUnit {
     Kcal,
     KJ,
-}
-
-pub struct UnitConversion {
-    from: Unit,
-    to: Unit,
-    factor: f64,
 }
