@@ -13,7 +13,34 @@ pub struct Nutrient {
 
 impl Nutrient {
     pub fn add_conversion(&mut self, from: Unit, to: Unit, factor: f64) -> Result((), String) {
-        if let matches!(from, Mass) {
+        if factor == 0 {
+            return Err(String::from("Conversion factor may not be 0"))
+        }
+
+        if let matches!(from, MassUnit) {
+            let mass = Mass::new(1, from);
+            let mass_g = mass.as_g();
+            let mass_kg = mass.as_kg;
+            let mass_mg = mass.as_mg;
+            let mass_ug = mass.as_ug;
+            
+            let g_factor = factor * mass_g.unit;
+            self.unit_conversions.insert((MassUnit::Gram, to), g_factor);
+            self.unit_conversions.insert((to, from), 1.0 / g_factor);
+
+            let kg_factor = factor * mass_kg.unit;
+            self.unit_conversions.insert((from, to), kg_factor);
+            self.unit_conversions.insert((to, from), 1.0 / kg_factor);
+            
+            let mg_factor = factor * mass_mg.unit;
+            self.unit_conversions.insert((from, to), mg_factor);
+            self.unit_conversions.insert((to, from), 1.0 / mg_factor);
+
+            let ug_factor = factor * mass_ug.unit;
+            self.unit_conversions.insert((from, to), ug_factor);
+            self.unit_conversions.insert((to, from), 1.0 / ug_factor);
+        }
+        else if let matches!(from, VolumeUnit) {
             self.unit_conversions.insert((from, to), value);
             if factor != 0.0 {
                 self.unit_conversions.insert((to, from), 1.0 / factor);
@@ -23,7 +50,7 @@ impl Nutrient {
                 self.unit_conversions.insert((to, from), 1.0 / factor);
             }
         }
-        else if let matches!(from, Volume) {
+        else if let matches!(from, EnergyUnit) {
             self.unit_conversions.insert((from, to), value);
             if factor != 0.0 {
                 self.unit_conversions.insert((to, from), 1.0 / factor);
@@ -33,17 +60,7 @@ impl Nutrient {
                 self.unit_conversions.insert((to, from), 1.0 / factor);
             }
         }
-        else if let matches!(from, Energy) {
-            self.unit_conversions.insert((from, to), value);
-            if factor != 0.0 {
-                self.unit_conversions.insert((to, from), 1.0 / factor);
-            }
-            self.unit_conversions.insert((from, to), value);
-            if factor != 0.0 {
-                self.unit_conversions.insert((to, from), 1.0 / factor);
-            }
-        }
-        if factor != 0.0 {
+        else {
             self.unit_conversions.insert((from, to), factor)
             self.unit_conversions.insert((to, from), 1.0 / factor)
         }
