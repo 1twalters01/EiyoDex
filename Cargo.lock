@@ -306,6 +306,10 @@ name = "exercise"
 version = "0.1.0"
 
 [[package]]
+name = "extensions"
+version = "0.1.0"
+
+[[package]]
 name = "external"
 version = "0.1.0"
 

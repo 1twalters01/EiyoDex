@@ -13,8 +13,8 @@ pub struct Profile {
     weight: Mass,
     target_weight: Mass,
     target_weight_deadline: Option<NaiveDate>,
-    // waist
-    // hip
+    waist_circumference: Distance,
+    hip_circumference: Distance,
     body_fat_percentage: Percentage,
 }
 
