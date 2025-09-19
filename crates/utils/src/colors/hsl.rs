@@ -1,4 +1,5 @@
-use super::{base_types::{Angle, Normalized}, hex_color::HexColor, rgb::RGB, packed_rgb::PackedRGB};
+use super::{hex_color::HexColor, rgb::RGB, packed_rgb::PackedRGB};
+use crate::base_types::{Angle, Normalized};
 
 // Use angle type instead of f64 for hue?
 // Create a normalised type for saturation and lightness?

@@ -1,0 +1,15 @@
+[package]
+name = "currency_macro"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+quote = "1.0.40"
+# serde = "1.0.225"
+serde = { version = "1.0.225", features = ["derive"] }
+serde_json = "1.0.145"
+syn = "2.0.106"
+

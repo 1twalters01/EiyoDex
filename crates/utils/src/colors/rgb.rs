@@ -1,4 +1,5 @@
-use super::{base_types::{Angle, Normalized}, hex_color::HexColor, hsl::HSL, packed_rgb::PackedRGB};
+use super::{hex_color::HexColor, hsl::HSL, packed_rgb::PackedRGB};
+use crate::base_types::{Angle, Normalized};
 
 pub struct RGB {
     pub red: u8,

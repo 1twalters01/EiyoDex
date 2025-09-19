@@ -1,5 +1,7 @@
 use uuid::Uuid;
 use chrono::NaiveDate;
+use units::{unit_type::UnitType, distance::Distance, mass::Mass};
+use utils::base_types::Percentage;
 
 pub struct Profile {
     id: Uuid,

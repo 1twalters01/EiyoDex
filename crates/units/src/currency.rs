@@ -197,7 +197,7 @@ macro_rules! define_currencies {
             todo!()
         }
 
-        // Don't know what datetime I will use, probably chrone
+        // Don't know what datetime I will use, probably chrono
         use std::time::SystemTime;
         pub fn fetch_past_exchange_rate(current_unit: CurrencyUnit, target_unit: CurrencyUnit, datetime: SystemTime) -> Result<f64, String> {
             // fetch from an api using current unit, target unit and datetime using reqwest
@@ -212,3 +212,6 @@ macro_rules! define_currencies {
         }
     };
 }
+
+use currency_macro::include_currencies_from_json;
+include_currencies_from_json!("data/currencies.json");

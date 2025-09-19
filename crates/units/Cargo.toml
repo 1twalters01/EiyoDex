@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+currency_macro = { path = "../macros/currency_macro" }
 serde = { version = "1.0", features = ["derive"], optional = true }
 redis = { version = "0.25.2", optional = true }
 reqwest = { version = "0.12.4", features = ["json"] }
