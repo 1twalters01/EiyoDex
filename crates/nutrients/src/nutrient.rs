@@ -11,7 +11,7 @@ use units::{
     energy::{Energy, EnergyUnit},
 };
 
-use crate::schema::nutrients::NutrientTypes;
+use crate::schema::nutrients::NutrientType;
 
 pub struct NutrientAmount {
     value: f64, // value for main unit is saved
@@ -30,13 +30,13 @@ impl NutrientAmount {
 pub struct Nutrient {
     id: Uuid,
     name: String,
-    categories: HashSet<NutrientTypes>,
+    description: String,
+    categories: HashSet<NutrientType>,
     parent: Vec<Uuid>,
     main_unit: Unit,
     accepted_units: BTreeSet<Unit>,
     unit_conversions: BTreeMap<(Unit, Unit), f64>
 }
-
 
 impl Nutrient {
     pub fn new(id: Option<Uuid>, name: String, main_unit: Unit) -> Self {
@@ -45,12 +45,25 @@ impl Nutrient {
         Nutrient {
             id,
             name: name,
+            description: String::new(),
             categories: HashSet::new(),
             parent: Vec::new(),
             main_unit: main_unit,
             accepted_units: BTreeSet::from([main_unit]),
             unit_conversions: BTreeMap::new(),
         }
+    }
+
+    pub fn set_description(&mut self, description: String) {
+        self.description = description;
+    }
+
+    pub fn remove_category(&mut self, category: NutrientType) {
+        self.categories.remove(&category);
+    }
+
+    pub fn insert_category(&mut self, category: NutrientType) {
+        self.categories.insert(category);
     }
 
     pub fn set_main_unit(&mut self, main_unit: Unit) -> Result<(), String> {
@@ -60,7 +73,6 @@ impl Nutrient {
         } else {
             Err(String::from("New main unit not in accepted units"))
         }
-
     }
 
     pub fn convert(&self, value: f64, from: Unit, to: Unit) -> Result<f64, String> {
@@ -72,6 +84,19 @@ impl Nutrient {
         } else {
             Err(String::from("Conversion must use values accepted by nutrient"))
         }
+    }
+
+    pub fn remove_conversion(&mut self, from: Unit, to: Unit) {
+        self.unit_conversions.remove(&(from, to));
+
+        let (mut found_from, mut found_to) = (false, false);
+        for (key, _) in &self.unit_conversions {
+            if key.0 == from || key.1 == from { found_from = true; }
+            if key.0 == to || key.1 == to { found_to = true; }
+        }
+
+        if found_from == false { self.accepted_units.remove(&from); }
+        if found_to == false { self.accepted_units.remove(&to); }
     }
 
     pub fn add_conversion(&mut self, from: Unit, to: Unit, factor: f64) -> Result<(), String> {

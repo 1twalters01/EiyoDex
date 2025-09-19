@@ -1,5 +1,7 @@
 use uuid::Uuid;
+use crate::sources::DataSource;
 use nutrients::nutrient::Nutrient;
+use std::collections::BTreeSet;
 
 pub struct Food {
     id: Uuid,
@@ -9,5 +11,6 @@ pub struct Food {
 pub struct FoodInstance {
     id: Uuid,
     name: String,
-    nutrients: Vec<Nutrient>,
+    data_source: DataSource,
+    nutrients: BTreeSet<Nutrient>,
 }

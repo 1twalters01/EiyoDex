@@ -1,3 +1,4 @@
+#[derive(PartialEq, Eq, Hash)]
 pub enum Energy {
     Carbohydrates(Carbohydrates),
     Proteins(Proteins),
@@ -5,6 +6,7 @@ pub enum Energy {
     Alcohol,
 }
 
+#[derive(PartialEq, Eq, Hash)]
 pub enum Carbohydrates {
     Fiber,
     Starch,
@@ -23,12 +25,14 @@ impl Carbohydrates {
     }
 }
 
+#[derive(PartialEq, Eq, Hash)]
 pub enum Proteins {
     EssentialAminoAcids,
     ConditionallyEssentialAminoAcids,
     NonEssentialAminoAcids,
 }
 
+#[derive(PartialEq, Eq, Hash)]
 pub enum Lipids {
     Fats(Fats),
     TransFats(TransFats),
@@ -37,12 +41,14 @@ pub enum Lipids {
     Phospholipids,
 }
 
+#[derive(PartialEq, Eq, Hash)]
 pub enum Fats {
     Monounsaturated,
     Polyunsaturated,
     Saturated,
 }
 
+#[derive(PartialEq, Eq, Hash)]
 pub enum TransFats {
     Natural,
     Artificial,

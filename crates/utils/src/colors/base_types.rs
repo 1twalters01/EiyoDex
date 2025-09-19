@@ -23,4 +23,18 @@ impl Normalized {
     }
 }
 
+pub struct Percentage {
+    pub value: u8
+}
 
+impl Percentage {
+    fn new(value: u8) -> Self {
+        assert!(value <= 100, "Percentage must be between 0 and 100.");
+        Percentage { value }
+    }
+
+    // Convert to a floating point between 0.0 and 1.0
+    fn as_fraction(&self) -> f64 {
+        self.value as f64 / 100.0
+    }
+}

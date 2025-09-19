@@ -3,20 +3,21 @@
 ## Define different user profiles
 Takes in:
 * Name
-* Units
+* Preferred Units
 * Language
 * Date of Birth
-* Ethnicity
+* Ethnicity (optional)
 * Gender
 * Height
-* Waist
-* Hip
 * Weight
     * Current Weight Logs
     * Target Weight (Toggleable)
     * Desired Date (Toggleable)
+* Waist?
+* Hip?
 * Body Fat Percentage (Estimate) Logs
-* Energy & Macronutrient Targets
+
+* Energy & Macronutrient Targets (Optional, can be calculated)
 * Basal Metabolic Rate (Can be Calculated)
 * Thermic Effect of Food (Toggleable)
 * Baseline Activity Enum (Toggleable)
