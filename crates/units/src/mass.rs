@@ -19,6 +19,16 @@ pub enum MassUnit {
 }
 
 impl MassUnit {
+    pub fn get_enumerations() -> Vec<MassUnit> {
+        Vec::from([
+            MassUnit::Gram,
+            MassUnit::Milligram,
+            MassUnit::Kilogram,
+            MassUnit::Microgram,
+            MassUnit::Ounce,
+        ])
+    }
+
     pub fn as_symbol(&self) -> &'static str {
         match self {
             MassUnit::Gram => "g",

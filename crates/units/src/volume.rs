@@ -16,6 +16,13 @@ pub enum VolumeUnit {
 }
 
 impl VolumeUnit {
+    pub fn get_enumerations() -> Vec<VolumeUnit> {
+        Vec::from([
+            VolumeUnit::Liter,
+            VolumeUnit::Milliliter,
+        ])
+    }
+
     pub fn as_symbol(&self) -> &'static str {
         match self {
             VolumeUnit::Liter => "l",

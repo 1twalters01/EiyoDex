@@ -16,6 +16,13 @@ pub enum EnergyUnit {
 }
 
 impl EnergyUnit {
+    pub fn get_enumerations() -> Vec<EnergyUnit> {
+        Vec::from([
+            EnergyUnit::Kcal,
+            EnergyUnit::KJ,
+        ])
+    }
+
     pub fn as_symbol(&self) -> &'static str {
         match self {
             EnergyUnit::Kcal => "kcal",
