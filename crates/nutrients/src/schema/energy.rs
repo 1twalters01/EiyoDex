@@ -2,48 +2,48 @@ pub enum Energy {
     Carbohydrates(Carbohydrates),
     Proteins(Proteins),
     Lipids(Lipids),
-    Alcohol(Alcohol),
+    Alcohol,
 }
 
 pub enum Carbohydrates {
-    Fiber(Fiber),
-    Starch(Starch),
-    Sugar(Sugar),
-    SugarAlcohols(SugarAlcohols),
-    AddedSugar(AddedSugar),
+    Fiber,
+    Starch,
+    Sugar,
+    SugarAlcohols,
+    AddedSugar,
 }
 
 impl Carbohydrates {
-    pub fn use_in_net_calculation(&self) -> &'static str {
+    pub fn use_in_net_calculation(&self) -> bool {
         match self {
-            Fiber => false,
-            SugarAlcohols => false,
+            Carbohydrates::Fiber => false,
+            Carbohydrates::SugarAlcohols => false,
             _ => true
         }
     }
 }
 
 pub enum Proteins {
-    EssentialAminoAcids(EssentialAminoAcids),
-    ConditionallyEssentialAminoAcids(ConditionallyEssentialAminoAcids),
-    NonEssentialAminoAcids(NonEssentialAminoAcids),
+    EssentialAminoAcids,
+    ConditionallyEssentialAminoAcids,
+    NonEssentialAminoAcids,
 }
 
 pub enum Lipids {
     Fats(Fats),
     TransFats(TransFats),
-    Cholesterol(Cholesterol),
-    Phytosterol(Phytosterol),
-    Phospholipids(Phospholipids),
+    Cholesterol,
+    Phytosterol,
+    Phospholipids,
 }
 
 pub enum Fats {
-    Monounsaturated(Monounsaturated),
-    Polyunsaturated(Polyunsaturated),
-    Saturated(Saturated),
+    Monounsaturated,
+    Polyunsaturated,
+    Saturated,
 }
 
 pub enum TransFats {
-    Natural(Natural),
-    Artificial(Artificial),
+    Natural,
+    Artificial,
 }

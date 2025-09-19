@@ -1,5 +1,16 @@
 use uuid::Uuid;
-use std::collections::BTreeMap;
+use std::collections::{
+    BTreeMap,
+    HashSet,
+};
+
+use units::{
+    mass::{Mass, MassUnit},
+    volume::{Volume, VolumeUnit},
+    energy::{Energy, EnergyUnit},
+};
+
+use crate::schema::nutrients::NutrientTypes;
 
 pub struct Nutrient {
     id: Uuid,
@@ -12,58 +23,48 @@ pub struct Nutrient {
 }
 
 impl Nutrient {
-    pub fn add_conversion(&mut self, from: Unit, to: Unit, factor: f64) -> Result((), String) {
-        if factor == 0 {
+    pub fn add_conversion(&mut self, from: Unit, to: Unit, factor: f64) -> Result<(), String> {
+        if factor == 0 as f64 {
             return Err(String::from("Conversion factor may not be 0"))
         }
 
-        if let matches!(from, MassUnit) {
-            let mass = Mass::new(1, from);
-            let mass_g = mass.as_g();
-            let mass_kg = mass.as_kg;
-            let mass_mg = mass.as_mg;
-            let mass_ug = mass.as_ug;
-            
-            let g_factor = factor * mass_g.unit;
-            self.unit_conversions.insert((MassUnit::Gram, to), g_factor);
-            self.unit_conversions.insert((to, from), 1.0 / g_factor);
+        let (from_unit, from_factor): (Unit, f64) = match from {
+            Unit::Mass(mass_unit) => {
+                let mass = Mass::new(1 as f64, mass_unit);
+                (Unit::Mass(MassUnit::Gram), mass.as_g())
+            },
+            Unit::Volume(volume_unit) => {
+                let volume = Volume::new(1 as f64, volume_unit);
+                (Unit::Volume(VolumeUnit::Milliliter), volume.as_ml())
+            },
+            Unit::Energy(energy_unit) => {
+                let energy = Energy::new(1 as f64, energy_unit);
+                (Unit::Energy(EnergyUnit::Kcal), energy.as_kcal())
+            },
+            _ => (to, 1 as f64)
+        };
 
-            let kg_factor = factor * mass_kg.unit;
-            self.unit_conversions.insert((from, to), kg_factor);
-            self.unit_conversions.insert((to, from), 1.0 / kg_factor);
-            
-            let mg_factor = factor * mass_mg.unit;
-            self.unit_conversions.insert((from, to), mg_factor);
-            self.unit_conversions.insert((to, from), 1.0 / mg_factor);
+        let (to_unit, to_factor): (Unit, f64) = match to {
+            Unit::Mass(mass_unit) => {
+                let mass = Mass::new(1 as f64, mass_unit);
+                (Unit::Mass(MassUnit::Gram), mass.as_g())
+            },
+            Unit::Volume(volume_unit) => {
+                let volume = Volume::new(1 as f64, volume_unit);
+                (Unit::Volume(VolumeUnit::Milliliter), volume.as_ml())
+            },
+            Unit::Energy(energy_unit) => {
+                let energy = Energy::new(1 as f64, energy_unit);
+                (Unit::Energy(EnergyUnit::Kcal), energy.as_kcal())
+            },
+            _ => (to, 1 as f64)
+        };
 
-            let ug_factor = factor * mass_ug.unit;
-            self.unit_conversions.insert((from, to), ug_factor);
-            self.unit_conversions.insert((to, from), 1.0 / ug_factor);
-        }
-        else if let matches!(from, VolumeUnit) {
-            self.unit_conversions.insert((from, to), value);
-            if factor != 0.0 {
-                self.unit_conversions.insert((to, from), 1.0 / factor);
-            }
-            self.unit_conversions.insert((from, to), value);
-            if factor != 0.0 {
-                self.unit_conversions.insert((to, from), 1.0 / factor);
-            }
-        }
-        else if let matches!(from, EnergyUnit) {
-            self.unit_conversions.insert((from, to), value);
-            if factor != 0.0 {
-                self.unit_conversions.insert((to, from), 1.0 / factor);
-            }
-            self.unit_conversions.insert((from, to), value);
-            if factor != 0.0 {
-                self.unit_conversions.insert((to, from), 1.0 / factor);
-            }
-        }
-        else {
-            self.unit_conversions.insert((from, to), factor)
-            self.unit_conversions.insert((to, from), 1.0 / factor)
-        }
+        let new_factor = factor * from_factor * to_factor;
+        self.unit_conversions.insert((from_unit, to_unit), new_factor);
+        self.unit_conversions.insert((to_unit, from_unit), 1.0 / new_factor);
+
+        Ok(())
     }
 
     pub fn convert(&self, value: f64, from: Unit, to: Unit) -> Option<f64> {
@@ -73,7 +74,8 @@ impl Nutrient {
     }
 }
 
-pub enum Unit { // Make this just the unit rather than the 
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
+pub enum Unit { 
     Mass(MassUnit),
     Volume(VolumeUnit),
     Energy(EnergyUnit),
@@ -87,20 +89,3 @@ pub enum Unit { // Make this just the unit rather than the
     DIAAS3, // Digestible Indispensable Amino Acid Score Over 3 years
 }
 
-pub enum MassUnit {
-    Gram,
-    Milligram,
-    Kilogram,
-    Microgram,
-    Ounce,
-}
-
-pub enum VolumeUnit {
-    Liter,
-    Milliliter,
-}
-
-pub enum EnergyUnit {
-    Kcal,
-    KJ,
-}

@@ -1,3 +1,5 @@
+use crate::schema::energy::Energy;
+
 pub enum NutrientTypes {
     Energy(Energy),
     Water,
