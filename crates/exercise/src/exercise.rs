@@ -1,6 +1,6 @@
-use uuid::Uuid;
 use chrono::Duration;
-// use units::calories_per_second::CaloriesPerSecond;
+use units::power::Power;
+use uuid::Uuid;
 
 pub struct ExerciseAmount {
     duration: Duration,
@@ -11,5 +11,5 @@ pub struct Exercise {
     id: Uuid,
     name: String,
     description: String,
-    // calories_per_second: CaloriesPerSecond,
+    power: Power,
 }

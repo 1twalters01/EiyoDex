@@ -7,7 +7,10 @@ use std::{
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::{mass::Mass, currency::{Currency, CurrencyUnit, fetch_current_exchange_rate}};
+use crate::{
+    currency::{fetch_current_exchange_rate, Currency, CurrencyUnit},
+    mass::Mass,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -72,7 +75,7 @@ impl SpecificCurrency {
                 let current_unit = CurrencyUnit::GBP;
                 let target_unit = CurrencyUnit::USD;
                 self.value * fetch_current_exchange_rate(current_unit, target_unit).unwrap()
-            },
+            }
         }
     }
 
@@ -83,7 +86,7 @@ impl SpecificCurrency {
                 let current_unit = CurrencyUnit::USD;
                 let target_unit = CurrencyUnit::GBP;
                 self.value * fetch_current_exchange_rate(current_unit, target_unit).unwrap()
-            },
+            }
         }
     }
 

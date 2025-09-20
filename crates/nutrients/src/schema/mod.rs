@@ -1,2 +1,2 @@
-pub mod nutrients;
 pub mod energy;
+pub mod nutrients;

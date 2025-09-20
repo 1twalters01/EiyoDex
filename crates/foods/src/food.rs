@@ -1,8 +1,8 @@
-use uuid::Uuid;
 use crate::sources::DataSource;
 use nutrients::nutrient::Nutrient;
 use std::collections::BTreeSet;
 use units::specific_currency::SpecificCurrency;
+use uuid::Uuid;
 
 pub struct FoodAmount {
     value: f64,
@@ -10,8 +10,7 @@ pub struct FoodAmount {
 }
 
 impl FoodAmount {
-    pub fn new() {
-    }
+    pub fn new() {}
 
     pub fn get_value(&self) -> f64 {
         self.value
@@ -34,7 +33,7 @@ pub struct Food {
 }
 
 impl Food {
-    pub fn new(id: Option<Uuid>, name: String, cost: Option<SpecificCurrency>) -> Self{
+    pub fn new(id: Option<Uuid>, name: String, cost: Option<SpecificCurrency>) -> Self {
         let id = if let Some(internal_id) = id {
             internal_id
         } else {

@@ -20,7 +20,7 @@ impl Carbohydrates {
         match self {
             Carbohydrates::Fiber => false,
             Carbohydrates::SugarAlcohols => false,
-            _ => true
+            _ => true,
         }
     }
 }

@@ -1,4 +1,4 @@
-use super::{hex_color::HexColor, rgb::RGB, packed_rgb::PackedRGB};
+use super::{hex_color::HexColor, packed_rgb::PackedRGB, rgb::RGB};
 use crate::base_types::{Angle, Normalized};
 
 // Use angle type instead of f64 for hue?
@@ -10,8 +10,16 @@ pub struct HSL {
 }
 
 impl HSL {
-    pub fn new(hue: Angle, saturation: Normalized, lightness: Normalized) -> Result<Self, &'static str> {
-        Ok(Self { hue, saturation, lightness })
+    pub fn new(
+        hue: Angle,
+        saturation: Normalized,
+        lightness: Normalized,
+    ) -> Result<Self, &'static str> {
+        Ok(Self {
+            hue,
+            saturation,
+            lightness,
+        })
     }
 
     pub fn to_rgb(&self) -> RGB {
@@ -48,4 +56,3 @@ impl HSL {
         self.to_rgb().to_hex_color()
     }
 }
-

@@ -242,4 +242,3 @@ impl PartialOrd for Distance {
         self.as_m().partial_cmp(&other.as_m())
     }
 }
-

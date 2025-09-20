@@ -9,11 +9,11 @@ pub struct RGB {
 
 pub fn normalise_angle(angle: f64) -> f64 {
     if angle < 0.0 {
-        return normalise_angle(angle + 360.0)
+        return normalise_angle(angle + 360.0);
     } else if angle > 360.0 {
-        return normalise_angle(angle - 360.0)
+        return normalise_angle(angle - 360.0);
     } else {
-        return angle
+        return angle;
     }
 }
 
@@ -54,13 +54,19 @@ impl RGB {
             }
         };
 
-        HSL { hue, saturation, lightness }
+        HSL {
+            hue,
+            saturation,
+            lightness,
+        }
     }
 
     pub fn to_packed_rgb(&self) -> PackedRGB {
         let red: u32 = (self.red as u32) << 16;
         let green: u32 = (self.green as u32) << 8;
-        PackedRGB { value: red + green + self.blue as u32 }
+        PackedRGB {
+            value: red + green + self.blue as u32,
+        }
     }
 
     pub fn to_hex_color(&self) -> HexColor {

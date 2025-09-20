@@ -1,8 +1,8 @@
-use uuid::Uuid;
-use chrono::{NaiveDateTime, NaiveDate};
+use chrono::{NaiveDate, NaiveDateTime};
 use exercise::exercise::ExerciseAmount;
 use foods::food::FoodAmount;
 use profiles::profile::Profile;
+use uuid::Uuid;
 
 pub struct JournalEntry {
     profile: Profile,
@@ -44,7 +44,7 @@ pub struct Entry {
     entry_item: EntryItem,
     datetime_eaten: NaiveDateTime,
     datetime_created: NaiveDateTime,
-    datetime_last_modified: NaiveDateTime
+    datetime_last_modified: NaiveDateTime,
 }
 
 impl Entry {

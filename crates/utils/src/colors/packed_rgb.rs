@@ -10,9 +10,15 @@ impl PackedRGB {
         let green = (value >> 8) & 255;
         let blue = value & 255;
 
-        if red > 255 { return Err("Invalid red component") }
-        if green > 255 { return Err("Invalid green component") }
-        if blue > 255 { return Err("Invalid blue component") }
+        if red > 255 {
+            return Err("Invalid red component");
+        }
+        if green > 255 {
+            return Err("Invalid green component");
+        }
+        if blue > 255 {
+            return Err("Invalid blue component");
+        }
 
         Ok(PackedRGB { value })
     }

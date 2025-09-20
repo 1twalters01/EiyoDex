@@ -9,6 +9,10 @@ pub struct NutrientBalance {
 
 impl NutrientBalance {
     pub fn new(name: String, description: String, nutrient_ratio: NutrientRatio) -> Self {
-        Self { name, description, nutrient_ratio }
+        Self {
+            name,
+            description,
+            nutrient_ratio,
+        }
     }
 }
