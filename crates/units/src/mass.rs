@@ -9,7 +9,7 @@ macro_rules! define_masses {
                 symbol: $symbol:expr,
                 unit_type: $unit_type:expr,
                 unit_type_plural: $unit_type_plural:expr,
-                factor: $factor:expr
+                grams_factor: $grams_factor:expr
             }
         ),+ $(,)?
     ) => {
@@ -53,7 +53,7 @@ macro_rules! define_masses {
 
             pub fn grams_factor(&self) -> f64 {
                 match self {
-                    $(MassUnit::$variant => $factor),+
+                    $(MassUnit::$variant => $grams_factor),+
                 }
             }
         }
@@ -89,7 +89,7 @@ macro_rules! define_masses {
 
             $(
                 pub fn $as_fn_name(&self) -> f64 {
-                    self.value * self.unit.grams_factor() / $factor
+                    self.value * self.unit.grams_factor() / $grams_factor
                 }
             )+
 
@@ -112,6 +112,14 @@ macro_rules! define_masses {
 
             pub fn is_negative(&self) -> bool {
                 self.value < 0.0
+            }
+
+            pub fn get_value(&self) -> f64 {
+                self.value
+            }
+
+            pub fn set_value(&mut self, value: f64) {
+                self.value = value;
             }
 
             pub fn get_unit(&self) -> MassUnit {

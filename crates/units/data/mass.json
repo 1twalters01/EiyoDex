@@ -3,31 +3,31 @@
         "symbol": "g",
         "unit_type": "gram",
         "unit_type_plural": "grams",
-        "factor": 1.0
+        "grams_factor": 1.0
     },
     "Milligram": {
         "symbol": "mg",
         "unit_type": "milligram",
         "unit_type_plural": "milligrams",
-        "factor": 0.001 
+        "grams_factor": 0.001 
     },
     "Kilogram": {
         "symbol": "kg",
         "unit_type": "kilogram",
         "unit_type_plural": "kilograms",
-        "factor": 1000.0
+        "grams_factor": 1000.0
     },
     "Microgram": {
         "symbol": "ug",
         "unit_type": "microgram",
         "unit_type_plural": "micrograms",
-        "factor": 0.000001
+        "grams_factor": 0.000001
     },
     "Ounce": {
         "symbol": "oz",
         "unit_type": "ounce",
         "unit_type_plural": "ounces",
-        "factor": 28.3495
+        "grams_factor": 28.3495
     }
 }
 

@@ -11,7 +11,7 @@ struct MassJson {
     symbol: String,
     unit_type: String,
     unit_type_plural: String,
-    factor: f64,
+    grams_factor: f64,
 }
 
 #[proc_macro]
@@ -36,7 +36,7 @@ pub fn include_masses_from_json(input: TokenStream) -> TokenStream {
         let symbol = &data.symbol;
         let unit_type = &data.unit_type;
         let unit_type_plural = &data.unit_type_plural;
-        let factor = &data.factor;
+        let grams_factor = &data.grams_factor;
 
         quote! {
             #variant => {
@@ -46,7 +46,7 @@ pub fn include_masses_from_json(input: TokenStream) -> TokenStream {
                 symbol: #symbol,
                 unit_type: #unit_type,
                 unit_type_plural: #unit_type_plural,
-                factor: #factor
+                grams_factor: #grams_factor
             }
         }
     });
