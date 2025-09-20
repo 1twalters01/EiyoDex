@@ -3,6 +3,7 @@ pub mod density;
 pub mod distance;
 pub mod energy;
 pub mod mass;
+pub mod mass_test;
 pub mod power;
 pub mod specific_currency;
 pub mod unit_type;

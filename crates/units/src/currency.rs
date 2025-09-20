@@ -5,8 +5,8 @@ macro_rules! define_currencies {
             $variant:ident => {
                 symbol: $symbol:expr,
                 code: $code:expr,
-                unit_type: $unit:expr,
-                unit_type_plural: $unit_plural:expr
+                unit_type: $unit_type:expr,
+                unit_type_plural: $unit_type_plural:expr
             }
         ),+ $(,)?
     ) => {
@@ -44,8 +44,8 @@ macro_rules! define_currencies {
                     $(CurrencyUnit::$variant => CurrencyMetadata {
                         symbol: $symbol,
                         code: $code,
-                        unit_type: $unit,
-                        unit_type_plural: $unit_plural,
+                        unit_type: $unit_type,
+                        unit_type_plural: $unit_type_plural,
                     }),+
                 }
             }

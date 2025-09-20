@@ -845,6 +845,16 @@ name = "markdown"
 version = "0.1.0"
 
 [[package]]
+name = "mass_macro"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "serde",
+ "serde_json",
+ "syn",
+]
+
+[[package]]
 name = "memchr"
 version = "2.7.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1598,6 +1608,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "currency_macro",
+ "mass_macro",
  "redis",
  "reqwest",
  "serde",

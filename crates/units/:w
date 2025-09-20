@@ -3,12 +3,9 @@ macro_rules! define_masses {
     (
         $(
             $variant:ident => {
-                from_fn_name: $from_fn_name:ident,
-                as_fn_name: $as_fn_name:ident,
                 symbol: $symbol:expr,
                 unit_type: $unit_type:expr,
-                unit_type_plural: $unit_type_plural:expr,
-                factor: $factor:expr
+                unit_type_plural: $unit_type_plural:expr
             }
         ),+ $(,)?
     ) => {
@@ -25,34 +22,53 @@ macro_rules! define_masses {
         #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
         pub enum MassUnit {
             $($variant),+
+            //     MassUnit::Gram,
+            //     MassUnit::Milligram,
+            //     MassUnit::Kilogram,
+            //     MassUnit::Microgram,
+            //     MassUnit::Ounce,
         }
 
         impl MassUnit {
             pub fn get_enumerations() -> Vec<MassUnit> {
                 Vec::from([$(MassUnit::$variant),+])
+                // MassUnit::Gram,
+                // MassUnit::Milligram,
+                // MassUnit::Kilogram,
+                // MassUnit::Microgram,
+                // MassUnit::Ounce,
             }
 
             pub fn as_symbol(&self) -> &'static str {
                 match self {
                     $(MassUnit::$variant => $symbol),+
+                    // MassUnit::Gram => "g",
+                    // MassUnit::Milligram => "mg",
+                    // MassUnit::Kilogram => "kg",
+                    // MassUnit::Microgram => "µg",
+                    // MassUnit::Ounce => "oz",
                 }
             }
 
             pub fn as_unit_type(&self) -> &'static str {
                 match self {
                     $(MassUnit::$variant => $unit_type),+
+                    // MassUnit::Gram => "gram",
+                    // MassUnit::Milligram => "milligram",
+                    // MassUnit::Kilogram => "kilogram",
+                    // MassUnit::Microgram => "microgram",
+                    // MassUnit::Ounce => "ounce",
                 }
             }
 
             pub fn as_unit_type_plural(&self) -> &'static str {
                 match self {
                     $(MassUnit::$variant => $unit_type_plural),+
-                }
-            }
-
-            pub fn grams_factor(&self) -> f64 {
-                match self {
-                    $(MassUnit::$variant => $factor),+
+                    // MassUnit::Gram => "grams",
+                    // MassUnit::Milligram => "milligrams",
+                    // MassUnit::Kilogram => "kilograms",
+                    // MassUnit::Microgram => "micrograms",
+                    // MassUnit::Ounce => "ounces",
                 }
             }
         }
@@ -62,11 +78,17 @@ macro_rules! define_masses {
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 match s.trim().to_lowercase().as_str() {
-                    $($symbol | $unit_type | $unit_type_plural => Ok(MassUnit::$variant),)+
+                    $($symbol | $unit_type | $unit_type_plural => Ok(MassUnit::$variant)),+
+                    // "g" | "gram" | "grams" => Ok(MassUnit::Gram),
+                    // "mg" | "milligram" | "milligrams" => Ok(MassUnit::Milligram),
+                    // "kg" | "kilogram" | "kilograms" => Ok(MassUnit::Kilogram),
+                    // "µg" | "microgram" | "micrograms" => Ok(MassUnit::Microgram),
+                    // "oz" | "ounce" | "ounces" => Ok(MassUnit::Ounce),
                     _ => Err("Unknown mass unit"),
                 }
             }
         }
+
 
         #[derive(Debug, Clone, Copy, PartialEq)]
         #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -80,47 +102,37 @@ macro_rules! define_masses {
                 Self { value, unit }
             }
 
-            $(
-                pub fn $from_fn_name(value: f64) -> Self {
-                    Self::new(value, MassUnit::$variant)
-                }
-            )+
-
-            paste::paste! {
-                $(
-                    pub fn $as_fn_name(&self) -> f64 {
-                        match self.unit {
-                            define_masses!(@arms [ $($variant => $factor),+ ] ; $factor)
-                        }
-                    }
-                )+
-            }
-            
-        
-
-            // $(
-            //     pub fn $as_fn_name(&self) -> f64 {
-            //         match self.unit {
-            //             $(MassUnit::$variant => self.value * self.unit.grams_factor() / $factor)+,
-            //         }
-            //     }
-            // )+
-
-            pub fn as_g(&self) -> f64 {
-                match self.unit {
-                    MassUnit::Gram => self.value,
-                    MassUnit::Milligram => self.value / 1000 as f64,
-                    MassUnit::Kilogram => self.value * 1000 as f64,
-                    MassUnit::Microgram => self.value / 1_000_000 as f64,
-                    MassUnit::Ounce => self.value * 28.3495,
-                }
+            pub fn from_g(g: f64) -> Self {
+                Self::new(g, MassUnit::Gram)
             }
 
-            pub fn as_mg(&self) -> f64 {
-                match self.unit {
-                    MassUnit::Gram => self.value * 1000 as f64,
-                    MassUnit::Milligram => self.value,
-                    MassUnit::Kilogram => self.value * 1_000_000 as f64,
+            pub fn from_ml(mg: f64) -> Self {
+                Self::new(mg, MassUnit::Milligram)
+            }
+
+            pub fn from_kg(kg: f64) -> Self {
+                Self::new(kg, MassUnit::Kilogram)
+            }
+
+            pub fn from_oz(oz: f64) -> Self {
+                Self::new(oz, MassUnit::Ounce)
+            }
+
+        pub fn as_g(&self) -> f64 {
+        match self.unit {
+        MassUnit::Gram => self.value,
+        MassUnit::Milligram => self.value / 1000 as f64,
+        MassUnit::Kilogram => self.value * 1000 as f64,
+        MassUnit::Microgram => self.value / 1_000_000 as f64,
+        MassUnit::Ounce => self.value * 28.3495,
+        }
+        }
+
+        pub fn as_mg(&self) -> f64 {
+        match self.unit {
+        MassUnit::Gram => self.value * 1000 as f64,
+        MassUnit::Milligram => self.value,
+        MassUnit::Kilogram => self.value * 1_000_000 as f64,
                     MassUnit::Microgram => self.value / 1000 as f64,
                     MassUnit::Ounce => self.value * 28_349.5,
                 }
@@ -158,12 +170,11 @@ macro_rules! define_masses {
 
             pub fn to_unit(&self, unit: MassUnit) -> Self {
                 let value = match unit {
-                    $(MassUnit::$variant => self.$as_fn_name()),+
-                    // MassUnit::Gram => self.as_g(),
-                    // MassUnit::Milligram => self.as_mg(),
-                    // MassUnit::Kilogram => self.as_kg(),
-                    // MassUnit::Microgram => self.as_mg(),
-                    // MassUnit::Ounce => self.as_oz(),
+                    MassUnit::Gram => self.as_g(),
+                    MassUnit::Milligram => self.as_mg(),
+                    MassUnit::Kilogram => self.as_kg(),
+                    MassUnit::Microgram => self.as_mg(),
+                    MassUnit::Ounce => self.as_oz(),
                 };
                 Self { value, unit }
             }
@@ -208,62 +219,55 @@ macro_rules! define_masses {
                 self.unit.as_unit_type()
             }
 
-            pub fn get_unit_type_plural(&self) -> &'static str {
-                self.unit.as_unit_type_plural()
-            }
-
-            pub fn to_string(&self) -> String {
-                format!("{} {}", self.value, self.get_symbol())
-            }
-
-            impl fmt::Display for Mass {
-                fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                    write!(f, "{} {}", self.value, self.get_symbol())
-                }
-            }
-
-            impl Add for Mass {
-                type Output = Self;
-                fn add(self, rhs: Self) -> Self {
-                    Self::from_g(self.as_g() + rhs.as_g())
-                }
-            }
-
-            impl Sub for Mass {
-                type Output = Self;
-                fn sub(self, rhs: Self) -> Self {
-                    Self::from_g(self.as_g() - rhs.as_g())
-                }
-            }
-
-            impl Mul<f64> for Mass {
-                type Output = Self;
-                fn mul(self, rhs: f64) -> Self {
-                    Self::from_g(self.as_g() * rhs)
-                }
-            }
-
-            impl Div<f64> for Mass {
-                type Output = Self;
-                fn div(self, rhs: f64) -> Self {
-                    Self::from_g(self.as_g() / rhs)
-                }
-            }
-
-            impl PartialOrd for Mass {
-                fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-                    self.as_g().partial_cmp(&other.as_g())
-                }
-            }
+        pub fn get_unit_type_plural(&self) -> &'static str {
+        self.unit.as_unit_type_plural()
         }
-    };
 
-    // helper: expand all match arms against a given target factor
-    (@arms [ $($v:ident => $f:expr),+ ] ; $target:expr) => {
-        $(
-        MassUnit::$v => self.value * $f / $target,
-        )+
-    };
+        pub fn to_string(&self) -> String {
+        format!("{} {}", self.value, self.get_symbol())
+        }
+        }
+
+        impl fmt::Display for Mass {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", self.value, self.get_symbol())
+        }
+        }
+
+        impl Add for Mass {
+        type Output = Self;
+        fn add(self, rhs: Self) -> Self {
+        Self::from_g(self.as_g() + rhs.as_g())
+        }
+        }
+
+        impl Sub for Mass {
+        type Output = Self;
+        fn sub(self, rhs: Self) -> Self {
+        Self::from_g(self.as_g() - rhs.as_g())
+        }
+        }
+
+        impl Mul<f64> for Mass {
+        type Output = Self;
+        fn mul(self, rhs: f64) -> Self {
+        Self::from_g(self.as_g() * rhs)
+        }
+        }
+
+        impl Div<f64> for Mass {
+        type Output = Self;
+        fn div(self, rhs: f64) -> Self {
+        Self::from_g(self.as_g() / rhs)
+        }
+        }
+
+        impl PartialOrd for Mass {
+        fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.as_g().partial_cmp(&other.as_g())
+        }
+        }
+    }
 }
 
 use mass_macro::include_masses_from_json;
