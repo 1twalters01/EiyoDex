@@ -897,6 +897,10 @@ dependencies = [
 [[package]]
 name = "nutrient_balances"
 version = "0.1.0"
+dependencies = [
+ "nutrients",
+ "utils",
+]
 
 [[package]]
 name = "nutrients"

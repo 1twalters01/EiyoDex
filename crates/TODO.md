@@ -1,3 +1,5 @@
+# Done (temporarily)
+
 # In progress
 themes/
 units/

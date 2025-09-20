@@ -4,6 +4,7 @@ use nutrients::nutrient::Nutrient;
 use std::collections::BTreeSet;
 use units::specific_currency::SpecificCurrency;
 
+// TODO - need to make it per whatever unig (100g?)
 pub struct Food {
     id: Uuid,
     name: String,

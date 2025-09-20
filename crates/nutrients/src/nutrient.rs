@@ -1,8 +1,11 @@
 use uuid::Uuid;
-use std::collections::{
-    BTreeMap,
-    BTreeSet,
-    HashSet,
+use std::{
+    collections::{
+        BTreeMap,
+        BTreeSet,
+        HashSet,
+    },
+    ops::{Mul, Div},
 };
 
 use units::{
@@ -13,6 +16,7 @@ use units::{
 
 use crate::schema::nutrients::NutrientType;
 
+#[derive(Clone)]
 pub struct NutrientAmount {
     value: f64, // value for main unit is saved
     nutrient: Nutrient,
@@ -25,8 +29,39 @@ impl NutrientAmount {
             Err(err) => Err(err),
         }
     }
+
+    pub fn get_value(&self) -> f64 {
+        self.value
+    }
+
+    pub fn set_value(&mut self, value: f64) {
+        self.value = value;
+    }
+
+    pub fn get_nutrient(&self) -> &Nutrient {
+        &self.nutrient
+    }
+
+    pub fn round(&self) -> Self {
+        Self::new(self.get_value().round(), self.get_nutrient().clone(), self.get_nutrient().get_main_unit()).unwrap()
+    }
 }
 
+impl Mul<f64> for NutrientAmount {
+    type Output = Self;
+    fn mul(self, rhs: f64) -> Self {
+        Self::new(self.get_value() * rhs, self.get_nutrient().clone(), self.get_nutrient().get_main_unit()).unwrap()
+    }
+}
+
+impl Div<f64> for NutrientAmount {
+    type Output = Self;
+    fn div(self, rhs: f64) -> Self {
+        Self::new(self.get_value() / rhs, self.get_nutrient().clone(), self.get_nutrient().get_main_unit()).unwrap()
+    }
+}
+
+#[derive(Clone)]
 pub struct Nutrient {
     id: Uuid,
     name: String,
@@ -64,6 +99,10 @@ impl Nutrient {
 
     pub fn insert_category(&mut self, category: NutrientType) {
         self.categories.insert(category);
+    }
+
+    pub fn get_main_unit(&self) -> Unit {
+        self.main_unit
     }
 
     pub fn set_main_unit(&mut self, main_unit: Unit) -> Result<(), String> {
