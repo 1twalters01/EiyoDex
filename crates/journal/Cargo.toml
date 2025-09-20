@@ -4,3 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+exercise = { path = "../exercise" }
+foods = { path = "../foods" }
+profiles = { path = "../profiles" }
+chrono = "0.4.42"
+uuid = { version = "1.8.0", features = ["v4", "fast-rng", "macro-diagnostics", "serde"] }
+

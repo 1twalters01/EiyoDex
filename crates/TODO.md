@@ -1,21 +1,20 @@
 # Done (temporarily)
 
 # In progress
-themes/
 units/
 utils/
 nutrients/
+nutrient_balances/
 profiles/
-foods/
 
 # Minor progress
-macros/
-nutrient_balances/
+foods/
+journal/
+exercise/
+proc_macros/
 
 # Todo
-journal/
 profile_reports/
-exercise/
 config/
 cli/
 
@@ -23,6 +22,7 @@ cli/
 markdown/
 notifications/
 data_sync/
+themes/
 gui/
 audio/
 charts/

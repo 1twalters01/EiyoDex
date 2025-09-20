@@ -315,6 +315,11 @@ dependencies = [
 [[package]]
 name = "exercise"
 version = "0.1.0"
+dependencies = [
+ "chrono",
+ "units",
+ "uuid",
+]
 
 [[package]]
 name = "extensions"
@@ -793,6 +798,13 @@ checksum = "4a5f13b858c8d314ee3e8f639011f7ccefe71f97f96e50151fb991f267928e2c"
 [[package]]
 name = "journal"
 version = "0.1.0"
+dependencies = [
+ "chrono",
+ "exercise",
+ "foods",
+ "profiles",
+ "uuid",
+]
 
 [[package]]
 name = "js-sys"
@@ -1029,6 +1041,12 @@ dependencies = [
 [[package]]
 name = "profile_reports"
 version = "0.1.0"
+dependencies = [
+ "chrono",
+ "foods",
+ "nutrients",
+ "profiles",
+]
 
 [[package]]
 name = "profiles"
