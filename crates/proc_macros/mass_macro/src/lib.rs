@@ -32,6 +32,7 @@ pub fn include_masses_from_json(input: TokenStream) -> TokenStream {
         let variant = format_ident!("{}", key);
         let from_fn_name = format_ident!("from_{}", data.symbol);
         let as_fn_name = format_ident!("as_{}", data.symbol);
+        let to_fn_name = format_ident!("to_{}", data.symbol);
         let symbol = &data.symbol;
         let unit_type = &data.unit_type;
         let unit_type_plural = &data.unit_type_plural;
@@ -41,6 +42,7 @@ pub fn include_masses_from_json(input: TokenStream) -> TokenStream {
             #variant => {
                 from_fn_name: #from_fn_name,
                 as_fn_name: #as_fn_name,
+                to_fn_name: #to_fn_name,
                 symbol: #symbol,
                 unit_type: #unit_type,
                 unit_type_plural: #unit_type_plural,
