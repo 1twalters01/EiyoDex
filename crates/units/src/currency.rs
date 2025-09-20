@@ -128,7 +128,7 @@ macro_rules! define_currencies {
                 self.value
             }
 
-            fn convert_to(&self, target_unit: CurrencyUnit) -> Result<Currency, String> {
+            pub fn convert_to(&self, target_unit: CurrencyUnit) -> Result<Currency, String> {
                 if self.unit == target_unit {
                     Ok(*self)
                 } else {

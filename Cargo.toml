@@ -1,8 +1,12 @@
 [workspace]
+resolver = "2"
 members = [
-    'crates/*',
     'apps/*',
     'xtask',
     'ui/gtk',
+    'crates/macros/*',
+    'crates/*',
 ]
-resolver = "2"
+exclude = [
+    "crates/macros",
+]
