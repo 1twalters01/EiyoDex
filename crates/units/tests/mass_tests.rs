@@ -119,7 +119,20 @@ fn test_mass_to_unit() {
 }
 
 #[test]
-fn test_mass_to_fn() {}
+fn test_mass_to_fn() {
+    let value = 6.9;
+    let new_value = value / 28.34952;
+    
+    let mass_grams = Mass::from_g(value);
+    let mass_ounces = Mass::from_oz(new_value);
+    let mass_grams_to_ounces = mass_grams.to_oz();
+
+    print!(
+        "mass_ounces1: {},\nmass_ounces2: {}",
+        mass_ounces, mass_grams_to_ounces
+    );
+    assert_eq!(mass_ounces, mass_grams_to_ounces);
+}
 
 #[test]
 fn test_mass_is_zero() {
@@ -140,25 +153,78 @@ fn test_mass_is_negative() {
 }
 
 #[test]
-fn test_mass_get_value() {}
+fn test_mass_get_value() {
+    let mass = Mass::new(6.882, MassUnit::Milligram);
+    assert_eq!(mass.get_value(), 6.882);
+}
 
 #[test]
-fn test_mass_set_value() {}
+fn test_mass_set_value() {
+    let mass = Mass::new(6.882, MassUnit::Milligram);
+    mass.set_value(8.92)
+    assert_eq!(mass.get_value(), 8.92);
+}
 
 #[test]
-fn test_mass_get_units() {}
+fn test_mass_get_unit() {
+    let mass = Mass::new(6.882, MassUnit::Milligram);
+    assert_eq!(mass.get_unit(), MassUnit::Milligram);
+}
 
 #[test]
-fn test_mass_set_units() {}
+fn test_mass_set_unit() {
+    let mass = Mass::new(6.882, MassUnit::Milligram);
+    mass.set_unit(MassUnit::Ounce);
+    assert_eq!(mass.get_unit(), MassUnit::Ounce);
+}
 
 #[test]
-fn test_mass_get_symbol() {}
+fn test_mass_get_symbol() {
+    let value = 4.2;
+    let mass_g = Mass::from_g(value);
+    let mass_mg = Mass::from_mg(value);
+    let mass_kg = Mass::from_kg(value);
+    let mass_ug = Mass::from_ug(value);
+    let mass_oz = Mass::from_oz(value);
+    
+    assert_eq!(mass_g.get_symbol, "g");
+    assert_eq!(mass_mg.get_symbol, "mg");
+    assert_eq!(mass_kg.get_symbol, "kg");
+    assert_eq!(mass_ug.get_symbol, "ug");
+    assert_eq!(mass_oz.get_symbol, "oz");
+}
 
 #[test]
-fn test_mass_unit_type() {}
+fn test_mass_unit_type() {
+    let value = 4.2;
+    let mass_g = Mass::from_g(value);
+    let mass_mg = Mass::from_mg(value);
+    let mass_kg = Mass::from_kg(value);
+    let mass_ug = Mass::from_ug(value);
+    let mass_oz = Mass::from_oz(value);
+    
+    assert_eq!(mass_g.get_unit_type, "gram");
+    assert_eq!(mass_mg.get_unit_type, "milligram");
+    assert_eq!(mass_kg.get_unit_type, "kilogram");
+    assert_eq!(mass_ug.get_unit_type, "microgram");
+    assert_eq!(mass_oz.get_unit_type, "ounce");
+}
 
 #[test]
-fn test_mass_unit_type_plural() {}
+fn test_mass_unit_type_plural() {
+    let value = 8.52;
+    let mass_g = Mass::from_g(value);
+    let mass_mg = Mass::from_mg(value);
+    let mass_kg = Mass::from_kg(value);
+    let mass_ug = Mass::from_ug(value);
+    let mass_oz = Mass::from_oz(value);
+    
+    assert_eq!(mass_g.get_unit_type_plural, "grams");
+    assert_eq!(mass_mg.get_unit_type_plural, "milligrams");
+    assert_eq!(mass_kg.get_unit_type_plural, "kilograms");
+    assert_eq!(mass_ug.get_unit_type_plural, "micrograms");
+    assert_eq!(mass_oz.get_unit_type_plural, "ounces");
+}
 
 #[test]
 fn test_mass_to_string() {}
@@ -207,7 +273,12 @@ fn test_mass_multiply() {
 }
 
 #[test]
-fn test_mass_divide() {}
+fn test_mass_divide() {
+    let mass_grams_1 = Mass::from_g(350f64);
+    let mass_grams_2 = Mass::from_g(70f64);
+
+    assert_eq!(mass_grams_1 / 5, mass_grams_2);
+}
 
 #[test]
 fn test_mass_partial_order() {}
