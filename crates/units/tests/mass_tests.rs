@@ -227,7 +227,24 @@ fn test_mass_unit_type_plural() {
 }
 
 #[test]
-fn test_mass_to_string() {}
+fn test_mass_to_string() {
+    let value_1 = 5f64;
+    let value_2 = 8.642;
+
+    let mass_g_1 = Mass::from_g(value_1);
+    let mass_mg_1 = Mass::from_mg(value_1);
+    let mass_kg_1 = Mass::from_kg(value_1);
+    let mass_ug_1 = Mass::from_ug(value_1);
+    let mass_oz_1 = Mass::from_oz(value_1);
+    assert_eq!(,)
+
+    let mass_g_2 = Mass::from_g(value_2);
+    let mass_mg_2 = Mass::from_mg(value_2);
+    let mass_kg_2 = Mass::from_kg(value_2);
+    let mass_ug_2 = Mass::from_ug(value_2);
+    let mass_oz_2 = Mass::from_oz(value_2);
+    
+}
 
 #[test]
 fn test_mass_display() {}
