@@ -1,11 +1,20 @@
-use units::mass::{ MassUnit};
 use std::collections::BTreeSet;
+use units::mass::MassUnit;
 
 #[test]
 fn test_get_mass_unit_enumerations() {
     let function_enumerations = MassUnit::get_enumerations();
-    let manual_enumerations = vec![MassUnit::Gram, MassUnit::Milligram, MassUnit::Kilogram, MassUnit::Microgram, MassUnit::Ounce];
-    assert_eq!(BTreeSet::from_iter(function_enumerations), BTreeSet::from_iter(manual_enumerations));
+    let manual_enumerations = vec![
+        MassUnit::Gram,
+        MassUnit::Milligram,
+        MassUnit::Kilogram,
+        MassUnit::Microgram,
+        MassUnit::Ounce,
+    ];
+    assert_eq!(
+        BTreeSet::from_iter(function_enumerations),
+        BTreeSet::from_iter(manual_enumerations)
+    );
 }
 
 #[test]
@@ -41,5 +50,43 @@ fn test_get_grams_factor() {
     assert_eq!(MassUnit::Milligram.grams_factor(), 0.001);
     assert_eq!(MassUnit::Kilogram.grams_factor(), 1000 as f64);
     assert_eq!(MassUnit::Microgram.grams_factor(), 0.000001);
-    assert_eq!(MassUnit::Ounce.grams_factor(), 28.3495);
+    assert_eq!(MassUnit::Ounce.grams_factor(), 28.34952);
+}
+
+#[test]
+fn test_from_str() {
+    assert_eq!(MassUnit::from_str("g").unwrap(), MassUnit::Gram);
+    assert_eq!(MassUnit::from_str("gram").unwrap(), MassUnit::Gram);
+    assert_eq!(MassUnit::from_str("Gram").unwrap(), MassUnit::Gram);
+    assert_eq!(MassUnit::from_str("grams").unwrap(), MassUnit::Gram);
+    assert_eq!(MassUnit::from_str("gRAmS").unwrap(), MassUnit::Gram);
+    assert_ne!(MassUnit::from_str("mg").unwrap(), MassUnit::Gram);
+
+    assert_eq!(MassUnit::from_str("mg").unwrap(), MassUnit::Milligram);
+    assert_eq!(
+        MassUnit::from_str("milligram").unwrap(),
+        MassUnit::Milligram
+    );
+    assert_eq!(
+        MassUnit::from_str("milligrams").unwrap(),
+        MassUnit::Milligram
+    );
+
+    assert_eq!(MassUnit::from_str("kg").unwrap(), MassUnit::Kilogram);
+    assert_eq!(MassUnit::from_str("kilogram").unwrap(), MassUnit::Kilogram);
+    assert_eq!(MassUnit::from_str("kilograms").unwrap(), MassUnit::Kilogram);
+
+    assert_eq!(MassUnit::from_str("ug").unwrap(), MassUnit::Microgram);
+    assert_eq!(
+        MassUnit::from_str("microgram").unwrap(),
+        MassUnit::Microgram
+    );
+    assert_eq!(
+        MassUnit::from_str("micrograms").unwrap(),
+        MassUnit::Microgram
+    );
+
+    assert_eq!(MassUnit::from_str("oz").unwrap(), MassUnit::Ounce);
+    assert_eq!(MassUnit::from_str("ounce").unwrap(), MassUnit::Ounce);
+    assert_eq!(MassUnit::from_str("ounces").unwrap(), MassUnit::Ounce);
 }

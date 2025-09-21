@@ -14,10 +14,10 @@ macro_rules! define_masses {
         ),+ $(,)?
     ) => {
         use std::{
-        cmp::Ordering,
-        fmt,
-        ops::{Add, Div, Mul, Sub},
-        str::FromStr,
+            cmp::Ordering,
+            fmt,
+            ops::{Add, Div, Mul, Sub},
+            // str::FromStr,
         };
         #[cfg(feature = "serde")]
         use serde::{Deserialize, Serialize};
@@ -56,17 +56,14 @@ macro_rules! define_masses {
                     $(MassUnit::$variant => $grams_factor),+
                 }
             }
-        }
 
-        impl FromStr for MassUnit {
-            type Err = &'static str;
-
-            fn from_str(s: &str) -> Result<Self, Self::Err> {
+            pub fn from_str(s: &str) -> Result<Self, &str> {
                 match s.trim().to_lowercase().as_str() {
                     $($symbol | $unit_type | $unit_type_plural => Ok(MassUnit::$variant),)+
                     _ => Err("Unknown mass unit"),
                 }
             }
+
         }
 
         #[derive(Debug, Clone, Copy, PartialEq)]
@@ -86,6 +83,12 @@ macro_rules! define_masses {
                     Self::new(value, MassUnit::$variant)
                 }
             )+
+
+            pub fn round(&mut self, dp: u8) -> Self {
+                let factor = 10f64.powi(dp as i32);
+                self.value = (self.value * factor).round()/factor;
+                return *self
+            }
 
             $(
                 pub fn $as_fn_name(&self) -> f64 {
@@ -126,6 +129,10 @@ macro_rules! define_masses {
                 self.unit
             }
 
+            pub fn set_unit(&mut self, unit: MassUnit) {
+                self.unit = unit;
+            }
+
             pub fn get_symbol(&self) -> &'static str {
                 self.unit.as_symbol()
             }
@@ -155,34 +162,48 @@ impl fmt::Display for Mass {
 impl Add for Mass {
     type Output = Self;
     fn add(self, rhs: Self) -> Self {
-        Self::from_g(self.as_g() + rhs.as_g())
+        Self::new(
+            self.get_value() + rhs.to_unit(self.unit).get_value(),
+            self.unit,
+        )
     }
 }
 
 impl Sub for Mass {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self {
-        Self::from_g(self.as_g() - rhs.as_g())
+        Self::new(
+            self.get_value() - rhs.to_unit(self.unit).get_value(),
+            self.unit,
+        )
+    }
+}
+
+impl Mul<u64> for Mass {
+    type Output = Self;
+    fn mul(self, rhs: u64) -> Self {
+        Self::new(self.get_value() * rhs as f64, self.unit)
     }
 }
 
 impl Mul<f64> for Mass {
     type Output = Self;
     fn mul(self, rhs: f64) -> Self {
-        Self::from_g(self.as_g() * rhs)
+        Self::new(self.get_value() * rhs, self.unit)
     }
 }
 
 impl Div<f64> for Mass {
     type Output = Self;
     fn div(self, rhs: f64) -> Self {
-        Self::from_g(self.as_g() / rhs)
+        Self::new(self.get_value() / rhs, self.unit)
     }
 }
 
 impl PartialOrd for Mass {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.as_g().partial_cmp(&other.as_g())
+        self.get_value()
+            .partial_cmp(&other.to_unit(self.unit).get_value())
     }
 }
 
