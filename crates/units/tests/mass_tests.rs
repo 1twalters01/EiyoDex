@@ -28,11 +28,17 @@ fn test_new_mass() {
 #[test]
 fn test_mass_rounding() {
     let value = 5.6803294822;
+    let value_2 = 147.20473186;
 
     let mut mass_new = Mass::new(value, MassUnit::Gram);
     let mass_rounded = mass_new.round(5);
     let mass_coded = Mass::new(5.68033, MassUnit::Gram);
     assert_eq!(mass_rounded, mass_coded);
+
+    let mut mass_new_2 = Mass::new(value_2, MassUnit::Gram);
+    let mass_rounded_2 = mass_new.round(5);
+    let mass_coded_2 = Mass::new(147.20473, MassUnit::Gram);
+    assert_eq!(mass_rounded_2, mass_coded_2);
 }
 
 #[test]
@@ -243,11 +249,8 @@ fn test_mass_to_string() {
     let mass_kg_2 = Mass::from_kg(value_2);
     let mass_ug_2 = Mass::from_ug(value_2);
     let mass_oz_2 = Mass::from_oz(value_2);
-    
+    assert_eq!(,)
 }
-
-#[test]
-fn test_mass_display() {}
 
 #[test]
 fn test_mass_add() {
@@ -298,4 +301,8 @@ fn test_mass_divide() {
 }
 
 #[test]
-fn test_mass_partial_order() {}
+fn test_mass_partial_order() {
+    let mass_grams_1 = Mass::from_g(6700f64);
+    let mass_grams_2 = Mass::from_g(4700f64);
+    let mass_kilograms = Mass::from_kg(5.2f64);
+}
