@@ -228,4 +228,7 @@ impl PartialOrd for Mass {
 }
 
 use mass_macro::include_masses_from_json;
-include_masses_from_json!("data/mass.json");
+include_masses_from_json!(
+    "data/mass.json",
+    // "data/fake_mass.json",
+);
