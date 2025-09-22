@@ -17,21 +17,24 @@ struct MassJson {
 
 #[proc_macro]
 pub fn include_measurement_systems_from_json(input: TokenStream) -> TokenStream {
-    let file_path_lit = syn::parse_macro_input!(input as LitStr);
-    let rel_path = file_path_lit.value();
+    let mut measurement_systems = HashSet::new(); 
 
-    let manifest_dir = env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set");
-    let full_path = Path::new(&manifest_dir).join(rel_path);
+    let file_paths = syn::parse_macro_input!(input with syn::punctuated::Punctuated::<LitStr, syn::Token![,]>::parse_terminated);
 
-    let file_content =
+    for file_path_lit in file_paths.iter() {
+        let rel_path = file_path_lit.value();
+        let manifest_dir = env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set");
+        let full_path = Path::new(&manifest_dir).join(rel_path);
+
+        let file_content =
         fs::read_to_string(&full_path).unwrap_or_else(|_| panic!("Unable to read file: {}", full_path.display()));
 
-    let json_results: HashMap<String, MassJson> =
+        let json_results: HashMap<String, MassJson> =
         serde_json::from_str(&file_content).expect("Invalid JSON format");
 
-    let mut measurement_systems = HashSet::new(); 
-    for data in json_results.values() {
-        measurement_systems.insert(data.measurement_system.clone());
+        for data in json_results.values() {
+            measurement_systems.insert(data.measurement_system.clone());
+        }
     }
 
     let variants: Vec<_> = measurement_systems.iter().map(|measurement_system| {
