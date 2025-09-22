@@ -1,12 +1,23 @@
-Potentially move to a file with rows of the form:
-    {
-        symbol: "£",
-        code: "GBP"
-        unit_type: "pound",
-        unit_type_plural: "pounds"
-    }
+Create macros for:
+* Distance
+* Energy
+* Volume
 
-Then have a function to just read from the file?
-Is this better than hard coding everything in rust?
-Not if only having GBP/USD but yes if having lots of currencies
-I would still need the CurrencyUnit enum and it would get big
+Create tests for Distance, Energy, and Volume
+
+Decide how derivatives will work (specific currency, density, power)
+
+Create tests for Specific currency, density, power
+
+Create proc macros for
+* specific currency
+* density
+* power
+
+create macros for
+* specific currency
+* density
+* power
+
+Write apis in Readme
+Write doc comments

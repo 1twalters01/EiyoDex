@@ -6,5 +6,4 @@ pub mod mass;
 pub mod measurement_system;
 pub mod power;
 pub mod specific_currency;
-pub mod unit_type;
 pub mod volume;
