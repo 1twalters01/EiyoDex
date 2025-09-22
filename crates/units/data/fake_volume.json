@@ -1,0 +1,9 @@
+{
+    "FakeLiter": {
+        "symbol": "fL",
+        "unit_type": "fakeliter",
+        "unit_type_plural": "fakeliters",
+        "measurement_system": "FakeVolume",
+        "liters_factor": 1.0
+    }
+}

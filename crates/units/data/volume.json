@@ -11,42 +11,42 @@
         "unit_type": "milliliter",
         "unit_type_plural": "milliliter",
         "measurement_system": "Metric",
-        "grams_factor": 0.001 
+        "liters_factor": 0.001 
     },
     "Pint": {
         "symbol": "pt",
         "unit_type": "pint",
         "unit_type_plural": "pints",
         "measurement_system": "Imperial",
-        "grams_factor": 0.473176
+        "liters_factor": 0.473176
     },
     "Gallon": {
         "symbol": "gal",
         "unit_type": "gallon",
         "unit_type_plural": "gallons",
         "measurement_system": "Imperial",
-        "grams_factor": 3.78541
+        "liters_factor": 3.78541
     },
     "FluidOunce": {
         "symbol": "fl oz",
         "unit_type": "fluid ounce",
         "unit_type_plural": "fluid ounces",
         "measurement_system": "Imperial",
-        "grams_factor": 0.0295735
+        "liters_factor": 0.0295735
     },
     "Tablespoon": {
         "symbol": "tbsp",
         "unit_type": "tablespoon",
         "unit_type_plural": "tablespoons",
         "measurement_system": "Imperial",
-        "grams_factor": 0.0177582
+        "liters_factor": 0.0177582
     },
     "Teaspoon": {
         "symbol": "tsp",
         "unit_type": "teaspoon",
         "unit_type_plural": "teaspoons",
         "measurement_system": "Imperial",
-        "grams_factor": 0.00591939
+        "liters_factor": 0.00591939
     }
 }
 

@@ -19,6 +19,7 @@ macro_rules! define_measurement_systems {
 }
 
 use measurement_system_macro::include_measurement_systems_from_json;
-// include_measurement_systems_from_json!("data/mass.json");
-include_measurement_systems_from_json!("data/mass.json", "data/fake_mass.json");
-
+include_measurement_systems_from_json!(
+    MassUnit => "data/mass.json", "data/fake_mass.json",
+    VolumeUnit => "data/volume.json", "data/fake_volume.json",
+);

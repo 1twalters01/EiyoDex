@@ -182,7 +182,10 @@ fn test_mass_get_measurement_system() {
     assert_eq!(mass_mg.get_measurement_system(), MeasurementSystem::Metric);
     assert_eq!(mass_kg.get_measurement_system(), MeasurementSystem::Metric);
     assert_eq!(mass_ug.get_measurement_system(), MeasurementSystem::Metric);
-    assert_eq!(mass_oz.get_measurement_system(), MeasurementSystem::Imperial);
+    assert_eq!(
+        mass_oz.get_measurement_system(),
+        MeasurementSystem::Imperial
+    );
 }
 
 #[test]
