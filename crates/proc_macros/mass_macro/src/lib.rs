@@ -20,7 +20,6 @@ pub fn include_masses_from_json(input: TokenStream) -> TokenStream {
     let mut masses: HashMap<String, MassJson> = HashMap::new();
 
     let file_paths = syn::parse_macro_input!(input with syn::punctuated::Punctuated::<LitStr, syn::Token![,]>::parse_terminated);
-    // let file_path_lit = syn::parse_macro_input!(input as LitStr);
     for file_path_lit in file_paths.iter() {
         let rel_path = file_path_lit.value();
 
