@@ -1,3 +1,5 @@
+use crate::measurement_system::MeasurementSystem;
+
 #[macro_export]
 macro_rules! define_masses {
     (
@@ -6,6 +8,7 @@ macro_rules! define_masses {
                 from_fn_name: $from_fn_name:ident,
                 as_fn_name: $as_fn_name:ident,
                 to_fn_name: $to_fn_name:ident,
+                measurement_system: $measurement_system:ident,
                 symbol: $symbol:expr,
                 unit_type: $unit_type:expr,
                 unit_type_plural: $unit_type_plural:expr,
@@ -48,6 +51,12 @@ macro_rules! define_masses {
             pub fn as_unit_type_plural(&self) -> &'static str {
                 match self {
                     $(MassUnit::$variant => $unit_type_plural),+
+                }
+            }
+
+            pub fn get_measurement_system(&self) -> MeasurementSystem {
+                match self {
+                    $(MassUnit::$variant => MeasurementSystem::$measurement_system),+
                 }
             }
 
@@ -135,6 +144,10 @@ macro_rules! define_masses {
 
             pub fn get_symbol(&self) -> &'static str {
                 self.unit.as_symbol()
+            }
+
+            pub fn get_measurement_system(&self) -> MeasurementSystem {
+                self.unit.get_measurement_system()
             }
 
             pub fn get_unit_type(&self) -> &'static str {

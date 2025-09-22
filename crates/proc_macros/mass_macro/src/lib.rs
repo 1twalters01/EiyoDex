@@ -11,6 +11,7 @@ struct MassJson {
     symbol: String,
     unit_type: String,
     unit_type_plural: String,
+    measurement_system: String,
     grams_factor: f64,
 }
 
@@ -25,14 +26,15 @@ pub fn include_masses_from_json(input: TokenStream) -> TokenStream {
     let file_content =
         fs::read_to_string(&full_path).unwrap_or_else(|_| panic!("Unable to read file: {}", full_path.display()));
 
-    let currencies: HashMap<String, MassJson> =
+    let masses: HashMap<String, MassJson> =
         serde_json::from_str(&file_content).expect("Invalid JSON format");
 
-    let variants = currencies.iter().map(|(key, data)| {
+    let variants = masses.iter().map(|(key, data)| {
         let variant = format_ident!("{}", key);
         let from_fn_name = format_ident!("from_{}", data.symbol);
         let as_fn_name = format_ident!("as_{}", data.symbol);
         let to_fn_name = format_ident!("to_{}", data.symbol);
+        let measurement_system = format_ident!("{}", data.measurement_system);
         let symbol = &data.symbol;
         let unit_type = &data.unit_type;
         let unit_type_plural = &data.unit_type_plural;
@@ -43,6 +45,7 @@ pub fn include_masses_from_json(input: TokenStream) -> TokenStream {
                 from_fn_name: #from_fn_name,
                 as_fn_name: #as_fn_name,
                 to_fn_name: #to_fn_name,
+                measurement_system: #measurement_system,
                 symbol: #symbol,
                 unit_type: #unit_type,
                 unit_type_plural: #unit_type_plural,

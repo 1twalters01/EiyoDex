@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+measurement_system_macro = { path = "../proc_macros/measurement_system_macro" }
 mass_macro = { path = "../proc_macros/mass_macro" }
 currency_macro = { path = "../proc_macros/currency_macro" }
 serde = { version = "1.0", features = ["derive"], optional = true }

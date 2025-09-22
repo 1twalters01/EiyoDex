@@ -855,6 +855,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "measurement_system_macro"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "serde",
+ "serde_json",
+ "syn",
+]
+
+[[package]]
 name = "memchr"
 version = "2.7.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1609,6 +1619,7 @@ dependencies = [
  "chrono",
  "currency_macro",
  "mass_macro",
+ "measurement_system_macro",
  "redis",
  "reqwest",
  "serde",

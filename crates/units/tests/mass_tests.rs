@@ -1,4 +1,7 @@
-use units::mass::{Mass, MassUnit};
+use units::{
+    mass::{Mass, MassUnit},
+    measurement_system::MeasurementSystem,
+};
 
 #[test]
 fn test_new_mass() {
@@ -166,6 +169,23 @@ fn test_mass_get_symbol() {
 }
 
 #[test]
+fn test_mass_get_measurement_system() {
+    let value = 4.2;
+
+    let mass_g = Mass::from_g(value);
+    let mass_mg = Mass::from_mg(value);
+    let mass_kg = Mass::from_kg(value);
+    let mass_ug = Mass::from_ug(value);
+    let mass_oz = Mass::from_oz(value);
+
+    assert_eq!(mass_g.get_measurement_system(), MeasurementSystem::Metric);
+    assert_eq!(mass_mg.get_measurement_system(), MeasurementSystem::Metric);
+    assert_eq!(mass_kg.get_measurement_system(), MeasurementSystem::Metric);
+    assert_eq!(mass_ug.get_measurement_system(), MeasurementSystem::Metric);
+    assert_eq!(mass_oz.get_measurement_system(), MeasurementSystem::Imperial);
+}
+
+#[test]
 fn test_mass_unit_type() {
     let value = 4.2;
     let mass_g = Mass::from_g(value);
@@ -198,7 +218,7 @@ fn test_mass_unit_type_plural() {
 }
 
 #[test]
-fn test_mass_to_short_string() {
+fn test_mass_to_string() {
     let value_1 = 5f64;
     let value_2 = 8.642;
 
