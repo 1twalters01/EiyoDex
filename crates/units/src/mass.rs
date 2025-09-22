@@ -146,7 +146,7 @@ macro_rules! define_masses {
             }
 
             pub fn to_string(&self) -> String {
-                format!("{} {}", self.value, self.get_symbol())
+                format!("{}{}", self.value.to_string().trim(), self.get_symbol().trim())
             }
 
         }
@@ -190,6 +190,13 @@ impl Mul<f64> for Mass {
     type Output = Self;
     fn mul(self, rhs: f64) -> Self {
         Self::new(self.get_value() * rhs, self.unit)
+    }
+}
+
+impl Div<i64> for Mass {
+    type Output = Self;
+    fn div(self, rhs: i64) -> Self {
+        Self::new(self.get_value() / rhs as f64, self.unit)
     }
 }
 
