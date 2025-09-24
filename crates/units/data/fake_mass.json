@@ -1,16 +1,18 @@
 {
     "FakeGram": {
+        "identifier": "fg",
         "symbol": "fg",
         "unit_type": "fakegram",
         "unit_type_plural": "fakegrams",
-        "measurement_system": "FakeMass",
+        "measurement_system": "Fake",
         "grams_factor": 1.0
     },
     "MadeupGram": {
+        "identifier": "mug",
         "symbol": "mug",
         "unit_type": "madeupgram",
         "unit_type_plural": "madeupgrams",
-        "measurement_system": "FakeMass",
+        "measurement_system": "Fake",
         "grams_factor": 0.001 
     }
 }

@@ -8,6 +8,7 @@ use syn::LitStr;
 
 #[derive(Debug, Deserialize)]
 struct MassJson {
+    identifier: String,
     symbol: String,
     unit_type: String,
     unit_type_plural: String,
@@ -39,13 +40,17 @@ pub fn include_masses_from_json(input: TokenStream) -> TokenStream {
 
     let variants = masses.iter().map(|(key, data)| {
         let variant = format_ident!("{}", key);
-        let from_fn_name = format_ident!("from_{}", data.symbol);
-        let as_fn_name = format_ident!("as_{}", data.symbol);
-        let to_fn_name = format_ident!("to_{}", data.symbol);
+        let from_fn_name = format_ident!("from_{}", data.identifier);
+        let as_fn_name = format_ident!("as_{}", data.identifier);
+        let to_fn_name = format_ident!("to_{}", data.identifier);
         let measurement_system = format_ident!("{}", data.measurement_system);
         let symbol = &data.symbol;
+        let symbol_lc = &data.symbol.to_lowercase();
         let unit_type = &data.unit_type;
+        let unit_type_lc = &data.unit_type.to_lowercase();
         let unit_type_plural = &data.unit_type_plural;
+        let unit_type_plural_lc = &data.unit_type_plural.to_lowercase();
+        let identifier_lc = &data.identifier.to_lowercase();
         let grams_factor = &data.grams_factor;
 
         quote! {
@@ -55,8 +60,12 @@ pub fn include_masses_from_json(input: TokenStream) -> TokenStream {
                 to_fn_name: #to_fn_name,
                 measurement_system: #measurement_system,
                 symbol: #symbol,
+                symbol_lc: #symbol_lc,
                 unit_type: #unit_type,
+                unit_type_lc: #unit_type_lc,
                 unit_type_plural: #unit_type_plural,
+                unit_type_plural_lc: #unit_type_plural_lc,
+                identifier_lc: #identifier_lc,
                 grams_factor: #grams_factor
             }
         }

@@ -1,142 +1,173 @@
-use std::{
-    cmp::Ordering,
-    fmt,
-    ops::{Add, Div, Mul, Sub},
-    str::FromStr,
-};
+use crate::measurement_system::MeasurementSystem;
 
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub enum VolumeUnit {
-    Liter,
-    Milliliter,
-}
-
-impl VolumeUnit {
-    pub fn get_enumerations() -> Vec<VolumeUnit> {
-        Vec::from([VolumeUnit::Liter, VolumeUnit::Milliliter])
-    }
-
-    pub fn as_symbol(&self) -> &'static str {
-        match self {
-            VolumeUnit::Liter => "l",
-            VolumeUnit::Milliliter => "ml",
-        }
-    }
-
-    pub fn as_unit_type(&self) -> &'static str {
-        match self {
-            VolumeUnit::Liter => "liter",
-            VolumeUnit::Milliliter => "milliliter",
-        }
-    }
-
-    pub fn as_unit_type_plural(&self) -> &'static str {
-        match self {
-            VolumeUnit::Liter => "liters",
-            VolumeUnit::Milliliter => "milliliters",
-        }
-    }
-}
-
-impl FromStr for VolumeUnit {
-    type Err = &'static str;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.trim().to_lowercase().as_str() {
-            "l" | "liter" | "liters" => Ok(VolumeUnit::Liter),
-            "ml" | "milliliter" | "milliliters" => Ok(VolumeUnit::Milliliter),
-            _ => Err("Unknown volume unit"),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Volume {
-    value: f64,
-    unit: VolumeUnit,
-}
-
-impl Default for Volume {
-    fn default() -> Self {
-        Volume::from_ml(0.0)
-    }
-}
-
-impl Volume {
-    pub fn new(value: f64, unit: VolumeUnit) -> Self {
-        Self { value, unit }
-    }
-
-    pub fn from_ml(ml: f64) -> Self {
-        Self::new(ml, VolumeUnit::Milliliter)
-    }
-
-    pub fn from_l(l: f64) -> Self {
-        Self::new(l, VolumeUnit::Liter)
-    }
-
-    pub fn as_ml(&self) -> f64 {
-        match self.unit {
-            VolumeUnit::Liter => self.value * 1000 as f64,
-            VolumeUnit::Milliliter => self.value,
-        }
-    }
-
-    pub fn as_l(&self) -> f64 {
-        match self.unit {
-            VolumeUnit::Liter => self.value,
-            VolumeUnit::Milliliter => self.value / 1000 as f64,
-        }
-    }
-
-    pub fn to_unit(&self, unit: VolumeUnit) -> Self {
-        let value = match unit {
-            VolumeUnit::Liter => self.as_l(),
-            VolumeUnit::Milliliter => self.as_ml(),
+#[macro_export]
+macro_rules! define_volumes {
+    (
+        $(
+            $variant:ident => {
+                from_fn_name: $from_fn_name:ident,
+                as_fn_name: $as_fn_name:ident,
+                to_fn_name: $to_fn_name:ident,
+                measurement_system: $measurement_system:ident,
+                symbol: $symbol:expr,
+                symbol_lc: $symbol_lc:expr,
+                unit_type: $unit_type:expr,
+                unit_type_lc: $unit_type_lc:expr,
+                unit_type_plural: $unit_type_plural:expr,
+                unit_type_plural_lc: $unit_type_plural_lc:expr,
+                identifier_lc: $identifier_lc:expr,
+                liters_factor: $liters_factor:expr
+            }
+        ),+ $(,)?
+    ) => {
+        use std::{
+            cmp::Ordering,
+            fmt,
+            ops::{Add, Div, Mul, Sub},
+            // str::FromStr,
         };
-        Self { value, unit }
-    }
+        #[cfg(feature = "serde")]
+        use serde::{Deserialize, Serialize};
 
-    pub fn to_ml(&self) -> Self {
-        self.to_unit(VolumeUnit::Milliliter)
-    }
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+        #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+        pub enum VolumeUnit {
+            $($variant),+
+        }
 
-    pub fn to_l(&self) -> Self {
-        self.to_unit(VolumeUnit::Liter)
-    }
+        impl VolumeUnit {
+            pub fn get_enumerations() -> Vec<VolumeUnit> {
+                Vec::from([$(VolumeUnit::$variant),+])
+            }
 
-    pub fn is_zero(&self) -> bool {
-        self.value == 0.0
-    }
+            pub fn as_symbol(&self) -> &'static str {
+                match self {
+                    $(VolumeUnit::$variant => $symbol),+
+                }
+            }
 
-    pub fn is_negative(&self) -> bool {
-        self.value < 0.0
-    }
+            pub fn as_unit_type(&self) -> &'static str {
+                match self {
+                    $(VolumeUnit::$variant => $unit_type),+
+                }
+            }
 
-    pub fn get_unit(&self) -> VolumeUnit {
-        self.unit
-    }
+            pub fn as_unit_type_plural(&self) -> &'static str {
+                match self {
+                    $(VolumeUnit::$variant => $unit_type_plural),+
+                }
+            }
 
-    pub fn get_symbol(&self) -> &'static str {
-        self.unit.as_symbol()
-    }
+            pub fn get_measurement_system(&self) -> MeasurementSystem {
+                match self {
+                    $(VolumeUnit::$variant => MeasurementSystem::$measurement_system),+
+                }
+            }
 
-    pub fn get_unit_type(&self) -> &'static str {
-        self.unit.as_unit_type()
-    }
+            pub fn liters_factor(&self) -> f64 {
+                match self {
+                    $(VolumeUnit::$variant => $liters_factor),+
+                }
+            }
 
-    pub fn get_unit_type_plural(&self) -> &'static str {
-        self.unit.as_unit_type_plural()
-    }
+            pub fn from_str(s: &str) -> Result<Self, &str> {
+                match s.trim().to_lowercase().as_str() {
+                    $($symbol_lc | $unit_type_lc | $unit_type_plural_lc | $identifier_lc => Ok(VolumeUnit::$variant),)+
+                    _ => Err("Unknown volume unit"),
+                }
+            }
 
-    pub fn to_string(&self) -> String {
-        format!("{} {}", self.value, self.get_symbol())
-    }
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq)]
+        #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+        pub struct Volume {
+            value: f64,
+            unit: VolumeUnit,
+        }
+
+        impl Volume {
+            pub fn new(value: f64, unit: VolumeUnit) -> Self {
+                Self { value, unit }
+            }
+
+            $(
+                pub fn $from_fn_name(value: f64) -> Self {
+                    Self::new(value, VolumeUnit::$variant)
+                }
+            )+
+
+            pub fn round(&mut self, dp: u8) -> Self {
+                let factor = 10f64.powi(dp as i32);
+                self.value = (self.value * factor).round()/factor;
+                return *self
+            }
+
+            $(
+                pub fn $as_fn_name(&self) -> f64 {
+                    self.value * self.unit.liters_factor() / $liters_factor
+                }
+            )+
+
+            pub fn to_unit(&self, unit: VolumeUnit) -> Self {
+                let value = match unit {
+                    $(VolumeUnit::$variant => self.$as_fn_name()),+
+                };
+                Self { value, unit }
+            }
+
+            $(
+                pub fn $to_fn_name(&self) -> Self {
+                    self.to_unit(VolumeUnit::$variant)
+                }
+            )+
+
+            pub fn is_zero(&self) -> bool {
+                self.value == 0.0
+            }
+
+            pub fn is_negative(&self) -> bool {
+                self.value < 0.0
+            }
+
+            pub fn get_value(&self) -> f64 {
+                self.value
+            }
+
+            pub fn set_value(&mut self, value: f64) {
+                self.value = value;
+            }
+
+            pub fn get_unit(&self) -> VolumeUnit {
+                self.unit
+            }
+
+            pub fn set_unit(&mut self, unit: VolumeUnit) {
+                self.unit = unit;
+            }
+
+            pub fn get_symbol(&self) -> &'static str {
+                self.unit.as_symbol()
+            }
+
+            pub fn get_measurement_system(&self) -> MeasurementSystem {
+                self.unit.get_measurement_system()
+            }
+
+            pub fn get_unit_type(&self) -> &'static str {
+                self.unit.as_unit_type()
+            }
+
+            pub fn get_unit_type_plural(&self) -> &'static str {
+                self.unit.as_unit_type_plural()
+            }
+
+            pub fn to_string(&self) -> String {
+                format!("{}{}", self.value.to_string().trim(), self.get_symbol().trim())
+            }
+
+        }
+    };
 }
 
 impl fmt::Display for Volume {
@@ -148,33 +179,58 @@ impl fmt::Display for Volume {
 impl Add for Volume {
     type Output = Self;
     fn add(self, rhs: Self) -> Self {
-        Self::from_l(self.as_l() + rhs.as_l())
+        Self::new(
+            self.get_value() + rhs.to_unit(self.unit).get_value(),
+            self.unit,
+        )
     }
 }
 
 impl Sub for Volume {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self {
-        Self::from_l(self.as_l() - rhs.as_l())
+        Self::new(
+            self.get_value() - rhs.to_unit(self.unit).get_value(),
+            self.unit,
+        )
+    }
+}
+
+impl Mul<u64> for Volume {
+    type Output = Self;
+    fn mul(self, rhs: u64) -> Self {
+        Self::new(self.get_value() * rhs as f64, self.unit)
     }
 }
 
 impl Mul<f64> for Volume {
     type Output = Self;
     fn mul(self, rhs: f64) -> Self {
-        Self::from_l(self.as_l() * rhs)
+        Self::new(self.get_value() * rhs, self.unit)
+    }
+}
+
+impl Div<i64> for Volume {
+    type Output = Self;
+    fn div(self, rhs: i64) -> Self {
+        Self::new(self.get_value() / rhs as f64, self.unit)
     }
 }
 
 impl Div<f64> for Volume {
     type Output = Self;
     fn div(self, rhs: f64) -> Self {
-        Self::from_l(self.as_l() / rhs)
+        Self::new(self.get_value() / rhs, self.unit)
     }
 }
 
 impl PartialOrd for Volume {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.as_ml().partial_cmp(&other.as_ml())
+        self.get_value()
+            .partial_cmp(&other.to_unit(self.unit).get_value())
     }
 }
+
+use volume_macro::include_volumes_from_json;
+include_volumes_from_json!("data/volume.json", "data/fake_volume.json",);
+

@@ -10,6 +10,9 @@ fn test_get_mass_unit_enumerations() {
         MassUnit::Kilogram,
         MassUnit::Microgram,
         MassUnit::Ounce,
+
+        MassUnit::FakeGram,
+        MassUnit::MadeupGram,
     ];
     assert_eq!(
         BTreeSet::from_iter(function_enumerations),

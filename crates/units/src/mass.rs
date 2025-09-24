@@ -10,8 +10,12 @@ macro_rules! define_masses {
                 to_fn_name: $to_fn_name:ident,
                 measurement_system: $measurement_system:ident,
                 symbol: $symbol:expr,
+                symbol_lc: $symbol_lc:expr,
                 unit_type: $unit_type:expr,
+                unit_type_lc: $unit_type_lc:expr,
                 unit_type_plural: $unit_type_plural:expr,
+                unit_type_plural_lc: $unit_type_plural_lc:expr,
+                identifier_lc: $identifier_lc:expr,
                 grams_factor: $grams_factor:expr
             }
         ),+ $(,)?
@@ -68,7 +72,7 @@ macro_rules! define_masses {
 
             pub fn from_str(s: &str) -> Result<Self, &str> {
                 match s.trim().to_lowercase().as_str() {
-                    $($symbol | $unit_type | $unit_type_plural => Ok(MassUnit::$variant),)+
+                    $($symbol_lc | $unit_type_lc | $unit_type_plural_lc | $identifier_lc => Ok(MassUnit::$variant),)+
                     _ => Err("Unknown mass unit"),
                 }
             }
@@ -228,4 +232,7 @@ impl PartialOrd for Mass {
 }
 
 use mass_macro::include_masses_from_json;
-include_masses_from_json!("data/mass.json", "data/fake_mass.json",);
+include_masses_from_json!(
+    "data/mass.json",
+    "data/fake_mass.json",
+);
