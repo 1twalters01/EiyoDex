@@ -12,7 +12,6 @@ fn test_get_volume_unit_enumerations() {
         VolumeUnit::FluidOunce,
         VolumeUnit::Teaspoon,
         VolumeUnit::Tablespoon,
-
         VolumeUnit::FakeLiter,
     ];
     assert_eq!(
@@ -96,25 +95,46 @@ fn test_from_str() {
     assert_eq!(VolumeUnit::from_str("pints").unwrap(), VolumeUnit::Pint);
 
     assert_eq!(VolumeUnit::from_str("gal").unwrap(), VolumeUnit::Gallon);
+    assert_eq!(VolumeUnit::from_str("gallon").unwrap(), VolumeUnit::Gallon);
+    assert_eq!(VolumeUnit::from_str("gallons").unwrap(), VolumeUnit::Gallon);
+
     assert_eq!(
-        VolumeUnit::from_str("gallon").unwrap(),
-        VolumeUnit::Gallon
+        VolumeUnit::from_str("fl oz").unwrap(),
+        VolumeUnit::FluidOunce
     );
     assert_eq!(
-        VolumeUnit::from_str("gallons").unwrap(),
-        VolumeUnit::Gallon
+        VolumeUnit::from_str("floz").unwrap(),
+        VolumeUnit::FluidOunce
+    );
+    assert_eq!(
+        VolumeUnit::from_str("fluid ounce").unwrap(),
+        VolumeUnit::FluidOunce
+    );
+    assert_eq!(
+        VolumeUnit::from_str("fluid ounces").unwrap(),
+        VolumeUnit::FluidOunce
     );
 
-    assert_eq!(VolumeUnit::from_str("fl oz").unwrap(), VolumeUnit::FluidOunce);
-    assert_eq!(VolumeUnit::from_str("floz").unwrap(), VolumeUnit::FluidOunce);
-    assert_eq!(VolumeUnit::from_str("fluid ounce").unwrap(), VolumeUnit::FluidOunce);
-    assert_eq!(VolumeUnit::from_str("fluid ounces").unwrap(), VolumeUnit::FluidOunce);
-
-    assert_eq!(VolumeUnit::from_str("tbsp").unwrap(), VolumeUnit::Tablespoon);
-    assert_eq!(VolumeUnit::from_str("tablespoon").unwrap(), VolumeUnit::Tablespoon);
-    assert_eq!(VolumeUnit::from_str("tablespoons").unwrap(), VolumeUnit::Tablespoon);
+    assert_eq!(
+        VolumeUnit::from_str("tbsp").unwrap(),
+        VolumeUnit::Tablespoon
+    );
+    assert_eq!(
+        VolumeUnit::from_str("tablespoon").unwrap(),
+        VolumeUnit::Tablespoon
+    );
+    assert_eq!(
+        VolumeUnit::from_str("tablespoons").unwrap(),
+        VolumeUnit::Tablespoon
+    );
 
     assert_eq!(VolumeUnit::from_str("tsp").unwrap(), VolumeUnit::Teaspoon);
-    assert_eq!(VolumeUnit::from_str("teaspoon").unwrap(), VolumeUnit::Teaspoon);
-    assert_eq!(VolumeUnit::from_str("teaspoons").unwrap(), VolumeUnit::Teaspoon);
+    assert_eq!(
+        VolumeUnit::from_str("teaspoon").unwrap(),
+        VolumeUnit::Teaspoon
+    );
+    assert_eq!(
+        VolumeUnit::from_str("teaspoons").unwrap(),
+        VolumeUnit::Teaspoon
+    );
 }

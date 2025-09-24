@@ -189,7 +189,7 @@ fn test_mass_get_measurement_system() {
 }
 
 #[test]
-fn test_mass_unit_type() {
+fn test_mass_get_unit_type() {
     let value = 4.2;
     let mass_g = Mass::from_g(value);
     let mass_mg = Mass::from_mg(value);
@@ -205,7 +205,7 @@ fn test_mass_unit_type() {
 }
 
 #[test]
-fn test_mass_unit_type_plural() {
+fn test_mass_get_unit_type_plural() {
     let value = 8.52;
     let mass_g = Mass::from_g(value);
     let mass_mg = Mass::from_mg(value);

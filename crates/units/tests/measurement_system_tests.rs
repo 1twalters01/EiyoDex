@@ -7,7 +7,6 @@ fn test_get_measurement_system_enumerations() {
     let manual_enumerations = vec![
         MeasurementSystem::Metric,
         MeasurementSystem::Imperial,
-
         MeasurementSystem::Fake,
     ];
     assert_eq!(
