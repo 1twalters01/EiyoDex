@@ -56,7 +56,7 @@ fn test_mass_as_fn() {
     let mass_oz = Mass::from_oz(value);
 
     // percentage error calculations
-    assert!((mass_g.as_mg() - value * 1_000 as f64).abs() / mass_g.as_g() < percentage_err);
+    assert!((mass_g.as_mg() - value * 1_000 as f64).abs() / mass_g.as_mg() < percentage_err);
     assert!((mass_g.as_kg() - value * 0.001).abs() / mass_g.as_kg() < percentage_err);
     assert!((mass_g.as_ug() - value * 1e6).abs() / mass_g.as_ug() < percentage_err);
     assert!((mass_g.as_oz() - value * 0.0352739).abs() / mass_g.as_oz() < percentage_err);
