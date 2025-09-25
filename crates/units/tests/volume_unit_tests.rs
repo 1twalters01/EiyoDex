@@ -60,7 +60,7 @@ fn test_get_plural_unit_types() {
 }
 
 #[test]
-fn test_get_factor() {
+fn test_get_liters_factor() {
     assert_eq!(VolumeUnit::Liter.liters_factor(), 1 as f64);
     assert_eq!(VolumeUnit::Milliliter.liters_factor(), 0.001);
     assert_eq!(VolumeUnit::Pint.liters_factor(), 0.5682612);
