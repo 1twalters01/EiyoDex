@@ -1,0 +1,10 @@
+{
+    "Meter": {
+        "identifier": "fm",
+        "symbol": "fm",
+        "unit_type": "fakemeter",
+        "unit_type_plural": "fakemeters",
+        "measurement_system": "Fake",
+        "meters_factor": 1.0
+    }
+}

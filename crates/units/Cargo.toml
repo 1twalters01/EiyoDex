@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 measurement_system_macro = { path = "../proc_macros/units/measurement_system_macro" }
 energy_macro = { path = "../proc_macros/units/energy_macro" }
+distance_macro = { path = "../proc_macros/units/distance_macro" }
 mass_macro = { path = "../proc_macros/units/mass_macro" }
 volume_macro = { path = "../proc_macros/units/volume_macro" }
 currency_macro = { path = "../proc_macros/units/currency_macro" }

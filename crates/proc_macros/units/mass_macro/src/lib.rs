@@ -35,7 +35,6 @@ pub fn include_masses_from_json(input: TokenStream) -> TokenStream {
         for (key, value) in json_results {
             masses.insert(key, value);
         }
-
     }
 
     let variants = masses.iter().map(|(key, data)| {

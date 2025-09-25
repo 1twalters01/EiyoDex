@@ -1,5 +1,3 @@
-use crate::measurement_system::MeasurementSystem;
-
 #[macro_export]
 macro_rules! define_masses {
     (
@@ -20,11 +18,11 @@ macro_rules! define_masses {
             }
         ),+ $(,)?
     ) => {
+        use crate::measurement_system::MeasurementSystem;
         use std::{
             cmp::Ordering,
             fmt,
             ops::{Add, Div, Mul, Sub},
-            // str::FromStr,
         };
         #[cfg(feature = "serde")]
         use serde::{Deserialize, Serialize};

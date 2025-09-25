@@ -288,6 +288,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "distance_macro"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "serde",
+ "serde_json",
+ "syn",
+]
+
+[[package]]
 name = "encoding_rs"
 version = "0.8.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1628,6 +1638,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "currency_macro",
+ "distance_macro",
  "energy_macro",
  "mass_macro",
  "measurement_system_macro",

@@ -22,4 +22,6 @@ use measurement_system_macro::include_measurement_systems_from_json;
 include_measurement_systems_from_json!(
     MassUnit => "data/mass.json", "data/fake_mass.json",
     VolumeUnit => "data/volume.json", "data/fake_volume.json",
+    EnergyUnit => "data/energy.json", "data/fake_energy.json",
+    DistanceUnit => "data/distance.json", "data/fake_distance.json",
 );

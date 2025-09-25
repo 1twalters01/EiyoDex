@@ -41,6 +41,8 @@ impl Parse for EnumSourceGroup {
 enum MeasurementContainer {
     MassJson(HashMap<String, MassJson>),
     VolumeJson(HashMap<String, VolumeJson>),
+    EnergyJson(HashMap<String, EnergyJson>),
+    DistanceJson(HashMap<String, DistanceJson>),
 }
 
 #[derive(Debug, Deserialize)]
@@ -50,6 +52,16 @@ struct MassJson {
 
 #[derive(Debug, Deserialize)]
 struct VolumeJson {
+    measurement_system: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct EnergyJson {
+    measurement_system: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct DistanceJson {
     measurement_system: String,
 }
 
@@ -77,7 +89,15 @@ pub fn include_measurement_systems_from_json(input: TokenStream) -> TokenStream 
                 "VolumeUnit" => {
                     let serde_res = serde_json::from_str(&file_content).expect("Invalid JSON format");
                     MeasurementContainer::VolumeJson(serde_res)
-                }
+                },
+                "EnergyUnit" => {
+                    let serde_res = serde_json::from_str(&file_content).expect("Invalid JSON format");
+                    MeasurementContainer::EnergyJson(serde_res)
+                },
+                "DistanceUnit" => {
+                    let serde_res = serde_json::from_str(&file_content).expect("Invalid JSON format");
+                    MeasurementContainer::DistanceJson(serde_res)
+                },
                 _ => panic!("Incorrect unit")
             };
 
@@ -91,7 +111,17 @@ pub fn include_measurement_systems_from_json(input: TokenStream) -> TokenStream 
                     for data in json_results.values() {
                         measurement_systems.insert(data.measurement_system.clone());
                     }
-                }
+                },
+                MeasurementContainer::EnergyJson(json_results) => {
+                    for data in json_results.values() {
+                        measurement_systems.insert(data.measurement_system.clone());
+                    }
+                },
+                MeasurementContainer::DistanceJson(json_results) => {
+                    for data in json_results.values() {
+                        measurement_systems.insert(data.measurement_system.clone());
+                    }
+                },
             }
         }
     }

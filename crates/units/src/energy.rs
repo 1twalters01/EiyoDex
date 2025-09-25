@@ -1,5 +1,3 @@
-use crate::measurement_system::MeasurementSystem;
-
 #[macro_export]
 macro_rules! define_energies {
     (
@@ -20,6 +18,7 @@ macro_rules! define_energies {
             }
         ),+ $(,)?
     ) => {
+        use crate::measurement_system::MeasurementSystem;
         use std::{
             cmp::Ordering,
             fmt,

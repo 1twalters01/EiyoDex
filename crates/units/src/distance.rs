@@ -1,206 +1,171 @@
-use std::{
-    cmp::Ordering,
-    fmt,
-    ops::{Add, Div, Mul, Sub},
-    str::FromStr,
-};
-
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub enum DistanceUnit {
-    Meter,
-    Centimeter,
-    Feet,
-    Inch,
-}
-
-impl DistanceUnit {
-    pub fn get_enumerations() -> Vec<DistanceUnit> {
-        Vec::from([
-            DistanceUnit::Meter,
-            DistanceUnit::Centimeter,
-            DistanceUnit::Feet,
-            DistanceUnit::Inch,
-        ])
-    }
-
-    pub fn as_symbol(&self) -> &'static str {
-        match self {
-            DistanceUnit::Meter => "m",
-            DistanceUnit::Centimeter => "cm",
-            DistanceUnit::Feet => "ft",
-            DistanceUnit::Inch => "in",
-        }
-    }
-
-    pub fn as_unit_type(&self) -> &'static str {
-        match self {
-            DistanceUnit::Meter => "meter",
-            DistanceUnit::Centimeter => "centimeter",
-            DistanceUnit::Feet => "foot",
-            DistanceUnit::Inch => "inch",
-        }
-    }
-
-    pub fn as_unit_type_plural(&self) -> &'static str {
-        match self {
-            DistanceUnit::Meter => "meters",
-            DistanceUnit::Centimeter => "centimeters",
-            DistanceUnit::Feet => "feet",
-            DistanceUnit::Inch => "inches",
-        }
-    }
-}
-
-impl FromStr for DistanceUnit {
-    type Err = &'static str;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.trim().to_lowercase().as_str() {
-            "m" | "meter" | "meters" => Ok(DistanceUnit::Meter),
-            "cm" | "centimeter" | "centimeters" => Ok(DistanceUnit::Centimeter),
-            "ft" | "foot" | "feet" => Ok(DistanceUnit::Feet),
-            "in" | "inch" | "inches" => Ok(DistanceUnit::Inch),
-            _ => Err("Unknown distance unit"),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Distance {
-    value: f64,
-    unit: DistanceUnit,
-}
-
-impl Default for Distance {
-    fn default() -> Self {
-        Distance::from_m(0.0)
-    }
-}
-
-impl Distance {
-    pub fn new(value: f64, unit: DistanceUnit) -> Self {
-        Self { value, unit }
-    }
-
-    pub fn from_m(m: f64) -> Self {
-        Self::new(m, DistanceUnit::Meter)
-    }
-
-    pub fn from_cm(cm: f64) -> Self {
-        Self::new(cm, DistanceUnit::Centimeter)
-    }
-
-    pub fn from_ft(ft: f64) -> Self {
-        Self::new(ft, DistanceUnit::Feet)
-    }
-
-    pub fn from_in(inch: f64) -> Self {
-        Self::new(inch, DistanceUnit::Inch)
-    }
-
-    pub fn as_m(&self) -> f64 {
-        match self.unit {
-            DistanceUnit::Meter => self.value,
-            DistanceUnit::Centimeter => self.value / 1000 as f64,
-            DistanceUnit::Feet => self.value * 1000 as f64,
-            DistanceUnit::Inch => self.value / 1_000_000 as f64,
-        }
-    }
-
-    pub fn as_in(&self) -> f64 {
-        match self.unit {
-            DistanceUnit::Meter => self.value * 1000 as f64,
-            DistanceUnit::Centimeter => self.value,
-            DistanceUnit::Feet => self.value * 1_000_000 as f64,
-            DistanceUnit::Inch => self.value / 1000 as f64,
-        }
-    }
-
-    pub fn as_ft(&self) -> f64 {
-        match self.unit {
-            DistanceUnit::Meter => self.value / 1000 as f64,
-            DistanceUnit::Centimeter => self.value / 1_000_000 as f64,
-            DistanceUnit::Feet => self.value,
-            DistanceUnit::Inch => self.value / 1_000_000_000 as f64,
-        }
-    }
-
-    pub fn as_ug(&self) -> f64 {
-        match self.unit {
-            DistanceUnit::Meter => self.value * 1_000_000 as f64,
-            DistanceUnit::Centimeter => self.value * 1000 as f64,
-            DistanceUnit::Feet => self.value * 1_000_000_000 as f64,
-            DistanceUnit::Inch => self.value,
-        }
-    }
-
-    pub fn as_oz(&self) -> f64 {
-        match self.unit {
-            DistanceUnit::Meter => self.value / 28.3495,
-            DistanceUnit::Centimeter => self.value / 28349.5,
-            DistanceUnit::Feet => self.value * 35.274,
-            DistanceUnit::Inch => self.value / 28_349_500 as f64,
-        }
-    }
-
-    pub fn to_unit(&self, unit: DistanceUnit) -> Self {
-        let value = match unit {
-            DistanceUnit::Meter => self.as_m(),
-            DistanceUnit::Centimeter => self.as_in(),
-            DistanceUnit::Feet => self.as_ft(),
-            DistanceUnit::Inch => self.as_in(),
+#[macro_export]
+macro_rules! define_distances {
+    (
+        $(
+            $variant:ident => {
+                from_fn_name: $from_fn_name:ident,
+                as_fn_name: $as_fn_name:ident,
+                to_fn_name: $to_fn_name:ident,
+                measurement_system: $measurement_system:ident,
+                symbol: $symbol:expr,
+                symbol_lc: $symbol_lc:expr,
+                unit_type: $unit_type:expr,
+                unit_type_lc: $unit_type_lc:expr,
+                unit_type_plural: $unit_type_plural:expr,
+                unit_type_plural_lc: $unit_type_plural_lc:expr,
+                identifier_lc: $identifier_lc:expr,
+                meters_factor: $meters_factor:expr
+            }
+        ),+ $(,)?
+    ) => {
+        use crate::measurement_system::MeasurementSystem;
+        use std::{
+            cmp::Ordering,
+            fmt,
+            ops::{Add, Div, Mul, Sub},
         };
-        Self { value, unit }
-    }
+        #[cfg(feature = "serde")]
+        use serde::{Deserialize, Serialize};
 
-    pub fn to_g(&self) -> Self {
-        self.to_unit(DistanceUnit::Meter)
-    }
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+        #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+        pub enum DistanceUnit {
+            $($variant),+
+        }
 
-    pub fn to_mg(&self) -> Self {
-        self.to_unit(DistanceUnit::Centimeter)
-    }
+        impl DistanceUnit {
+            pub fn get_enumerations() -> Vec<DistanceUnit> {
+                Vec::from([$(DistanceUnit::$variant),+])
+            }
 
-    pub fn to_kg(&self) -> Self {
-        self.to_unit(DistanceUnit::Feet)
-    }
+            pub fn as_symbol(&self) -> &'static str {
+                match self {
+                    $(DistanceUnit::$variant => $symbol),+
+                }
+            }
 
-    pub fn to_ug(&self) -> Self {
-        self.to_unit(DistanceUnit::Inch)
-    }
+            pub fn as_unit_type(&self) -> &'static str {
+                match self {
+                    $(DistanceUnit::$variant => $unit_type),+
+                }
+            }
 
-    pub fn is_zero(&self) -> bool {
-        self.value == 0.0
-    }
+            pub fn as_unit_type_plural(&self) -> &'static str {
+                match self {
+                    $(DistanceUnit::$variant => $unit_type_plural),+
+                }
+            }
 
-    pub fn is_negative(&self) -> bool {
-        self.value < 0.0
-    }
+            pub fn get_measurement_system(&self) -> MeasurementSystem {
+                match self {
+                    $(DistanceUnit::$variant => MeasurementSystem::$measurement_system),+
+                }
+            }
 
-    pub fn get_unit(&self) -> DistanceUnit {
-        self.unit
-    }
+            pub fn meters_factor(&self) -> f64 {
+                match self {
+                    $(DistanceUnit::$variant => $meters_factor),+
+                }
+            }
 
-    pub fn get_symbol(&self) -> &'static str {
-        self.unit.as_symbol()
-    }
+            pub fn from_str(s: &str) -> Result<Self, &str> {
+                match s.trim().to_lowercase().as_str() {
+                    $($symbol_lc | $unit_type_lc | $unit_type_plural_lc | $identifier_lc => Ok(DistanceUnit::$variant),)+
+                    _ => Err("Unknown distance unit"),
+                }
+            }
 
-    pub fn get_unit_type(&self) -> &'static str {
-        self.unit.as_unit_type()
-    }
+        }
 
-    pub fn get_unit_type_plural(&self) -> &'static str {
-        self.unit.as_unit_type_plural()
-    }
+        #[derive(Debug, Clone, Copy, PartialEq)]
+        #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+        pub struct Distance {
+            value: f64,
+            unit: DistanceUnit,
+        }
 
-    pub fn to_string(&self) -> String {
-        format!("{} {}", self.value, self.get_symbol())
-    }
+        impl Distance {
+            pub fn new(value: f64, unit: DistanceUnit) -> Self {
+                Self { value, unit }
+            }
+
+            $(
+                pub fn $from_fn_name(value: f64) -> Self {
+                    Self::new(value, DistanceUnit::$variant)
+                }
+            )+
+
+            pub fn round(&mut self, dp: u8) -> Self {
+                let factor = 10f64.powi(dp as i32);
+                self.value = (self.value * factor).round()/factor;
+                return *self
+            }
+
+            $(
+                pub fn $as_fn_name(&self) -> f64 {
+                    self.value * self.unit.meters_factor() / $meters_factor
+                }
+            )+
+
+            pub fn to_unit(&self, unit: DistanceUnit) -> Self {
+                let value = match unit {
+                    $(DistanceUnit::$variant => self.$as_fn_name()),+
+                };
+                Self { value, unit }
+            }
+
+            $(
+                pub fn $to_fn_name(&self) -> Self {
+                    self.to_unit(DistanceUnit::$variant)
+                }
+            )+
+
+            pub fn is_zero(&self) -> bool {
+                self.value == 0.0
+            }
+
+            pub fn is_negative(&self) -> bool {
+                self.value < 0.0
+            }
+
+            pub fn get_value(&self) -> f64 {
+                self.value
+            }
+
+            pub fn set_value(&mut self, value: f64) {
+                self.value = value;
+            }
+
+            pub fn get_unit(&self) -> DistanceUnit {
+                self.unit
+            }
+
+            pub fn set_unit(&mut self, unit: DistanceUnit) {
+                self.unit = unit;
+            }
+
+            pub fn get_symbol(&self) -> &'static str {
+                self.unit.as_symbol()
+            }
+
+            pub fn get_measurement_system(&self) -> MeasurementSystem {
+                self.unit.get_measurement_system()
+            }
+
+            pub fn get_unit_type(&self) -> &'static str {
+                self.unit.as_unit_type()
+            }
+
+            pub fn get_unit_type_plural(&self) -> &'static str {
+                self.unit.as_unit_type_plural()
+            }
+
+            pub fn to_string(&self) -> String {
+                format!("{}{}", self.value.to_string().trim(), self.get_symbol().trim())
+            }
+
+        }
+    };
 }
 
 impl fmt::Display for Distance {
@@ -212,33 +177,61 @@ impl fmt::Display for Distance {
 impl Add for Distance {
     type Output = Self;
     fn add(self, rhs: Self) -> Self {
-        Self::from_m(self.as_m() + rhs.as_m())
+        Self::new(
+            self.get_value() + rhs.to_unit(self.unit).get_value(),
+            self.unit,
+        )
     }
 }
 
 impl Sub for Distance {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self {
-        Self::from_m(self.as_m() - rhs.as_m())
+        Self::new(
+            self.get_value() - rhs.to_unit(self.unit).get_value(),
+            self.unit,
+        )
+    }
+}
+
+impl Mul<u64> for Distance {
+    type Output = Self;
+    fn mul(self, rhs: u64) -> Self {
+        Self::new(self.get_value() * rhs as f64, self.unit)
     }
 }
 
 impl Mul<f64> for Distance {
     type Output = Self;
     fn mul(self, rhs: f64) -> Self {
-        Self::from_m(self.as_m() * rhs)
+        Self::new(self.get_value() * rhs, self.unit)
+    }
+}
+
+impl Div<i64> for Distance {
+    type Output = Self;
+    fn div(self, rhs: i64) -> Self {
+        Self::new(self.get_value() / rhs as f64, self.unit)
     }
 }
 
 impl Div<f64> for Distance {
     type Output = Self;
     fn div(self, rhs: f64) -> Self {
-        Self::from_m(self.as_m() / rhs)
+        Self::new(self.get_value() / rhs, self.unit)
     }
 }
 
 impl PartialOrd for Distance {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.as_m().partial_cmp(&other.as_m())
+        self.get_value()
+            .partial_cmp(&other.to_unit(self.unit).get_value())
     }
 }
+
+use distance_macro::include_distances_from_json;
+include_distances_from_json!(
+    "data/distance.json",
+    "data/fake_distance.json",
+);
+
