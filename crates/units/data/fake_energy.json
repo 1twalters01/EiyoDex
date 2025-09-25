@@ -1,0 +1,11 @@
+{
+    "Fakejoule": {
+        "identifier": "fj",
+        "symbol": "fj",
+        "unit_type": "fakejoule",
+        "unit_type_plural": "fakejoules",
+        "measurement_system": "Fake",
+        "joules_factor": 1000
+    }
+}
+

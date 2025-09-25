@@ -297,6 +297,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "energy_macro"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "serde",
+ "serde_json",
+ "syn",
+]
+
+[[package]]
 name = "equivalent"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1618,6 +1628,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "currency_macro",
+ "energy_macro",
  "mass_macro",
  "measurement_system_macro",
  "redis",

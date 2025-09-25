@@ -62,57 +62,57 @@ fn test_volume_as_fn() {
 
     // percentage error calculations
     assert!((volume_l.as_ml() - value * 1_000 as f64).abs() / volume_l.as_l() < percentage_err);
-    assert!((volume_l.as_pt() - value * 0.001).abs() / volume_l.as_pt() < percentage_err);
-    assert!((volume_l.as_gal() - value * 1e6).abs() / volume_l.as_gal() < percentage_err);
-    assert!((volume_l.as_tbsp() - value * 0.0352739).abs() / volume_l.as_tbsp() < percentage_err);
-    assert!((volume_l.as_tsp() - value * 0.0352739).abs() / volume_l.as_tsp() < percentage_err);
+    assert!((volume_l.as_pt() - value * 1.759754).abs() / volume_l.as_pt() < percentage_err);
+    assert!((volume_l.as_gal() - value * 0.2199693).abs() / volume_l.as_gal() < percentage_err);
+    assert!((volume_l.as_tbsp() - value * 56.31213).abs() / volume_l.as_tbsp() < percentage_err);
+    assert!((volume_l.as_tsp() - value * 168.9364).abs() / volume_l.as_tsp() < percentage_err);
 
-    assert!((volume_ml.as_l() - value * 0.001 as f64).abs() / volume_ml.as_l() < percentage_err);
-    assert!((volume_ml.as_pt() - value * 1e-6).abs() / volume_ml.as_pt() < percentage_err);
+    assert!((volume_ml.as_l() - value * 1e-3).abs() / volume_ml.as_l() < percentage_err);
+    assert!((volume_ml.as_pt() - value * 0.001759754).abs() / volume_ml.as_pt() < percentage_err);
     assert!(
-        (volume_ml.as_gal() - value * 1_000 as f64).abs() / volume_ml.as_gal() < percentage_err
+        (volume_ml.as_gal() - value * 0.0002199693).abs() / volume_ml.as_gal() < percentage_err
     );
     assert!(
-        (volume_ml.as_tbsp() - value * 3.527396e-5).abs() / volume_ml.as_tbsp() < percentage_err
+        (volume_ml.as_tbsp() - value * 0.05631213).abs() / volume_ml.as_tbsp() < percentage_err
     );
-    assert!((volume_ml.as_tsp() - value * 3.527396e-5).abs() / volume_ml.as_tsp() < percentage_err);
+    assert!((volume_ml.as_tsp() - value * 0.1689364).abs() / volume_ml.as_tsp() < percentage_err);
 
-    assert!((volume_pt.as_l() - value * 1000 as f64).abs() / volume_pt.as_l() < percentage_err);
-    assert!((volume_pt.as_ml() - value * 1e6).abs() / volume_pt.as_ml() < percentage_err);
-    assert!((volume_pt.as_gal() - value * 1e9).abs() / volume_pt.as_gal() < percentage_err);
-    assert!((volume_pt.as_tbsp() - value * 35.27396).abs() / volume_pt.as_tbsp() < percentage_err);
-    assert!((volume_pt.as_tsp() - value * 35.27396).abs() / volume_pt.as_tsp() < percentage_err);
+    assert!((volume_pt.as_l() - value * 0.5682612).abs() / volume_pt.as_l() < percentage_err);
+    assert!((volume_pt.as_ml() - value * 568.2612).abs() / volume_pt.as_ml() < percentage_err);
+    assert!((volume_pt.as_gal() - value * 0.125).abs() / volume_pt.as_gal() < percentage_err);
+    assert!((volume_pt.as_tbsp() - value * 32f64).abs() / volume_pt.as_tbsp() < percentage_err);
+    assert!((volume_pt.as_tsp() - value * 96f64).abs() / volume_pt.as_tsp() < percentage_err);
 
-    assert!((volume_gal.as_l() - value * 1e-6).abs() / volume_gal.as_l() < percentage_err);
-    assert!((volume_gal.as_ml() - value * 0.001).abs() / volume_gal.as_ml() < percentage_err);
-    assert!((volume_gal.as_pt() - value * 1e-9).abs() / volume_gal.as_pt() < percentage_err);
+    assert!((volume_gal.as_l() - value * 4.54609).abs() / volume_gal.as_l() < percentage_err);
+    assert!((volume_gal.as_ml() - value * 4546.09).abs() / volume_gal.as_ml() < percentage_err);
+    assert!((volume_gal.as_pt() - value * 8f64).abs() / volume_gal.as_pt() < percentage_err);
     assert!(
-        (volume_gal.as_tbsp() - value * 3.527396e-8).abs() / volume_gal.as_tbsp() < percentage_err
+        (volume_gal.as_tbsp() - value * 256f64).abs() / volume_gal.as_tbsp() < percentage_err
     );
     assert!(
-        (volume_gal.as_tsp() - value * 3.527396e-8).abs() / volume_gal.as_tsp() < percentage_err
-    );
-
-    assert!((volume_tbsp.as_l() - value * 28.34952).abs() / volume_tbsp.as_l() < percentage_err);
-    assert!((volume_tbsp.as_ml() - value * 28349.52).abs() / volume_tbsp.as_ml() < percentage_err);
-    assert!(
-        (volume_tbsp.as_pt() - value * 0.02834952).abs() / volume_tbsp.as_pt() < percentage_err
-    );
-    assert!(
-        (volume_tbsp.as_gal() - value * 2.834952e+7).abs() / volume_tbsp.as_gal() < percentage_err
-    );
-    assert!(
-        (volume_tbsp.as_tsp() - value * 2.834952e+7).abs() / volume_tbsp.as_tsp() < percentage_err
+        (volume_gal.as_tsp() - value * 786f64).abs() / volume_gal.as_tsp() < percentage_err
     );
 
-    assert!((volume_tsp.as_l() - value * 28.34952).abs() / volume_tsp.as_l() < percentage_err);
-    assert!((volume_tsp.as_ml() - value * 28349.52).abs() / volume_tsp.as_ml() < percentage_err);
-    assert!((volume_tsp.as_pt() - value * 0.02834952).abs() / volume_tsp.as_pt() < percentage_err);
+    assert!((volume_tbsp.as_l() - value * 0.01775816).abs() / volume_tbsp.as_l() < percentage_err);
+    assert!((volume_tbsp.as_ml() - value * 17.75816).abs() / volume_tbsp.as_ml() < percentage_err);
     assert!(
-        (volume_tsp.as_gal() - value * 2.834952e+7).abs() / volume_tsp.as_gal() < percentage_err
+        (volume_tbsp.as_pt() - value * 0.03125).abs() / volume_tbsp.as_pt() < percentage_err
     );
     assert!(
-        (volume_tsp.as_tbsp() - value * 2.834952e+7).abs() / volume_tsp.as_tbsp() < percentage_err
+        (volume_tbsp.as_gal() - value * 0.00390625).abs() / volume_tbsp.as_gal() < percentage_err
+    );
+    assert!(
+        (volume_tbsp.as_tsp() - value * 3f64).abs() / volume_tbsp.as_tsp() < percentage_err
+    );
+
+    assert!((volume_tsp.as_l() - value * 0.005919387).abs() / volume_tsp.as_l() < percentage_err);
+    assert!((volume_tsp.as_ml() - value * 5.919388).abs() / volume_tsp.as_ml() < percentage_err);
+    assert!((volume_tsp.as_pt() - value * 0.01041667).abs() / volume_tsp.as_pt() < percentage_err);
+    assert!(
+        (volume_tsp.as_gal() - value * 0.001302083).abs() / volume_tsp.as_gal() < percentage_err
+    );
+    assert!(
+        (volume_tsp.as_tbsp() - value * 0.3333333).abs() / volume_tsp.as_tbsp() < percentage_err
     );
 }
 

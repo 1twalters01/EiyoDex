@@ -1,0 +1,18 @@
+{
+    "Kilojoule": {
+        "identifier": "kj",
+        "symbol": "kj",
+        "unit_type": "kilojoule",
+        "unit_type_plural": "kilojoules",
+        "measurement_system": "Metric",
+        "joules_factor": 1000
+    },
+    "Kilocalorie": {
+        "identifier": "kcal",
+        "symbol": "kcal",
+        "unit_type": "kilocalorie",
+        "unit_type_plural": "kilocalories",
+        "measurement_system": "Metric",
+        "joules_factor": 4184
+    }
+}
