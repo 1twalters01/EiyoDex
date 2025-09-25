@@ -15,7 +15,7 @@
         "measurement_system": "Metric",
         "meters_factor": 0.01 
     },
-    "Feet": {
+    "Foot": {
         "identifier": "ft",
         "symbol": "ft",
         "unit_type": "foot",

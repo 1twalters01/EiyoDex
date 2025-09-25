@@ -1,5 +1,5 @@
 {
-    "Meter": {
+    "Fakemeter": {
         "identifier": "fm",
         "symbol": "fm",
         "unit_type": "fakemeter",

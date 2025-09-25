@@ -1,7 +1,6 @@
-Create macros for:
-* Distance
-
 Create tests for Distance, Energy, and Volume
+
+Split data into Metric and Imperial units
 
 Decide how derivatives will work (specific currency, density, power)
 
