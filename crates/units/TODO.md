@@ -1,7 +1,5 @@
 Create macros for:
 * Distance
-* Energy
-* Volume
 
 Create tests for Distance, Energy, and Volume
 

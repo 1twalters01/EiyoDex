@@ -1,0 +1,34 @@
+{
+    "Meter": {
+        "identifier": "m",
+        "symbol": "m",
+        "unit_type": "meter",
+        "unit_type_plural": "meters",
+        "measurement_system": "Metric",
+        "meters_factor": 1.0
+    },
+    "Centimeter": {
+        "identifier": "cm",
+        "symbol": "cm",
+        "unit_type": "centimeter",
+        "unit_type_plural": "centimeters",
+        "measurement_system": "Metric",
+        "meters_factor": 0.01 
+    },
+    "Feet": {
+        "identifier": "ft",
+        "symbol": "ft",
+        "unit_type": "foot",
+        "unit_type_plural": "feet",
+        "measurement_system": "Imperial",
+        "meters_factor": 0.3048
+    },
+    "Inch": {
+        "identifier": "in",
+        "symbol": "in",
+        "unit_type": "inch",
+        "unit_type_plural": "inches",
+        "measurement_system": "Imperial",
+        "meters_factor": 0.0254
+    }
+}
