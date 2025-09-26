@@ -1,11 +1,9 @@
 #[macro_export]
 macro_rules! define_measurement_systems {
     ($($variant:ident),+) => {
-        #[cfg(feature = "serde")]
         use serde::{Deserialize, Serialize};
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-        #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+        #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
         pub enum MeasurementSystem {
             $($variant),+
         }

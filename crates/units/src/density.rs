@@ -4,13 +4,11 @@ use std::{
     ops::{Div, Mul},
 };
 
-#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 use crate::{mass::Mass, volume::Volume};
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
 pub enum DensityUnit {
     GramsPerMl,
     GramsPerL,
@@ -39,8 +37,7 @@ impl DensityUnit {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
 pub struct Density {
     value: f64,
     unit: DensityUnit,

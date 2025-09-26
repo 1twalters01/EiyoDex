@@ -1,3 +1,5 @@
+// #[allow(unreachable_patterns)]
+
 use crate::energy::Energy;
 use chrono::Duration;
 use std::{
@@ -7,11 +9,9 @@ use std::{
     str::FromStr,
 };
 
-#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PowerUnit {
     KcalPerSecond,
     Watts,
@@ -58,8 +58,7 @@ impl FromStr for PowerUnit {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
 pub struct Power {
     value: f64,
     unit: PowerUnit,

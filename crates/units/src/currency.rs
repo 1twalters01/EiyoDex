@@ -10,13 +10,13 @@ macro_rules! define_currencies {
             }
         ),+ $(,)?
     ) => {
+        use chrono::NaiveDateTime;
         use std::{
             cmp::Ordering,
             fmt,
             ops::{Add, Div, Mul, Sub},
             str::FromStr,
         };
-        #[cfg(feature = "serde")]
         use serde::{Deserialize, Serialize};
 
         pub struct CurrencyMetadata {
@@ -26,8 +26,7 @@ macro_rules! define_currencies {
             pub unit_type_plural: &'static str,
         }
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-        #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+        #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash)]
         pub enum CurrencyUnit {
             $($variant),+
         }
@@ -88,8 +87,7 @@ macro_rules! define_currencies {
             }
         }
 
-        #[derive(Debug, Clone, Copy, PartialEq)]
-        #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+        #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
         pub struct Currency {
             value: f64,
             unit: CurrencyUnit,
@@ -128,11 +126,22 @@ macro_rules! define_currencies {
                 self.value
             }
 
-            pub fn convert_to(&self, target_unit: CurrencyUnit) -> Result<Currency, String> {
+            pub async fn convert_to(&self, target_unit: CurrencyUnit) -> Result<Currency, String> {
                 if self.unit == target_unit {
                     Ok(*self)
                 } else {
-                    match fetch_current_exchange_rate(self.unit, target_unit) {
+                    match fetch_current_exchange_rate(self.unit, target_unit).await {
+                        Ok(rate) => Ok(Currency::new(self.value * rate, target_unit)),
+                        Err(err) => Err(err),
+                    }
+                }
+            }
+
+            pub fn convert_to_sync(&self, target_unit: CurrencyUnit) -> Result<Currency, String> {
+                if self.unit == target_unit {
+                    Ok(*self)
+                } else {
+                    match fetch_current_exchange_rate_sync(self.unit, target_unit) {
                         Ok(rate) => Ok(Currency::new(self.value * rate, target_unit)),
                         Err(err) => Err(err),
                     }
@@ -149,17 +158,18 @@ macro_rules! define_currencies {
         impl Add for Currency {
             type Output = Self;
             fn add(self, rhs: Self) -> Self::Output {
-                match rhs.convert_to(self.unit) {
+                match rhs.convert_to_sync(self.unit) {
                     Ok(converted_rhs) => Self::new(self.value + converted_rhs.value, self.unit),
                     Err(_) => panic!("Currency conversion failed in addition"),
                 }
             }
         }
+
         impl Sub for Currency {
             type Output = Self;
 
             fn sub(self, rhs: Self) -> Self::Output {
-                match rhs.convert_to(self.unit) {
+                match rhs.convert_to_sync(self.unit) {
                     Ok(converted_rhs) => Self::new(self.value - converted_rhs.value, self.unit),
                     Err(_) => panic!("Currency conversion failed in subtraction"),
                 }
@@ -184,33 +194,74 @@ macro_rules! define_currencies {
 
         impl PartialOrd for Currency {
             fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-                match other.convert_to(self.unit) {
+                match other.convert_to_sync(self.unit) {
                     Ok(converted_other) => self.value.partial_cmp(&converted_other.value),
                     Err(_) => None,
                 }
             }
         }
 
-        pub fn fetch_current_exchange_rate(current_unit: CurrencyUnit, target_unit: CurrencyUnit) -> Result<f64, String> {
-            // fetch from an api using current unit, target unit and time now using reqwest
-            // return result of fetch
-            todo!()
+
+        #[derive(Deserialize)]
+        struct ExchangeResponse {
+            result: f64,
         }
 
-        // Don't know what datetime I will use, probably chrono
-        use std::time::SystemTime;
-        pub fn fetch_past_exchange_rate(current_unit: CurrencyUnit, target_unit: CurrencyUnit, datetime: SystemTime) -> Result<f64, String> {
-            // fetch from an api using current unit, target unit and datetime using reqwest
-            // return result of fetch
-            todo!()
+        pub async fn fetch_current_exchange_rate(current_unit: CurrencyUnit, target_unit: CurrencyUnit) -> Result<f64, String> {
+            let url = format!(
+                "https://api.exchangerate.host/convert?from={}&to={}",
+                current_unit.to_string(),
+                target_unit.to_string()
+            );
+            let resp = reqwest::get(&url)
+                .await
+                .map_err(|e| e.to_string())?;
+    
+            // Save to postgres and/or redis
+            todo!();
+
+            let data: ExchangeResponse = resp.json().await.map_err(|e| e.to_string())?;
+            Ok(data.result)
         }
 
-        pub fn fetch_exchange_rate_expiry_in_seconds() -> i8 {
-            // fetch from somewhere e.g. toml file
-            // success or default is 30 mins
+        pub fn fetch_current_exchange_rate_sync(current_unit: CurrencyUnit, target_unit: CurrencyUnit) -> Result<f64, String> {
+        todo!()
+        }
+
+        // example: {rates":{"EUR":0.92}}
+        #[derive(Deserialize)]
+        struct HistoricalResponse {
+        rates: std::collections::HashMap<String, f64>,
+        }
+
+        pub async fn fetch_past_exchange_rate(current_unit: CurrencyUnit, target_unit: CurrencyUnit, datetime: NaiveDateTime) -> Result<f64, String> {
+            let date_str = datetime.format("%Y-%m-%d").to_string();
+
+            let url = format!(
+                "https://api.exchangerate.host/{}?base={}&symbols={}",
+                date_str,
+                current_unit.to_string(),
+                target_unit.to_string(),
+            );
+
+            let resp = reqwest::get(&url)
+                .await
+                .map_err(|e| e.to_string())?;
+
+            // Save to postgres and/or redis
+            todo!();
+
+            let data: HistoricalResponse = resp.json().await.map_err(|e| e.to_string())?;
+            data.rates
+                .get(&target_unit.to_string())
+                .cloned()
+                .ok_or_else(|| "Rate not found".to_string())
+        }
+
+        pub fn fetch_past_exchange_rate_sync(current_unit: CurrencyUnit, target_unit: CurrencyUnit, datetime: NaiveDateTime) -> Result<f64, String> {
             todo!()
         }
-    };
+   };
 }
 
 use currency_macro::include_currencies_from_json;

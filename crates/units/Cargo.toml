@@ -10,16 +10,13 @@ distance_macro = { path = "../proc_macros/units/distance_macro" }
 mass_macro = { path = "../proc_macros/units/mass_macro" }
 volume_macro = { path = "../proc_macros/units/volume_macro" }
 currency_macro = { path = "../proc_macros/units/currency_macro" }
-serde = { version = "1.0", features = ["derive"], optional = true }
+serde = { version = "1.0", features = ["derive"] }
 redis = { version = "0.25.2", optional = true }
 reqwest = { version = "0.12.4", features = ["json"] }
 chrono = "0.4.42"
 
 [features]
 default = []
-serde = [
-    'dep:serde',
-]
 redis = [
     'dep:redis',
 ]

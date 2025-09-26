@@ -1,19 +1,19 @@
+// #[allow(unreachable_patterns)]
+
 use std::{
     cmp::Ordering,
     fmt,
     ops::{Div, Mul},
 };
 
-#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    currency::{fetch_current_exchange_rate, Currency, CurrencyUnit},
+    currency::{fetch_current_exchange_rate_sync, Currency, CurrencyUnit},
     mass::Mass,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
 pub enum SpecificCurrencyUnit {
     GBPPerGram,
     USDPerGram,
@@ -42,8 +42,7 @@ impl SpecificCurrencyUnit {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
 pub struct SpecificCurrency {
     value: f64,
     unit: SpecificCurrencyUnit,
@@ -74,7 +73,7 @@ impl SpecificCurrency {
             SpecificCurrencyUnit::GBPPerGram => {
                 let current_unit = CurrencyUnit::GBP;
                 let target_unit = CurrencyUnit::USD;
-                self.value * fetch_current_exchange_rate(current_unit, target_unit).unwrap()
+                self.value * fetch_current_exchange_rate_sync(current_unit, target_unit).unwrap()
             }
         }
     }
@@ -85,7 +84,7 @@ impl SpecificCurrency {
             SpecificCurrencyUnit::GBPPerGram => {
                 let current_unit = CurrencyUnit::USD;
                 let target_unit = CurrencyUnit::GBP;
-                self.value * fetch_current_exchange_rate(current_unit, target_unit).unwrap()
+                self.value * fetch_current_exchange_rate_sync(current_unit, target_unit).unwrap()
             }
         }
     }
@@ -95,7 +94,7 @@ impl SpecificCurrency {
     }
 
     pub fn get_mass_for_currency(&self, currency: Currency) -> Mass {
-        let currency = currency.convert_to(CurrencyUnit::USD).unwrap();
+        let currency = currency.convert_to_sync(CurrencyUnit::USD).unwrap();
         Mass::from_g(currency.get_value() / self.as_usd_per_g())
     }
 
@@ -166,13 +165,11 @@ impl Mul<SpecificCurrency> for Mass {
     }
 }
 
-// d = m/v
-// sc = c/m
 impl Div<Mass> for Currency {
     type Output = SpecificCurrency;
 
     fn div(self, mass: Mass) -> SpecificCurrency {
-        let usd = self.convert_to(CurrencyUnit::USD).unwrap().get_value();
+        let usd = self.convert_to_sync(CurrencyUnit::USD).unwrap().get_value();
         let grams = mass.as_g();
         let usd_per_gram: f64 = usd / grams;
         SpecificCurrency::from_usd_per_g(usd_per_gram)

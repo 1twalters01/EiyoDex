@@ -1,4 +1,3 @@
-Change all factors e.g. grams_factor to si_factor (kg in this case)
 Split data into Metric and Imperial units
 Move data to a data folder or something
 

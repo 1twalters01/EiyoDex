@@ -1,3 +1,5 @@
+// #[allow(unreachable_patterns)]
+
 #[macro_export]
 macro_rules! define_masses {
     (
@@ -24,11 +26,9 @@ macro_rules! define_masses {
             fmt,
             ops::{Add, Div, Mul, Sub},
         };
-        #[cfg(feature = "serde")]
         use serde::{Deserialize, Serialize};
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-        #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+        #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
         pub enum MassUnit {
             $($variant),+
         }
@@ -77,8 +77,7 @@ macro_rules! define_masses {
 
         }
 
-        #[derive(Debug, Clone, Copy, PartialEq)]
-        #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+        #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
         pub struct Mass {
             value: f64,
             unit: MassUnit,

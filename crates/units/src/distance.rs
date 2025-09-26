@@ -1,3 +1,5 @@
+// #[allow(unreachable_patterns)]
+
 #[macro_export]
 macro_rules! define_distances {
     (
@@ -24,11 +26,9 @@ macro_rules! define_distances {
             fmt,
             ops::{Add, Div, Mul, Sub},
         };
-        #[cfg(feature = "serde")]
         use serde::{Deserialize, Serialize};
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-        #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+        #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
         pub enum DistanceUnit {
             $($variant),+
         }
@@ -77,8 +77,7 @@ macro_rules! define_distances {
 
         }
 
-        #[derive(Debug, Clone, Copy, PartialEq)]
-        #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+        #[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq)]
         pub struct Distance {
             value: f64,
             unit: DistanceUnit,

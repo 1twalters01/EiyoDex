@@ -25,11 +25,9 @@ macro_rules! define_volumes {
             ops::{Add, Div, Mul, Sub},
             // str::FromStr,
         };
-        #[cfg(feature = "serde")]
         use serde::{Deserialize, Serialize};
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-        #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+        #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
         pub enum VolumeUnit {
             $($variant),+
         }
@@ -69,6 +67,7 @@ macro_rules! define_volumes {
                 }
             }
 
+            #[allow(unreachable_patterns)]
             pub fn from_str(s: &str) -> Result<Self, &str> {
                 match s.trim().to_lowercase().as_str() {
                     $($symbol_lc | $unit_type_lc | $unit_type_plural_lc | $identifier_lc => Ok(VolumeUnit::$variant),)+
@@ -78,8 +77,7 @@ macro_rules! define_volumes {
 
         }
 
-        #[derive(Debug, Clone, Copy, PartialEq)]
-        #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+        #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
         pub struct Volume {
             value: f64,
             unit: VolumeUnit,

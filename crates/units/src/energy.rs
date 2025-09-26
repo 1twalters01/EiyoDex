@@ -1,3 +1,5 @@
+// #[allow(unreachable_patterns)]
+
 #[macro_export]
 macro_rules! define_energies {
     (
@@ -25,11 +27,9 @@ macro_rules! define_energies {
             ops::{Add, Div, Mul, Sub},
             // str::FromStr,
         };
-        #[cfg(feature = "serde")]
         use serde::{Deserialize, Serialize};
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-        #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+        #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
         pub enum EnergyUnit {
             $($variant),+
         }
@@ -78,8 +78,7 @@ macro_rules! define_energies {
 
         }
 
-        #[derive(Debug, Clone, Copy, PartialEq)]
-        #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+        #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
         pub struct Energy {
             value: f64,
             unit: EnergyUnit,
