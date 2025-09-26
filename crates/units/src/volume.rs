@@ -14,7 +14,7 @@ macro_rules! define_volumes {
                 unit_type_plural: $unit_type_plural:expr,
                 unit_type_plural_lc: $unit_type_plural_lc:expr,
                 identifier_lc: $identifier_lc:expr,
-                liters_factor: $liters_factor:expr
+                si_factor: $si_factor:expr
             }
         ),+ $(,)?
     ) => {
@@ -63,9 +63,9 @@ macro_rules! define_volumes {
                 }
             }
 
-            pub fn liters_factor(&self) -> f64 {
+            pub fn si_factor(&self) -> f64 {
                 match self {
-                    $(VolumeUnit::$variant => $liters_factor),+
+                    $(VolumeUnit::$variant => $si_factor),+
                 }
             }
 
@@ -104,7 +104,7 @@ macro_rules! define_volumes {
 
             $(
                 pub fn $as_fn_name(&self) -> f64 {
-                    self.value * self.unit.liters_factor() / $liters_factor
+                    self.value * self.unit.si_factor() / $si_factor
                 }
             )+
 

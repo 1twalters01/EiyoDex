@@ -1,0 +1,11 @@
+{
+  "GramPerMilliliter": {
+    "identifier": "g_per_ml",
+    "mass_unit": "Gram",
+    "volume_unit": "Milliliter",
+    "symbol": "g/mL",
+    "unit_type": "gram per milliliter",
+    "unit_type_plural": "grams per milliliter",
+    "measurement_system": "Metric"
+  }
+}

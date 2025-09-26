@@ -48,11 +48,11 @@ fn test_get_plural_unit_types() {
 
 #[test]
 fn test_get_grams_factor() {
-    assert_eq!(MassUnit::Gram.grams_factor(), 1 as f64);
-    assert_eq!(MassUnit::Milligram.grams_factor(), 0.001);
-    assert_eq!(MassUnit::Kilogram.grams_factor(), 1000 as f64);
-    assert_eq!(MassUnit::Microgram.grams_factor(), 0.000001);
-    assert_eq!(MassUnit::Ounce.grams_factor(), 28.34952);
+    assert_eq!(MassUnit::Gram.si_factor(), 0.001 as f64);
+    assert_eq!(MassUnit::Milligram.si_factor(), 0.000001);
+    assert_eq!(MassUnit::Kilogram.si_factor(), 1 as f64);
+    assert_eq!(MassUnit::Microgram.si_factor(), 0.000000001);
+    assert_eq!(MassUnit::Ounce.si_factor(), 0.02834952);
 }
 
 #[test]

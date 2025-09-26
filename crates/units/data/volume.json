@@ -5,7 +5,7 @@
         "unit_type": "liter",
         "unit_type_plural": "liters",
         "measurement_system": "Metric",
-        "liters_factor": 1.0
+        "si_factor": 0.001
     },
     "Milliliter": {
         "identifier": "ml",
@@ -13,7 +13,7 @@
         "unit_type": "milliliter",
         "unit_type_plural": "milliliters",
         "measurement_system": "Metric",
-        "liters_factor": 0.001 
+        "si_factor": 0.000001 
     },
     "Pint": {
         "identifier": "pt",
@@ -21,7 +21,7 @@
         "unit_type": "pint",
         "unit_type_plural": "pints",
         "measurement_system": "Imperial",
-        "liters_factor": 0.5682612
+        "si_factor": 0.0005682612
     },
     "Gallon": {
         "identifier": "gal",
@@ -29,7 +29,7 @@
         "unit_type": "gallon",
         "unit_type_plural": "gallons",
         "measurement_system": "Imperial",
-        "liters_factor": 4.54609
+        "si_factor": 0.00454609
     },
     "FluidOunce": {
         "identifier": "floz",
@@ -37,7 +37,7 @@
         "unit_type": "fluid ounce",
         "unit_type_plural": "fluid ounces",
         "measurement_system": "Imperial",
-        "liters_factor": 0.02841306
+        "si_factor": 0.00002841306
     },
     "Tablespoon": {
         "identifier": "tbsp",
@@ -45,7 +45,7 @@
         "unit_type": "tablespoon",
         "unit_type_plural": "tablespoons",
         "measurement_system": "Imperial",
-        "liters_factor": 0.01775816
+        "si_factor": 0.00001775816
     },
     "Teaspoon": {
         "identifier": "tsp",
@@ -53,7 +53,7 @@
         "unit_type": "teaspoon",
         "unit_type_plural": "teaspoons",
         "measurement_system": "Imperial",
-        "liters_factor": 0.005919387
+        "si_factor": 0.000005919387
     }
 }
 

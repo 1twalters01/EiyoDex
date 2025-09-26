@@ -43,10 +43,10 @@ fn test_get_plural_unit_types() {
 
 #[test]
 fn test_get_factor() {
-    assert_eq!(DistanceUnit::Meter.meters_factor(), 1 as f64);
-    assert_eq!(DistanceUnit::Centimeter.meters_factor(), 0.01);
-    assert_eq!(DistanceUnit::Foot.meters_factor(), 0.3048 as f64);
-    assert_eq!(DistanceUnit::Inch.meters_factor(), 0.0254);
+    assert_eq!(DistanceUnit::Meter.si_factor(), 1 as f64);
+    assert_eq!(DistanceUnit::Centimeter.si_factor(), 0.01);
+    assert_eq!(DistanceUnit::Foot.si_factor(), 0.3048 as f64);
+    assert_eq!(DistanceUnit::Inch.si_factor(), 0.0254);
 }
 
 #[test]

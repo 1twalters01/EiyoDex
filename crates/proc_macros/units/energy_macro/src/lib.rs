@@ -13,7 +13,7 @@ struct EnergyJson {
     unit_type: String,
     unit_type_plural: String,
     measurement_system: String,
-    joules_factor: f64,
+    si_factor: f64,
 }
 
 #[proc_macro]
@@ -51,7 +51,7 @@ pub fn include_energies_from_json(input: TokenStream) -> TokenStream {
         let unit_type_plural = &data.unit_type_plural;
         let unit_type_plural_lc = &data.unit_type_plural.to_lowercase();
         let identifier_lc = &data.identifier.to_lowercase();
-        let joules_factor = &data.joules_factor;
+        let si_factor = &data.si_factor;
 
         quote! {
             #variant => {
@@ -66,7 +66,7 @@ pub fn include_energies_from_json(input: TokenStream) -> TokenStream {
                 unit_type_plural: #unit_type_plural,
                 unit_type_plural_lc: #unit_type_plural_lc,
                 identifier_lc: #identifier_lc,
-                joules_factor: #joules_factor
+                si_factor: #si_factor
             }
         }
     });

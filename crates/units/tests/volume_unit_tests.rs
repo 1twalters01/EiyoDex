@@ -20,18 +20,18 @@ fn test_get_volume_unit_enumerations() {
     );
 }
 
-// #[test]
-// fn test_get_symbols() {
-//     assert_eq!(VolumeUnit::Liter.as_symbol(), "L");
-//     assert_eq!(VolumeUnit::Milliliter.as_symbol(), "mL");
-//     assert_eq!(VolumeUnit::Pint.as_symbol(), "pt");
-//     assert_eq!(VolumeUnit::Gallon.as_symbol(), "gal");
-//     assert_eq!(VolumeUnit::FluidOunce.as_symbol(), "fl oz");
-//     assert_eq!(VolumeUnit::Teaspoon.as_symbol(), "tsp");
-//     assert_eq!(VolumeUnit::Tablespoon.as_symbol(), "tbsp");
-//
-//     assert_eq!(VolumeUnit::FakeLiter.as_symbol(), "fL");
-// }
+#[test]
+fn test_get_symbols() {
+    assert_eq!(VolumeUnit::Liter.as_symbol(), "L");
+    assert_eq!(VolumeUnit::Milliliter.as_symbol(), "mL");
+    assert_eq!(VolumeUnit::Pint.as_symbol(), "pt");
+    assert_eq!(VolumeUnit::Gallon.as_symbol(), "gal");
+    assert_eq!(VolumeUnit::FluidOunce.as_symbol(), "fl oz");
+    assert_eq!(VolumeUnit::Teaspoon.as_symbol(), "tsp");
+    assert_eq!(VolumeUnit::Tablespoon.as_symbol(), "tbsp");
+
+    assert_eq!(VolumeUnit::FakeLiter.as_symbol(), "fL");
+}
 
 #[test]
 fn test_get_unit_types() {
@@ -61,13 +61,13 @@ fn test_get_plural_unit_types() {
 
 #[test]
 fn test_get_liters_factor() {
-    assert_eq!(VolumeUnit::Liter.liters_factor(), 1 as f64);
-    assert_eq!(VolumeUnit::Milliliter.liters_factor(), 0.001);
-    assert_eq!(VolumeUnit::Pint.liters_factor(), 0.5682612);
-    assert_eq!(VolumeUnit::Gallon.liters_factor(), 4.54609);
-    assert_eq!(VolumeUnit::FluidOunce.liters_factor(), 0.02841306);
-    assert_eq!(VolumeUnit::Tablespoon.liters_factor(), 0.01775816);
-    assert_eq!(VolumeUnit::Teaspoon.liters_factor(), 0.005919387);
+    assert_eq!(VolumeUnit::Liter.si_factor(), 0.001);
+    assert_eq!(VolumeUnit::Milliliter.si_factor(), 0.000001);
+    assert_eq!(VolumeUnit::Pint.si_factor(), 0.0005682612);
+    assert_eq!(VolumeUnit::Gallon.si_factor(), 0.00454609);
+    assert_eq!(VolumeUnit::FluidOunce.si_factor(), 0.00002841306);
+    assert_eq!(VolumeUnit::Tablespoon.si_factor(), 0.00001775816);
+    assert_eq!(VolumeUnit::Teaspoon.si_factor(), 0.000005919387);
 }
 
 #[test]

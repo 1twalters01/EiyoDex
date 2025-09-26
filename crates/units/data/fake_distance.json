@@ -5,6 +5,6 @@
         "unit_type": "fakemeter",
         "unit_type_plural": "fakemeters",
         "measurement_system": "Fake",
-        "meters_factor": 1.0
+        "si_factor": 1.0
     }
 }

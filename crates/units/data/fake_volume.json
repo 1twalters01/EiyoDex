@@ -5,6 +5,6 @@
         "unit_type": "fakeliter",
         "unit_type_plural": "fakeliters",
         "measurement_system": "Fake",
-        "liters_factor": 1.0
+        "si_factor": 1.0
     }
 }

@@ -35,8 +35,8 @@ fn test_get_plural_unit_types() {
 
 #[test]
 fn test_get_joules_factor() {
-    assert_eq!(EnergyUnit::Kilojoule.joules_factor(), 1000 as f64);
-    assert_eq!(EnergyUnit::Kilocalorie.joules_factor(), 4184f64);
+    assert_eq!(EnergyUnit::Kilojoule.si_factor(), 1000 as f64);
+    assert_eq!(EnergyUnit::Kilocalorie.si_factor(), 4184f64);
 }
 
 #[test]

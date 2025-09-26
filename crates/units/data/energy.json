@@ -5,7 +5,7 @@
         "unit_type": "kilojoule",
         "unit_type_plural": "kilojoules",
         "measurement_system": "Metric",
-        "joules_factor": 1000
+        "si_factor": 1000
     },
     "Kilocalorie": {
         "identifier": "kcal",
@@ -13,6 +13,6 @@
         "unit_type": "kilocalorie",
         "unit_type_plural": "kilocalories",
         "measurement_system": "Metric",
-        "joules_factor": 4184
+        "si_factor": 4184
     }
 }

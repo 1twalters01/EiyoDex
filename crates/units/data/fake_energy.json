@@ -5,7 +5,7 @@
         "unit_type": "fakejoule",
         "unit_type_plural": "fakejoules",
         "measurement_system": "Fake",
-        "joules_factor": 1000
+        "si_factor": 1000
     }
 }
 

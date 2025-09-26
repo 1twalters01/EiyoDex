@@ -5,7 +5,7 @@
         "unit_type": "meter",
         "unit_type_plural": "meters",
         "measurement_system": "Metric",
-        "meters_factor": 1.0
+        "si_factor": 1.0
     },
     "Centimeter": {
         "identifier": "cm",
@@ -13,7 +13,7 @@
         "unit_type": "centimeter",
         "unit_type_plural": "centimeters",
         "measurement_system": "Metric",
-        "meters_factor": 0.01 
+        "si_factor": 0.01 
     },
     "Foot": {
         "identifier": "ft",
@@ -21,7 +21,7 @@
         "unit_type": "foot",
         "unit_type_plural": "feet",
         "measurement_system": "Imperial",
-        "meters_factor": 0.3048
+        "si_factor": 0.3048
     },
     "Inch": {
         "identifier": "in",
@@ -29,6 +29,6 @@
         "unit_type": "inch",
         "unit_type_plural": "inches",
         "measurement_system": "Imperial",
-        "meters_factor": 0.0254
+        "si_factor": 0.0254
     }
 }

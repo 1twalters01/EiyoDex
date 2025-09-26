@@ -122,8 +122,8 @@ fn test_volume_to_unit() {
     let new_value = value / 0.5682612;
 
     let mass_l = Volume::from_l(value);
-    let mass_pt = Volume::from_pt(new_value);
-    let mass_l_to_pt = mass_l.to_unit(VolumeUnit::Pint);
+    let mass_pt = Volume::from_pt(new_value).round(5);
+    let mass_l_to_pt = mass_l.to_unit(VolumeUnit::Pint).round(5);
 
     print!("mass_ounces1: {},\nmass_ounces2: {}", mass_pt, mass_l_to_pt);
     assert_eq!(mass_pt, mass_l_to_pt);
@@ -135,8 +135,8 @@ fn test_volume_to_fn() {
     let new_value = value / 0.5682612;
 
     let mass_l = Volume::from_l(value);
-    let mass_pt = Volume::from_pt(new_value);
-    let mass_l_to_pt = mass_l.to_pt();
+    let mass_pt = Volume::from_pt(new_value).round(6);
+    let mass_l_to_pt = mass_l.to_pt().round(6);
 
     print!(
         "volume_pints 1: {},\nvolume_pints 2: {}",
@@ -320,8 +320,8 @@ fn test_volume_subtract() {
     let volume_l_minus_ml_1 = Volume::from_l(-5.5);
     let volume_ml_2_minus_l = Volume::from_ml(3500f64);
 
-    assert_eq!(volume_ml_1 - volume_ml_2, volume_ml_1_minus_ml_2);
-    assert_eq!(volume_l - volume_ml_1, volume_l_minus_ml_1);
+    assert_eq!((volume_ml_1 - volume_ml_2).round(1), volume_ml_1_minus_ml_2);
+    assert_eq!((volume_l - volume_ml_1).round(1), volume_l_minus_ml_1);
     assert_eq!(volume_ml_2 - volume_l, volume_ml_2_minus_l);
 }
 

@@ -14,7 +14,7 @@ macro_rules! define_masses {
                 unit_type_plural: $unit_type_plural:expr,
                 unit_type_plural_lc: $unit_type_plural_lc:expr,
                 identifier_lc: $identifier_lc:expr,
-                grams_factor: $grams_factor:expr
+                si_factor: $si_factor:expr
             }
         ),+ $(,)?
     ) => {
@@ -62,9 +62,9 @@ macro_rules! define_masses {
                 }
             }
 
-            pub fn grams_factor(&self) -> f64 {
+            pub fn si_factor(&self) -> f64 {
                 match self {
-                    $(MassUnit::$variant => $grams_factor),+
+                    $(MassUnit::$variant => $si_factor),+
                 }
             }
 
@@ -103,7 +103,7 @@ macro_rules! define_masses {
 
             $(
                 pub fn $as_fn_name(&self) -> f64 {
-                    self.value * self.unit.grams_factor() / $grams_factor
+                    self.value * self.unit.si_factor() / $si_factor
                 }
             )+
 
@@ -230,4 +230,6 @@ impl PartialOrd for Mass {
 }
 
 use mass_macro::include_masses_from_json;
-include_masses_from_json!("data/mass.json", "data/fake_mass.json",);
+include_masses_from_json!(
+    "data/mass.json",
+    "data/fake_mass.json",);

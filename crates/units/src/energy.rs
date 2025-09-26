@@ -14,7 +14,7 @@ macro_rules! define_energies {
                 unit_type_plural: $unit_type_plural:expr,
                 unit_type_plural_lc: $unit_type_plural_lc:expr,
                 identifier_lc: $identifier_lc:expr,
-                joules_factor: $joules_factor:expr
+                si_factor: $si_factor:expr
             }
         ),+ $(,)?
     ) => {
@@ -63,9 +63,9 @@ macro_rules! define_energies {
                 }
             }
 
-            pub fn joules_factor(&self) -> f64 {
+            pub fn si_factor(&self) -> f64 {
                 match self {
-                    $(EnergyUnit::$variant => $joules_factor),+
+                    $(EnergyUnit::$variant => $si_factor),+
                 }
             }
 
@@ -104,7 +104,7 @@ macro_rules! define_energies {
 
             $(
                 pub fn $as_fn_name(&self) -> f64 {
-                    self.value * self.unit.joules_factor() / $joules_factor
+                    self.value * self.unit.si_factor() / $si_factor
                 }
             )+
 

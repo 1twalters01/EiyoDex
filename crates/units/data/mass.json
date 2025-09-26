@@ -5,7 +5,7 @@
         "unit_type": "gram",
         "unit_type_plural": "grams",
         "measurement_system": "Metric",
-        "grams_factor": 1.0
+        "si_factor": 0.001
     },
     "Milligram": {
         "identifier": "mg",
@@ -13,7 +13,7 @@
         "unit_type": "milligram",
         "unit_type_plural": "milligrams",
         "measurement_system": "Metric",
-        "grams_factor": 0.001 
+        "si_factor": 0.000001 
     },
     "Kilogram": {
         "identifier": "kg",
@@ -21,7 +21,7 @@
         "unit_type": "kilogram",
         "unit_type_plural": "kilograms",
         "measurement_system": "Metric",
-        "grams_factor": 1000.0
+        "si_factor": 1.0
     },
     "Microgram": {
         "identifier": "ug",
@@ -29,7 +29,7 @@
         "unit_type": "microgram",
         "unit_type_plural": "micrograms",
         "measurement_system": "Metric",
-        "grams_factor": 0.000001
+        "si_factor": 0.000000001
     },
     "Ounce": {
         "identifier": "oz",
@@ -37,7 +37,7 @@
         "unit_type": "ounce",
         "unit_type_plural": "ounces",
         "measurement_system": "Imperial",
-        "grams_factor": 28.34952
+        "si_factor": 0.02834952
     }
 }
 

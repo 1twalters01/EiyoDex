@@ -14,7 +14,7 @@ macro_rules! define_distances {
                 unit_type_plural: $unit_type_plural:expr,
                 unit_type_plural_lc: $unit_type_plural_lc:expr,
                 identifier_lc: $identifier_lc:expr,
-                meters_factor: $meters_factor:expr
+                si_factor: $si_factor:expr
             }
         ),+ $(,)?
     ) => {
@@ -62,9 +62,9 @@ macro_rules! define_distances {
                 }
             }
 
-            pub fn meters_factor(&self) -> f64 {
+            pub fn si_factor(&self) -> f64 {
                 match self {
-                    $(DistanceUnit::$variant => $meters_factor),+
+                    $(DistanceUnit::$variant => $si_factor),+
                 }
             }
 
@@ -103,7 +103,7 @@ macro_rules! define_distances {
 
             $(
                 pub fn $as_fn_name(&self) -> f64 {
-                    self.value * self.unit.meters_factor() / $meters_factor
+                    self.value * self.unit.si_factor() / $si_factor
                 }
             )+
 
