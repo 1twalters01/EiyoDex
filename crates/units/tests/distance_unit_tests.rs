@@ -36,7 +36,10 @@ fn test_get_unit_types() {
 #[test]
 fn test_get_plural_unit_types() {
     assert_eq!(DistanceUnit::Meter.as_unit_type_plural(), "meters");
-    assert_eq!(DistanceUnit::Centimeter.as_unit_type_plural(), "centimeters");
+    assert_eq!(
+        DistanceUnit::Centimeter.as_unit_type_plural(),
+        "centimeters"
+    );
     assert_eq!(DistanceUnit::Foot.as_unit_type_plural(), "feet");
     assert_eq!(DistanceUnit::Inch.as_unit_type_plural(), "inches");
 }
@@ -52,13 +55,28 @@ fn test_get_factor() {
 #[test]
 fn test_from_str() {
     assert_eq!(DistanceUnit::from_str("m").unwrap(), DistanceUnit::Meter);
-    assert_eq!(DistanceUnit::from_str("meter").unwrap(), DistanceUnit::Meter);
-    assert_eq!(DistanceUnit::from_str("Meter").unwrap(), DistanceUnit::Meter);
-    assert_eq!(DistanceUnit::from_str("meters").unwrap(), DistanceUnit::Meter);
-    assert_eq!(DistanceUnit::from_str("mEtErS").unwrap(), DistanceUnit::Meter);
+    assert_eq!(
+        DistanceUnit::from_str("meter").unwrap(),
+        DistanceUnit::Meter
+    );
+    assert_eq!(
+        DistanceUnit::from_str("Meter").unwrap(),
+        DistanceUnit::Meter
+    );
+    assert_eq!(
+        DistanceUnit::from_str("meters").unwrap(),
+        DistanceUnit::Meter
+    );
+    assert_eq!(
+        DistanceUnit::from_str("mEtErS").unwrap(),
+        DistanceUnit::Meter
+    );
     assert_ne!(DistanceUnit::from_str("cm").unwrap(), DistanceUnit::Meter);
 
-    assert_eq!(DistanceUnit::from_str("cm").unwrap(), DistanceUnit::Centimeter);
+    assert_eq!(
+        DistanceUnit::from_str("cm").unwrap(),
+        DistanceUnit::Centimeter
+    );
     assert_eq!(
         DistanceUnit::from_str("centimeter").unwrap(),
         DistanceUnit::Centimeter
@@ -73,13 +91,9 @@ fn test_from_str() {
     assert_eq!(DistanceUnit::from_str("feet").unwrap(), DistanceUnit::Foot);
 
     assert_eq!(DistanceUnit::from_str("in").unwrap(), DistanceUnit::Inch);
-    assert_eq!(
-        DistanceUnit::from_str("inch").unwrap(),
-        DistanceUnit::Inch
-    );
+    assert_eq!(DistanceUnit::from_str("inch").unwrap(), DistanceUnit::Inch);
     assert_eq!(
         DistanceUnit::from_str("inches").unwrap(),
         DistanceUnit::Inch
     );
 }
-

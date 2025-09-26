@@ -187,7 +187,7 @@ impl Nutrient {
                     .map(|energy_unit| self.accepted_units.insert(Unit::Energy(*energy_unit)));
 
                 let energy = Energy::new(1 as f64, energy_unit);
-                (Unit::Energy(EnergyUnit::Kcal), energy.as_kcal())
+                (Unit::Energy(EnergyUnit::Kilocalorie), energy.as_kcal())
             }
             _ => {
                 self.accepted_units.insert(from);
@@ -218,7 +218,7 @@ impl Nutrient {
                     .map(|energy_unit| self.accepted_units.insert(Unit::Energy(*energy_unit)));
 
                 let energy = Energy::new(1 as f64, energy_unit);
-                (Unit::Energy(EnergyUnit::Kcal), energy.as_kcal())
+                (Unit::Energy(EnergyUnit::Kilocalorie), energy.as_kcal())
             }
             _ => {
                 self.accepted_units.insert(from);

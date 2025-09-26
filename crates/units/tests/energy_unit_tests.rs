@@ -30,7 +30,10 @@ fn test_get_unit_types() {
 #[test]
 fn test_get_plural_unit_types() {
     assert_eq!(EnergyUnit::Kilojoule.as_unit_type_plural(), "kilojoules");
-    assert_eq!(EnergyUnit::Kilocalorie.as_unit_type_plural(), "kilocalories");
+    assert_eq!(
+        EnergyUnit::Kilocalorie.as_unit_type_plural(),
+        "kilocalories"
+    );
 }
 
 #[test]
@@ -42,13 +45,28 @@ fn test_get_joules_factor() {
 #[test]
 fn test_from_str() {
     assert_eq!(EnergyUnit::from_str("kj").unwrap(), EnergyUnit::Kilojoule);
-    assert_eq!(EnergyUnit::from_str("kilojoule").unwrap(), EnergyUnit::Kilojoule);
-    assert_eq!(EnergyUnit::from_str("Kilojoule").unwrap(), EnergyUnit::Kilojoule);
-    assert_eq!(EnergyUnit::from_str("kilojoules").unwrap(), EnergyUnit::Kilojoule);
-    assert_eq!(EnergyUnit::from_str("KilOJOUleS").unwrap(), EnergyUnit::Kilojoule);
+    assert_eq!(
+        EnergyUnit::from_str("kilojoule").unwrap(),
+        EnergyUnit::Kilojoule
+    );
+    assert_eq!(
+        EnergyUnit::from_str("Kilojoule").unwrap(),
+        EnergyUnit::Kilojoule
+    );
+    assert_eq!(
+        EnergyUnit::from_str("kilojoules").unwrap(),
+        EnergyUnit::Kilojoule
+    );
+    assert_eq!(
+        EnergyUnit::from_str("KilOJOUleS").unwrap(),
+        EnergyUnit::Kilojoule
+    );
     assert_ne!(EnergyUnit::from_str("kcal").unwrap(), EnergyUnit::Kilojoule);
 
-    assert_eq!(EnergyUnit::from_str("kcal").unwrap(), EnergyUnit::Kilocalorie);
+    assert_eq!(
+        EnergyUnit::from_str("kcal").unwrap(),
+        EnergyUnit::Kilocalorie
+    );
     assert_eq!(
         EnergyUnit::from_str("kilocalorie").unwrap(),
         EnergyUnit::Kilocalorie

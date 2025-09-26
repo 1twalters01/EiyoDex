@@ -41,8 +41,13 @@ fn test_energy_as_fn() {
     let energy_kj = Energy::from_kj(value);
 
     // percentage error calculations
-    assert!((energy_kcal.as_kj() - value * 4.184 as f64).abs() / energy_kcal.as_kcal() < percentage_err);
-    assert!((energy_kj.as_kcal() - value * 0.2390057 as f64).abs() / energy_kj.as_kcal() < percentage_err);
+    assert!(
+        (energy_kcal.as_kj() - value * 4.184 as f64).abs() / energy_kcal.as_kcal() < percentage_err
+    );
+    assert!(
+        (energy_kj.as_kcal() - value * 0.2390057 as f64).abs() / energy_kj.as_kcal()
+            < percentage_err
+    );
 }
 
 #[test]
@@ -54,7 +59,10 @@ fn test_energy_to_unit() {
     let energy_kj = Energy::from_kj(new_value);
     let energy_kcal_to_kj = energy_kcal.to_unit(EnergyUnit::Kilojoule);
 
-    print!("mass_ounces1: {},\nmass_ounces2: {}", energy_kj, energy_kcal_to_kj);
+    print!(
+        "mass_ounces1: {},\nmass_ounces2: {}",
+        energy_kj, energy_kcal_to_kj
+    );
     assert_eq!(energy_kj, energy_kcal_to_kj);
 }
 
@@ -67,7 +75,10 @@ fn test_energy_to_fn() {
     let energy_kj = Energy::from_kj(new_value);
     let mass_kcal_to_kj = energy_kcal.to_kj();
 
-    print!("mass_ounces1: {},\nmass_ounces2: {}", energy_kj, mass_kcal_to_kj);
+    print!(
+        "mass_ounces1: {},\nmass_ounces2: {}",
+        energy_kj, mass_kcal_to_kj
+    );
     assert_eq!(energy_kj, mass_kcal_to_kj);
 }
 
@@ -132,8 +143,14 @@ fn test_mass_get_measurement_system() {
     let energy_kcal = Energy::from_kcal(value);
     let energy_kj = Energy::from_kj(value);
 
-    assert_eq!(energy_kcal.get_measurement_system(), MeasurementSystem::Metric);
-    assert_eq!(energy_kj.get_measurement_system(), MeasurementSystem::Metric);
+    assert_eq!(
+        energy_kcal.get_measurement_system(),
+        MeasurementSystem::Metric
+    );
+    assert_eq!(
+        energy_kj.get_measurement_system(),
+        MeasurementSystem::Metric
+    );
 }
 
 #[test]

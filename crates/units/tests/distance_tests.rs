@@ -65,7 +65,9 @@ fn test_distance_as_fn() {
 
     assert!((distance_in.as_m() - value * 0.0254).abs() / distance_in.as_m() < percentage_err);
     assert!((distance_in.as_cm() - value * 2.54).abs() / distance_in.as_cm() < percentage_err);
-    assert!((distance_in.as_ft() - value * 0.08333333).abs() / distance_in.as_ft() < percentage_err);
+    assert!(
+        (distance_in.as_ft() - value * 0.08333333).abs() / distance_in.as_ft() < percentage_err
+    );
 }
 
 #[test]
@@ -77,7 +79,10 @@ fn test_distance_to_unit() {
     let distance_cm = Distance::from_cm(new_value);
     let distance_m_to_cm = distance_m.to_unit(DistanceUnit::Centimeter);
 
-    print!("mass_ounces1: {},\nmass_ounces2: {}", distance_cm, distance_m_to_cm);
+    print!(
+        "mass_ounces1: {},\nmass_ounces2: {}",
+        distance_cm, distance_m_to_cm
+    );
     assert_eq!(distance_cm, distance_m_to_cm);
 }
 
@@ -90,7 +95,10 @@ fn test_distance_to_fn() {
     let distance_cm = Distance::from_cm(new_value);
     let distance_m_to_cm = distance_m.to_cm();
 
-    print!("distance_centimeters1: {},\ndistance_centimeters2: {}", distance_cm, distance_m_to_cm);
+    print!(
+        "distance_centimeters1: {},\ndistance_centimeters2: {}",
+        distance_cm, distance_m_to_cm
+    );
     assert_eq!(distance_cm, distance_m_to_cm);
 }
 
@@ -161,10 +169,22 @@ fn test_distance_get_measurement_system() {
     let distance_ft = Distance::from_ft(value);
     let distance_in = Distance::from_in(value);
 
-    assert_eq!(distance_m.get_measurement_system(), MeasurementSystem::Metric);
-    assert_eq!(distance_cm.get_measurement_system(), MeasurementSystem::Metric);
-    assert_eq!(distance_ft.get_measurement_system(), MeasurementSystem::Imperial);
-    assert_eq!(distance_in.get_measurement_system(), MeasurementSystem::Imperial);
+    assert_eq!(
+        distance_m.get_measurement_system(),
+        MeasurementSystem::Metric
+    );
+    assert_eq!(
+        distance_cm.get_measurement_system(),
+        MeasurementSystem::Metric
+    );
+    assert_eq!(
+        distance_ft.get_measurement_system(),
+        MeasurementSystem::Imperial
+    );
+    assert_eq!(
+        distance_in.get_measurement_system(),
+        MeasurementSystem::Imperial
+    );
 }
 
 #[test]
@@ -275,4 +295,3 @@ fn test_mass_partial_order() {
     assert!(distance_m_1 > distance_cm);
     assert!(distance_cm > distance_m_2);
 }
-

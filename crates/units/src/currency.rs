@@ -208,6 +208,10 @@ macro_rules! define_currencies {
         }
 
         pub async fn fetch_current_exchange_rate(current_unit: CurrencyUnit, target_unit: CurrencyUnit) -> Result<f64, String> {
+            if current_unit == target_unit {
+                return Ok(1f64)
+            }
+
             let url = format!(
                 "https://api.exchangerate.host/convert?from={}&to={}",
                 current_unit.to_string(),
@@ -216,7 +220,7 @@ macro_rules! define_currencies {
             let resp = reqwest::get(&url)
                 .await
                 .map_err(|e| e.to_string())?;
-    
+
             // Save to postgres and/or redis
             todo!();
 
@@ -225,7 +229,14 @@ macro_rules! define_currencies {
         }
 
         pub fn fetch_current_exchange_rate_sync(current_unit: CurrencyUnit, target_unit: CurrencyUnit) -> Result<f64, String> {
-        todo!()
+            if current_unit == target_unit {
+                return Ok(1f64)
+            }
+
+            // read from redis
+            let exchange_rate = todo!();
+
+            return exchange_rate
         }
 
         // example: {rates":{"EUR":0.92}}
@@ -235,6 +246,10 @@ macro_rules! define_currencies {
         }
 
         pub async fn fetch_past_exchange_rate(current_unit: CurrencyUnit, target_unit: CurrencyUnit, datetime: NaiveDateTime) -> Result<f64, String> {
+            if current_unit == target_unit {
+                return Ok(1f64)
+            }
+
             let date_str = datetime.format("%Y-%m-%d").to_string();
 
             let url = format!(
@@ -259,6 +274,10 @@ macro_rules! define_currencies {
         }
 
         pub fn fetch_past_exchange_rate_sync(current_unit: CurrencyUnit, target_unit: CurrencyUnit, datetime: NaiveDateTime) -> Result<f64, String> {
+            if current_unit == target_unit {
+                return Ok(1f64)
+            }
+
             todo!()
         }
    };

@@ -229,8 +229,4 @@ impl PartialOrd for Distance {
 }
 
 use distance_macro::include_distances_from_json;
-include_distances_from_json!(
-    "data/distance.json",
-    "data/fake_distance.json",
-);
-
+include_distances_from_json!("data/distance.json", "data/fake_distance.json",);

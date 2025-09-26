@@ -231,4 +231,3 @@ impl PartialOrd for Energy {
 
 use energy_macro::include_energies_from_json;
 include_energies_from_json!("data/energy.json", "data/fake_energy.json",);
-

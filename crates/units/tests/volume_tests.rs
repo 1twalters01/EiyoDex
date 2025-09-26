@@ -86,24 +86,16 @@ fn test_volume_as_fn() {
     assert!((volume_gal.as_l() - value * 4.54609).abs() / volume_gal.as_l() < percentage_err);
     assert!((volume_gal.as_ml() - value * 4546.09).abs() / volume_gal.as_ml() < percentage_err);
     assert!((volume_gal.as_pt() - value * 8f64).abs() / volume_gal.as_pt() < percentage_err);
-    assert!(
-        (volume_gal.as_tbsp() - value * 256f64).abs() / volume_gal.as_tbsp() < percentage_err
-    );
-    assert!(
-        (volume_gal.as_tsp() - value * 786f64).abs() / volume_gal.as_tsp() < percentage_err
-    );
+    assert!((volume_gal.as_tbsp() - value * 256f64).abs() / volume_gal.as_tbsp() < percentage_err);
+    assert!((volume_gal.as_tsp() - value * 786f64).abs() / volume_gal.as_tsp() < percentage_err);
 
     assert!((volume_tbsp.as_l() - value * 0.01775816).abs() / volume_tbsp.as_l() < percentage_err);
     assert!((volume_tbsp.as_ml() - value * 17.75816).abs() / volume_tbsp.as_ml() < percentage_err);
-    assert!(
-        (volume_tbsp.as_pt() - value * 0.03125).abs() / volume_tbsp.as_pt() < percentage_err
-    );
+    assert!((volume_tbsp.as_pt() - value * 0.03125).abs() / volume_tbsp.as_pt() < percentage_err);
     assert!(
         (volume_tbsp.as_gal() - value * 0.00390625).abs() / volume_tbsp.as_gal() < percentage_err
     );
-    assert!(
-        (volume_tbsp.as_tsp() - value * 3f64).abs() / volume_tbsp.as_tsp() < percentage_err
-    );
+    assert!((volume_tbsp.as_tsp() - value * 3f64).abs() / volume_tbsp.as_tsp() < percentage_err);
 
     assert!((volume_tsp.as_l() - value * 0.005919387).abs() / volume_tsp.as_l() < percentage_err);
     assert!((volume_tsp.as_ml() - value * 5.919388).abs() / volume_tsp.as_ml() < percentage_err);
