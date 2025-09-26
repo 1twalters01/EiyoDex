@@ -34,8 +34,8 @@ macro_rules! define_masses {
         }
 
         impl MassUnit {
-            pub fn get_enumerations() -> Vec<MassUnit> {
-                Vec::from([$(MassUnit::$variant),+])
+            pub fn get_enumerations() -> &'static [MassUnit] {
+                &[$(MassUnit::$variant),+]
             }
 
             pub fn as_symbol(&self) -> &'static str {

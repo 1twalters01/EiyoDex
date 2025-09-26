@@ -5,9 +5,9 @@ use units::energy::EnergyUnit;
 fn test_get_energy_unit_enumerations() {
     let function_enumerations = EnergyUnit::get_enumerations();
     let manual_enumerations = vec![
-        EnergyUnit::Kilojoule,
-        EnergyUnit::Kilocalorie,
-        EnergyUnit::Fakejoule,
+        &EnergyUnit::Kilojoule,
+        &EnergyUnit::Kilocalorie,
+        &EnergyUnit::Fakejoule,
     ];
     assert_eq!(
         BTreeSet::from_iter(function_enumerations),

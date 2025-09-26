@@ -34,8 +34,8 @@ macro_rules! define_distances {
         }
 
         impl DistanceUnit {
-            pub fn get_enumerations() -> Vec<DistanceUnit> {
-                Vec::from([$(DistanceUnit::$variant),+])
+            pub fn get_enumerations() -> &'static [DistanceUnit] {
+                &[$(DistanceUnit::$variant),+]
             }
 
             pub fn as_symbol(&self) -> &'static str {

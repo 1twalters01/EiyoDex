@@ -27,16 +27,14 @@ macro_rules! define_currencies {
             pub unit_type_plural: &'static str,
         }
 
-        #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash)]
+        #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
         pub enum CurrencyUnit {
             $($variant),+
         }
 
         impl CurrencyUnit {
-            pub fn variants() -> &'static [CurrencyUnit] {
-                &[
-                    $(CurrencyUnit::$variant),+
-                ]
+            pub fn get_enumerations() -> &'static [CurrencyUnit] {
+                &[$(CurrencyUnit::$variant),+]
             }
 
             pub fn metadata(&self) -> CurrencyMetadata {
@@ -51,19 +49,27 @@ macro_rules! define_currencies {
             }
 
             pub fn as_symbol(&self) -> &'static str {
-                self.metadata().symbol
+                match self {
+                    $(CurrencyUnit::$variant => $symbol),+
+                }
             }
 
             pub fn as_code(&self) -> &'static str {
-                self.metadata().code
+                match self {
+                    $(CurrencyUnit::$variant => $code),+
+                }
             }
 
             pub fn as_unit_type(&self) -> &'static str {
-                self.metadata().unit_type
+                match self {
+                    $(CurrencyUnit::$variant => $unit_type),+
+                }
             }
 
             pub fn as_unit_type_plural(&self) -> &'static str {
-                self.metadata().unit_type_plural
+                match self {
+                    $(CurrencyUnit::$variant => $unit_type_plural),+
+                }
             }
         }
 
@@ -72,7 +78,7 @@ macro_rules! define_currencies {
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 let formatted_s = s.trim().to_uppercase();
-                for variant in Self::variants() {
+                for variant in Self::get_enumerations() {
                     let variant_metadata = variant.metadata();
                     if formatted_s == variant_metadata.code || formatted_s == variant_metadata.symbol {
                         return Ok(*variant);

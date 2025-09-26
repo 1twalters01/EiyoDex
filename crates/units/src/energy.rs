@@ -25,7 +25,6 @@ macro_rules! define_energies {
             cmp::Ordering,
             fmt,
             ops::{Add, Div, Mul, Sub},
-            // str::FromStr,
         };
         use serde::{Deserialize, Serialize};
 
@@ -35,8 +34,8 @@ macro_rules! define_energies {
         }
 
         impl EnergyUnit {
-            pub fn get_enumerations() -> Vec<EnergyUnit> {
-                Vec::from([$(EnergyUnit::$variant),+])
+            pub fn get_enumerations() -> &'static [EnergyUnit] {
+                &[$(EnergyUnit::$variant),+]
             }
 
             pub fn as_symbol(&self) -> &'static str {

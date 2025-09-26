@@ -5,11 +5,11 @@ use units::distance::DistanceUnit;
 fn test_get_distance_unit_enumerations() {
     let function_enumerations = DistanceUnit::get_enumerations();
     let manual_enumerations = vec![
-        DistanceUnit::Meter,
-        DistanceUnit::Centimeter,
-        DistanceUnit::Foot,
-        DistanceUnit::Inch,
-        DistanceUnit::Fakemeter,
+        &DistanceUnit::Meter,
+        &DistanceUnit::Centimeter,
+        &DistanceUnit::Foot,
+        &DistanceUnit::Inch,
+        &DistanceUnit::Fakemeter,
     ];
     assert_eq!(
         BTreeSet::from_iter(function_enumerations),

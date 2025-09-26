@@ -33,8 +33,8 @@ macro_rules! define_volumes {
         }
 
         impl VolumeUnit {
-            pub fn get_enumerations() -> Vec<VolumeUnit> {
-                Vec::from([$(VolumeUnit::$variant),+])
+            pub fn get_enumerations() -> &'static [VolumeUnit] {
+                &[$(VolumeUnit::$variant),+]
             }
 
             pub fn as_symbol(&self) -> &'static str {

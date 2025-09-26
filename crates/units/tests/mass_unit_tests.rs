@@ -5,13 +5,13 @@ use units::mass::MassUnit;
 fn test_get_mass_unit_enumerations() {
     let function_enumerations = MassUnit::get_enumerations();
     let manual_enumerations = vec![
-        MassUnit::Gram,
-        MassUnit::Milligram,
-        MassUnit::Kilogram,
-        MassUnit::Microgram,
-        MassUnit::Ounce,
-        MassUnit::FakeGram,
-        MassUnit::MadeupGram,
+        &MassUnit::Gram,
+        &MassUnit::Milligram,
+        &MassUnit::Kilogram,
+        &MassUnit::Microgram,
+        &MassUnit::Ounce,
+        &MassUnit::FakeGram,
+        &MassUnit::MadeupGram,
     ];
     assert_eq!(
         BTreeSet::from_iter(function_enumerations),
