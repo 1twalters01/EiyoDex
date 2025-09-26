@@ -1,5 +1,9 @@
 use chrono::NaiveDate;
-use units::{distance::Distance, mass::Mass, unit_type::UnitType};
+use units::{
+    distance::{Distance, DistanceUnit},
+    mass::{Mass, MassUnit},
+    volume::VolumeUnit,
+};
 use utils::base_types::Percentage;
 use uuid::Uuid;
 
@@ -44,8 +48,8 @@ pub enum Ethnicity {
 }
 
 pub struct PreferredUnits {
-    mass: UnitType,
-    volume: UnitType,
-    height: UnitType,
-    distance: UnitType,
+    mass: MassUnit,
+    volume: VolumeUnit,
+    height: DistanceUnit,
+    distance: DistanceUnit,
 }

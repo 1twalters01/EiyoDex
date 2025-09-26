@@ -9,7 +9,7 @@ use std::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    currency::{fetch_current_exchange_rate_sync, Currency, CurrencyUnit},
+    currency::{get_current_exchange_rate_sync, Currency, CurrencyUnit},
     mass::Mass,
 };
 
@@ -73,7 +73,7 @@ impl SpecificCurrency {
             SpecificCurrencyUnit::GBPPerGram => {
                 let current_unit = CurrencyUnit::GBP;
                 let target_unit = CurrencyUnit::USD;
-                self.value * fetch_current_exchange_rate_sync(current_unit, target_unit).unwrap()
+                self.value * get_current_exchange_rate_sync(current_unit, target_unit).unwrap()
             }
         }
     }
@@ -84,7 +84,7 @@ impl SpecificCurrency {
             SpecificCurrencyUnit::GBPPerGram => {
                 let current_unit = CurrencyUnit::USD;
                 let target_unit = CurrencyUnit::GBP;
-                self.value * fetch_current_exchange_rate_sync(current_unit, target_unit).unwrap()
+                self.value * get_current_exchange_rate_sync(current_unit, target_unit).unwrap()
             }
         }
     }

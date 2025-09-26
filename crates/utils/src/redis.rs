@@ -1,4 +1,4 @@
-use redis::{cmd, Commands, Connection, RedisResult, ToRedisArgs};
+use redis::{cmd, Commands, Connection, FromRedisValue, RedisResult, ToRedisArgs};
 // use dotenv::dotenv;
 use std::{env, path::PathBuf};
 
@@ -16,23 +16,22 @@ impl CacheService {
         Self { con }
     }
 
-    pub fn store_key_and_value<K: ToRedisArgs, V: ToRedisArgs>(
+    pub fn store_key_value<K: ToRedisArgs, V: ToRedisArgs>(
         &mut self,
         key: K,
-        value: K,
-        expiry_in_seconds: Option<i64>,
+        value: V,
+        duration_in_seconds: Option<i64>,
     ) -> RedisResult<()> {
-        let mut command = cmd("SET");
-        command.arg(&key).arg(&value);
+        let _: () = self.con.set(&key, &value)?;
 
-        if let Some(expiry) = expiry_in_seconds {
-            command.arg("EX").arg(expiry);
+        if let Some(expiry) = duration_in_seconds {
+            let _: () = self.con.expire(key, expiry)?;
         }
 
-        command.query(&mut self.con)
+        Ok(())
     }
 
-    pub fn get_value_as_string<K: ToRedisArgs>(&mut self, key: K) -> RedisResult<String> {
+    pub fn get_value<K: ToRedisArgs, V: FromRedisValue>(&mut self, key: K) -> RedisResult<V> {
         self.con.get(key)
     }
 
@@ -71,37 +70,41 @@ mod tests {
 
     #[test]
     fn test_new_cache_service() {
+        dotenv().ok();
+
         let mut cache_service = CacheService::new();
 
         let key = "test_new_cache_service";
-        let value = "value";
-        let expiry_in_seconds = None;
+        let value = 12.6f64;
+        let duration_in_seconds = None;
 
-        let _ = cache_service.store_key_and_value::<&str, &str>(key, value, expiry_in_seconds);
-        let res = cache_service.get_value_as_string(key);
+        let _ = cache_service.store_key_value(key, value, duration_in_seconds);
+        let mut res: Result<String, redis::RedisError> = cache_service.get_value(key);
         assert_eq!(Some(value.to_string()), res.ok());
 
         let _ = cache_service.delete_key(key);
-        let res2 = cache_service.get_value_as_string(key);
-        assert_eq!(None, res2.ok());
+        res = cache_service.get_value(key);
+        assert_eq!(None, res.ok());
     }
 
     #[test]
     fn test_from_cache_service() {
+        dotenv().ok();
+
         let con = create_redis_client_connection();
         let mut cache_service = CacheService::from_con(con);
 
         let key = "test_from_cache_service";
         let value = "value";
-        let expiry_in_seconds = Some(1);
+        let duration_in_seconds = Some(1);
 
-        let _ = cache_service.store_key_and_value::<&str, &str>(key, value, expiry_in_seconds);
-        let res = cache_service.get_value_as_string(key);
+        let _ = cache_service.store_key_value::<&str, &str>(key, value, duration_in_seconds);
+        let mut res: Result<String, redis::RedisError> = cache_service.get_value(key);
         assert_eq!(Some(value.to_string()), res.ok());
 
         sleep(Duration::from_secs(2));
 
-        let res2 = cache_service.get_value_as_string(key);
-        assert_eq!(None, res2.ok());
+        res = cache_service.get_value(key);
+        assert_eq!(None, res.ok());
     }
 }
