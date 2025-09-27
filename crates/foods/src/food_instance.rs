@@ -110,6 +110,76 @@ pub struct FoodInstance {
 }
 
 #[derive(Clone, PartialEq)]
+pub struct FoodTag {
+    id: Uuid,
+    name: String,
+    description: String,
+    applicable_categories: Vec<FoodCategory>,
+}
+
+impl FoodTag {
+    pub fn new(id: Option<Uuid>, name: String) -> Self {
+        let id = match id {
+            Some(id) => id,
+            None => Uuid::new_v4(),
+        };
+
+        Self {
+            id,
+            name,
+            description: String::new(),
+            applicable_categories: Vec::new(),
+        }
+    }
+
+    pub fn get_id(&self) -> Uuid {
+        self.id
+    }
+
+    pub fn set_id(&mut self, id: Uuid) {
+        self.id = id;
+    }
+
+    pub fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
+    pub fn set_name(&mut self, name: String) {
+        self.name = name;
+    }
+
+    pub fn get_description(&self) -> String {
+        self.description.clone()
+    }
+
+    pub fn set_description(&mut self, description: String) {
+        self.description = description;
+    }
+
+    pub fn get_applicable_categories(&self) -> Vec<FoodCategory> {
+        self.applicable_categories.clone()
+    }
+
+    pub fn set_applicable_categories(&mut self, food_categories: Vec<FoodCategory>) {
+        self.applicable_categories = food_categories;
+    }
+
+    pub fn add_applicable_category(&mut self, food_category: FoodCategory) {
+        self.applicable_categories.push(food_category);
+    }
+
+    pub fn remove_applicable_category(&mut self, food_category: FoodCategory) {
+        if let Some(pos) = self
+            .applicable_categories
+            .iter()
+            .position(|x| *x == food_category)
+        {
+            self.applicable_categories.remove(pos);
+        }
+    }
+}
+
+#[derive(Clone, PartialEq)]
 pub struct FoodData {
     data_source: DataSource,
     nutrients: BTreeSet<NutrientAmount>,
@@ -159,12 +229,4 @@ impl FoodData {
     pub fn remove_nutrient(&mut self, nutrient: &NutrientAmount) {
         self.nutrients.remove(nutrient);
     }
-}
-
-#[derive(Clone, PartialEq)]
-pub struct FoodTag {
-    id: Uuid,
-    name: String,
-    description: String,
-    applicable_categories: Vec<FoodCategory>,
 }
