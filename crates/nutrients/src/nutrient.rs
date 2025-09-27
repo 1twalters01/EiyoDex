@@ -17,7 +17,7 @@ use crate::schema::nutrients::NutrientType;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct NutrientAmount {
-    value: f64, // value for main unit is saved
+    value: f64,
     nutrient: Rc<RefCell<Nutrient>>,
 }
 
@@ -80,6 +80,25 @@ impl PartialOrd for NutrientAmount {
         let n = self.nutrient.borrow();
         self.get_value()
             .partial_cmp(&other.convert(n.get_main_unit()).unwrap())
+    }
+}
+
+impl Eq for NutrientAmount {}
+
+impl Ord for NutrientAmount {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let id_cmp = self
+            .nutrient
+            .borrow()
+            .name
+            .cmp(&other.nutrient.borrow().name);
+        if id_cmp != Ordering::Equal {
+            return id_cmp;
+        }
+
+        self.value
+            .partial_cmp(&other.value)
+            .unwrap_or(Ordering::Equal)
     }
 }
 

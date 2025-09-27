@@ -1,5 +1,5 @@
 use crate::sources::DataSource;
-use nutrients::nutrient::Nutrient;
+use nutrients::nutrient::NutrientAmount;
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
 use uuid::Uuid;
 
@@ -112,7 +112,53 @@ pub struct FoodInstance {
 #[derive(Clone, PartialEq)]
 pub struct FoodData {
     data_source: DataSource,
-    nutrients: BTreeSet<Nutrient>,
+    nutrients: BTreeSet<NutrientAmount>,
+}
+
+impl FoodData {
+    pub fn new(data_source: DataSource, nutrients: BTreeSet<NutrientAmount>) -> Self {
+        Self {
+            data_source,
+            nutrients,
+        }
+    }
+
+    pub fn get_data_source(&self) -> DataSource {
+        self.data_source.clone()
+    }
+
+    pub fn set_data_source(&mut self, data_source: DataSource) {
+        self.data_source = data_source;
+    }
+
+    pub fn get_nutrients(&self) -> BTreeSet<NutrientAmount> {
+        self.nutrients.clone()
+    }
+
+    pub fn set_nutrients(&mut self, nutrients: BTreeSet<NutrientAmount>) {
+        self.nutrients = nutrients;
+    }
+
+    pub fn add_nutrient(&mut self, nutrient: NutrientAmount) -> Result<(), &'static str> {
+        for self_nutrient in self.nutrients.iter() {
+            if Rc::ptr_eq(&self_nutrient.get_nutrient(), &nutrient.get_nutrient()) {
+                return Err("Nutrient already in nutrients");
+            }
+
+            if self_nutrient.get_nutrient().borrow().get_id()
+                == nutrient.get_nutrient().borrow().get_id()
+            {
+                return Err("Nutrient already in nutrients");
+            }
+        }
+        self.nutrients.insert(nutrient);
+
+        return Ok(());
+    }
+
+    pub fn remove_nutrient(&mut self, nutrient: &NutrientAmount) {
+        self.nutrients.remove(nutrient);
+    }
 }
 
 #[derive(Clone, PartialEq)]
