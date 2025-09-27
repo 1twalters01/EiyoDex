@@ -69,7 +69,8 @@ macro_rules! define_distances {
             }
 
             pub fn from_str(s: &str) -> Result<Self, &str> {
-                match s.trim().to_lowercase().as_str() {
+                let phrase = s.trim().to_lowercase();
+                match phrase.as_str() {
                     $($symbol_lc | $unit_type_lc | $unit_type_plural_lc | $identifier_lc => Ok(DistanceUnit::$variant),)+
                     _ => Err("Unknown distance unit"),
                 }

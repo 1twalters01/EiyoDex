@@ -1,6 +1,6 @@
 use crate::schema::energy::Energy;
 
-#[derive(PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum NutrientType {
     Energy(Energy),
     Water,

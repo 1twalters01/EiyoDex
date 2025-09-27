@@ -1,6 +1,6 @@
 use std::{
     collections::{BTreeMap, BTreeSet, HashSet},
-    ops::{Div, Mul},
+    ops::{Add, Div, Mul, Sub},
 };
 use uuid::Uuid;
 
@@ -12,7 +12,7 @@ use units::{
 
 use crate::schema::nutrients::NutrientType;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct NutrientAmount {
     value: f64, // value for main unit is saved
     nutrient: Nutrient,
@@ -38,6 +38,10 @@ impl NutrientAmount {
         &self.nutrient
     }
 
+    pub fn set_nutrient(&mut self, nutrient: Nutrient) {
+        self.nutrient = nutrient;
+    }
+
     pub fn round(&self) -> Self {
         Self::new(
             self.get_value().round(),
@@ -45,6 +49,40 @@ impl NutrientAmount {
             self.get_nutrient().get_main_unit(),
         )
         .unwrap()
+    }
+}
+
+impl Add for NutrientAmount {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        if self.nutrient != rhs.nutrient {
+            panic!(
+                "Tried to add different nutrients: {:#?} + {:#?}",
+                self.nutrient, rhs.nutrient
+            );
+        }
+        Self {
+            value: self.value + rhs.value,
+            nutrient: self.nutrient,
+        }
+    }
+}
+
+impl Sub for NutrientAmount {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        if self.nutrient != rhs.nutrient {
+            panic!(
+                "Tried to add different nutrients: {:#?} + {:#?}",
+                self.nutrient, rhs.nutrient
+            );
+        }
+        Self {
+            value: self.value - rhs.value,
+            nutrient: self.nutrient,
+        }
     }
 }
 
@@ -72,16 +110,17 @@ impl Div<f64> for NutrientAmount {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Nutrient {
     id: Uuid,
     name: String,
     description: String,
     categories: HashSet<NutrientType>,
-    parent: Vec<Uuid>,
     main_unit: Unit,
     accepted_units: BTreeSet<Unit>,
     unit_conversions: BTreeMap<(Unit, Unit), f64>,
+    parent_uuids: Vec<Uuid>,
+    child_uuids: Vec<Uuid>,
 }
 
 impl Nutrient {
@@ -90,18 +129,43 @@ impl Nutrient {
 
         Nutrient {
             id,
-            name: name,
+            name,
             description: String::new(),
             categories: HashSet::new(),
-            parent: Vec::new(),
-            main_unit: main_unit,
+            main_unit,
             accepted_units: BTreeSet::from([main_unit]),
             unit_conversions: BTreeMap::new(),
+            parent_uuids: Vec::new(),
+            child_uuids: Vec::new(),
         }
+    }
+
+    pub fn get_id(&self) -> Uuid {
+        self.id
+    }
+
+    pub fn set_id(&mut self, id: Uuid) {
+        self.id = id
+    }
+
+    pub fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
+    pub fn set_name(&mut self, name: String) {
+        self.name = name;
+    }
+
+    pub fn get_description(&self) -> String {
+        self.description.clone()
     }
 
     pub fn set_description(&mut self, description: String) {
         self.description = description;
+    }
+
+    pub fn get_categories(&self) -> HashSet<NutrientType> {
+        self.categories.clone()
     }
 
     pub fn remove_category(&mut self, category: NutrientType) {
@@ -119,10 +183,81 @@ impl Nutrient {
     pub fn set_main_unit(&mut self, main_unit: Unit) -> Result<(), String> {
         if self.accepted_units.contains(&main_unit) {
             self.main_unit = main_unit;
-            Ok(())
-        } else {
-            Err(String::from("New main unit not in accepted units"))
+            return Ok(());
         }
+
+        match self.main_unit {
+            Unit::Mass(_) => {
+                if let Unit::Mass(_) = main_unit {
+                    self.accepted_units.remove(&self.main_unit);
+                    self.accepted_units.insert(main_unit);
+                    self.main_unit = main_unit;
+                    return Ok(());
+                }
+            }
+            Unit::Volume(_) => {
+                if let Unit::Volume(_) = main_unit {
+                    self.accepted_units.remove(&self.main_unit);
+                    self.accepted_units.insert(main_unit);
+                    self.main_unit = main_unit;
+                    return Ok(());
+                }
+            }
+            Unit::Energy(_) => {
+                if let Unit::Energy(_) = main_unit {
+                    self.accepted_units.remove(&self.main_unit);
+                    self.accepted_units.insert(main_unit);
+                    self.main_unit = main_unit;
+                    return Ok(());
+                }
+            }
+            _ => return Err(String::from("New main unit not in accepted units")),
+        }
+
+        Err(String::from("New main unit not in accepted units"))
+    }
+
+    pub fn get_accepted_units(&self) -> BTreeSet<Unit> {
+        let mut accepted_units = self.accepted_units.clone();
+        let mut mass_added = false;
+        let mut volume_added = false;
+        let mut energy_added = false;
+        for unit in accepted_units.clone() {
+            match unit {
+                Unit::Mass(_) => {
+                    if !mass_added {
+                        accepted_units.extend(
+                            MassUnit::get_enumerations()
+                                .iter()
+                                .map(|unit| Unit::Mass(*unit)),
+                        );
+                        mass_added = true;
+                    }
+                }
+                Unit::Volume(_) => {
+                    if !volume_added {
+                        accepted_units.extend(
+                            VolumeUnit::get_enumerations()
+                                .iter()
+                                .map(|unit| Unit::Volume(*unit)),
+                        );
+                        volume_added = true;
+                    }
+                }
+                Unit::Energy(_) => {
+                    if !energy_added {
+                        accepted_units.extend(
+                            EnergyUnit::get_enumerations()
+                                .iter()
+                                .map(|unit| Unit::Energy(*unit)),
+                        );
+                        energy_added = true;
+                    }
+                }
+                _ => {}
+            }
+        }
+        accepted_units
     }
 
     pub fn convert(&self, value: f64, from: Unit, to: Unit) -> Result<f64, String> {
@@ -234,9 +369,25 @@ impl Nutrient {
 
         Ok(())
     }
+
+    pub fn add_parent(&self, parent_uuid: Uuid) {
+        todo!()
+    }
+
+    pub fn remove_parent(&self, parent_uuid: Uuid) {
+        todo!()
+    }
+
+    pub fn add_child(&self, parent_uuid: Uuid) {
+        todo!()
+    }
+
+    pub fn remove_child(&self, parent_uuid: Uuid) {
+        todo!()
+    }
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub enum Unit {
     Mass(MassUnit),
     Volume(VolumeUnit),
