@@ -3,7 +3,7 @@ use nutrients::nutrient::NutrientAmount;
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
 use uuid::Uuid;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FoodCategory {
     parents: Vec<Rc<RefCell<FoodCategory>>>,
     children: Vec<Rc<RefCell<FoodCategory>>>,
@@ -100,16 +100,98 @@ impl FoodCategory {
     }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FoodInstance {
     id: Uuid,
     name: String,
+    description: String,
     favourite: bool,
     tags: BTreeSet<FoodTag>,
     food_data: BTreeSet<FoodData>,
 }
 
-#[derive(Clone, PartialEq)]
+impl FoodInstance {
+    pub fn new(id: Option<Uuid>, name: String) -> Self {
+        let id = match id {
+            Some(id) => id,
+            None => Uuid::new_v4(),
+        };
+
+        Self {
+            id,
+            name,
+            description: String::new(),
+            favourite: false,
+            tags: BTreeSet::new(),
+            food_data: BTreeSet::new(),
+        }
+    }
+
+    pub fn get_id(&self) -> Uuid {
+        self.id
+    }
+
+    pub fn set_id(&mut self, id: Uuid) {
+        self.id = id;
+    }
+
+    pub fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
+    pub fn set_name(&mut self, name: String) {
+        self.name = name;
+    }
+
+    pub fn get_description(&self) -> String {
+        self.description.clone()
+    }
+
+    pub fn set_description(&mut self, description: String) {
+        self.description = description;
+    }
+
+    pub fn get_favourite_status(&self) -> bool {
+        self.favourite
+    }
+
+    pub fn set_favourite_status(&mut self, favourite_status: bool) {
+        self.favourite = favourite_status;
+    }
+
+    pub fn get_tags(&self) -> BTreeSet<FoodTag> {
+        self.tags.clone()
+    }
+
+    pub fn set_tags(&mut self, tags: BTreeSet<FoodTag>) {
+        self.tags = tags;
+    }
+
+    pub fn add_tag(&mut self, tag: FoodTag) {
+        self.tags.insert(tag);
+    }
+    pub fn remove_tag(&mut self, tag: FoodTag) {
+        self.tags.remove(&tag);
+    }
+
+    pub fn get_food_data(&self) -> BTreeSet<FoodData> {
+        self.food_data.clone()
+    }
+
+    pub fn set_food_data(&mut self, food_data: BTreeSet<FoodData>) {
+        self.food_data = food_data;
+    }
+
+    pub fn add_food_data(&mut self, food_data: FoodData) {
+        self.food_data.insert(food_data);
+    }
+
+    pub fn remove_food_data(&mut self, food_data: FoodData) {
+        self.food_data.remove(&food_data);
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FoodTag {
     id: Uuid,
     name: String,
@@ -179,7 +261,7 @@ impl FoodTag {
     }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FoodData {
     data_source: DataSource,
     nutrients: BTreeSet<NutrientAmount>,
