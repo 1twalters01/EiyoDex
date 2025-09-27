@@ -29,10 +29,24 @@ pub struct Merchant {
     id: Uuid,
     name: String,
     description: String,
-    link: String,
+    website: String,
 }
 
 impl Merchant {
+    pub fn new(name: String, id: Option<Uuid>) -> Self {
+        let id: Uuid = match id {
+            Some(id) => id,
+            None => Uuid::new_v4(),
+        };
+
+        Merchant {
+            id,
+            name,
+            description: String::new(),
+            website: String::new(),
+        }
+    }
+
     pub fn get_id(&self) -> Uuid {
         self.id
     }
@@ -57,11 +71,11 @@ impl Merchant {
         self.description = description;
     }
 
-    pub fn get_link(&self) -> String {
-        self.link.clone()
+    pub fn get_website(&self) -> String {
+        self.website.clone()
     }
 
-    pub fn set_link(&mut self, link: String) {
-        self.link = link;
+    pub fn set_website(&mut self, website: String) {
+        self.website = website;
     }
 }
