@@ -1,4 +1,5 @@
 use std::{
+    cmp::Ordering,
     collections::{BTreeMap, BTreeSet, HashSet},
     ops::{Add, Div, Mul, Sub},
 };
@@ -12,7 +13,7 @@ use units::{
 
 use crate::schema::nutrients::NutrientType;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct NutrientAmount {
     value: f64, // value for main unit is saved
     nutrient: Nutrient,
@@ -21,7 +22,10 @@ pub struct NutrientAmount {
 impl NutrientAmount {
     pub fn new(value: f64, nutrient: Nutrient, unit: Unit) -> Result<Self, String> {
         match nutrient.convert(value, unit, nutrient.main_unit) {
-            Ok(value) => Ok(Self { value, nutrient }),
+            Ok(conversion_factor) => Ok(Self {
+                value: value * conversion_factor,
+                nutrient,
+            }),
             Err(err) => Err(err),
         }
     }
@@ -49,6 +53,18 @@ impl NutrientAmount {
             self.get_nutrient().get_main_unit(),
         )
         .unwrap()
+    }
+
+    pub fn convert(&self, unit: Unit) -> Result<f64, String> {
+        self.get_nutrient()
+            .convert(self.get_value(), self.get_nutrient().get_main_unit(), unit)
+    }
+}
+
+impl PartialOrd for NutrientAmount {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.get_value()
+            .partial_cmp(&other.convert(self.get_nutrient().get_main_unit()).unwrap())
     }
 }
 
@@ -90,7 +106,7 @@ impl Mul<f64> for NutrientAmount {
     type Output = Self;
     fn mul(self, rhs: f64) -> Self {
         Self::new(
-            self.get_value() * rhs,
+            self.value * rhs,
             self.get_nutrient().clone(),
             self.get_nutrient().get_main_unit(),
         )
@@ -261,6 +277,30 @@ impl Nutrient {
     }
 
     pub fn convert(&self, value: f64, from: Unit, to: Unit) -> Result<f64, String> {
+        if from == to {
+            return Ok(1f64);
+        }
+
+        match from {
+            Unit::Mass(from_mass) => {
+                if let Unit::Mass(to_mass) = to {
+                    println!("{}", from_mass.si_factor() / to_mass.si_factor());
+                    return Ok(from_mass.si_factor() / to_mass.si_factor());
+                }
+            }
+            Unit::Volume(from_volume) => {
+                if let Unit::Volume(to_volume) = to {
+                    return Ok(from_volume.si_factor() / to_volume.si_factor());
+                }
+            }
+            Unit::Energy(from_energy) => {
+                if let Unit::Energy(to_energy) = to {
+                    return Ok(from_energy.si_factor() / to_energy.si_factor());
+                }
+            }
+            _ => {}
+        }
+
         if self.accepted_units.contains(&to) && self.accepted_units.contains(&from) {
             match self.unit_conversions.get(&(from, to)) {
                 Some(factor) => Ok(value * factor),
