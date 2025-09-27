@@ -1,6 +1,6 @@
 use foods::price_metadata::{Merchant, PriceMetadata};
-use units::specific_currency::{SpecificCurrency, SpecificCurrencyUnit};
 use std::{cell::RefCell, rc::Rc};
+use units::specific_currency::{SpecificCurrency, SpecificCurrencyUnit};
 use uuid::Uuid;
 
 #[test]
@@ -51,10 +51,7 @@ pub fn test_price_metadata() {
     assert_eq!(price_metadata.get_specific_currency(), None);
     let value = 3f64;
     let unit = SpecificCurrencyUnit::GBPPerGram;
-    specific_currency = Some(SpecificCurrency::new(
-        value,
-        unit,
-    ));
+    specific_currency = Some(SpecificCurrency::new(value, unit));
     price_metadata.set_specific_currency(specific_currency);
     assert_eq!(price_metadata.get_specific_currency(), specific_currency);
 }

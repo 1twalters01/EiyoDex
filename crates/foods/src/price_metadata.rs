@@ -1,5 +1,5 @@
-use units::specific_currency::SpecificCurrency;
 use std::{cell::RefCell, rc::Rc};
+use units::specific_currency::SpecificCurrency;
 use uuid::Uuid;
 
 pub struct PriceMetadata {

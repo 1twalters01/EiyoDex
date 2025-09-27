@@ -3,7 +3,7 @@ use nutrients::nutrient::Nutrient;
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
 use uuid::Uuid;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone)]
 pub struct FoodCategory {
     parents: Vec<Rc<RefCell<FoodCategory>>>,
     children: Vec<Rc<RefCell<FoodCategory>>>,
@@ -23,8 +23,8 @@ impl FoodCategory {
         self.parents.clone()
     }
 
-    pub fn set_parents(&mut self, food_categories: Vec<Rc<RefCell<FoodCategory>>>) {
-        self.parents = food_categories;
+    pub fn set_parents(&mut self, parents: Vec<Rc<RefCell<FoodCategory>>>) {
+        self.parents = parents;
     }
 
     pub fn add_parent(&mut self, food_category: FoodCategory) {
@@ -36,22 +36,14 @@ impl FoodCategory {
     }
 
     pub fn remove_parent(&mut self, food_category: FoodCategory) {
-        if let Some(pos) = self
-            .parents
-            .iter()
-            .position(|x| *x.borrow() == food_category)
-        {
+        if let Some(pos) = self.parents.iter().position(|x| *x == food_category) {
             self.parents.remove(pos);
         }
     }
 
-    pub fn remove_parent_rc_refcell(&mut self, food_category: Rc<RefCell<FoodCategory>>) {
-        if let Some(pos) = self
-            .parents
-            .iter()
-            .position(|x| Rc::ptr_eq(x, &food_category))
-        {
-            self.parents.remove(pos);
+    fn remove_parent_rc_refcell(&self, food_category: Rc<RefCell<FoodCategory>>) {
+        if let Some(pos) = vec.iter().position(|x| Rc::ptr_eq(x, &food_category)) {
+            vec.remove(pos);
         }
     }
 
@@ -59,37 +51,13 @@ impl FoodCategory {
         self.children.clone()
     }
 
-    pub fn set_children(&mut self, food_categories: Vec<Rc<RefCell<FoodCategory>>>) {
-        self.children = food_categories;
-    }
+    pub fn add_child() {}
 
-    pub fn add_child(&mut self, food_category: FoodCategory) {
-        self.children.push(Rc::new(RefCell::new(food_category)));
-    }
+    pub fn add_child_rc_refcell() {}
 
-    pub fn add_child_rc_refcell(&mut self, food_category: Rc<RefCell<FoodCategory>>) {
-        self.children.push(food_category);
-    }
+    pub fn remove_child() {}
 
-    pub fn remove_child(&mut self, food_category: FoodCategory) {
-        if let Some(pos) = self
-            .children
-            .iter()
-            .position(|x| *x.borrow() == food_category)
-        {
-            self.children.remove(pos);
-        }
-    }
-
-    pub fn remove_child_rc_refcell(&mut self, food_category: Rc<RefCell<FoodCategory>>) {
-        if let Some(pos) = self
-            .children
-            .iter()
-            .position(|x| Rc::ptr_eq(x, &food_category))
-        {
-            self.children.remove(pos);
-        }
-    }
+    pub fn remove_child_rc_refcell() {}
 
     pub fn get_food_instance(&self) -> Option<FoodInstance> {
         self.food_instance.clone()
@@ -100,7 +68,7 @@ impl FoodCategory {
     }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone)]
 pub struct FoodInstance {
     id: Uuid,
     name: String,
@@ -109,13 +77,13 @@ pub struct FoodInstance {
     food_data: BTreeSet<FoodData>,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone)]
 pub struct FoodData {
     data_source: DataSource,
     nutrients: BTreeSet<Nutrient>,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone)]
 pub struct FoodTag {
     id: Uuid,
     name: String,
