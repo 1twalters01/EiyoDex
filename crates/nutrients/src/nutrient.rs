@@ -1,7 +1,9 @@
 use std::{
+    cell::RefCell,
     cmp::Ordering,
     collections::{BTreeMap, BTreeSet, HashSet},
     ops::{Add, Div, Mul, Sub},
+    rc::Rc,
 };
 use uuid::Uuid;
 
@@ -16,7 +18,7 @@ use crate::schema::nutrients::NutrientType;
 #[derive(Debug, Clone, PartialEq)]
 pub struct NutrientAmount {
     value: f64, // value for main unit is saved
-    nutrient: Nutrient,
+    nutrient: Rc<RefCell<Nutrient>>,
 }
 
 impl NutrientAmount {
@@ -24,10 +26,25 @@ impl NutrientAmount {
         match nutrient.convert(value, unit, nutrient.main_unit) {
             Ok(conversion_factor) => Ok(Self {
                 value: value * conversion_factor,
-                nutrient,
+                nutrient: Rc::new(RefCell::new(nutrient)),
             }),
             Err(err) => Err(err),
         }
+    }
+
+    pub fn from_rc_refcell(
+        value: f64,
+        nutrient: Rc<RefCell<Nutrient>>,
+        unit: Unit,
+    ) -> Result<Self, String> {
+        let conversion_factor = {
+            let n = nutrient.borrow();
+            n.convert(value, unit, n.main_unit)?
+        };
+        Ok(Self {
+            value: value * conversion_factor,
+            nutrient: nutrient,
+        })
     }
 
     pub fn get_value(&self) -> f64 {
@@ -38,33 +55,31 @@ impl NutrientAmount {
         self.value = value;
     }
 
-    pub fn get_nutrient(&self) -> &Nutrient {
-        &self.nutrient
+    pub fn get_nutrient(&self) -> Rc<RefCell<Nutrient>> {
+        self.nutrient.clone()
     }
 
     pub fn set_nutrient(&mut self, nutrient: Nutrient) {
-        self.nutrient = nutrient;
+        self.nutrient = Rc::new(RefCell::new(nutrient));
     }
 
-    pub fn round(&self) -> Self {
-        Self::new(
-            self.get_value().round(),
-            self.get_nutrient().clone(),
-            self.get_nutrient().get_main_unit(),
-        )
-        .unwrap()
+    pub fn round(&mut self, dp: u8) -> Self {
+        let factor = 10f64.powi(dp as i32);
+        self.value = (self.value * factor).round() / factor;
+        return self.clone();
     }
 
     pub fn convert(&self, unit: Unit) -> Result<f64, String> {
-        self.get_nutrient()
-            .convert(self.get_value(), self.get_nutrient().get_main_unit(), unit)
+        let n = self.nutrient.borrow();
+        n.convert(self.get_value(), n.get_main_unit(), unit)
     }
 }
 
 impl PartialOrd for NutrientAmount {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        let n = self.nutrient.borrow();
         self.get_value()
-            .partial_cmp(&other.convert(self.get_nutrient().get_main_unit()).unwrap())
+            .partial_cmp(&other.convert(n.get_main_unit()).unwrap())
     }
 }
 
@@ -105,24 +120,18 @@ impl Sub for NutrientAmount {
 impl Mul<f64> for NutrientAmount {
     type Output = Self;
     fn mul(self, rhs: f64) -> Self {
-        Self::new(
-            self.value * rhs,
-            self.get_nutrient().clone(),
-            self.get_nutrient().get_main_unit(),
-        )
-        .unwrap()
+        let n = self.nutrient.borrow();
+        let main_unit = n.get_main_unit();
+        Self::from_rc_refcell(self.value * rhs, self.get_nutrient(), main_unit).unwrap()
     }
 }
 
 impl Div<f64> for NutrientAmount {
     type Output = Self;
     fn div(self, rhs: f64) -> Self {
-        Self::new(
-            self.get_value() / rhs,
-            self.get_nutrient().clone(),
-            self.get_nutrient().get_main_unit(),
-        )
-        .unwrap()
+        let n = self.nutrient.borrow();
+        let main_unit = n.get_main_unit();
+        Self::from_rc_refcell(self.get_value() / rhs, self.get_nutrient(), main_unit).unwrap()
     }
 }
 
@@ -154,6 +163,22 @@ impl Nutrient {
             parent_uuids: Vec::new(),
             child_uuids: Vec::new(),
         }
+    }
+
+    pub fn new_rc_refcell(id: Option<Uuid>, name: String, main_unit: Unit) -> Rc<RefCell<Self>> {
+        let id = id.unwrap_or_else(Uuid::new_v4);
+
+        Rc::new(RefCell::new(Nutrient {
+            id,
+            name,
+            description: String::new(),
+            categories: HashSet::new(),
+            main_unit,
+            accepted_units: BTreeSet::from([main_unit]),
+            unit_conversions: BTreeMap::new(),
+            parent_uuids: Vec::new(),
+            child_uuids: Vec::new(),
+        }))
     }
 
     pub fn get_id(&self) -> Uuid {

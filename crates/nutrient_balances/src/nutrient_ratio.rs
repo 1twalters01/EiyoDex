@@ -46,11 +46,10 @@ impl NutrientRatio {
     }
 
     pub fn approximate_to_n_dp(&self, precision: u8) -> Vec<NutrientAmount> {
-        let scale = 10_f64.powi(precision as i32);
         let scaled_nutrient_amounts: Vec<NutrientAmount> = self
             .parts
             .iter()
-            .map(|nutrient_amount| (nutrient_amount.clone() * scale).round())
+            .map(|nutrient_amount| nutrient_amount.clone().round(precision))
             .collect();
 
         let highest_common_factor: i64 =
