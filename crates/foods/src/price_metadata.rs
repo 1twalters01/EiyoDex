@@ -2,6 +2,7 @@ use std::{cell::RefCell, rc::Rc};
 use units::specific_currency::SpecificCurrency;
 use uuid::Uuid;
 
+#[derive(Clone, PartialEq)]
 pub struct PriceMetadata {
     merchant: Rc<RefCell<Merchant>>,
     specific_currency: Option<SpecificCurrency>,

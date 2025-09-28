@@ -3,6 +3,7 @@ use uuid::Uuid;
 
 use crate::{food_instance::FoodInstance, price_metadata::PriceMetadata};
 
+#[derive(Clone, PartialEq)]
 pub struct FoodAmount {
     value: f64,
     food: Food,
@@ -25,6 +26,7 @@ impl FoodAmount {
 }
 
 // TODO - per whatever unit (100g?)
+#[derive(Clone, PartialEq)]
 pub struct Food {
     id: Uuid,
     name: String,

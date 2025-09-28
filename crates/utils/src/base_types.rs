@@ -23,6 +23,7 @@ impl Normalized {
     }
 }
 
+#[derive(Clone)]
 pub struct Percentage {
     pub value: f64,
 }
