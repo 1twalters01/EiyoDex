@@ -3,7 +3,7 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use serde::Deserialize;
-use std::{collections::{HashMap, HashSet}, env, fs, path::Path};
+use std::{collections::HashMap, env, fs, path::Path};
 use syn::LitStr;
 
 #[derive(Debug, Deserialize)]

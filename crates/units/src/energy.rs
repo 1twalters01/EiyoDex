@@ -221,12 +221,20 @@ impl Div<f64> for Energy {
     }
 }
 
+impl Sum for Energy {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Energy::new(0f64, EnergyUnit::Kilocalorie), |a, b| a + b)
+    }
+}
+
 impl PartialOrd for Energy {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.get_value()
             .partial_cmp(&other.to_unit(self.unit).get_value())
     }
 }
+
+use std::iter::Sum;
 
 use energy_macro::include_energies_from_json;
 include_energies_from_json!("data/energy.json", "data/fake_energy.json",);

@@ -1,6 +1,7 @@
 use crate::sources::DataSource;
-use nutrients::nutrient::NutrientAmount;
+use nutrients::nutrient::{NutrientAmount, Unit};
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
+use units::energy::Energy;
 use uuid::Uuid;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -170,6 +171,7 @@ impl FoodInstance {
     pub fn add_tag(&mut self, tag: FoodTag) {
         self.tags.insert(tag);
     }
+
     pub fn remove_tag(&mut self, tag: FoodTag) {
         self.tags.remove(&tag);
     }
@@ -188,6 +190,35 @@ impl FoodInstance {
 
     pub fn remove_food_data(&mut self, food_data: FoodData) {
         self.food_data.remove(&food_data);
+    }
+
+    pub fn get_calories(&self, food_data_uuid: Uuid) -> Energy {
+        let mut food_data: Option<FoodData> = None;
+        for data in self.food_data.clone() {
+            if data.get_data_source().get_id() == food_data_uuid {
+                food_data = Some(data)
+            }
+        }
+
+        let mut energy: Energy = Energy::new(0f64, units::energy::EnergyUnit::Kilocalorie);
+        match food_data {
+            Some(data) => {
+                for nutrient in data.get_nutrients() {
+                    if nutrient.get_nutrient().borrow().get_name() == "Calories" {
+                        let unit = nutrient.get_nutrient().borrow().get_main_unit();
+                        match unit {
+                            Unit::Energy(energy_unit) => {
+                                energy = Energy::new(nutrient.get_value(), energy_unit);
+                                break;
+                            }
+                            _ => {}
+                        };
+                    }
+                }
+            }
+            None => energy = Energy::new(0f64, units::energy::EnergyUnit::Kilocalorie),
+        };
+        return energy;
     }
 }
 

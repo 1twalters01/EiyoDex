@@ -58,7 +58,7 @@ impl FromStr for PowerUnit {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct Power {
     value: f64,
     unit: PowerUnit,

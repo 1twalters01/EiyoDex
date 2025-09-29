@@ -7,6 +7,7 @@ edition = "2021"
 exercise = { path = "../exercise" }
 foods = { path = "../foods" }
 profiles = { path = "../profiles" }
+units = { path = "../units" }
 chrono = "0.4.42"
 uuid = { version = "1.8.0", features = ["v4", "fast-rng", "macro-diagnostics", "serde"] }
 

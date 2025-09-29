@@ -1,4 +1,4 @@
-use redis::{cmd, Commands, Connection, FromRedisValue, RedisResult, ToRedisArgs};
+use redis::{Commands, Connection, FromRedisValue, RedisResult, ToRedisArgs};
 // use dotenv::dotenv;
 use std::{env, path::PathBuf};
 

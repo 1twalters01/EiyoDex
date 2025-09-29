@@ -4,12 +4,12 @@
 units/
 utils/
 nutrients/
-nutrient_balances/
-profiles/
-
-# Minor progress
 foods/
 journal/
+nutrient_balances/
+
+# Minor progress
+profiles/
 exercise/
 proc_macros/
 

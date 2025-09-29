@@ -2,6 +2,7 @@ use chrono::{NaiveDate, NaiveDateTime};
 use exercise::exercise::ExerciseAmount;
 use foods::food::FoodAmount;
 use profiles::profile::Profile;
+use units::energy::Energy;
 use uuid::Uuid;
 
 pub struct JournalEntry {
@@ -9,7 +10,7 @@ pub struct JournalEntry {
     profile: Profile,
     note: String,
     date: NaiveDate,
-    uncategorised_time_slot: Vec<Entry>,
+    uncategorised_time_slots: Vec<Entry>,
     time_slots: Vec<TimeSlot>,
 }
 
@@ -48,17 +49,58 @@ impl JournalEntry {
         self.date = date;
     }
 
-    pub fn get_uncategorised_time_slots() {}
-    pub fn set_uncategorised_time_slots() {}
-    pub fn add_uncategorised_time_slot() {}
-    pub fn remove_uncategorised_time_slot() {}
+    pub fn get_uncategorised_time_slots(&self) -> Vec<Entry> {
+        self.uncategorised_time_slots.clone()
+    }
 
-    pub fn get_time_slots() {}
-    pub fn set_time_slots() {}
-    pub fn add_time_slot() {}
-    pub fn remove_time_slot() {}
+    pub fn set_uncategorised_time_slots(&mut self, entries: Vec<Entry>) {
+        self.uncategorised_time_slots = entries;
+    }
 
-    pub fn get_calories(&self) {}
+    pub fn add_uncategorised_time_slot(&mut self, entry: Entry) {
+        self.uncategorised_time_slots.push(entry);
+    }
+
+    pub fn remove_uncategorised_time_slot(&mut self, entry: Entry) {
+        if let Some(pos) = self
+            .uncategorised_time_slots
+            .iter()
+            .position(|x| x == &entry)
+        {
+            self.uncategorised_time_slots.remove(pos);
+        }
+    }
+
+    pub fn get_time_slots(&self) -> Vec<TimeSlot> {
+        self.time_slots.clone()
+    }
+
+    pub fn set_time_slots(&mut self, time_slots: Vec<TimeSlot>) {
+        self.time_slots = time_slots;
+    }
+    pub fn add_time_slot(&mut self, time_slot: TimeSlot) {
+        self.time_slots.push(time_slot);
+    }
+    pub fn remove_time_slot(&mut self, time_slot: TimeSlot) {
+        if let Some(pos) = self.time_slots.iter().position(|x| x == &time_slot) {
+            self.time_slots.remove(pos);
+        }
+    }
+
+    pub fn get_calories(&self) -> Energy {
+        let uncategorised_calories: Energy = self
+            .uncategorised_time_slots
+            .iter()
+            .map(|entry| entry.get_calories())
+            .sum();
+        let time_slot_calories: Energy = self
+            .time_slots
+            .iter()
+            .map(|time_slot| time_slot.get_calories())
+            .sum();
+        let total_calories: Energy = uncategorised_calories + time_slot_calories;
+        return total_calories;
+    }
     pub fn get_protein(&self) {}
     pub fn get_carbs(&self) {}
     pub fn get_fats(&self) {}
@@ -68,6 +110,7 @@ impl JournalEntry {
 }
 
 // (e.g. breakfast, lunch, snack 1)
+#[derive(Clone, PartialEq)]
 pub struct TimeSlot {
     id: Uuid,
     name: String,
@@ -132,7 +175,13 @@ impl TimeSlot {
         }
     }
 
-    pub fn get_calories(&self) {}
+    pub fn get_calories(&self) -> Energy {
+        self.entries
+            .iter()
+            .map(|time_slot| time_slot.get_calories())
+            .sum()
+    }
+
     pub fn get_protein(&self) {}
     pub fn get_carbs(&self) {}
     pub fn get_fats(&self) {}
@@ -198,7 +247,10 @@ impl Entry {
         self.datetime_last_modified = datetime;
     }
 
-    pub fn get_calories(&self) {}
+    pub fn get_calories(&self) -> Energy {
+        self.entry_item.get_calories()
+    }
+
     pub fn get_protein(&self) {}
     pub fn get_carbs(&self) {}
     pub fn get_fats(&self) {}
@@ -209,6 +261,17 @@ impl Entry {
 
 #[derive(Clone, PartialEq)]
 pub enum EntryItem {
-    FoodAmount(FoodAmount),
+    FoodAmount(FoodAmount, Uuid),
     ExerciseAmount(ExerciseAmount),
+}
+
+impl EntryItem {
+    pub fn get_calories(&self) -> Energy {
+        match self {
+            Self::FoodAmount(food_amount, food_data_uuid) => {
+                food_amount.get_calories(food_data_uuid.clone())
+            }
+            Self::ExerciseAmount(exercise_amount) => exercise_amount.get_calories(),
+        }
+    }
 }
