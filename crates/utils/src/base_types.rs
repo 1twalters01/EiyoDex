@@ -34,6 +34,7 @@ impl Sub for Angle {
     }
 }
 
+#[derive(Debug, PartialEq)]
 pub struct Normalized {
     pub value: f64,
 }

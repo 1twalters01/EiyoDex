@@ -1,5 +1,6 @@
 use super::{hex_color::HexColor, hsl::HSL, rgb::RGB};
 
+#[derive(Debug, PartialEq)]
 pub struct PackedRGB {
     pub value: u32,
 }

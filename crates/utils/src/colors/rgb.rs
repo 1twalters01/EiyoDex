@@ -1,6 +1,7 @@
 use super::{hex_color::HexColor, hsl::HSL, packed_rgb::PackedRGB};
 use crate::base_types::{Angle, Normalized};
 
+#[derive(Debug, PartialEq)]
 pub struct RGB {
     pub red: u8,
     pub green: u8,

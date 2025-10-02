@@ -1,8 +1,7 @@
 use super::{hex_color::HexColor, packed_rgb::PackedRGB, rgb::RGB};
 use crate::base_types::{Angle, Normalized};
 
-// Use angle type instead of f64 for hue?
-// Create a normalised type for saturation and lightness?
+#[derive(Debug, PartialEq)]
 pub struct HSL {
     pub hue: Angle,
     pub saturation: Normalized,
