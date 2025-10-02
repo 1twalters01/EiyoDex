@@ -6,3 +6,4 @@ python/**/build/
 **/.venv/
 **/.env
 sled/
+*.sqlite
