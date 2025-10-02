@@ -1,5 +1,6 @@
 use super::{hsl::HSL, packed_rgb::PackedRGB, rgb::RGB};
 
+#[derive(Debug, PartialEq)]
 pub struct HexColor {
     pub value: String,
 }
@@ -13,7 +14,9 @@ impl HexColor {
         let _greed = u8::from_str_radix(&hex[3..5], 16).map_err(|_| "Invalid green component")?;
         let _blue = u8::from_str_radix(&hex[5..7], 16).map_err(|_| "Invalid blue component")?;
 
-        Ok(Self { value: hex })
+        Ok(Self {
+            value: hex.to_uppercase(),
+        })
     }
 
     pub fn get_value(&self) -> String {
