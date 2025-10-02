@@ -1,11 +1,36 @@
+use std::ops::{Add, Sub};
+
+#[derive(Debug, PartialEq)]
 pub struct Angle {
     pub value: f64,
 }
 
 impl Angle {
     pub fn new(degrees: f64) -> Self {
-        let value = degrees.rem_euclid(360.0);
+        let value = degrees.rem_euclid(360f64);
         Angle { value }
+    }
+
+    pub fn get_value(&self) -> f64 {
+        self.value
+    }
+
+    pub fn set_value(&mut self, value: f64) {
+        self.value = value;
+    }
+}
+
+impl Add for Angle {
+    type Output = Self;
+    fn add(self, rhs: Self) -> Self {
+        Self::new(self.get_value() + rhs.get_value())
+    }
+}
+
+impl Sub for Angle {
+    type Output = Self;
+    fn sub(self, rhs: Self) -> Self {
+        Self::new(self.get_value() - rhs.get_value())
     }
 }
 
@@ -21,6 +46,10 @@ impl Normalized {
             Err("Value must be between 0 and 1")
         }
     }
+
+    pub fn get_value(&self) -> f64 {
+        self.value
+    }
 }
 
 #[derive(Clone)]
@@ -30,12 +59,90 @@ pub struct Percentage {
 
 impl Percentage {
     pub fn new(value: f64) -> Self {
-        assert!(value <= 100 as f64, "Percentage must be between 0 and 100.");
         Percentage { value }
     }
 
-    // Convert to a floating point between 0.0 and 1.0
+    pub fn get_value(&self) -> f64 {
+        self.value
+    }
+
+    pub fn is_proportion(&self) -> bool {
+        self.value <= 100f64 && self.value >= 0f64
+    }
+
     pub fn as_fraction(&self) -> f64 {
         self.value as f64 / 100.0
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_angle_one_revolution() {
+        let angle_1 = Angle::new(360f64);
+        assert_eq!(angle_1.get_value(), 0f64);
+    }
+
+    #[test]
+    fn test_angle_negative_angle() {
+        let angle_1 = Angle::new(-10.5);
+        let err = (angle_1.get_value() + Angle::new(10.5).get_value())
+            .abs()
+            .rem_euclid(360f64);
+        println!("{}", err);
+        assert!(err < 0.0001);
+    }
+
+    #[test]
+    fn test_angle_over_one_revolution() {
+        let angle_1 = Angle::new(400.52);
+        let err = (angle_1.get_value() - Angle::new(40.52).get_value()).abs();
+        assert!(err < 0.0001);
+    }
+
+    #[test]
+    fn test_angle_over_two_revolution() {
+        let angle_1 = Angle::new(760f64);
+        let err = (angle_1.get_value() - Angle::new(40f64).get_value()).abs();
+        assert!(err < 0.0001);
+    }
+
+    #[test]
+    fn test_normalization() {
+        let too_large = Normalized::new(2f64);
+        assert!(too_large.is_err());
+
+        let too_low = Normalized::new(-0.5);
+        assert!(too_low.is_err());
+
+        let normalized = Normalized::new(0.62);
+        assert!(normalized.is_ok());
+        assert_eq!(normalized.unwrap().get_value(), 0.62);
+    }
+
+    #[test]
+    fn test_percentages() {
+        let large = Percentage::new(100.5f64);
+        assert!(!large.is_proportion());
+
+        let low = Percentage::new(-0.5);
+        assert!(!low.is_proportion());
+
+        let proportion = Percentage::new(62.8);
+        assert!(proportion.is_proportion());
+
+        let proportion = Percentage::new(0f64);
+        assert!(proportion.is_proportion());
+
+        let proportion = Percentage::new(0.1);
+        assert!(proportion.is_proportion());
+
+        let proportion = Percentage::new(100f64);
+        assert!(proportion.is_proportion());
+
+        let proportion = Percentage::new(99.99999);
+        assert!(proportion.is_proportion());
     }
 }
