@@ -52,7 +52,7 @@ impl Normalized {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Percentage {
     pub value: f64,
 }
@@ -72,6 +72,20 @@ impl Percentage {
 
     pub fn as_fraction(&self) -> f64 {
         self.value as f64 / 100.0
+    }
+}
+
+impl Add for Percentage {
+    type Output = Self;
+    fn add(self, rhs: Self) -> Self {
+        Self::new(self.get_value() + rhs.get_value())
+    }
+}
+
+impl Sub for Percentage {
+    type Output = Self;
+    fn sub(self, rhs: Self) -> Self {
+        Self::new(self.get_value() - rhs.get_value())
     }
 }
 
@@ -130,19 +144,22 @@ mod tests {
         let low = Percentage::new(-0.5);
         assert!(!low.is_proportion());
 
-        let proportion = Percentage::new(62.8);
-        assert!(proportion.is_proportion());
+        let proportion_1 = Percentage::new(62.8);
+        assert!(proportion_1.is_proportion());
 
-        let proportion = Percentage::new(0f64);
-        assert!(proportion.is_proportion());
+        let proportion_2 = Percentage::new(0f64);
+        assert!(proportion_2.is_proportion());
 
-        let proportion = Percentage::new(0.1);
-        assert!(proportion.is_proportion());
+        let proportion_3 = Percentage::new(0.1);
+        assert!(proportion_3.is_proportion());
 
-        let proportion = Percentage::new(100f64);
-        assert!(proportion.is_proportion());
+        let proportion_4 = Percentage::new(100f64);
+        assert!(proportion_4.is_proportion());
 
-        let proportion = Percentage::new(99.99999);
-        assert!(proportion.is_proportion());
+        let proportion_5 = Percentage::new(99.99999);
+        assert!(proportion_5.is_proportion());
+
+        assert_eq!(proportion_1 + proportion_3, Percentage::new(62.9));
+        assert!((proportion_1 - proportion_3).get_value() - 62.7 < 0.000001);
     }
 }
