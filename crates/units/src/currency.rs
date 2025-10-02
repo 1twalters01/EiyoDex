@@ -18,7 +18,7 @@ macro_rules! define_currencies {
             str::FromStr,
         };
         use serde::{Deserialize, Serialize};
-        use utils::redis::CacheService;
+        use utils::cache::CacheService;
 
         pub struct CurrencyMetadata {
             pub symbol: &'static str,
@@ -220,8 +220,8 @@ macro_rules! define_currencies {
             }
             let datetime = None;
 
-            let mut cache_service = CacheService::new();
-            let duration_in_seconds: Option<i64> = Some(Duration::days(1).num_seconds());
+            let cache_service = CacheService::new().map_err(|e| e.to_string())?;
+            let duration_in_seconds: Option<u64> = Some(Duration::days(1).num_seconds() as u64);
 
             let current_key = format!("exchange_rate: {} to {}", current_unit, CurrencyUnit::USD);
             let current_value: f64 = match current_unit {
@@ -271,8 +271,8 @@ macro_rules! define_currencies {
 
             let datetime = None;
 
-            let mut cache_service = CacheService::new();
-            let duration_in_seconds: Option<i64> = Some(Duration::days(1).num_seconds());
+            let cache_service = CacheService::new().map_err(|e| e.to_string())?;
+            let duration_in_seconds: Option<u64> = Some(Duration::days(1).num_seconds() as u64);
 
             let current_key = format!("exchange_rate: {} to {}", current_unit, CurrencyUnit::USD);
             let current_value: f64 = match current_unit {
@@ -326,8 +326,8 @@ macro_rules! define_currencies {
                 return Ok(1f64)
             }
 
-            let mut cache_service = CacheService::new();
-            let duration_in_seconds: Option<i64> = Some(Duration::days(1).num_seconds());
+            let cache_service = CacheService::new().map_err(|e| e.to_string())?;
+            let duration_in_seconds: Option<u64> = Some(Duration::days(1).num_seconds() as u64);
             let date_str = datetime.format("%Y-%m-%d").to_string();
 
             let current_key = format!("historical_exchange_rate: {} to {} at {}", current_unit, CurrencyUnit::USD, date_str);
@@ -376,8 +376,8 @@ macro_rules! define_currencies {
                 return Ok(1f64)
             }
 
-            let mut cache_service = CacheService::new();
-            let duration_in_seconds: Option<i64> = Some(Duration::days(1).num_seconds());
+            let cache_service = CacheService::new().map_err(|e| e.to_string())?;
+            let duration_in_seconds: Option<u64> = Some(Duration::days(1).num_seconds() as u64);
             let date_str = datetime.format("%Y-%m-%d").to_string();
 
             let current_key = format!("historical_exchange_rate: {} to {} at {}", current_unit, CurrencyUnit::USD, date_str);

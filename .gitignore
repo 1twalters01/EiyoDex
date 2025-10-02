@@ -5,3 +5,4 @@ python/**/build/
 **/*.egg-info/
 **/.venv/
 **/.env
+sled/
