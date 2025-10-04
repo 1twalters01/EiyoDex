@@ -247,7 +247,8 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
             }
         })
         .collect();
-let variants_all: Vec<_> = density_all
+
+    let variants_all: Vec<_> = density_all
         .iter()
         .map(|(key, data)| {
             let variant = format_ident!("{}", key);
