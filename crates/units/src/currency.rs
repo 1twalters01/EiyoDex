@@ -77,10 +77,10 @@ macro_rules! define_currencies {
             type Err = &'static str;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
-                let formatted_s = s.trim().to_uppercase();
+                let formatted_string = s.trim().to_uppercase();
                 for variant in Self::get_enumerations() {
                     let variant_metadata = variant.metadata();
-                    if formatted_s == variant_metadata.code || formatted_s == variant_metadata.symbol {
+                    if formatted_string == variant_metadata.code || formatted_string == variant_metadata.symbol {
                         return Ok(*variant);
                     }
                 }
@@ -234,7 +234,7 @@ macro_rules! define_currencies {
                                 Ok(val) => val,
                                 Err(err) => return Err(err)
                             };
-                            cache_service.store_key_value(current_key.as_str(), current_value, duration_in_seconds);
+                            let _ = cache_service.store_key_value(current_key.as_str(), current_value, duration_in_seconds);
                             current_value
                         },
                         Err(err) => return Err(err.to_string()),
@@ -253,7 +253,7 @@ macro_rules! define_currencies {
                                 Ok(val) => val,
                                 Err(err) => return Err(err)
                             };
-                            cache_service.store_key_value(target_key.as_str(), target_value, duration_in_seconds);
+                            let _ = cache_service.store_key_value(target_key.as_str(), target_value, duration_in_seconds);
                             target_value
                         }
                         Err(err) => return Err(err.to_string()),
@@ -261,7 +261,7 @@ macro_rules! define_currencies {
                 }
             };
 
-            Ok(current_value / target_value)
+            return Ok(current_value / target_value)
         }
 
         pub fn get_current_exchange_rate_sync(current_unit: CurrencyUnit, target_unit: CurrencyUnit) -> Result<f64, String> {
@@ -285,7 +285,7 @@ macro_rules! define_currencies {
                                 Ok(val) => val,
                                 Err(err) => return Err(err)
                             };
-                            cache_service.store_key_value(current_key.as_str(), current_value, duration_in_seconds);
+                            let _ = cache_service.store_key_value(current_key.as_str(), current_value, duration_in_seconds);
                             current_value
                         },
                         Err(err) => return Err(err.to_string()),
@@ -304,7 +304,7 @@ macro_rules! define_currencies {
                                 Ok(val) => val,
                                 Err(err) => return Err(err)
                             };
-                            cache_service.store_key_value(target_key.as_str(), target_value, duration_in_seconds);
+                            let _ = cache_service.store_key_value(target_key.as_str(), target_value, duration_in_seconds);
                             target_value
                         }
                         Err(err) => return Err(err.to_string()),
@@ -341,7 +341,7 @@ macro_rules! define_currencies {
                                 Ok(val) => val,
                                 Err(err) => return Err(err)
                             };
-                            cache_service.store_key_value(current_key.as_str(), current_value, duration_in_seconds);
+                            let _ = cache_service.store_key_value(current_key.as_str(), current_value, duration_in_seconds);
                             current_value
                         },
                         Err(err) => return Err(err.to_string()),
@@ -360,7 +360,7 @@ macro_rules! define_currencies {
                                 Ok(val) => val,
                                 Err(err) => return Err(err)
                             };
-                            cache_service.store_key_value(target_key.as_str(), target_value, duration_in_seconds);
+                            let _ = cache_service.store_key_value(target_key.as_str(), target_value, duration_in_seconds);
                             target_value
                         }
                         Err(err) => return Err(err.to_string()),
@@ -391,7 +391,7 @@ macro_rules! define_currencies {
                                 Ok(val) => val,
                                 Err(err) => return Err(err)
                             };
-                            cache_service.store_key_value(current_key.as_str(), current_value, duration_in_seconds);
+                            let _ = cache_service.store_key_value(current_key.as_str(), current_value, duration_in_seconds);
                             current_value
                         },
                         Err(err) => return Err(err.to_string()),
@@ -410,7 +410,7 @@ macro_rules! define_currencies {
                                 Ok(val) => val,
                                 Err(err) => return Err(err)
                             };
-                            cache_service.store_key_value(target_key.as_str(), target_value, duration_in_seconds);
+                            let _ = cache_service.store_key_value(target_key.as_str(), target_value, duration_in_seconds);
                             target_value
                         }
                         Err(err) => return Err(err.to_string()),
@@ -508,4 +508,4 @@ pub fn fetch_unit_to_usd_exchange_rate_sync(
 }
 
 use currency_macro::include_currencies_from_json;
-include_currencies_from_json!("data/currencies.json");
+include_currencies_from_json!("data/currencies.json",);

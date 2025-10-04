@@ -25,6 +25,7 @@ macro_rules! define_distances {
             cmp::Ordering,
             fmt,
             ops::{Add, Div, Mul, Sub},
+            str::FromStr
         };
         use serde::{Deserialize, Serialize};
 
@@ -67,15 +68,23 @@ macro_rules! define_distances {
                     $(DistanceUnit::$variant => $si_factor),+
                 }
             }
+        }
 
-            pub fn from_str(s: &str) -> Result<Self, &str> {
-                let phrase = s.trim().to_lowercase();
-                match phrase.as_str() {
-                    $($symbol_lc | $unit_type_lc | $unit_type_plural_lc | $identifier_lc => Ok(DistanceUnit::$variant),)+
-                    _ => Err("Unknown distance unit"),
+        impl FromStr for DistanceUnit {
+            type Err = &'static str;
+
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                let formatted_string = s.trim().to_lowercase();
+                match formatted_string.as_str() {
+                    $($symbol_lc | $unit_type_lc | $unit_type_plural_lc => return Ok(DistanceUnit::$variant),)+
+                    _ => {
+                        match formatted_string.as_str() {
+                            $($identifier_lc => Ok(DistanceUnit::$variant),)+
+                            _ => Err("Unknown mass unit"),
+                        }
+                    }
                 }
             }
-
         }
 
         #[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq)]

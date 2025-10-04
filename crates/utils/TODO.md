@@ -1,1 +1,2 @@
-add tests to colors
+Add docstrings to everything
+Add document tests to everything

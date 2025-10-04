@@ -78,4 +78,3 @@ pub fn include_masses_from_json(input: TokenStream) -> TokenStream {
 
     expanded.into()
 }
-

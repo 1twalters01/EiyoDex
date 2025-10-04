@@ -25,6 +25,7 @@ macro_rules! define_energies {
             cmp::Ordering,
             fmt,
             ops::{Add, Div, Mul, Sub},
+            str::FromStr,
         };
         use serde::{Deserialize, Serialize};
 
@@ -67,14 +68,23 @@ macro_rules! define_energies {
                     $(EnergyUnit::$variant => $si_factor),+
                 }
             }
+        }
 
-            pub fn from_str(s: &str) -> Result<Self, &str> {
-                match s.trim().to_lowercase().as_str() {
-                    $($symbol_lc | $unit_type_lc | $unit_type_plural_lc | $identifier_lc => Ok(EnergyUnit::$variant),)+
-                    _ => Err("Unknown energy unit"),
+        impl FromStr for EnergyUnit {
+            type Err = &'static str;
+
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                let formatted_string = s.trim().to_lowercase();
+                match formatted_string.as_str() {
+                    $($symbol_lc | $unit_type_lc | $unit_type_plural_lc => return Ok(EnergyUnit::$variant),)+
+                    _ => {
+                        match formatted_string.as_str() {
+                            $($identifier_lc => Ok(EnergyUnit::$variant),)+
+                            _ => Err("Unknown mass unit"),
+                        }
+                    }
                 }
             }
-
         }
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]

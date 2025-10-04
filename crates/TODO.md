@@ -1,8 +1,8 @@
-# Done (temporarily)
+# Done
+utils/
 
 # In progress
 units/
-utils/
 nutrients/
 foods/
 journal/

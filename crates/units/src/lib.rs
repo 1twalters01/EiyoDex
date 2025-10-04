@@ -1,3 +1,4 @@
+// #[allow(unused_must_use)]
 pub mod currency;
 pub mod density;
 pub mod distance;

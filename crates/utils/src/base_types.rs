@@ -1,22 +1,26 @@
 use std::ops::{Add, Sub};
 
+/// A wrapper around an f64 representing an Angle
 #[derive(Debug, PartialEq)]
 pub struct Angle {
     pub value: f64,
 }
 
 impl Angle {
+    /// Constructs a new Angle container type
     pub fn new(degrees: f64) -> Self {
         let value = degrees.rem_euclid(360f64);
         Angle { value }
     }
 
+    /// Get the value of an Angle
     pub fn get_value(&self) -> f64 {
         self.value
     }
 
+    /// Update the value of an Angle
     pub fn set_value(&mut self, value: f64) {
-        self.value = value;
+        self.value = value.rem_euclid(360f64);
     }
 }
 
@@ -34,12 +38,14 @@ impl Sub for Angle {
     }
 }
 
+/// A wrapper around an f64 representing a Normalized Value
 #[derive(Debug, PartialEq)]
 pub struct Normalized {
     pub value: f64,
 }
 
 impl Normalized {
+    /// Constructs a new Normalized container type
     pub fn new(value: f64) -> Result<Self, &'static str> {
         if (0.0..=1.0).contains(&value) {
             Ok(Self { value })
@@ -48,6 +54,7 @@ impl Normalized {
         }
     }
 
+    /// Update the inner value of a normalized value
     pub fn get_value(&self) -> f64 {
         self.value
     }
