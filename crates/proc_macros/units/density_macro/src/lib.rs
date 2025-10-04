@@ -39,35 +39,56 @@ impl Parse for EnumSourceGroup {
 }
 
 enum MeasurementContainer {
+    DensityJson(HashMap<String, DensityJson>),
     MassJson(HashMap<String, MassJson>),
     VolumeJson(HashMap<String, VolumeJson>),
-    EnergyJson(HashMap<String, EnergyJson>),
-    DistanceJson(HashMap<String, DistanceJson>),
+}
+
+#[derive(Debug, Deserialize)]
+struct Density {
+    identifier: String,
+    mass_unit_varient: String,
+    volume_unit_varient: String,
+    symbol: String,
+    unit_type: String,
+    unit_type_plural: String,
+    measurement_system: String,
+    si_factor: f64,
+}
+
+#[derive(Debug, Deserialize)]
+struct DensityJson {
+    mass_unit_varient: String,
+    volume_unit_varient: String,
 }
 
 #[derive(Debug, Deserialize)]
 struct MassJson {
+    identifier: String,
+    symbol: String,
+    unit_type: String,
+    unit_type_plural: String,
     measurement_system: String,
+    si_factor: f64,
 }
 
 #[derive(Debug, Deserialize)]
 struct VolumeJson {
+    identifier: String,
+    symbol: String,
+    unit_type: String,
     measurement_system: String,
-}
-
-#[derive(Debug, Deserialize)]
-struct EnergyJson {
-    measurement_system: String,
-}
-
-#[derive(Debug, Deserialize)]
-struct DistanceJson {
-    measurement_system: String,
+    si_factor: f64,
 }
 
 #[proc_macro]
-pub fn include_measurement_systems_from_json(input: TokenStream) -> TokenStream {
-    let mut measurement_systems = HashSet::new(); 
+pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
+    let mut density_all: HashMap<String, Density> = HashMap::new();
+    let mut mass_data: HashMap<String, MassJson> = HashMap::new();
+    let mut volume_data: HashMap<String, VolumeJson> = HashMap::new();
+
+    let mut density: HashMap<String, Density> = HashMap::new(); 
+    let mut density_data: HashMap<String, DensityJson> = HashMap::new();
 
     let parsed_input = syn::parse_macro_input!(input as EnumSourceGroup);
 
@@ -90,38 +111,34 @@ pub fn include_measurement_systems_from_json(input: TokenStream) -> TokenStream 
                     let serde_res = serde_json::from_str::<HashMap<String, VolumeJson>>(&file_content).expect("Invalid JSON format");
                     MeasurementContainer::VolumeJson(serde_res)
                 },
-                "EnergyUnit" => {
-                    let serde_res = serde_json::from_str::<HashMap<String, EnergyJson>>(&file_content).expect("Invalid JSON format");
-                    MeasurementContainer::EnergyJson(serde_res)
-                },
-                "DistanceUnit" => {
-                    let serde_res = serde_json::from_str::<HashMap<String, DistanceJson>>(&file_content).expect("Invalid JSON format");
-                    MeasurementContainer::DistanceJson(serde_res)
+                "DensityUnit" => {
+                    let serde_res = serde_json::from_str::<HashMap<String, DensityJson>>(&file_content).expect("Invalid JSON format");
+                    MeasurementContainer::DensityJson(serde_res)
                 },
                 _ => panic!("Incorrect unit")
             };
 
             match measurement_container {
                 MeasurementContainer::MassJson(json_results) => {
-                    for data in json_results.values() {
-                        measurement_systems.insert(data.measurement_system.clone());
+                    for (key, data) in json_results {
+                        mass_data.insert(key, data);
                     }
                 },
                 MeasurementContainer::VolumeJson(json_results) => {
-                    for data in json_results.values() {
-                        measurement_systems.insert(data.measurement_system.clone());
+                    for (key, data) in json_results {
+                        volume_data.insert(key, data);
                     }
                 },
-                MeasurementContainer::EnergyJson(json_results) => {
-                    for data in json_results.values() {
-                        measurement_systems.insert(data.measurement_system.clone());
+                MeasurementContainer::DensityJson(json_results) => {
+                    for (key, data) in json_results {
+                        density_data.insert(key, data);
                     }
                 },
-                MeasurementContainer::DistanceJson(json_results) => {
-                    for data in json_results.values() {
-                        measurement_systems.insert(data.measurement_system.clone());
-                    }
-                },
+            }
+
+            for (mass_key, mass_value) in mass_data {
+                for (volume_key, volume_data) in volume_data {
+                }
             }
         }
     }
@@ -142,4 +159,3 @@ pub fn include_measurement_systems_from_json(input: TokenStream) -> TokenStream 
 
     expanded.into()
 }
-
