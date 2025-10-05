@@ -1,169 +1,136 @@
-use std::{
-    cmp::Ordering,
-    fmt,
-    ops::{Div, Mul},
-};
+#[macro_rules]
+macro_rules! define densities {
+    (
+        $(
+            all: {
+                $(
+                    $all_variant:ident => {
+                        from_fn_name: $all_from_fn_name:ident,
+                        as_fn_name: $all_as_fn_name:ident,
+                        to_fn_name: $all_to_fn_name:ident,
+                        mass_unit_varient: $all_mass_unit_varient: ident,
+                        volume_unit_varient: $all_volume_unit_varient:ident,
+                        measurement_system: $all_measurement_system: DensityMeasurementSystem{
+                            mass_measurement_system: ident,
+                            volume_measurement_system: ident,
+                        }
+                        symbol: $all_symbol: expr,
+                        symbol_lc: $all_symbol_lc: expr,
+                        unit_type: $all_unit_type: expr,
+                        unit_type_lc: $all_unit_type_lc: expr,
+                        unit_type_plural: $all_unit_type_plural: expr,
+                        unit_type_plural_lc: $all_unit_type_plural_lc: expr,
+                        identifier_lc: $all_identifier_lc: expr,
+                        si_factor: $all_si_factor: expr
+                    }
+                )
+            },
+            json: {
+                $(
+                    $variant:ident => {
+                        from_fn_name: $json_from_fn_name: ident,
+                        as_fn_name: $json_as_fn_name: ident,
+                        to_fn_name: $json_to_fn_name: ident,
+                        mass_unit_varient: $json_mass_unit_variant: ident,
+                        volume_unit_varient: $json_volume_unit_variant: ident,
+                        measurement_system: $json_measurement_system: DensityMeasurementSystem {
+                            mass_measurement_system: ident,
+                            volume_measurement_system: ident,
+                        },
+                        symbol: $json_symbol: expr,
+                        symbol_lc: $json_symbol_lc: expr,
+                        unit_type: $json_unit_type: expr,
+                        unit_type_lc: $json_unit_type_lc: expr,
+                        unit_type_plural: $json_unit_type_plural: expr,
+                        unit_type_plural_lc: $json_unit_type_plural_lc: expr,
+                        identifier_lc: $json_identifier_lc: expr,
+                        si_factor: $json_si_factor: expr,
+                    }
+                )
+            }
+        ) => {
+            use crate::measurement_system::MeasurementSystem;
+            use std::{
+                cmp::Ordering,
+                fmt,
+                ops::{Add, Div, Mul, Sub},
+                str::FromStr,
+            };
+            use serde::{Deserialize, Serialize};
 
-use serde::{Deserialize, Serialize};
+            #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+            pub enum DensityUnit {
+                $($all_variant),+
+            }
 
-use crate::{mass::Mass, volume::Volume};
+            impl DensityUnit {
+                pub fn get_all_enumerations() -> Vec<Self> {
+                    &[$(MassUnit::$all_variant),+]
+                }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
-pub enum DensityUnit {
-    GramsPerMl,
-    GramsPerL,
-}
+                pub fn get_selected_enumerations() -> Vec<Self> {
+                    &[$(MassUnit::$json_variant), +]
+                }
+                
+                pub fn as_symbol(&self) -> &'static str {
+                    match self {
+                        $(DensityUnit::$all_variant => $all_symbol),+
+                    }
+                }
 
-impl DensityUnit {
-    pub fn as_symbol(&self) -> &'static str {
-        match self {
-            DensityUnit::GramsPerMl => "g/ml",
-            DensityUnit::GramsPerL => "g/l",
+                pub fn as_unit_type(&self) -> &'static str {
+                    match self {
+                        $(DensityUnit::$all_variant => $all_unit_type),+
+                    }
+                }
+
+                pub fn as_unit_type_plural(&self) -> &'static str {
+                    match self {
+                        $(DensityUnit::$all_variant => $all_unit_type_plural),+
+                    }
+                }
+
+                pub fn get_measurement_system(&self) -> DensityMeasurementSystem {
+                    match self {
+                        $(DensityUnit::$all_variant => DensityMeasurementSystem {
+                            mass_measurement_system: MeasurementSystem::$all_measurement_system.mass_measurement_system,
+                            volume_measurement_system: MeasurementSystem::all_measurement_system.volume_measurement_system,
+                        }),+
+                    }
+                }
+
+                pub fn si_factor(&self) -> f64 {
+                    match self {
+                        $(DensityUnit::$all_variant => $si_factor),+
+                    }
+                }
+            }
+
+            impl FromStr for DensityUnit {
+                type Err = &'static str;
+
+                fn from_str(s: &str) -> Result<Self, Self::Err> {
+                    let formatted_string = s.trim().to_lowercase();
+                    match formatted_string.as_str() {
+                        $($all_symbol_lc | $all_unit_type_lc | $all_unit_type_plural_lc => return Ok(DensityUnit::$all_variant),)+
+                        _ => {
+                            match formatted_string.as_str() {
+                                $($all_identifier_lc => Ok(DensityUnit::$all_variant),)+
+                                _ => Err("Unknown density unit"),
+                            }
+                        }
+                    }
+                }
+            }
+
+            #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
+            pub struct Density {
+                value: f64,
+                unit: DensityUnit,
+            }
+
+            impl Density {
+            }
         }
-    }
-
-    pub fn as_unit_type(&self) -> &'static str {
-        match self {
-            DensityUnit::GramsPerMl => "gram per milliliter",
-            DensityUnit::GramsPerL => "gram per liter",
-        }
-    }
-
-    pub fn as_unit_type_plural(&self) -> &'static str {
-        match self {
-            DensityUnit::GramsPerMl => "grams per milliliter",
-            DensityUnit::GramsPerL => "grams per liter",
-        }
-    }
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
-pub struct Density {
-    value: f64,
-    unit: DensityUnit,
-}
-
-impl Default for Density {
-    fn default() -> Self {
-        Density::from_g_per_ml(0.0)
-    }
-}
-
-impl Density {
-    pub fn new(value: f64, unit: DensityUnit) -> Self {
-        Self { value, unit }
-    }
-
-    pub fn from_g_per_ml(g_per_ml: f64) -> Self {
-        Self::new(g_per_ml, DensityUnit::GramsPerMl)
-    }
-
-    pub fn from_g_per_l(g_per_l: f64) -> Self {
-        Self::new(g_per_l, DensityUnit::GramsPerL)
-    }
-
-    pub fn as_g_per_ml(&self) -> f64 {
-        match self.unit {
-            DensityUnit::GramsPerMl => self.value,
-            DensityUnit::GramsPerL => self.value / 1000 as f64,
-        }
-    }
-
-    pub fn as_g_per_l(&self) -> f64 {
-        match self.unit {
-            DensityUnit::GramsPerMl => self.value * 1000 as f64,
-            DensityUnit::GramsPerL => self.value,
-        }
-    }
-
-    pub fn get_mass_for_volume(&self, volume: Volume) -> Mass {
-        Mass::from_g(self.as_g_per_ml() * volume.as_ml())
-    }
-
-    pub fn get_volume_for_mass(&self, mass: Mass) -> Volume {
-        Volume::from_ml(mass.as_g() / self.as_g_per_ml())
-    }
-
-    pub fn to_unit(&self, unit: DensityUnit) -> Self {
-        let value = match unit {
-            DensityUnit::GramsPerMl => self.as_g_per_ml(),
-            DensityUnit::GramsPerL => self.as_g_per_l(),
-        };
-        Self { value, unit }
-    }
-
-    pub fn to_g_per_ml(&self) -> Self {
-        self.to_unit(DensityUnit::GramsPerMl)
-    }
-
-    pub fn to_g_per_l(&self) -> Self {
-        self.to_unit(DensityUnit::GramsPerL)
-    }
-
-    pub fn is_zero(&self) -> bool {
-        self.value == 0.0
-    }
-
-    pub fn is_negative(&self) -> bool {
-        self.value < 0.0
-    }
-
-    pub fn get_unit(&self) -> DensityUnit {
-        self.unit
-    }
-
-    pub fn get_symbol(&self) -> &'static str {
-        self.unit.as_symbol()
-    }
-
-    pub fn get_unit_type(&self) -> &'static str {
-        self.unit.as_unit_type()
-    }
-
-    pub fn get_unit_type_plural(&self) -> &'static str {
-        self.unit.as_unit_type_plural()
-    }
-
-    pub fn to_string(&self) -> String {
-        format!("{} {}", self.value, self.get_symbol())
-    }
-}
-
-impl fmt::Display for Density {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", self.value, self.get_symbol())
-    }
-}
-
-impl Mul<Volume> for Density {
-    type Output = Mass;
-
-    fn mul(self, volume: Volume) -> Mass {
-        self.get_mass_for_volume(volume)
-    }
-}
-
-impl Mul<Density> for Volume {
-    type Output = Mass;
-
-    fn mul(self, density: Density) -> Mass {
-        density.get_mass_for_volume(self)
-    }
-}
-
-impl Div<Volume> for Mass {
-    type Output = Density;
-
-    fn div(self, volume: Volume) -> Density {
-        let grams = self.as_g();
-        let milliliters = volume.as_ml();
-        let grams_per_milliliter = grams / milliliters;
-        Density::from_g_per_ml(grams_per_milliliter)
-    }
-}
-
-impl PartialOrd for Density {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.as_g_per_ml().partial_cmp(&other.as_g_per_ml())
-    }
+    )
 }
