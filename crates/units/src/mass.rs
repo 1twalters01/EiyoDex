@@ -33,7 +33,7 @@ macro_rules! define_masses {
         }
 
         impl MassUnit {
-            pub fn get_enumerations() -> &'static [MassUnit] {
+            pub fn get_enumerations() -> &'static [Self] {
                 &[$(MassUnit::$variant),+]
             }
 

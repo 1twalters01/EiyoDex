@@ -42,17 +42,11 @@ impl Parse for EnumSourceGroup {
     }
 }
 
-enum MeasurementContainer {
-    DensityJson(HashMap<String, DensityJson>),
-    MassJson(HashMap<String, MassJson>),
-    VolumeJson(HashMap<String, VolumeJson>),
-}
-
 #[derive(Debug, Deserialize)]
 struct Density {
     identifier: String,
-    mass_unit_variant: String,
-    volume_unit_variant: String,
+    mass_unit: String,
+    volume_unit: String,
     symbol: String,
     unit_type: String,
     unit_type_plural: String,
@@ -68,8 +62,8 @@ struct DensityMeasurementSystem {
 
 #[derive(Debug, Deserialize)]
 struct DensityJson {
-    // mass_unit_varient: String,
-    // volume_unit_varient: String,
+    mass_unit: String,
+    volume_unit: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -111,46 +105,27 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
             let file_content = fs::read_to_string(&full_path)
                 .unwrap_or_else(|_| panic!("Unable to read file: {}", full_path.display()));
 
-            let measurement_container: MeasurementContainer = match enum_name.to_string().as_str() {
+            match enum_name.to_string().as_str() {
                 "MassUnit" => {
-                    let serde_res =
-                        serde_json::from_str::<HashMap<String, MassJson>>(&file_content)
+                    let serde_res: HashMap<String, MassJson> =
+                        serde_json::from_str(&file_content)
                             .expect("Invalid JSON format");
-                    MeasurementContainer::MassJson(serde_res)
+                    for (key, data) in serde_res { mass_data.insert(key, data); }
                 }
                 "VolumeUnit" => {
                     let serde_res =
                         serde_json::from_str::<HashMap<String, VolumeJson>>(&file_content)
                             .expect("Invalid JSON format");
-                    MeasurementContainer::VolumeJson(serde_res)
+                    for (key, data) in serde_res { volume_data.insert(key, data); }
                 }
                 "DensityUnit" => {
                     let serde_res =
                         serde_json::from_str::<HashMap<String, DensityJson>>(&file_content)
                             .expect("Invalid JSON format");
-                    MeasurementContainer::DensityJson(serde_res)
+                    for (key, data) in serde_res { density_data.insert(key, data); }
                 }
                 _ => panic!("Incorrect unit"),
             };
-
-            match measurement_container {
-                MeasurementContainer::MassJson(json_results) => {
-                    for (key, data) in json_results {
-                        mass_data.insert(key, data);
-                    }
-                }
-                MeasurementContainer::VolumeJson(json_results) => {
-                    for (key, data) in json_results {
-                        volume_data.insert(key, data);
-                    }
-                }
-                MeasurementContainer::DensityJson(json_results) => {
-                    for (key, data) in json_results {
-                        density_data.insert(key, data);
-                    }
-                }
-            }
-
         }
     }
 
@@ -176,8 +151,8 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
                 density_variant.clone(),
                 Density {
                     identifier: density_identifier.clone(),
-                    mass_unit_variant: mass_key.clone(),
-                    volume_unit_variant: volume_key.clone(),
+                    mass_unit: mass_key.clone(),
+                    volume_unit: volume_key.clone(),
                     symbol: density_symbol.clone(),
                     unit_type: density_unit_type.clone(),
                     unit_type_plural: density_unit_type_plural.clone(),
@@ -191,8 +166,8 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
                     density_variant,
                     Density {
                         identifier: density_identifier,
-                        mass_unit_variant: mass_key.clone(),
-                        volume_unit_variant: volume_key.clone(),
+                        mass_unit: mass_key.clone(),
+                        volume_unit: volume_key.clone(),
                         symbol: density_symbol,
                         unit_type: density_unit_type,
                         unit_type_plural: density_unit_type_plural,
@@ -207,14 +182,14 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
     let variants: Vec<_> = density
         .iter()
         .map(|(key, data)| {
-            let variant = format_ident!("{}", key);
+            let json_variant = format_ident!("{}", key);
             let from_fn_name = format_ident!("from_{}", data.identifier);
             let as_fn_name = format_ident!("as_{}", data.identifier);
             let to_fn_name = format_ident!("to_{}", data.identifier);
-            let mass_unit_varient = &data.mass_unit_variant;
-            let volume_unit_varient = &data.volume_unit_variant;
-            let mass_measurement_system = &data.measurement_system.mass_measurement_system;
-            let volume_measurement_system = &data.measurement_system.volume_measurement_system;
+            let mass_unit_varient = format_ident!("{}", &data.mass_unit);
+            let volume_unit_varient = format_ident!("{}", &data.volume_unit);
+            let mass_measurement_system = format_ident!("{}", &data.measurement_system.mass_measurement_system);
+            let volume_measurement_system = format_ident!("{}", &data.measurement_system.volume_measurement_system);
             let symbol = &data.symbol;
             let symbol_lc = &data.symbol.to_lowercase();
             let unit_type = &data.unit_type;
@@ -225,16 +200,14 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
             let si_factor = &data.si_factor;
 
             quote! {
-                #variant => {
+                #json_variant => {
                     from_fn_name: #from_fn_name,
                     as_fn_name: #as_fn_name,
                     to_fn_name: #to_fn_name,
                     mass_unit_varient: #mass_unit_varient,
                     volume_unit_varient: #volume_unit_varient,
-                    measurement_system: DensityMeasurementSystem {
-                        mass_measurement_system: #mass_measurement_system.to_string(),
-                        volume_measurement_system: #volume_measurement_system.to_string(),
-                    },
+                    mass_measurement_system: #mass_measurement_system,
+                    volume_measurement_system: #volume_measurement_system,
                     symbol: #symbol,
                     symbol_lc: #symbol_lc,
                     unit_type: #unit_type,
@@ -251,14 +224,14 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
     let variants_all: Vec<_> = density_all
         .iter()
         .map(|(key, data)| {
-            let variant = format_ident!("{}", key);
+            let all_variant = format_ident!("{}", key);
             let from_fn_name = format_ident!("from_{}", data.identifier);
             let as_fn_name = format_ident!("as_{}", data.identifier);
             let to_fn_name = format_ident!("to_{}", data.identifier);
-            let mass_unit_variant = &data.mass_unit_variant;
-            let volume_unit_variant = &data.volume_unit_variant;
-            let mass_measurement_system = &data.measurement_system.mass_measurement_system;
-            let volume_measurement_system = &data.measurement_system.volume_measurement_system;
+            let mass_unit_variant = format_ident!("{}", &data.mass_unit);
+            let volume_unit_variant = format_ident!("{}", &data.volume_unit);
+            let mass_measurement_system = format_ident!("{}", &data.measurement_system.mass_measurement_system);
+            let volume_measurement_system = format_ident!("{}", &data.measurement_system.volume_measurement_system);
             let symbol = &data.symbol;
             let symbol_lc = &data.symbol.to_lowercase();
             let unit_type = &data.unit_type;
@@ -269,16 +242,14 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
             let si_factor = &data.si_factor;
 
             quote! {
-                #variant => {
+                #all_variant => {
                     from_fn_name: #from_fn_name,
                     as_fn_name: #as_fn_name,
                     to_fn_name: #to_fn_name,
                     mass_unit_varient: #mass_unit_variant,
                     volume_unit_varient: #volume_unit_variant,
-                    measurement_system: DensityMeasurementSystem {
-                        mass_measurement_system: #mass_measurement_system.to_string(),
-                        volume_measurement_system: #volume_measurement_system.to_string(),
-                    },
+                    mass_measurement_system: #mass_measurement_system,
+                    volume_measurement_system: #volume_measurement_system,
                     symbol: #symbol,
                     symbol_lc: #symbol_lc,
                     unit_type: #unit_type,
