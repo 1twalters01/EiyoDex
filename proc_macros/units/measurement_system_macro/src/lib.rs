@@ -3,9 +3,13 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use serde::Deserialize;
-use std::{collections::{HashMap, HashSet}, env, fs, path::Path};
-use syn::{Ident, LitStr, Token};
+use std::{
+    collections::{HashMap, HashSet},
+    env, fs,
+    path::Path,
+};
 use syn::parse::{Parse, ParseStream, Result as ParseResult};
+use syn::{Ident, LitStr, Token};
 
 struct EnumSourceGroup {
     items: Vec<(Ident, Vec<LitStr>)>,
@@ -67,38 +71,45 @@ struct DistanceJson {
 
 #[proc_macro]
 pub fn include_measurement_systems_from_json(input: TokenStream) -> TokenStream {
-    let mut measurement_systems = HashSet::new(); 
+    let mut measurement_systems = HashSet::new();
 
     let parsed_input = syn::parse_macro_input!(input as EnumSourceGroup);
 
     for (enum_name, paths) in parsed_input.items {
         for file_path_lit in paths {
-
             let rel_path = file_path_lit.value();
-            let manifest_dir = env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set");
+            let manifest_dir = env::var("WORKSPACE_ROOT").expect("WORKSPACE_ROOT not set");
             let full_path = Path::new(&manifest_dir).join(rel_path);
 
-            let file_content =
-            fs::read_to_string(&full_path).unwrap_or_else(|_| panic!("Unable to read file: {}", full_path.display()));
+            let file_content = fs::read_to_string(&full_path)
+                .unwrap_or_else(|_| panic!("Unable to read file: {}", full_path.display()));
 
             let measurement_container: MeasurementContainer = match enum_name.to_string().as_str() {
                 "MassUnit" => {
-                    let serde_res = serde_json::from_str::<HashMap<String, MassJson>>(&file_content).expect("Invalid JSON format");
+                    let serde_res =
+                        serde_json::from_str::<HashMap<String, MassJson>>(&file_content)
+                            .expect("Invalid JSON format");
                     MeasurementContainer::MassJson(serde_res)
-                },
+                }
                 "VolumeUnit" => {
-                    let serde_res = serde_json::from_str::<HashMap<String, VolumeJson>>(&file_content).expect("Invalid JSON format");
+                    let serde_res =
+                        serde_json::from_str::<HashMap<String, VolumeJson>>(&file_content)
+                            .expect("Invalid JSON format");
                     MeasurementContainer::VolumeJson(serde_res)
-                },
+                }
                 "EnergyUnit" => {
-                    let serde_res = serde_json::from_str::<HashMap<String, EnergyJson>>(&file_content).expect("Invalid JSON format");
+                    let serde_res =
+                        serde_json::from_str::<HashMap<String, EnergyJson>>(&file_content)
+                            .expect("Invalid JSON format");
                     MeasurementContainer::EnergyJson(serde_res)
-                },
+                }
                 "DistanceUnit" => {
-                    let serde_res = serde_json::from_str::<HashMap<String, DistanceJson>>(&file_content).expect("Invalid JSON format");
+                    let serde_res =
+                        serde_json::from_str::<HashMap<String, DistanceJson>>(&file_content)
+                            .expect("Invalid JSON format");
                     MeasurementContainer::DistanceJson(serde_res)
-                },
-                _ => panic!("Incorrect unit")
+                }
+                _ => panic!("Incorrect unit"),
             };
 
             match measurement_container {
@@ -106,33 +117,36 @@ pub fn include_measurement_systems_from_json(input: TokenStream) -> TokenStream 
                     for data in json_results.values() {
                         measurement_systems.insert(data.measurement_system.clone());
                     }
-                },
+                }
                 MeasurementContainer::VolumeJson(json_results) => {
                     for data in json_results.values() {
                         measurement_systems.insert(data.measurement_system.clone());
                     }
-                },
+                }
                 MeasurementContainer::EnergyJson(json_results) => {
                     for data in json_results.values() {
                         measurement_systems.insert(data.measurement_system.clone());
                     }
-                },
+                }
                 MeasurementContainer::DistanceJson(json_results) => {
                     for data in json_results.values() {
                         measurement_systems.insert(data.measurement_system.clone());
                     }
-                },
+                }
             }
         }
     }
 
-    let variants: Vec<_> = measurement_systems.iter().map(|measurement_system| {
-        let variant = format_ident!("{}", measurement_system);
+    let variants: Vec<_> = measurement_systems
+        .iter()
+        .map(|measurement_system| {
+            let variant = format_ident!("{}", measurement_system);
 
-        quote! {
-            #variant
-        }
-    }).collect();
+            quote! {
+                #variant
+            }
+        })
+        .collect();
 
     let expanded = quote! {
         define_measurement_systems! {
@@ -142,4 +156,3 @@ pub fn include_measurement_systems_from_json(input: TokenStream) -> TokenStream 
 
     expanded.into()
 }
-

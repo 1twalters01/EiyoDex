@@ -4,9 +4,9 @@ members = [
     'apps/*',
     'xtask',
     'ui/gtk',
-    'crates/proc_macros/*',
+    'proc_macros/*/*',
     'crates/*',
 ]
-exclude = [
-    "crates/proc_macros",
-]
+# exclude = [
+#     "crates/proc_macros",
+# ]

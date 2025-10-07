@@ -24,18 +24,18 @@ pub fn include_volumes_from_json(input: TokenStream) -> TokenStream {
     for file_path_lit in file_paths.iter() {
         let rel_path = file_path_lit.value();
 
-        let manifest_dir = env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set");
+        let manifest_dir = env::var("WORKSPACE_ROOT").expect("WORKSPACE_ROOT not set");
         let full_path = Path::new(&manifest_dir).join(rel_path);
 
-        let file_content =
-        fs::read_to_string(&full_path).unwrap_or_else(|_| panic!("Unable to read file: {}", full_path.display()));
+        let file_content = fs::read_to_string(&full_path)
+            .unwrap_or_else(|_| panic!("Unable to read file: {}", full_path.display()));
 
-        let json_results: HashMap<String, VolumeJson> = serde_json::from_str(&file_content).expect("Invalid JSON format");
+        let json_results: HashMap<String, VolumeJson> =
+            serde_json::from_str(&file_content).expect("Invalid JSON format");
 
         for (key, value) in json_results {
             volumes.insert(key, value);
         }
-
     }
 
     let variants = volumes.iter().map(|(key, data)| {
@@ -53,7 +53,7 @@ pub fn include_volumes_from_json(input: TokenStream) -> TokenStream {
         let identifier_lc = &data.identifier.to_lowercase();
         let si_factor = &data.si_factor;
 
-            quote! {
+        quote! {
             #variant => {
                 from_fn_name: #from_fn_name,
                 as_fn_name: #as_fn_name,
@@ -79,4 +79,3 @@ pub fn include_volumes_from_json(input: TokenStream) -> TokenStream {
 
     expanded.into()
 }
-

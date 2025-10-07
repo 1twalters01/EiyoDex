@@ -21,8 +21,8 @@ macro_rules! define_measurement_systems {
 
 use measurement_system_macro::include_measurement_systems_from_json;
 include_measurement_systems_from_json!(
-    MassUnit => "data/mass.json", "data/fake_mass.json",
-    VolumeUnit => "data/volume.json", "data/fake_volume.json",
-    EnergyUnit => "data/energy.json", "data/fake_energy.json",
-    DistanceUnit => "data/distance.json", "data/fake_distance.json",
+    MassUnit => "data/units/mass/mass.json", "data/units/mass/fake_mass.json",
+    VolumeUnit => "data/units/volume/volume.json", "data/units/volume/fake_volume.json",
+    EnergyUnit => "data/units/energy/energy.json", "data/units/energy/fake_energy.json",
+    DistanceUnit => "data/units/distance/distance.json", "data/units/distance/fake_distance.json",
 );

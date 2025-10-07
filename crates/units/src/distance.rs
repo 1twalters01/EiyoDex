@@ -1,5 +1,3 @@
-// #[allow(unreachable_patterns)]
-
 #[macro_export]
 macro_rules! define_distances {
     (
@@ -239,4 +237,7 @@ impl PartialOrd for Distance {
 }
 
 use distance_macro::include_distances_from_json;
-include_distances_from_json!("data/distance.json", "data/fake_distance.json",);
+include_distances_from_json!(
+    "data/units/distance/distance.json",
+    "data/units/distance/fake_distance.json",
+);
