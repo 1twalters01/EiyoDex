@@ -23,7 +23,7 @@ macro_rules! define_volumes {
             cmp::Ordering,
             fmt,
             ops::{Add, Div, Mul, Sub},
-            // str::FromStr,
+            str::FromStr,
         };
         use serde::{Deserialize, Serialize};
 
@@ -66,15 +66,23 @@ macro_rules! define_volumes {
                     $(VolumeUnit::$variant => $si_factor),+
                 }
             }
+        }
 
-            #[allow(unreachable_patterns)]
-            pub fn from_str(s: &str) -> Result<Self, &str> {
-                match s.trim().to_lowercase().as_str() {
-                    $($symbol_lc | $unit_type_lc | $unit_type_plural_lc | $identifier_lc => Ok(VolumeUnit::$variant),)+
-                    _ => Err("Unknown volume unit"),
+        impl FromStr for VolumeUnit {
+            type Err = &'static str;
+
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                let formatted_string = s.trim().to_lowercase();
+                match formatted_string.as_str() {
+                    $($symbol_lc | $unit_type_lc | $unit_type_plural_lc => return Ok(VolumeUnit::$variant),)+
+                    _ => {
+                        match formatted_string.as_str() {
+                            $($identifier_lc => Ok(VolumeUnit::$variant),)+
+                            _ => Err("Unknown volume unit"),
+                        }
+                    }
                 }
             }
-
         }
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
@@ -230,6 +238,5 @@ impl PartialOrd for Volume {
 
 use volume_macro::include_volumes_from_json;
 include_volumes_from_json!(
-    "data/units/volume/volume.json",
-    "data/units/volume/fake_volume.json",
+    "data/units/volume",
 );

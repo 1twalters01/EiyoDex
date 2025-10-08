@@ -248,6 +248,5 @@ use std::iter::Sum;
 
 use energy_macro::include_energies_from_json;
 include_energies_from_json!(
-    "data/units/energy/energy.json",
-    "data/units/energy/fake_energy.json",
+    "data/units/energy",
 );
