@@ -1,5 +1,6 @@
 extern crate proc_macro;
 
+use glob::glob;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use serde::Deserialize;
@@ -102,32 +103,42 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
             let manifest_dir = env::var("WORKSPACE_ROOT").expect("WORKSPACE_ROOT not set");
             let full_path = Path::new(&manifest_dir).join(rel_path);
 
-            let file_content = fs::read_to_string(&full_path)
-                .unwrap_or_else(|_| panic!("Unable to read file: {}", full_path.display()));
+            let pattern = if full_path.is_dir() {
+                format!("{}/**/*.json", full_path.display())
+            } else {
+                full_path.display().to_string()
+            };
 
-            match enum_name.to_string().as_str() {
-                "MassUnit" => {
-                    let serde_res: HashMap<String, MassJson> =
+            for entry in glob(&pattern).expect("Error reading glob pattern") {
+                let full_path = entry.expect("Invalid path");
+
+                let file_content = fs::read_to_string(&full_path)
+                    .unwrap_or_else(|_| panic!("Unable to read file: {}", full_path.display()));
+
+                match enum_name.to_string().as_str() {
+                    "MassUnit" => {
+                        let serde_res: HashMap<String, MassJson> =
                         serde_json::from_str(&file_content).expect("Invalid JSON format");
-                    for (key, data) in serde_res {
-                        mass_data.insert(key, data);
+                        for (key, data) in serde_res {
+                            mass_data.insert(key, data);
+                        }
                     }
-                }
-                "VolumeUnit" => {
-                    let serde_res =
+                    "VolumeUnit" => {
+                        let serde_res =
                         serde_json::from_str::<HashMap<String, VolumeJson>>(&file_content)
                             .expect("Invalid JSON format");
-                    for (key, data) in serde_res {
-                        volume_data.insert(key, data);
+                        for (key, data) in serde_res {
+                            volume_data.insert(key, data);
+                        }
                     }
-                }
-                "DensityUnit" => {
-                    let serde_res: Vec<DensityJson> =
+                    "DensityUnit" => {
+                        let serde_res: Vec<DensityJson> =
                         serde_json::from_str(&file_content).expect("Invalid JSON format");
-                    density_data.extend(serde_res);
-                }
-                _ => panic!("Incorrect unit"),
-            };
+                        density_data.extend(serde_res);
+                    }
+                    _ => panic!("Incorrect unit"),
+                };
+            }
         }
     }
 

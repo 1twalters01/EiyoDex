@@ -1,5 +1,6 @@
 extern crate proc_macro;
 
+use glob::glob;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use serde::Deserialize;
@@ -25,14 +26,24 @@ pub fn include_currencies_from_json(input: TokenStream) -> TokenStream {
         let manifest_dir = env::var("WORKSPACE_ROOT").expect("WORKSPACE_ROOT not set");
         let full_path = Path::new(&manifest_dir).join(rel_path);
 
-        let file_content = fs::read_to_string(&full_path)
-            .unwrap_or_else(|_| panic!("Unable to read file: {}", full_path.display()));
+        let pattern = if full_path.is_dir() {
+            format!("{}/**/*.json", full_path.display())
+        } else {
+            full_path.display().to_string()
+        };
 
-        let json_results: HashMap<String, CurrencyJson> =
+        for entry in glob(&pattern).expect("Error reading glob pattern") {
+            let full_path = entry.expect("Invalid path");
+
+            let file_content = fs::read_to_string(&full_path)
+                .unwrap_or_else(|_| panic!("Unable to read file: {}", full_path.display()));
+
+            let json_results: HashMap<String, CurrencyJson> =
             serde_json::from_str(&file_content).expect("Invalid JSON format");
 
-        for (key, value) in json_results {
-            currencies.insert(key, value);
+            for (key, value) in json_results {
+                currencies.insert(key, value);
+            }
         }
     }
 

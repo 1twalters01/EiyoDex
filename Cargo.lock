@@ -379,6 +379,7 @@ dependencies = [
 name = "currency_macro"
 version = "0.1.0"
 dependencies = [
+ "glob",
  "quote",
  "serde",
  "serde_json",
@@ -393,6 +394,7 @@ version = "0.1.0"
 name = "density_macro"
 version = "0.1.0"
 dependencies = [
+ "glob",
  "quote",
  "serde",
  "serde_json",
