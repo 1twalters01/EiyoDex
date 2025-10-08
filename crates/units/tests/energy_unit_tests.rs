@@ -7,7 +7,6 @@ fn test_get_energy_unit_enumerations() {
     let manual_enumerations = vec![
         &EnergyUnit::Kilojoule,
         &EnergyUnit::Kilocalorie,
-        &EnergyUnit::Fakejoule,
     ];
     assert_eq!(
         BTreeSet::from_iter(function_enumerations),
