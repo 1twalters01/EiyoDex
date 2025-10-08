@@ -118,22 +118,22 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
                 match enum_name.to_string().as_str() {
                     "MassUnit" => {
                         let serde_res: HashMap<String, MassJson> =
-                        serde_json::from_str(&file_content).expect("Invalid JSON format");
+                            serde_json::from_str(&file_content).expect("Invalid JSON format");
                         for (key, data) in serde_res {
                             mass_data.insert(key, data);
                         }
                     }
                     "VolumeUnit" => {
                         let serde_res =
-                        serde_json::from_str::<HashMap<String, VolumeJson>>(&file_content)
-                            .expect("Invalid JSON format");
+                            serde_json::from_str::<HashMap<String, VolumeJson>>(&file_content)
+                                .expect("Invalid JSON format");
                         for (key, data) in serde_res {
                             volume_data.insert(key, data);
                         }
                     }
                     "DensityUnit" => {
                         let serde_res: Vec<DensityJson> =
-                        serde_json::from_str(&file_content).expect("Invalid JSON format");
+                            serde_json::from_str(&file_content).expect("Invalid JSON format");
                         density_data.extend(serde_res);
                     }
                     _ => panic!("Incorrect unit"),

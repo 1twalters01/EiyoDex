@@ -1,20 +1,4 @@
 {
-    "Liter": {
-        "identifier": "l",
-        "symbol": "L",
-        "unit_type": "liter",
-        "unit_type_plural": "liters",
-        "measurement_system": "Metric",
-        "si_factor": 0.001
-    },
-    "Milliliter": {
-        "identifier": "ml",
-        "symbol": "mL",
-        "unit_type": "milliliter",
-        "unit_type_plural": "milliliters",
-        "measurement_system": "Metric",
-        "si_factor": 0.000001 
-    },
     "Pint": {
         "identifier": "pt",
         "symbol": "pt",
@@ -56,4 +40,3 @@
         "si_factor": 0.000005919387
     }
 }
-

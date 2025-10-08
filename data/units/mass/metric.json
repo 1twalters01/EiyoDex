@@ -30,14 +30,6 @@
         "unit_type_plural": "micrograms",
         "measurement_system": "Metric",
         "si_factor": 0.000000001
-    },
-    "Ounce": {
-        "identifier": "oz",
-        "symbol": "oz",
-        "unit_type": "ounce",
-        "unit_type_plural": "ounces",
-        "measurement_system": "Imperial",
-        "si_factor": 0.02834952
     }
 }
 

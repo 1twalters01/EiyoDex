@@ -14,21 +14,5 @@
         "unit_type_plural": "centimeters",
         "measurement_system": "Metric",
         "si_factor": 0.01 
-    },
-    "Foot": {
-        "identifier": "ft",
-        "symbol": "ft",
-        "unit_type": "foot",
-        "unit_type_plural": "feet",
-        "measurement_system": "Imperial",
-        "si_factor": 0.3048
-    },
-    "Inch": {
-        "identifier": "in",
-        "symbol": "in",
-        "unit_type": "inch",
-        "unit_type_plural": "inches",
-        "measurement_system": "Imperial",
-        "si_factor": 0.0254
     }
 }

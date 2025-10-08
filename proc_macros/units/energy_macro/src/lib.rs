@@ -36,12 +36,12 @@ pub fn include_energies_from_json(input: TokenStream) -> TokenStream {
 
         for entry in glob(&pattern).expect("Error reading glob pattern") {
             let full_path = entry.expect("Invalid path");
-            
+
             let file_content = fs::read_to_string(&full_path)
                 .unwrap_or_else(|_| panic!("Unable to read file: {}", full_path.display()));
 
             let json_results: HashMap<String, EnergyJson> =
-            serde_json::from_str(&file_content).expect("Invalid JSON format");
+                serde_json::from_str(&file_content).expect("Invalid JSON format");
 
             for (key, value) in json_results {
                 energies.insert(key, value);

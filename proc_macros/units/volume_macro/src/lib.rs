@@ -41,7 +41,7 @@ pub fn include_volumes_from_json(input: TokenStream) -> TokenStream {
                 .unwrap_or_else(|_| panic!("Unable to read file: {}", full_path.display()));
 
             let json_results: HashMap<String, VolumeJson> =
-            serde_json::from_str(&file_content).expect("Invalid JSON format");
+                serde_json::from_str(&file_content).expect("Invalid JSON format");
 
             for (key, value) in json_results {
                 volumes.insert(key, value);

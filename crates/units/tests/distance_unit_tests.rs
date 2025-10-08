@@ -9,7 +9,6 @@ fn test_get_distance_unit_enumerations() {
         &DistanceUnit::Centimeter,
         &DistanceUnit::Foot,
         &DistanceUnit::Inch,
-        &DistanceUnit::Fakemeter,
     ];
     assert_eq!(
         BTreeSet::from_iter(function_enumerations),

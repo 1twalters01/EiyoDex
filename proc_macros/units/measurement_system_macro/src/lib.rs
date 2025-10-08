@@ -91,22 +91,38 @@ pub fn include_measurement_systems_from_json(input: TokenStream) -> TokenStream 
                     "MassUnit" => {
                         serde_json::from_str::<HashMap<String, MassJson>>(&file_content)
                             .expect("Invalid JSON format")
-                            .values().into_iter().for_each(|mass| { measurement_systems.insert(mass.measurement_system.clone()); });
+                            .values()
+                            .into_iter()
+                            .for_each(|mass| {
+                                measurement_systems.insert(mass.measurement_system.clone());
+                            });
                     }
                     "VolumeUnit" => {
                         serde_json::from_str::<HashMap<String, VolumeJson>>(&file_content)
                             .expect("Invalid JSON format")
-                            .values().into_iter().for_each(|volume| { measurement_systems.insert(volume.measurement_system.clone()); });
+                            .values()
+                            .into_iter()
+                            .for_each(|volume| {
+                                measurement_systems.insert(volume.measurement_system.clone());
+                            });
                     }
                     "EnergyUnit" => {
                         serde_json::from_str::<HashMap<String, EnergyJson>>(&file_content)
                             .expect("Invalid JSON format")
-                            .values().into_iter().for_each(|energy| { measurement_systems.insert(energy.measurement_system.clone()); });
+                            .values()
+                            .into_iter()
+                            .for_each(|energy| {
+                                measurement_systems.insert(energy.measurement_system.clone());
+                            });
                     }
                     "DistanceUnit" => {
                         serde_json::from_str::<HashMap<String, DistanceJson>>(&file_content)
                             .expect("Invalid JSON format")
-                            .values().into_iter().for_each(|distance| { measurement_systems.insert(distance.measurement_system.clone()); });
+                            .values()
+                            .into_iter()
+                            .for_each(|distance| {
+                                measurement_systems.insert(distance.measurement_system.clone());
+                            });
                     }
                     _ => panic!("Incorrect unit"),
                 };

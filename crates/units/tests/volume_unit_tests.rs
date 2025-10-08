@@ -12,7 +12,6 @@ fn test_get_volume_unit_enumerations() {
         &VolumeUnit::FluidOunce,
         &VolumeUnit::Teaspoon,
         &VolumeUnit::Tablespoon,
-        &VolumeUnit::FakeLiter,
     ];
     assert_eq!(
         BTreeSet::from_iter(function_enumerations),
@@ -29,8 +28,6 @@ fn test_get_symbols() {
     assert_eq!(VolumeUnit::FluidOunce.as_symbol(), "fl oz");
     assert_eq!(VolumeUnit::Teaspoon.as_symbol(), "tsp");
     assert_eq!(VolumeUnit::Tablespoon.as_symbol(), "tbsp");
-
-    assert_eq!(VolumeUnit::FakeLiter.as_symbol(), "fL");
 }
 
 #[test]
@@ -42,8 +39,6 @@ fn test_get_unit_types() {
     assert_eq!(VolumeUnit::FluidOunce.as_unit_type(), "fluid ounce");
     assert_eq!(VolumeUnit::Tablespoon.as_unit_type(), "tablespoon");
     assert_eq!(VolumeUnit::Teaspoon.as_unit_type(), "teaspoon");
-
-    assert_eq!(VolumeUnit::FakeLiter.as_unit_type(), "fakeliter");
 }
 
 #[test]
@@ -55,8 +50,6 @@ fn test_get_plural_unit_types() {
     assert_eq!(VolumeUnit::FluidOunce.as_unit_type_plural(), "fluid ounces");
     assert_eq!(VolumeUnit::Tablespoon.as_unit_type_plural(), "tablespoons");
     assert_eq!(VolumeUnit::Teaspoon.as_unit_type_plural(), "teaspoons");
-
-    assert_eq!(VolumeUnit::FakeLiter.as_unit_type_plural(), "fakeliters");
 }
 
 #[test]

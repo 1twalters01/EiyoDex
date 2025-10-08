@@ -1,0 +1,11 @@
+{
+    "Ounce": {
+        "identifier": "oz",
+        "symbol": "oz",
+        "unit_type": "ounce",
+        "unit_type_plural": "ounces",
+        "measurement_system": "Imperial",
+        "si_factor": 0.02834952
+    }
+}
+

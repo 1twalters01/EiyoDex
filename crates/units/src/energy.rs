@@ -247,6 +247,4 @@ impl PartialOrd for Energy {
 use std::iter::Sum;
 
 use energy_macro::include_energies_from_json;
-include_energies_from_json!(
-    "data/units/energy",
-);
+include_energies_from_json!("data/units/energy",);
