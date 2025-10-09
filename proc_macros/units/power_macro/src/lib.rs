@@ -44,31 +44,31 @@ impl Parse for EnumSourceGroup {
 }
 
 #[derive(Clone, Debug, Deserialize)]
-struct Density {
+struct Power {
     identifier: String,
-    mass_unit: String,
-    volume_unit: String,
+    energy_unit: String,
+    duration_unit: String,
     symbol: String,
     unit_type: String,
     unit_type_plural: String,
-    measurement_system: DensityMeasurementSystem,
+    measurement_system: PowerMeasurementSystem,
     si_factor: f64,
 }
 
 #[derive(Clone, Debug, Deserialize)]
-struct DensityMeasurementSystem {
-    mass_measurement_system: String,
-    volume_measurement_system: String,
+struct PowerMeasurementSystem {
+    energy_measurement_system: String,
+    duration_measurement_system: String,
 }
 
 #[derive(Debug, Deserialize, Clone, PartialEq, Eq, Hash)]
-struct DensityJson {
-    mass_unit: String,
-    volume_unit: String,
+struct PowerJson {
+    energy_unit: String,
+    duration_unit: String,
 }
 
 #[derive(Debug, Deserialize)]
-struct MassJson {
+struct EnergyJson {
     identifier: String,
     symbol: String,
     unit_type: String,
@@ -78,22 +78,21 @@ struct MassJson {
 }
 
 #[derive(Debug, Deserialize)]
-struct VolumeJson {
-    identifier: String,
-    symbol: String,
+struct DurationJson {
     unit_type: String,
+    symbol: String,
     measurement_system: String,
     si_factor: f64,
 }
 
 #[proc_macro]
-pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
-    let mut density_all: HashMap<String, Density> = HashMap::new();
-    let mut mass_data: HashMap<String, MassJson> = HashMap::new();
-    let mut volume_data: HashMap<String, VolumeJson> = HashMap::new();
+pub fn include_powers_from_json(input: TokenStream) -> TokenStream {
+    let mut power_all: HashMap<String, Power> = HashMap::new();
+    let mut energy_data: HashMap<String, EnergyJson> = HashMap::new();
+    let mut duration_data: HashMap<String, DurationJson> = HashMap::new();
 
-    let mut density: HashMap<String, Density> = HashMap::new();
-    let mut density_data: HashSet<DensityJson> = HashSet::new();
+    let mut power: HashMap<String, Power> = HashMap::new();
+    let mut power_data: HashSet<PowerJson> = HashSet::new();
 
     let parsed_input = syn::parse_macro_input!(input as EnumSourceGroup);
 
@@ -116,25 +115,24 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
                     .unwrap_or_else(|_| panic!("Unable to read file: {}", full_path.display()));
 
                 match enum_name.to_string().as_str() {
-                    "MassUnit" => {
-                        let serde_res: HashMap<String, MassJson> =
+                    "EnergyUnit" => {
+                        let serde_res: HashMap<String, EnergyJson> =
                             serde_json::from_str(&file_content).expect("Invalid JSON format");
                         for (key, data) in serde_res {
-                            mass_data.insert(key, data);
+                            energy_data.insert(key, data);
                         }
                     }
-                    "VolumeUnit" => {
-                        let serde_res =
-                            serde_json::from_str::<HashMap<String, VolumeJson>>(&file_content)
-                                .expect("Invalid JSON format");
-                        for (key, data) in serde_res {
-                            volume_data.insert(key, data);
-                        }
-                    }
-                    "DensityUnit" => {
-                        let serde_res: Vec<DensityJson> =
+                    "DurationUnit" => {
+                        let serde_res: HashMap<String, DurationJson> =
                             serde_json::from_str(&file_content).expect("Invalid JSON format");
-                        density_data.extend(serde_res);
+                        for (key, data) in serde_res {
+                            duration_data.insert(key, data);
+                        }
+                    }
+                    "PowerUnit" => {
+                        let serde_res: Vec<PowerJson> =
+                            serde_json::from_str(&file_content).expect("Invalid JSON format");
+                        power_data.extend(serde_res);
                     }
                     _ => panic!("Incorrect unit"),
                 };
@@ -142,59 +140,62 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
         }
     }
 
-    for (mass_key, mass_value) in &mass_data {
-        for (volume_key, volume_value) in &volume_data {
-            let density_variant = format!("{}Per{}", mass_key, volume_key);
-            let density_identifier =
-                format!("{}_per_{}", mass_value.identifier, volume_value.identifier);
-            let density_symbol = format!("{}/{}", mass_value.symbol, volume_value.symbol);
-            let density_unit_type =
-                format!("{} per {}", mass_value.unit_type, volume_value.unit_type);
-            let density_unit_type_plural = format!(
+    for (energy_key, energy_value) in &energy_data {
+        for (duration_key, duration_value) in &duration_data {
+            let power_variant = format!("{}Per{}", energy_key, duration_key);
+
+            let power_identifier =
+                format!("{}_per_{}", energy_value.identifier, duration_value.symbol);
+            let power_symbol = format!("{}/{}", energy_value.symbol, duration_value.symbol);
+            let power_unit_type = format!(
                 "{} per {}",
-                mass_value.unit_type_plural, volume_value.unit_type
+                energy_value.unit_type, duration_value.unit_type
             );
-            let density_measurement_system = DensityMeasurementSystem {
-                mass_measurement_system: mass_value.measurement_system.clone(),
-                volume_measurement_system: volume_value.measurement_system.clone(),
+            let power_unit_type_plural = format!(
+                "{} per {}",
+                energy_value.unit_type_plural, duration_value.unit_type
+            );
+            let power_measurement_system = PowerMeasurementSystem {
+                energy_measurement_system: energy_value.measurement_system.clone(),
+                duration_measurement_system: duration_value.measurement_system.clone(),
             };
-            let density_si_factor = mass_value.si_factor / volume_value.si_factor;
+            let power_si_factor = energy_value.si_factor / duration_value.si_factor;
 
-            let density_object = Density {
-                identifier: density_identifier.clone(),
-                mass_unit: mass_key.clone(),
-                volume_unit: volume_key.clone(),
-                symbol: density_symbol.clone(),
-                unit_type: density_unit_type.clone(),
-                unit_type_plural: density_unit_type_plural.clone(),
-                measurement_system: density_measurement_system.clone(),
-                si_factor: density_si_factor,
+            let power_object = Power {
+                identifier: power_identifier.clone(),
+                energy_unit: energy_key.clone(),
+                duration_unit: duration_value.unit_type.clone(),
+                symbol: power_symbol.clone(),
+                unit_type: power_unit_type.clone(),
+                unit_type_plural: power_unit_type_plural.clone(),
+                measurement_system: power_measurement_system.clone(),
+                si_factor: power_si_factor,
             };
 
-            density_all.insert(density_variant.clone(), density_object.clone());
+            power_all.insert(power_variant.clone(), power_object.clone());
 
-            if density_data.contains(&DensityJson {
-                mass_unit: mass_key.clone(),
-                volume_unit: volume_key.clone(),
+            if power_data.contains(&PowerJson {
+                energy_unit: energy_key.clone(),
+                duration_unit: duration_value.unit_type.clone(),
             }) {
-                density.insert(density_variant, density_object);
+                power.insert(power_variant, power_object);
             }
         }
     }
 
-    let variants: Vec<_> = density
+    let variants: Vec<_> = power
         .iter()
         .map(|(key, data)| {
             let json_variant = format_ident!("{}", key);
             let from_fn_name = format_ident!("from_{}", data.identifier);
             let as_fn_name = format_ident!("as_{}", data.identifier);
             let to_fn_name = format_ident!("to_{}", data.identifier);
-            let mass_unit_variant = format_ident!("{}", &data.mass_unit);
-            let volume_unit_variant = format_ident!("{}", &data.volume_unit);
-            let mass_measurement_system =
-                format_ident!("{}", &data.measurement_system.mass_measurement_system);
-            let volume_measurement_system =
-                format_ident!("{}", &data.measurement_system.volume_measurement_system);
+            let energy_unit_variant = format_ident!("{}", &data.energy_unit);
+            let volume_unit_variant = format_ident!("{}", &data.duration_unit);
+            let energy_measurement_system =
+                format_ident!("{}", &data.measurement_system.energy_measurement_system);
+            let duration_measurement_system =
+                format_ident!("{}", &data.measurement_system.duration_measurement_system);
             let symbol = &data.symbol;
             let symbol_lc = &data.symbol.to_lowercase();
             let unit_type = &data.unit_type;
@@ -209,10 +210,10 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
                     from_fn_name: #from_fn_name,
                     as_fn_name: #as_fn_name,
                     to_fn_name: #to_fn_name,
-                    mass_unit_variant: #mass_unit_variant,
+                    energy_unit_variant: #energy_unit_variant,
                     volume_unit_variant: #volume_unit_variant,
-                    mass_measurement_system: #mass_measurement_system,
-                    volume_measurement_system: #volume_measurement_system,
+                    energy_measurement_system: #energy_measurement_system,
+                    duration_measurement_system: #duration_measurement_system,
                     symbol: #symbol,
                     symbol_lc: #symbol_lc,
                     unit_type: #unit_type,
@@ -226,19 +227,19 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
         })
         .collect();
 
-    let variants_all: Vec<_> = density_all
+    let variants_all: Vec<_> = power_all
         .iter()
         .map(|(key, data)| {
             let all_variant = format_ident!("{}", key);
             let from_fn_name = format_ident!("from_{}", data.identifier);
             let as_fn_name = format_ident!("as_{}", data.identifier);
             let to_fn_name = format_ident!("to_{}", data.identifier);
-            let mass_unit_variant = format_ident!("{}", &data.mass_unit);
-            let volume_unit_variant = format_ident!("{}", &data.volume_unit);
-            let mass_measurement_system =
-                format_ident!("{}", &data.measurement_system.mass_measurement_system);
-            let volume_measurement_system =
-                format_ident!("{}", &data.measurement_system.volume_measurement_system);
+            let energy_unit_variant = format_ident!("{}", &data.energy_unit);
+            let volume_unit_variant = format_ident!("{}", &data.duration_unit);
+            let energy_measurement_system =
+                format_ident!("{}", &data.measurement_system.energy_measurement_system);
+            let duration_measurement_system =
+                format_ident!("{}", &data.measurement_system.duration_measurement_system);
             let symbol = &data.symbol;
             let symbol_lc = data.symbol.to_lowercase();
             let unit_type = &data.unit_type;
@@ -253,10 +254,10 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
                     from_fn_name: #from_fn_name,
                     as_fn_name: #as_fn_name,
                     to_fn_name: #to_fn_name,
-                    mass_unit_variant: #mass_unit_variant,
+                    energy_unit_variant: #energy_unit_variant,
                     volume_unit_variant: #volume_unit_variant,
-                    mass_measurement_system: #mass_measurement_system,
-                    volume_measurement_system: #volume_measurement_system,
+                    energy_measurement_system: #energy_measurement_system,
+                    duration_measurement_system: #duration_measurement_system,
                     symbol: #symbol,
                     symbol_lc: #symbol_lc,
                     unit_type: #unit_type,

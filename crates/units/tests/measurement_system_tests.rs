@@ -7,6 +7,7 @@ fn test_get_measurement_system_enumerations() {
     let manual_enumerations = vec![
         MeasurementSystem::Metric,
         MeasurementSystem::Imperial,
+        MeasurementSystem::SI,
     ];
     assert_eq!(
         BTreeSet::from_iter(function_enumerations),

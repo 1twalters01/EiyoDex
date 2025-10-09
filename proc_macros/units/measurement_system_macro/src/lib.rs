@@ -63,6 +63,11 @@ struct DistanceJson {
     measurement_system: String,
 }
 
+#[derive(Debug, Deserialize, PartialEq, Eq, Hash)]
+struct DurationJson {
+    measurement_system: String,
+}
+
 #[proc_macro]
 pub fn include_measurement_systems_from_json(input: TokenStream) -> TokenStream {
     let mut measurement_systems = HashSet::new();
@@ -117,6 +122,15 @@ pub fn include_measurement_systems_from_json(input: TokenStream) -> TokenStream 
                     }
                     "DistanceUnit" => {
                         serde_json::from_str::<HashMap<String, DistanceJson>>(&file_content)
+                            .expect("Invalid JSON format")
+                            .values()
+                            .into_iter()
+                            .for_each(|distance| {
+                                measurement_systems.insert(distance.measurement_system.clone());
+                            });
+                    }
+                    "DurationUnit" => {
+                        serde_json::from_str::<HashMap<String, DurationJson>>(&file_content)
                             .expect("Invalid JSON format")
                             .values()
                             .into_iter()

@@ -25,4 +25,5 @@ include_measurement_systems_from_json!(
     VolumeUnit => "data/units/volume",
     EnergyUnit => "data/units/energy",
     DistanceUnit => "data/units/distance",
+    DurationUnit => "data/units/duration",
 );

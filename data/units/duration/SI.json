@@ -1,0 +1,46 @@
+{
+  "Second": {
+    "symbol": "s",
+    "unit_type": "second",
+    "measurement_system": "SI",
+    "si_factor": 1.0
+  },
+  "Minute": {
+    "symbol": "min",
+    "unit_type": "minute",
+    "measurement_system": "SI",
+    "si_factor": 60.0
+  },
+  "Hour": {
+    "symbol": "hr",
+    "unit_type": "hour",
+    "measurement_system": "SI",
+    "si_factor": 3600.0
+  },
+  "Day": {
+    "symbol": "day",
+    "unit_type": "day",
+    "measurement_system": "SI",
+    "si_factor": 87400.0
+  },
+  "Week": {
+    "symbol": "week",
+    "unit_type": "week",
+    "measurement_system": "SI",
+    "si_factor": 604800.0
+  },
+  "Month": {
+    "symbol": "month",
+    "unit_type": "month",
+    "measurement_system": "SI",
+    "si_factor": 2.628e6
+  },
+  "Year": {
+    "symbol": "year",
+    "unit_type": "year",
+    "measurement_system": "SI",
+    "si_factor": 3.154e7
+  }
+}
+
+
