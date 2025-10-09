@@ -44,7 +44,11 @@ macro_rules! define_densities {
             ),* $(,)?
         },
     ) => {
-        use crate::measurement_system::MeasurementSystem;
+        use crate::{
+            mass::Mass,
+            measurement_system::MeasurementSystem,
+            volume::Volume,
+        };
         use std::{
             cmp::Ordering,
             fmt,
@@ -263,6 +267,26 @@ impl Mul<f64> for Density {
     }
 }
 
+impl Mul<Volume> for Density {
+    type Output = Mass;
+
+    fn mul(self, rhs: Volume) -> Mass {
+        let ml = rhs.as_ml();
+        let g_per_ml = self.as_g_per_ml();
+        Mass::from_g(ml * g_per_ml)
+    }
+}
+
+impl Mul<Density> for Volume {
+    type Output = Mass;
+
+    fn mul(self, rhs: Density) -> Mass {
+        let ml = self.as_ml();
+        let g_per_ml = rhs.as_g_per_ml();
+        Mass::from_g(ml * g_per_ml)
+    }
+}
+
 impl Div<i64> for Density {
     type Output = Self;
     fn div(self, rhs: i64) -> Self {
@@ -274,6 +298,16 @@ impl Div<f64> for Density {
     type Output = Self;
     fn div(self, rhs: f64) -> Self {
         Self::new(self.get_value() / rhs, self.unit)
+    }
+}
+
+impl Div<Volume> for Mass {
+    type Output = Density;
+
+    fn div(self, rhs: Volume) -> Density {
+        let g = self.as_g();
+        let ml = rhs.as_ml();
+        Density::from_g_per_ml(g / ml)
     }
 }
 
