@@ -1,5 +1,3 @@
-// #[allow(unreachable_patterns)]
-
 use std::{
     cmp::Ordering,
     fmt,

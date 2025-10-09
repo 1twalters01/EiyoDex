@@ -28,18 +28,6 @@
     "unit_type": "week",
     "measurement_system": "SI",
     "si_factor": 604800.0
-  },
-  "Month": {
-    "symbol": "month",
-    "unit_type": "month",
-    "measurement_system": "SI",
-    "si_factor": 2.628e6
-  },
-  "Year": {
-    "symbol": "year",
-    "unit_type": "year",
-    "measurement_system": "SI",
-    "si_factor": 3.154e7
   }
 }
 

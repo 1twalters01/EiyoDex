@@ -2615,8 +2615,10 @@ dependencies = [
  "energy_macro",
  "mass_macro",
  "measurement_system_macro",
+ "power_macro",
  "reqwest",
  "serde",
+ "specific_currency_macro",
  "utils",
  "volume_macro",
 ]

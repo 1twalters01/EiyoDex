@@ -11,6 +11,8 @@ distance_macro = { path = "../../proc_macros/units/distance_macro" }
 mass_macro = { path = "../../proc_macros/units/mass_macro" }
 volume_macro = { path = "../../proc_macros/units/volume_macro" }
 density_macro = { path = "../../proc_macros/units/density_macro" }
+power_macro = { path = "../../proc_macros/units/power_macro" }
+specific_currency_macro = { path = "../../proc_macros/units/specific_currency_macro" }
 utils = { path = "../utils" }
 serde = { version = "1.0", features = ["derive"] }
 reqwest = { version = "0.12.4", features = ["blocking", "json"] }

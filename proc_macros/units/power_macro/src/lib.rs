@@ -176,7 +176,7 @@ pub fn include_powers_from_json(input: TokenStream) -> TokenStream {
 
             if power_data.contains(&PowerJson {
                 energy_unit: energy_key.clone(),
-                duration_unit: duration_value.unit_type.clone(),
+                duration_unit: duration_key.clone(),
             }) {
                 power.insert(power_variant, power_object);
             }
@@ -191,7 +191,7 @@ pub fn include_powers_from_json(input: TokenStream) -> TokenStream {
             let as_fn_name = format_ident!("as_{}", data.identifier);
             let to_fn_name = format_ident!("to_{}", data.identifier);
             let energy_unit_variant = format_ident!("{}", &data.energy_unit);
-            let volume_unit_variant = format_ident!("{}", &data.duration_unit);
+            let duration_unit_variant = format_ident!("{}", &data.duration_unit);
             let energy_measurement_system =
                 format_ident!("{}", &data.measurement_system.energy_measurement_system);
             let duration_measurement_system =
@@ -211,7 +211,7 @@ pub fn include_powers_from_json(input: TokenStream) -> TokenStream {
                     as_fn_name: #as_fn_name,
                     to_fn_name: #to_fn_name,
                     energy_unit_variant: #energy_unit_variant,
-                    volume_unit_variant: #volume_unit_variant,
+                    duration_unit_variant: #duration_unit_variant,
                     energy_measurement_system: #energy_measurement_system,
                     duration_measurement_system: #duration_measurement_system,
                     symbol: #symbol,
@@ -235,7 +235,7 @@ pub fn include_powers_from_json(input: TokenStream) -> TokenStream {
             let as_fn_name = format_ident!("as_{}", data.identifier);
             let to_fn_name = format_ident!("to_{}", data.identifier);
             let energy_unit_variant = format_ident!("{}", &data.energy_unit);
-            let volume_unit_variant = format_ident!("{}", &data.duration_unit);
+            let duration_unit_variant = format_ident!("{}", &data.duration_unit);
             let energy_measurement_system =
                 format_ident!("{}", &data.measurement_system.energy_measurement_system);
             let duration_measurement_system =
@@ -255,7 +255,7 @@ pub fn include_powers_from_json(input: TokenStream) -> TokenStream {
                     as_fn_name: #as_fn_name,
                     to_fn_name: #to_fn_name,
                     energy_unit_variant: #energy_unit_variant,
-                    volume_unit_variant: #volume_unit_variant,
+                    duration_unit_variant: #duration_unit_variant,
                     energy_measurement_system: #energy_measurement_system,
                     duration_measurement_system: #duration_measurement_system,
                     symbol: #symbol,
@@ -272,7 +272,7 @@ pub fn include_powers_from_json(input: TokenStream) -> TokenStream {
         .collect();
 
     let expanded = quote! {
-        define_densities! {
+        define_powers! {
             all: { #(#variants_all),* },
             json: { #(#variants),* },
         }
