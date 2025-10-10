@@ -48,6 +48,7 @@ struct SpecificCurrency {
     identifier: String,
     currency_unit: String,
     denominator_unit: String,
+    denominator_unit_type: String,
     symbol: String,
     unit_type: String,
     unit_type_plural: String,
@@ -81,7 +82,7 @@ struct DenominatorJson {
 pub fn include_specific_currencies_from_json(input: TokenStream) -> TokenStream {
     let mut specific_currency_all: HashMap<String, SpecificCurrency> = HashMap::new();
     let mut currency_data: HashMap<String, CurrencyJson> = HashMap::new();
-    let mut denominator_data: HashMap<String, DenominatorJson> = HashMap::new();
+    let mut denominator_data: HashMap<String, (DenominatorJson, String)> = HashMap::new();
 
     let mut specific_currency: HashMap<String, SpecificCurrency> = HashMap::new();
     let mut specific_currency_data: HashSet<SpecificCurrencyJson> = HashSet::new();
@@ -119,11 +120,18 @@ pub fn include_specific_currencies_from_json(input: TokenStream) -> TokenStream 
                             currency_data.insert(key, data);
                         }
                     }
-                    "MassUnit" | "VolumeUnit" => {
+                    "MassUnit" => {
                         let serde_res: HashMap<String, DenominatorJson> =
                             serde_json::from_str(&file_content).expect("Invalid JSON format");
                         for (key, data) in serde_res {
-                            denominator_data.insert(key, data);
+                            denominator_data.insert(key, (data, "Mass".to_string()));
+                        }
+                    }
+                    "VolumeUnit" => {
+                        let serde_res: HashMap<String, DenominatorJson> =
+                            serde_json::from_str(&file_content).expect("Invalid JSON format");
+                        for (key, data) in serde_res {
+                            denominator_data.insert(key, (data, "Volume".to_string()));
                         }
                     }
                     _ => panic!("Incorrect unit"),
@@ -133,7 +141,7 @@ pub fn include_specific_currencies_from_json(input: TokenStream) -> TokenStream 
     }
 
     for (currency_key, currency_value) in &currency_data {
-        for (denominator_key, denominator_value) in &denominator_data {
+        for (denominator_key, (denominator_value, denominator_unit_type)) in &denominator_data {
             let specific_currency_variant = format!("{}Per{}", currency_key, denominator_key);
 
             let specific_currency_identifier = format!(
@@ -159,6 +167,7 @@ pub fn include_specific_currencies_from_json(input: TokenStream) -> TokenStream 
                 identifier: specific_currency_identifier.clone(),
                 currency_unit: currency_key.clone(),
                 denominator_unit: denominator_value.identifier.clone(),
+                denominator_unit_type: denominator_unit_type.clone(),
                 symbol: specific_currency_symbol.clone(),
                 unit_type: specific_unit_type.clone(),
                 unit_type_plural: specific_currency_unit_type_plural.clone(),
@@ -189,6 +198,7 @@ pub fn include_specific_currencies_from_json(input: TokenStream) -> TokenStream 
             let to_fn_name = format_ident!("to_{}", data.identifier);
             let currency_unit_variant = format_ident!("{}", &data.currency_unit);
             let denominator_unit_variant = format_ident!("{}", &data.denominator_unit);
+            let denominator_unit_type = format_ident!("{}", &data.denominator_unit_type);
             let denominator_measurement_system =
                 format_ident!("{}", &data.denominator_measurement_system);
             let symbol = &data.symbol;
@@ -207,6 +217,7 @@ pub fn include_specific_currencies_from_json(input: TokenStream) -> TokenStream 
                     to_fn_name: #to_fn_name,
                     currency_unit_variant: #currency_unit_variant,
                     denominator_unit_variant: #denominator_unit_variant,
+                    denominator_unit_type: #denominator_unit_type,
                     denominator_measurement_system: #denominator_measurement_system,
                     symbol: #symbol,
                     symbol_lc: #symbol_lc,
@@ -230,6 +241,7 @@ pub fn include_specific_currencies_from_json(input: TokenStream) -> TokenStream 
             let to_fn_name = format_ident!("to_{}", data.identifier);
             let currency_unit_variant = format_ident!("{}", &data.currency_unit);
             let denominator_unit_variant = format_ident!("{}", &data.denominator_unit);
+            let denominator_unit_type = format_ident!("{}", &data.denominator_unit_type);
             let denominator_measurement_system =
                 format_ident!("{}", &data.denominator_measurement_system);
             let symbol = &data.symbol;
@@ -248,6 +260,7 @@ pub fn include_specific_currencies_from_json(input: TokenStream) -> TokenStream 
                     to_fn_name: #to_fn_name,
                     currency_unit_variant: #currency_unit_variant,
                     denominator_unit_variant: #denominator_unit_variant,
+                    denominator_unit_type: #denominator_unit_type,
                     denominator_measurement_system: #denominator_measurement_system,
                     symbol: #symbol,
                     symbol_lc: #symbol_lc,
