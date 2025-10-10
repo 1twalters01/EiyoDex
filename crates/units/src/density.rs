@@ -45,9 +45,9 @@ macro_rules! define_densities {
         },
     ) => {
         use crate::{
-            mass::Mass,
+            mass::{Mass, MassUnit},
             measurement_system::MeasurementSystem,
-            volume::Volume,
+            volume::{Volume, VolumeUnit},
         };
         use std::{
             cmp::Ordering,
@@ -79,6 +79,12 @@ macro_rules! define_densities {
         }
 
         impl DensityUnit {
+            pub fn from_variants(mass_unit: MassUnit, volume_unit: VolumeUnit) -> DensityUnit {
+                match (mass_unit, volume_unit) {
+                    $((MassUnit::$all_mass_unit_variant, VolumeUnit::$all_volume_unit_variant) => DensityUnit::$all_variant,)+
+                }
+            }
+
             pub fn get_all_enumerations() -> &'static [Self] {
                 &[$(DensityUnit::$all_variant),+]
             }
@@ -114,6 +120,19 @@ macro_rules! define_densities {
                 }
             }
 
+            pub fn get_mass_variant(&self) -> MassUnit {
+                match self {
+                    $(DensityUnit::$all_variant => MassUnit::$all_mass_unit_variant,)+
+                }
+            }
+
+            pub fn get_volume_variant(&self) -> VolumeUnit {
+                match self {
+                    $(DensityUnit::$all_variant => VolumeUnit::$all_volume_unit_variant,)+
+                }
+            }
+
+
             pub fn si_factor(&self) -> f64 {
                 match self {
                     $(DensityUnit::$all_variant => $all_si_factor),+
@@ -147,6 +166,13 @@ macro_rules! define_densities {
         impl Density {
             pub fn new(value: f64, unit: DensityUnit) -> Self {
                 Self { value, unit }
+            }
+
+            pub fn from_variants(value: f64, mass_unit: MassUnit, volume_unit: VolumeUnit) -> Self {
+                Self {
+                    value,
+                    unit: DensityUnit::from_variants(mass_unit, volume_unit),
+                }
             }
 
             $(
@@ -268,9 +294,11 @@ impl Mul<Volume> for Density {
     type Output = Mass;
 
     fn mul(self, rhs: Volume) -> Mass {
-        let ml = rhs.as_ml();
-        let g_per_ml = self.as_g_per_ml();
-        Mass::from_g(ml * g_per_ml)
+        let density_volume_variant = self.get_unit().get_volume_variant();
+        let density_mass_variant = self.get_unit().get_mass_variant();
+        let volume = rhs.to_unit(density_volume_variant).get_value();
+        let density = self.get_value();
+        Mass::new(density * volume, density_mass_variant)
     }
 }
 
@@ -278,9 +306,11 @@ impl Mul<Density> for Volume {
     type Output = Mass;
 
     fn mul(self, rhs: Density) -> Mass {
-        let ml = self.as_ml();
-        let g_per_ml = rhs.as_g_per_ml();
-        Mass::from_g(ml * g_per_ml)
+        let density_volume_variant = rhs.get_unit().get_volume_variant();
+        let density_mass_variant = rhs.get_unit().get_mass_variant();
+        let volume = self.to_unit(density_volume_variant).get_value();
+        let density = rhs.get_value();
+        Mass::new(density * volume, density_mass_variant)
     }
 }
 
@@ -299,9 +329,10 @@ impl Div<Volume> for Mass {
     type Output = Density;
 
     fn div(self, rhs: Volume) -> Density {
-        let g = self.as_g();
-        let ml = rhs.as_ml();
-        Density::from_g_per_ml(g / ml)
+        let value = self.get_value() / rhs.get_value();
+        let mass_unit = self.get_unit();
+        let volume_unit = rhs.get_unit();
+        Density::from_variants(value, mass_unit, volume_unit)
     }
 }
 
