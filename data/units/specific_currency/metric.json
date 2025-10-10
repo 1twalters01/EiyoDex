@@ -1,0 +1,10 @@
+[
+  {
+    "currency_unit": "GBP",
+    "denominator_unit": "Kilogram"
+  },
+  {
+    "currency_unit": "GBP",
+    "denominator_unit": "Liter"
+  }
+]

@@ -84,7 +84,7 @@ macro_rules! define_densities {
             }
 
             pub fn get_selected_enumerations() -> &'static [Self] {
-                &[$(DensityUnit::$json_variant),+]
+                &[$(DensityUnit::$json_variant),*]
             }
 
             pub fn as_symbol(&self) -> &'static str {

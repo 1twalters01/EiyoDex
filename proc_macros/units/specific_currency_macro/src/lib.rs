@@ -51,14 +51,8 @@ struct SpecificCurrency {
     symbol: String,
     unit_type: String,
     unit_type_plural: String,
-    measurement_system: SpecificCurrencyMeasurementSystem,
-    si_factor: f64,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-struct SpecificCurrencyMeasurementSystem {
-    currency_measurement_system: String,
     denominator_measurement_system: String,
+    si_factor: f64,
 }
 
 #[derive(Debug, Deserialize, Clone, PartialEq, Eq, Hash)]
@@ -69,12 +63,9 @@ struct SpecificCurrencyJson {
 
 #[derive(Debug, Deserialize)]
 struct CurrencyJson {
-    identifier: String,
     symbol: String,
     unit_type: String,
     unit_type_plural: String,
-    measurement_system: String,
-    si_factor: f64,
 }
 
 #[derive(Debug, Deserialize)]
@@ -87,7 +78,7 @@ struct DenominatorJson {
 }
 
 #[proc_macro]
-pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
+pub fn include_specific_currencies_from_json(input: TokenStream) -> TokenStream {
     let mut specific_currency_all: HashMap<String, SpecificCurrency> = HashMap::new();
     let mut currency_data: HashMap<String, CurrencyJson> = HashMap::new();
     let mut denominator_data: HashMap<String, DenominatorJson> = HashMap::new();
@@ -116,6 +107,11 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
                     .unwrap_or_else(|_| panic!("Unable to read file: {}", full_path.display()));
 
                 match enum_name.to_string().as_str() {
+                    "SpecificCurrencyUnit" => {
+                        let serde_res: Vec<SpecificCurrencyJson> =
+                            serde_json::from_str(&file_content).expect("Invalid JSON format");
+                        specific_currency_data.extend(serde_res);
+                    }
                     "CurrencyUnit" => {
                         let serde_res: HashMap<String, CurrencyJson> =
                             serde_json::from_str(&file_content).expect("Invalid JSON format");
@@ -130,11 +126,6 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
                             denominator_data.insert(key, data);
                         }
                     }
-                    "SpecificCurrencyUnit" => {
-                        let serde_res: Vec<SpecificCurrencyJson> =
-                            serde_json::from_str(&file_content).expect("Invalid JSON format");
-                        specific_currency_data.extend(serde_res);
-                    }
                     _ => panic!("Incorrect unit"),
                 };
             }
@@ -145,34 +136,34 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
         for (denominator_key, denominator_value) in &denominator_data {
             let specific_currency_variant = format!("{}Per{}", currency_key, denominator_key);
 
-            let power_identifier = format!(
+            let specific_currency_identifier = format!(
                 "{}_per_{}",
-                currency_value.identifier, denominator_value.identifier
+                currency_key.to_lowercase(),
+                denominator_value.identifier
             );
-            let power_symbol = format!("{}/{}", currency_value.symbol, denominator_value.symbol);
-            let power_unit_type = format!(
+            let specific_currency_symbol =
+                format!("{}/{}", currency_value.symbol, denominator_value.symbol);
+            let specific_unit_type = format!(
                 "{} per {}",
                 currency_value.unit_type, denominator_value.unit_type
             );
-            let power_unit_type_plural = format!(
+            let specific_currency_unit_type_plural = format!(
                 "{} per {}",
                 currency_value.unit_type_plural, denominator_value.unit_type
             );
-            let specific_currency_measurement_system = SpecificCurrencyMeasurementSystem {
-                currency_measurement_system: currency_value.measurement_system.clone(),
-                denominator_measurement_system: denominator_value.measurement_system.clone(),
-            };
-            let power_si_factor = currency_value.si_factor / denominator_value.si_factor;
+
+            let denominator_measurement_system = denominator_value.measurement_system.clone();
+            let specific_currency_si_factor = 1f64 / denominator_value.si_factor;
 
             let specific_currency_object = SpecificCurrency {
-                identifier: power_identifier.clone(),
+                identifier: specific_currency_identifier.clone(),
                 currency_unit: currency_key.clone(),
-                denominator_unit: denominator_value.unit_type.clone(),
-                symbol: power_symbol.clone(),
-                unit_type: power_unit_type.clone(),
-                unit_type_plural: power_unit_type_plural.clone(),
-                measurement_system: specific_currency_measurement_system.clone(),
-                si_factor: power_si_factor,
+                denominator_unit: denominator_value.identifier.clone(),
+                symbol: specific_currency_symbol.clone(),
+                unit_type: specific_unit_type.clone(),
+                unit_type_plural: specific_currency_unit_type_plural.clone(),
+                denominator_measurement_system: denominator_measurement_system.clone(),
+                si_factor: specific_currency_si_factor,
             };
 
             specific_currency_all.insert(
@@ -182,7 +173,7 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
 
             if specific_currency_data.contains(&SpecificCurrencyJson {
                 currency_unit: currency_key.clone(),
-                denominator_unit: denominator_value.unit_type.clone(),
+                denominator_unit: denominator_key.clone(),
             }) {
                 specific_currency.insert(specific_currency_variant, specific_currency_object);
             }
@@ -198,12 +189,8 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
             let to_fn_name = format_ident!("to_{}", data.identifier);
             let currency_unit_variant = format_ident!("{}", &data.currency_unit);
             let denominator_unit_variant = format_ident!("{}", &data.denominator_unit);
-            let currency_measurement_system =
-                format_ident!("{}", &data.measurement_system.currency_measurement_system);
-            let denominator_measurement_system = format_ident!(
-                "{}",
-                &data.measurement_system.denominator_measurement_system
-            );
+            let denominator_measurement_system =
+                format_ident!("{}", &data.denominator_measurement_system);
             let symbol = &data.symbol;
             let symbol_lc = &data.symbol.to_lowercase();
             let unit_type = &data.unit_type;
@@ -220,7 +207,6 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
                     to_fn_name: #to_fn_name,
                     currency_unit_variant: #currency_unit_variant,
                     denominator_unit_variant: #denominator_unit_variant,
-                    currency_measurement_system: #currency_measurement_system,
                     denominator_measurement_system: #denominator_measurement_system,
                     symbol: #symbol,
                     symbol_lc: #symbol_lc,
@@ -244,12 +230,8 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
             let to_fn_name = format_ident!("to_{}", data.identifier);
             let currency_unit_variant = format_ident!("{}", &data.currency_unit);
             let denominator_unit_variant = format_ident!("{}", &data.denominator_unit);
-            let currency_measurement_system =
-                format_ident!("{}", &data.measurement_system.currency_measurement_system);
-            let denominator_measurement_system = format_ident!(
-                "{}",
-                &data.measurement_system.denominator_measurement_system
-            );
+            let denominator_measurement_system =
+                format_ident!("{}", &data.denominator_measurement_system);
             let symbol = &data.symbol;
             let symbol_lc = data.symbol.to_lowercase();
             let unit_type = &data.unit_type;
@@ -266,7 +248,6 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
                     to_fn_name: #to_fn_name,
                     currency_unit_variant: #currency_unit_variant,
                     denominator_unit_variant: #denominator_unit_variant,
-                    currency_measurement_system: #currency_measurement_system,
                     denominator_measurement_system: #denominator_measurement_system,
                     symbol: #symbol,
                     symbol_lc: #symbol_lc,
@@ -282,7 +263,7 @@ pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
         .collect();
 
     let expanded = quote! {
-        define_densities! {
+        define_specific_currencies! {
             all: { #(#variants_all),* },
             json: { #(#variants),* },
         }

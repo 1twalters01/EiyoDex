@@ -85,7 +85,7 @@ macro_rules! define_powers {
             }
 
             pub fn get_selected_enumerations() -> &'static [Self] {
-                &[$(PowerUnit::$json_variant),+]
+                &[$(PowerUnit::$json_variant),*]
             }
 
             pub fn as_symbol(&self) -> &'static str {
