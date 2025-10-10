@@ -251,17 +251,14 @@ impl fmt::Display for SpecificCurrency {
     }
 }
 
-impl Mul<u64> for SpecificCurrency {
+impl<T> Mul<T> for SpecificCurrency
+where
+    T: Into<f64> + Copy,
+{
     type Output = Self;
-    fn mul(self, rhs: u64) -> Self {
-        Self::new(self.get_value() * rhs as f64, self.unit)
-    }
-}
 
-impl Mul<f64> for SpecificCurrency {
-    type Output = Self;
-    fn mul(self, rhs: f64) -> Self {
-        Self::new(self.get_value() * rhs, self.unit)
+    fn mul(self, rhs: T) -> Self {
+        Self::new(self.get_value() * rhs.into(), self.unit)
     }
 }
 
@@ -338,17 +335,14 @@ impl Mul<SpecificCurrency> for Mass {
     }
 }
 
-impl Div<i64> for SpecificCurrency {
+impl<T> Div<T> for SpecificCurrency
+where
+    T: Into<f64> + Copy,
+{
     type Output = Self;
-    fn div(self, rhs: i64) -> Self {
-        Self::new(self.get_value() / rhs as f64, self.unit)
-    }
-}
 
-impl Div<f64> for SpecificCurrency {
-    type Output = Self;
-    fn div(self, rhs: f64) -> Self {
-        Self::new(self.get_value() / rhs, self.unit)
+    fn div(self, rhs: T) -> Self {
+        Self::new(self.get_value() / rhs.into(), self.unit)
     }
 }
 

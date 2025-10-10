@@ -47,6 +47,7 @@ macro_rules! define_powers {
         use crate::{
             measurement_system::MeasurementSystem,
             energy::Energy,
+            into_f64::IntoF64Safe,
         };
         use chrono::Duration;
         use std::{
@@ -256,17 +257,25 @@ impl Sub for Power {
     }
 }
 
-impl Mul<u64> for Power {
+impl<T> Div<T> for Power
+where
+    T: Into<f64> + Copy,
+{
     type Output = Self;
-    fn mul(self, rhs: u64) -> Self {
-        Self::new(self.get_value() * rhs as f64, self.unit)
+
+    fn div(self, rhs: T) -> Self {
+        Self::new(self.get_value() / rhs.into(), self.unit)
     }
 }
 
-impl Mul<f64> for Power {
+impl<T> Mul<T> for Power
+where
+    T: Into<f64> + IntoF64Safe + Copy,
+{
     type Output = Self;
-    fn mul(self, rhs: f64) -> Self {
-        Self::new(self.get_value() * rhs, self.unit)
+
+    fn mul(self, rhs: T) -> Self {
+        Self::new(self.get_value() * rhs.into(), self.unit)
     }
 }
 
@@ -285,30 +294,6 @@ impl Mul<Power> for Duration {
     fn mul(self, rhs: Power) -> Energy {
         let seconds: f64 = self.num_seconds() as f64;
         Energy::from_kcal(seconds as f64 * rhs.as_kcal_per_s())
-    }
-}
-
-impl Div<i64> for Power {
-    type Output = Self;
-    fn div(self, rhs: i64) -> Self {
-        Self::new(self.get_value() / rhs as f64, self.unit)
-    }
-}
-
-impl Div<f64> for Power {
-    type Output = Self;
-    fn div(self, rhs: f64) -> Self {
-        Self::new(self.get_value() / rhs, self.unit)
-    }
-}
-
-impl Div<Duration> for Energy {
-    type Output = Power;
-
-    fn div(self, duration: Duration) -> Power {
-        let seconds: f64 = duration.num_seconds() as f64;
-        let kcal = self.as_kcal();
-        Power::from_kcal_per_s(kcal / seconds)
     }
 }
 

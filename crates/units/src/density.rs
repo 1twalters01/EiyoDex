@@ -253,17 +253,14 @@ impl Sub for Density {
     }
 }
 
-impl Mul<u64> for Density {
+impl<T> Mul<T> for Density
+where
+    T: Into<f64> + Copy,
+{
     type Output = Self;
-    fn mul(self, rhs: u64) -> Self {
-        Self::new(self.get_value() * rhs as f64, self.unit)
-    }
-}
 
-impl Mul<f64> for Density {
-    type Output = Self;
-    fn mul(self, rhs: f64) -> Self {
-        Self::new(self.get_value() * rhs, self.unit)
+    fn mul(self, rhs: T) -> Self {
+        Self::new(self.get_value() * rhs.into(), self.unit)
     }
 }
 
@@ -287,17 +284,14 @@ impl Mul<Density> for Volume {
     }
 }
 
-impl Div<i64> for Density {
+impl<T> Div<T> for Density
+where
+    T: Into<f64> + Copy,
+{
     type Output = Self;
-    fn div(self, rhs: i64) -> Self {
-        Self::new(self.get_value() / rhs as f64, self.unit)
-    }
-}
 
-impl Div<f64> for Density {
-    type Output = Self;
-    fn div(self, rhs: f64) -> Self {
-        Self::new(self.get_value() / rhs, self.unit)
+    fn div(self, rhs: T) -> Self {
+        Self::new(self.get_value() / rhs.into(), self.unit)
     }
 }
 

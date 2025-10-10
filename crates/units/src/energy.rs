@@ -28,6 +28,8 @@ macro_rules! define_energies {
             str::FromStr,
         };
         use serde::{Deserialize, Serialize};
+        use std::iter::Sum;
+        use crate::into_f64::IntoF64Safe;
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
         pub enum EnergyUnit {
@@ -203,31 +205,26 @@ impl Sub for Energy {
     }
 }
 
-impl Mul<u64> for Energy {
+impl<T> Mul<T> for Energy
+where
+    T: Into<f64> + Copy,
+{
     type Output = Self;
-    fn mul(self, rhs: u64) -> Self {
-        Self::new(self.get_value() * rhs as f64, self.unit)
+
+    fn mul(self, rhs: T) -> Self {
+        Self::new(self.get_value() * rhs.into(), self.unit)
     }
 }
 
-impl Mul<f64> for Energy {
+impl<T> Div<T> for Energy
+where
+    T: Into<f64> + IntoF64Safe + Copy,
+{
     type Output = Self;
-    fn mul(self, rhs: f64) -> Self {
-        Self::new(self.get_value() * rhs, self.unit)
-    }
-}
 
-impl Div<i64> for Energy {
-    type Output = Self;
-    fn div(self, rhs: i64) -> Self {
-        Self::new(self.get_value() / rhs as f64, self.unit)
-    }
-}
-
-impl Div<f64> for Energy {
-    type Output = Self;
-    fn div(self, rhs: f64) -> Self {
-        Self::new(self.get_value() / rhs, self.unit)
+    fn div(self, rhs: T) -> Self {
+        println!("yoooo");
+        Self::new(self.get_value() / rhs.into(), self.unit)
     }
 }
 
@@ -244,7 +241,6 @@ impl PartialOrd for Energy {
     }
 }
 
-use std::iter::Sum;
-
 use energy_macro::include_energies_from_json;
+
 include_energies_from_json!("data/units/energy");

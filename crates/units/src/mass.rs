@@ -201,31 +201,25 @@ impl Sub for Mass {
     }
 }
 
-impl Mul<u64> for Mass {
+impl<T> Mul<T> for Mass
+where
+    T: Into<f64> + Copy,
+{
     type Output = Self;
-    fn mul(self, rhs: u64) -> Self {
-        Self::new(self.get_value() * rhs as f64, self.unit)
+
+    fn mul(self, rhs: T) -> Self {
+        Self::new(self.get_value() * rhs.into(), self.unit)
     }
 }
 
-impl Mul<f64> for Mass {
+impl<T> Div<T> for Mass
+where
+    T: Into<f64> + Copy,
+{
     type Output = Self;
-    fn mul(self, rhs: f64) -> Self {
-        Self::new(self.get_value() * rhs, self.unit)
-    }
-}
 
-impl Div<i64> for Mass {
-    type Output = Self;
-    fn div(self, rhs: i64) -> Self {
-        Self::new(self.get_value() / rhs as f64, self.unit)
-    }
-}
-
-impl Div<f64> for Mass {
-    type Output = Self;
-    fn div(self, rhs: f64) -> Self {
-        Self::new(self.get_value() / rhs, self.unit)
+    fn div(self, rhs: T) -> Self {
+        Self::new(self.get_value() / rhs.into(), self.unit)
     }
 }
 
