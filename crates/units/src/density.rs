@@ -132,7 +132,6 @@ macro_rules! define_densities {
                 }
             }
 
-
             pub fn si_factor(&self) -> f64 {
                 match self {
                     $(DensityUnit::$all_variant => $all_si_factor),+

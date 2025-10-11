@@ -46,7 +46,7 @@ macro_rules! define_powers {
     ) => {
         use crate::{
             measurement_system::MeasurementSystem,
-            energy::Energy,
+            energy::{Energy, EnergyUnit},
             into_f64::IntoF64Safe,
         };
         use chrono::Duration;
@@ -81,6 +81,13 @@ macro_rules! define_powers {
         }
 
         impl PowerUnit {
+            pub fn from_variants(energy_unit: EnergyUnit) -> PowerUnit {
+                match (energy_unit, "Second") {
+                    $((EnergyUnit::$all_energy_unit_variant, stringify!($all_duration_unit_variant)) => PowerUnit::$all_variant,)+
+                    _ => panic!("Cannot find unit"),
+                }
+            }
+
             pub fn get_all_enumerations() -> &'static [Self] {
                 &[$(PowerUnit::$all_variant),+]
             }
@@ -113,6 +120,12 @@ macro_rules! define_powers {
                         energy_measurement_system: MeasurementSystem::$all_energy_measurement_system,
                         duration_measurement_system: MeasurementSystem::$all_duration_measurement_system,
                     }),+
+                }
+            }
+
+            pub fn get_energy_variant(&self) -> EnergyUnit {
+                match self {
+                    $(PowerUnit::$all_variant => EnergyUnit::$all_energy_unit_variant,)+
                 }
             }
 
@@ -149,6 +162,13 @@ macro_rules! define_powers {
         impl Power {
             pub fn new(value: f64, unit: PowerUnit) -> Self {
                 Self { value, unit }
+            }
+
+            pub fn from_variants(value: f64, energy_unit: EnergyUnit) -> Self {
+                Self {
+                    value,
+                    unit: PowerUnit::from_variants(energy_unit),
+                }
             }
 
             $(
@@ -259,12 +279,22 @@ impl Sub for Power {
 
 impl<T> Div<T> for Power
 where
-    T: Into<f64> + Copy,
+    T: Into<f64> + IntoF64Safe + Copy,
 {
     type Output = Self;
 
     fn div(self, rhs: T) -> Self {
         Self::new(self.get_value() / rhs.into(), self.unit)
+    }
+}
+
+impl Div<Duration> for Energy {
+    type Output = Power;
+
+    fn div(self, rhs: Duration) -> Power {
+        let value = self.get_value() / rhs.num_seconds() as f64;
+        let energy_unit = self.get_unit();
+        Power::from_variants(value, energy_unit)
     }
 }
 
@@ -283,8 +313,9 @@ impl Mul<Duration> for Power {
     type Output = Energy;
 
     fn mul(self, rhs: Duration) -> Energy {
+        let power_energy_variant = self.get_unit().get_energy_variant();
         let seconds: f64 = rhs.num_seconds() as f64;
-        Energy::from_kcal(seconds as f64 * self.as_kcal_per_s())
+        Energy::from_kcal(seconds as f64 * self.as_kcal_per_s()).to_unit(power_energy_variant)
     }
 }
 
@@ -292,8 +323,9 @@ impl Mul<Power> for Duration {
     type Output = Energy;
 
     fn mul(self, rhs: Power) -> Energy {
+        let power_energy_variant = rhs.get_unit().get_energy_variant();
         let seconds: f64 = self.num_seconds() as f64;
-        Energy::from_kcal(seconds as f64 * rhs.as_kcal_per_s())
+        Energy::from_kcal(seconds as f64 * rhs.as_kcal_per_s()).to_unit(power_energy_variant)
     }
 }
 

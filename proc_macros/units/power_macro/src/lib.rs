@@ -164,7 +164,7 @@ pub fn include_powers_from_json(input: TokenStream) -> TokenStream {
             let power_object = Power {
                 identifier: power_identifier.clone(),
                 energy_unit: energy_key.clone(),
-                duration_unit: duration_value.unit_type.clone(),
+                duration_unit: duration_key.clone(),
                 symbol: power_symbol.clone(),
                 unit_type: power_unit_type.clone(),
                 unit_type_plural: power_unit_type_plural.clone(),
