@@ -1,31 +1,41 @@
 {
   "Second": {
+    "identifier": "s",
     "symbol": "s",
     "unit_type": "second",
+    "unit_type_plural": "seconds",
     "measurement_system": "SI",
     "si_factor": 1.0
   },
   "Minute": {
+    "identifier": "min",
     "symbol": "min",
     "unit_type": "minute",
+    "unit_type_plural": "minutes",
     "measurement_system": "SI",
     "si_factor": 60.0
   },
   "Hour": {
+    "identifier": "hr",
     "symbol": "hr",
     "unit_type": "hour",
+    "unit_type_plural": "hours",
     "measurement_system": "SI",
     "si_factor": 3600.0
   },
   "Day": {
+    "identifier": "day",
     "symbol": "day",
     "unit_type": "day",
+    "unit_type_plural": "days",
     "measurement_system": "SI",
     "si_factor": 87400.0
   },
   "Week": {
+    "identifier": "week",
     "symbol": "week",
     "unit_type": "week",
+    "unit_type_plural": "weeks",
     "measurement_system": "SI",
     "si_factor": 604800.0
   }
