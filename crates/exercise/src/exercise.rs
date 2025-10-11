@@ -1,10 +1,9 @@
-use chrono::Duration;
-use units::{energy::Energy, power::Power};
+use units::{duration::DurationWrapper, energy::Energy, power::Power};
 use uuid::Uuid;
 
 #[derive(Clone, PartialEq)]
 pub struct ExerciseAmount {
-    duration: Duration,
+    duration: DurationWrapper,
     exercise: Exercise,
 }
 

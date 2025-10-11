@@ -54,6 +54,7 @@ pub fn include_durations_from_json(input: TokenStream) -> TokenStream {
         let from_fn_name = format_ident!("from_{}", data.identifier);
         let as_fn_name = format_ident!("as_{}", data.identifier);
         let to_fn_name = format_ident!("to_{}", data.identifier);
+        let chrono_name = format_ident!("{}", &data.unit_type_plural.to_lowercase());
         let measurement_system = format_ident!("{}", data.measurement_system);
         let symbol = &data.symbol;
         let symbol_lc = &data.symbol.to_lowercase();
@@ -69,6 +70,7 @@ pub fn include_durations_from_json(input: TokenStream) -> TokenStream {
                 from_fn_name: #from_fn_name,
                 as_fn_name: #as_fn_name,
                 to_fn_name: #to_fn_name,
+                chrono_name: #chrono_name,
                 measurement_system: #measurement_system,
                 symbol: #symbol,
                 symbol_lc: #symbol_lc,

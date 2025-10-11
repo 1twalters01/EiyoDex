@@ -1,6 +1,7 @@
 pub mod currency;
 pub mod density;
 pub mod distance;
+pub mod duration;
 pub mod energy;
 pub mod into_f64;
 pub mod mass;

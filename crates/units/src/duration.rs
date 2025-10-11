@@ -1,11 +1,14 @@
+// Exists to make power not use Energy/second and instead be Energy/Duration
+
 #[macro_export]
-macro_rules! define_masses {
+macro_rules! define_durations {
     (
         $(
             $variant:ident => {
                 from_fn_name: $from_fn_name:ident,
                 as_fn_name: $as_fn_name:ident,
                 to_fn_name: $to_fn_name:ident,
+                chrono_name: $chrono_name: ident,
                 measurement_system: $measurement_system:ident,
                 symbol: $symbol:expr,
                 symbol_lc: $symbol_lc:expr,
@@ -26,128 +29,130 @@ macro_rules! define_masses {
             str::FromStr,
         };
         use serde::{Deserialize, Serialize};
+        use chrono::Duration;
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-        pub enum MassUnit {
+        pub enum DurationUnit {
             $($variant),+
         }
 
-        impl MassUnit {
+        impl DurationUnit {
             pub fn get_enumerations() -> &'static [Self] {
-                &[$(MassUnit::$variant),+]
+                &[$(DurationUnit::$variant),+]
             }
 
             pub fn as_symbol(&self) -> &'static str {
                 match self {
-                    $(MassUnit::$variant => $symbol),+
+                    $(DurationUnit::$variant => $symbol),+
                 }
             }
 
             pub fn as_unit_type(&self) -> &'static str {
                 match self {
-                    $(MassUnit::$variant => $unit_type),+
+                    $(DurationUnit::$variant => $unit_type),+
                 }
             }
 
             pub fn as_unit_type_plural(&self) -> &'static str {
                 match self {
-                    $(MassUnit::$variant => $unit_type_plural),+
+                    $(DurationUnit::$variant => $unit_type_plural),+
                 }
             }
 
             pub fn get_measurement_system(&self) -> MeasurementSystem {
                 match self {
-                    $(MassUnit::$variant => MeasurementSystem::$measurement_system),+
+                    $(DurationUnit::$variant => MeasurementSystem::$measurement_system),+
                 }
             }
 
             pub fn si_factor(&self) -> f64 {
                 match self {
-                    $(MassUnit::$variant => $si_factor),+
+                    $(DurationUnit::$variant => $si_factor),+
                 }
             }
         }
 
-        impl FromStr for MassUnit {
+        impl FromStr for DurationUnit {
             type Err = &'static str;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 let formatted_string = s.trim().to_lowercase();
                 match formatted_string.as_str() {
-                    $($symbol_lc | $unit_type_lc | $unit_type_plural_lc => return Ok(MassUnit::$variant),)+
+                    $($symbol_lc | $unit_type_plural_lc => return Ok(DurationUnit::$variant),)+
                     _ => {
                         match formatted_string.as_str() {
-                            $($identifier_lc => Ok(MassUnit::$variant),)+
-                            _ => Err("Unknown mass unit"),
+                            $($unit_type_lc => Ok(DurationUnit::$variant),)+
+                            _ => {
+                                match formatted_string.as_str() {
+                                    $($identifier_lc => Ok(DurationUnit::$variant),)+
+                                    _ => Err("Unknown duration unit"),
+                                }
+                            }
                         }
                     }
                 }
             }
         }
 
+
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
-        pub struct Mass {
-            value: f64,
-            unit: MassUnit,
+        pub struct DurationWrapper {
+            value: Duration,
+            unit: DurationUnit,
         }
 
-        impl Mass {
-            pub fn new(value: f64, unit: MassUnit) -> Self {
-                Self { value, unit }
+        impl DurationWrapper {
+            pub fn new(value: f64, unit: DurationUnit) -> Self {
+                let seconds = value * unit.si_factor();
+                let duration = Duration::seconds(seconds.round() as i64);
+                match unit {
+                    $(DurationUnit::$variant => Self { value: duration, unit },)+
+                }
             }
 
             $(
                 pub fn $from_fn_name(value: f64) -> Self {
-                    Self::new(value, MassUnit::$variant)
+                    Self::new(value, DurationUnit::$variant)
                 }
             )+
-
-            pub fn round(&mut self, dp: u8) -> Self {
-                let factor = 10f64.powi(dp as i32);
-                self.value = (self.value * factor).round()/factor;
-                return *self
-            }
 
             $(
                 pub fn $as_fn_name(&self) -> f64 {
-                    self.value * self.unit.si_factor() / $si_factor
+                    self.value.as_seconds_f64() / $si_factor
                 }
             )+
 
-            pub fn to_unit(&self, unit: MassUnit) -> Self {
-                let value = match unit {
-                    $(MassUnit::$variant => self.$as_fn_name()),+
-                };
-                Self { value, unit }
+            pub fn to_unit(&self, unit: DurationUnit) -> Self {
+                Self { value: self.value, unit }
             }
 
             $(
                 pub fn $to_fn_name(&self) -> Self {
-                    self.to_unit(MassUnit::$variant)
+                    self.to_unit(DurationUnit::$variant)
                 }
             )+
 
+            pub fn get_duration(&self) -> f64 {
+                self.value.as_seconds_f64() / self.unit.si_factor()
+            }
+
             pub fn is_zero(&self) -> bool {
-                self.value == 0.0
+                self.value.num_seconds() == 0
             }
 
-            pub fn is_negative(&self) -> bool {
-                self.value < 0.0
-            }
-
-            pub fn get_value(&self) -> f64 {
+            pub fn get_value(&self) -> Duration {
                 self.value
             }
 
-            pub fn set_value(&mut self, value: f64) {
+            pub fn set_value(&mut self, value: Duration) {
                 self.value = value;
             }
 
-            pub fn get_unit(&self) -> MassUnit {
+            pub fn get_unit(&self) -> DurationUnit {
                 self.unit
             }
 
-            pub fn set_unit(&mut self, unit: MassUnit) {
+            pub fn set_unit(&mut self, unit: DurationUnit) {
                 self.unit = unit;
             }
 
@@ -174,60 +179,60 @@ macro_rules! define_masses {
     };
 }
 
-impl fmt::Display for Mass {
+impl fmt::Display for DurationWrapper {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", self.value, self.get_symbol())
+        write!(f, "{} {}", self.get_duration(), self.get_symbol())
     }
 }
 
-impl Add for Mass {
+impl Add for DurationWrapper {
     type Output = Self;
     fn add(self, rhs: Self) -> Self {
         Self::new(
-            self.get_value() + rhs.to_unit(self.unit).get_value(),
+            self.get_duration() + rhs.to_unit(self.unit).get_duration(),
             self.unit,
         )
     }
 }
 
-impl Sub for Mass {
+impl Sub for DurationWrapper {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self {
         Self::new(
-            self.get_value() - rhs.to_unit(self.unit).get_value(),
+            self.get_duration() - rhs.to_unit(self.unit).get_duration(),
             self.unit,
         )
     }
 }
 
-impl<T> Mul<T> for Mass
+impl<T> Mul<T> for DurationWrapper
 where
     T: Into<f64> + Copy,
 {
     type Output = Self;
 
     fn mul(self, rhs: T) -> Self {
-        Self::new(self.get_value() * rhs.into(), self.unit)
+        Self::new(self.get_duration() * rhs.into(), self.unit)
     }
 }
 
-impl<T> Div<T> for Mass
+impl<T> Div<T> for DurationWrapper
 where
     T: Into<f64> + Copy,
 {
     type Output = Self;
 
     fn div(self, rhs: T) -> Self {
-        Self::new(self.get_value() / rhs.into(), self.unit)
+        Self::new(self.get_duration() / rhs.into(), self.unit)
     }
 }
 
-impl PartialOrd for Mass {
+impl PartialOrd for DurationWrapper {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.get_value()
             .partial_cmp(&other.to_unit(self.unit).get_value())
     }
 }
 
-use mass_macro::include_masses_from_json;
-include_masses_from_json!("data/units/mass");
+use duration_macro::include_durations_from_json;
+include_durations_from_json!("data/units/duration");

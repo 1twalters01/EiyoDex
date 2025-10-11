@@ -215,6 +215,7 @@ dependencies = [
  "iana-time-zone",
  "js-sys",
  "num-traits",
+ "serde",
  "wasm-bindgen",
  "windows-link 0.2.1",
 ]
@@ -538,7 +539,6 @@ dependencies = [
 name = "exercise"
 version = "0.1.0"
 dependencies = [
- "chrono",
  "units",
  "uuid",
 ]
@@ -2623,6 +2623,7 @@ dependencies = [
  "currency_macro",
  "density_macro",
  "distance_macro",
+ "duration_macro",
  "energy_macro",
  "mass_macro",
  "measurement_system_macro",
