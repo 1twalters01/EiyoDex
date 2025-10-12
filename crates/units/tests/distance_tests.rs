@@ -61,7 +61,7 @@ fn test_distance_as_fn() {
     let distance_in = Distance::from_in(value);
 
     // percentage error calculations
-    assert!((distance_km.as_m() - value * 1000f64).abs() / distance_km.as_km() < percentage_err);
+    assert!((distance_km.as_m() - value * 1000f64).abs() / distance_km.as_m() < percentage_err);
     assert!(
         (distance_km.as_cm() - value * 100_000f64).abs() / distance_km.as_cm() < percentage_err
     );

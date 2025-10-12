@@ -26,6 +26,7 @@ macro_rules! define_durations {
             cmp::Ordering,
             fmt,
             ops::{Add, Div, Mul, Sub},
+            iter::Sum,
             str::FromStr,
         };
         use serde::{Deserialize, Serialize};
@@ -224,6 +225,14 @@ where
 
     fn div(self, rhs: T) -> Self {
         Self::new(self.get_duration() / rhs.into(), self.unit)
+    }
+}
+
+impl Sum for DurationWrapper {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(DurationWrapper::new(0f64, DurationUnit::Second), |a, b| {
+            b + a
+        })
     }
 }
 
