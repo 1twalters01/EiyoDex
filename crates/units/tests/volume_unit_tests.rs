@@ -4,14 +4,14 @@ use units::{measurement_system::MeasurementSystem, volume::VolumeUnit};
 #[test]
 fn test_get_volume_unit_enumerations() {
     let function_enumerations = VolumeUnit::get_enumerations();
-    let manual_enumerations = vec![
-        &VolumeUnit::Liter,
-        &VolumeUnit::Milliliter,
-        &VolumeUnit::Pint,
-        &VolumeUnit::Gallon,
-        &VolumeUnit::FluidOunce,
-        &VolumeUnit::Teaspoon,
-        &VolumeUnit::Tablespoon,
+    let manual_enumerations = &vec![
+        VolumeUnit::Liter,
+        VolumeUnit::Milliliter,
+        VolumeUnit::Pint,
+        VolumeUnit::Gallon,
+        VolumeUnit::FluidOunce,
+        VolumeUnit::Teaspoon,
+        VolumeUnit::Tablespoon,
     ];
     assert_eq!(
         BTreeSet::from_iter(function_enumerations),

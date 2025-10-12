@@ -1,4 +1,5 @@
 # Todo
+  * Add plural symbol to data types
   * Make currency conversion work
     * Get an API for currency conversion
   * Create tests for

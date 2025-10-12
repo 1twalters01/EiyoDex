@@ -4,12 +4,12 @@ use units::{mass::MassUnit, measurement_system::MeasurementSystem};
 #[test]
 fn test_get_mass_unit_enumerations() {
     let function_enumerations = MassUnit::get_enumerations();
-    let manual_enumerations = vec![
-        &MassUnit::Gram,
-        &MassUnit::Milligram,
-        &MassUnit::Kilogram,
-        &MassUnit::Microgram,
-        &MassUnit::Ounce,
+    let manual_enumerations = &vec![
+        MassUnit::Gram,
+        MassUnit::Milligram,
+        MassUnit::Kilogram,
+        MassUnit::Microgram,
+        MassUnit::Ounce,
     ];
     assert_eq!(
         BTreeSet::from_iter(function_enumerations),

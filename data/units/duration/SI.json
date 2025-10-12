@@ -29,7 +29,7 @@
     "unit_type": "day",
     "unit_type_plural": "days",
     "measurement_system": "SI",
-    "si_factor": 87400.0
+    "si_factor": 86400.0
   },
   "Week": {
     "identifier": "week",
