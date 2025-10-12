@@ -25,10 +25,10 @@ macro_rules! define_energies {
             cmp::Ordering,
             fmt,
             ops::{Add, Div, Mul, Sub},
+            iter::Sum,
             str::FromStr,
         };
         use serde::{Deserialize, Serialize};
-        use std::iter::Sum;
         use crate::into_f64::IntoF64Safe;
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -230,7 +230,7 @@ where
 
 impl Sum for Energy {
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
-        iter.fold(Energy::new(0f64, EnergyUnit::Kilocalorie), |a, b| a + b)
+        iter.fold(Energy::new(0f64, EnergyUnit::Kilocalorie), |a, b| b + a)
     }
 }
 

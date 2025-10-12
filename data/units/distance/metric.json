@@ -1,0 +1,34 @@
+{
+    "Kilometer": {
+        "identifier": "km",
+        "symbol": "km",
+        "unit_type": "kilometer",
+        "unit_type_plural": "kilometers",
+        "measurement_system": "Metric",
+        "si_factor": 1000
+    },
+    "Meter": {
+        "identifier": "m",
+        "symbol": "m",
+        "unit_type": "meter",
+        "unit_type_plural": "meters",
+        "measurement_system": "Metric",
+        "si_factor": 1.0
+    },
+    "Centimeter": {
+        "identifier": "cm",
+        "symbol": "cm",
+        "unit_type": "centimeter",
+        "unit_type_plural": "centimeters",
+        "measurement_system": "Metric",
+        "si_factor": 0.01 
+    },
+    "Millimeter": {
+        "identifier": "mm",
+        "symbol": "mm",
+        "unit_type": "millimeter",
+        "unit_type_plural": "millimeters",
+        "measurement_system": "Metric",
+        "si_factor": 0.001 
+    }
+}

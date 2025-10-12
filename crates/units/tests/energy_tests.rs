@@ -238,6 +238,22 @@ fn test_energy_divide() {
 }
 
 #[test]
+fn test_energy_sum() {
+    let energy_1 = Energy::from_kcal(30f64);
+    let energy_2 = Energy::from_kcal(20f64);
+    let energy_3 = Energy::from_kcal(50f64).to_kj();
+    let energy_4 = Energy::from_kcal(20f64).to_kj();
+    let energy_5 = Energy::from_kcal(130f64).to_kj();
+    let energy_total = Energy::from_kcal(250f64);
+
+    let energies = vec![energy_1, energy_2, energy_3, energy_4, energy_5];
+
+    let sum: Energy = energies.iter().map(|energy| *energy * 2).sum();
+    assert_eq!(sum.get_unit(), energy_5.get_unit());
+    assert_eq!(sum, (energy_total * 2).to_unit(energy_5.get_unit()));
+}
+
+#[test]
 fn test_energy_partial_order() {
     let energy_kcal_1 = Energy::from_kcal(6700f64);
     let energy_kcal_2 = Energy::from_kcal(4700f64);

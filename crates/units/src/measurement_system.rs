@@ -7,13 +7,10 @@ macro_rules! define_measurement_systems {
         pub enum MeasurementSystem {
             $($variant),+
         }
-        pub fn get_enumerations() -> &'static [MeasurementSystem] {
-            &[$(MeasurementSystem::$variant),+]
-        }
 
         impl MeasurementSystem {
-            pub fn get_enumerations() -> Vec<MeasurementSystem> {
-                Vec::from([$(MeasurementSystem::$variant),+])
+            pub fn get_enumerations() -> &'static [MeasurementSystem] {
+                &[$(MeasurementSystem::$variant),+]
             }
         }
     };

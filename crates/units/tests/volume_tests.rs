@@ -336,6 +336,22 @@ fn test_volume_divide() {
 }
 
 #[test]
+fn test_volume_sum() {
+    let volume_1 = Volume::from_l(30f64);
+    let volume_2 = Volume::from_l(20f64);
+    let volume_3 = Volume::from_l(50f64).to_floz();
+    let volume_4 = Volume::from_l(20f64).to_floz();
+    let volume_5 = Volume::from_l(130f64);
+    let volume_total = Volume::from_l(250f64);
+
+    let volumes = vec![volume_1, volume_2, volume_3, volume_4, volume_5];
+
+    let sum: Volume = volumes.iter().map(|volume| *volume * 2).sum();
+    assert_eq!(sum.get_unit(), volume_5.get_unit());
+    assert_eq!(sum, (volume_total * 2).to_unit(volume_5.get_unit()));
+}
+
+#[test]
 fn test_volume_partial_order() {
     let volume_ml_1 = Volume::from_ml(6700f64);
     let volume_ml_2 = Volume::from_ml(4700f64);

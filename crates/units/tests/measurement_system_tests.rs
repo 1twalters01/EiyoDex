@@ -4,7 +4,7 @@ use units::measurement_system::MeasurementSystem;
 #[test]
 fn test_get_measurement_system_enumerations() {
     let function_enumerations = MeasurementSystem::get_enumerations();
-    let manual_enumerations = vec![
+    let manual_enumerations = &[
         MeasurementSystem::Metric,
         MeasurementSystem::Imperial,
         MeasurementSystem::SI,

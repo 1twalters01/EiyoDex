@@ -7,6 +7,10 @@ use units::{
 fn test_new_distance() {
     let value = 10 as f64;
 
+    let distance_new_km = Distance::new(value, DistanceUnit::Kilometer);
+    let distance_from_km = Distance::from_km(value);
+    assert_eq!(distance_new_km, distance_from_km);
+
     let distance_new_m = Distance::new(value, DistanceUnit::Meter);
     let distance_from_m = Distance::from_m(value);
     assert_eq!(distance_new_m, distance_from_m);
@@ -14,6 +18,10 @@ fn test_new_distance() {
     let distance_new_cm = Distance::new(value, DistanceUnit::Centimeter);
     let distance_from_cm = Distance::from_cm(value);
     assert_eq!(distance_new_cm, distance_from_cm);
+
+    let distance_new_mm = Distance::new(value, DistanceUnit::Millimeter);
+    let distance_from_mm = Distance::from_mm(value);
+    assert_eq!(distance_new_mm, distance_from_mm);
 
     let distance_new_ft = Distance::new(value, DistanceUnit::Foot);
     let distance_from_ft = Distance::from_ft(value);
@@ -45,26 +53,56 @@ fn test_distance_as_fn() {
     let value = 5.6;
     let percentage_err = 0.5;
 
+    let distance_km = Distance::from_km(value);
     let distance_m = Distance::from_m(value);
     let distance_cm = Distance::from_cm(value);
+    let distance_mm = Distance::from_mm(value);
     let distance_ft = Distance::from_ft(value);
     let distance_in = Distance::from_in(value);
 
     // percentage error calculations
+    assert!((distance_km.as_m() - value * 1000f64).abs() / distance_km.as_km() < percentage_err);
+    assert!(
+        (distance_km.as_cm() - value * 100_000f64).abs() / distance_km.as_cm() < percentage_err
+    );
+    assert!(
+        (distance_km.as_mm() - value * 1_000_000f64).abs() / distance_km.as_mm() < percentage_err
+    );
+    assert!((distance_km.as_ft() - value * 3280.84).abs() / distance_km.as_ft() < percentage_err);
+    assert!((distance_km.as_in() - value * 39_370.08).abs() / distance_km.as_in() < percentage_err);
+
+    assert!((distance_m.as_km() - value * 0.001).abs() / distance_m.as_km() < percentage_err);
     assert!((distance_m.as_cm() - value * 100f64).abs() / distance_m.as_cm() < percentage_err);
+    assert!((distance_m.as_mm() - value * 1000f64).abs() / distance_m.as_mm() < percentage_err);
     assert!((distance_m.as_ft() - value * 3.28084).abs() / distance_m.as_ft() < percentage_err);
     assert!((distance_m.as_in() - value * 39.37008).abs() / distance_m.as_in() < percentage_err);
 
+    assert!((distance_cm.as_km() - value * 0.00001).abs() / distance_cm.as_km() < percentage_err);
     assert!((distance_cm.as_m() - value * 0.01).abs() / distance_cm.as_m() < percentage_err);
+    assert!((distance_cm.as_mm() - value * 10f64).abs() / distance_cm.as_mm() < percentage_err);
     assert!((distance_cm.as_ft() - value * 0.0328084).abs() / distance_cm.as_ft() < percentage_err);
     assert!((distance_cm.as_in() - value * 0.3937008).abs() / distance_cm.as_in() < percentage_err);
 
+    assert!((distance_mm.as_km() - value * 0.000001).abs() / distance_mm.as_km() < percentage_err);
+    assert!((distance_mm.as_m() - value * 0.001).abs() / distance_mm.as_m() < percentage_err);
+    assert!((distance_mm.as_cm() - value * 0.1f64).abs() / distance_mm.as_cm() < percentage_err);
+    assert!(
+        (distance_mm.as_ft() - value * 0.00328084).abs() / distance_mm.as_ft() < percentage_err
+    );
+    assert!(
+        (distance_mm.as_in() - value * 0.03937008).abs() / distance_mm.as_in() < percentage_err
+    );
+
+    assert!((distance_ft.as_km() - value * 0.0003048).abs() / distance_cm.as_km() < percentage_err);
     assert!((distance_ft.as_m() - value * 0.3048).abs() / distance_cm.as_m() < percentage_err);
     assert!((distance_ft.as_cm() - value * 30.48).abs() / distance_cm.as_cm() < percentage_err);
+    assert!((distance_ft.as_mm() - value * 304.8).abs() / distance_cm.as_mm() < percentage_err);
     assert!((distance_ft.as_in() - value * 12f64).abs() / distance_cm.as_in() < percentage_err);
 
+    assert!((distance_in.as_km() - value * 0.0000254).abs() / distance_in.as_km() < percentage_err);
     assert!((distance_in.as_m() - value * 0.0254).abs() / distance_in.as_m() < percentage_err);
     assert!((distance_in.as_cm() - value * 2.54).abs() / distance_in.as_cm() < percentage_err);
+    assert!((distance_in.as_mm() - value * 25.4).abs() / distance_in.as_mm() < percentage_err);
     assert!(
         (distance_in.as_ft() - value * 0.08333333).abs() / distance_in.as_ft() < percentage_err
     );
@@ -149,13 +187,17 @@ fn test_distance_set_unit() {
 #[test]
 fn test_distance_get_symbol() {
     let value = 4.2;
+    let distance_km = Distance::from_km(value);
     let distance_m = Distance::from_m(value);
     let distance_cm = Distance::from_cm(value);
+    let distance_mm = Distance::from_mm(value);
     let distance_ft = Distance::from_ft(value);
     let distance_in = Distance::from_in(value);
 
+    assert_eq!(distance_km.get_symbol(), "km");
     assert_eq!(distance_m.get_symbol(), "m");
     assert_eq!(distance_cm.get_symbol(), "cm");
+    assert_eq!(distance_mm.get_symbol(), "mm");
     assert_eq!(distance_ft.get_symbol(), "ft");
     assert_eq!(distance_in.get_symbol(), "in");
 }
@@ -164,17 +206,27 @@ fn test_distance_get_symbol() {
 fn test_distance_get_measurement_system() {
     let value = 4.2;
 
+    let distance_km = Distance::from_km(value);
     let distance_m = Distance::from_m(value);
     let distance_cm = Distance::from_cm(value);
+    let distance_mm = Distance::from_mm(value);
     let distance_ft = Distance::from_ft(value);
     let distance_in = Distance::from_in(value);
 
+    assert_eq!(
+        distance_km.get_measurement_system(),
+        MeasurementSystem::Metric
+    );
     assert_eq!(
         distance_m.get_measurement_system(),
         MeasurementSystem::Metric
     );
     assert_eq!(
         distance_cm.get_measurement_system(),
+        MeasurementSystem::Metric
+    );
+    assert_eq!(
+        distance_mm.get_measurement_system(),
         MeasurementSystem::Metric
     );
     assert_eq!(
@@ -190,13 +242,17 @@ fn test_distance_get_measurement_system() {
 #[test]
 fn test_mass_get_unit_type() {
     let value = 4.2;
+    let distance_km = Distance::from_km(value);
     let distance_m = Distance::from_m(value);
     let distance_cm = Distance::from_cm(value);
+    let distance_mm = Distance::from_mm(value);
     let distance_ft = Distance::from_ft(value);
     let distance_in = Distance::from_in(value);
 
+    assert_eq!(distance_km.get_unit_type(), "kilometer");
     assert_eq!(distance_m.get_unit_type(), "meter");
     assert_eq!(distance_cm.get_unit_type(), "centimeter");
+    assert_eq!(distance_mm.get_unit_type(), "millimeter");
     assert_eq!(distance_ft.get_unit_type(), "foot");
     assert_eq!(distance_in.get_unit_type(), "inch");
 }
@@ -204,13 +260,17 @@ fn test_mass_get_unit_type() {
 #[test]
 fn test_mass_get_unit_type_plural() {
     let value = 8.52;
+    let distance_km = Distance::from_km(value);
     let distance_m = Distance::from_m(value);
     let distance_cm = Distance::from_cm(value);
+    let distance_mm = Distance::from_mm(value);
     let distance_ft = Distance::from_ft(value);
     let distance_in = Distance::from_in(value);
 
+    assert_eq!(distance_km.get_unit_type_plural(), "kilometers");
     assert_eq!(distance_m.get_unit_type_plural(), "meters");
     assert_eq!(distance_cm.get_unit_type_plural(), "centimeters");
+    assert_eq!(distance_mm.get_unit_type_plural(), "millimeters");
     assert_eq!(distance_ft.get_unit_type_plural(), "feet");
     assert_eq!(distance_in.get_unit_type_plural(), "inches");
 }
@@ -220,19 +280,27 @@ fn test_mass_to_string() {
     let value_1 = 5f64;
     let value_2 = 8.642;
 
+    let distance_km_1 = Distance::from_km(value_1);
+    assert_eq!(distance_km_1.to_string(), "5km");
     let distance_m_1 = Distance::from_m(value_1);
     assert_eq!(distance_m_1.to_string(), "5m");
     let distance_cm_1 = Distance::from_cm(value_1);
     assert_eq!(distance_cm_1.to_string(), "5cm");
+    let distance_mm_1 = Distance::from_mm(value_1);
+    assert_eq!(distance_mm_1.to_string(), "5mm");
     let distance_ft_1 = Distance::from_ft(value_1);
     assert_eq!(distance_ft_1.to_string(), "5ft");
     let distance_in_1 = Distance::from_in(value_1);
     assert_eq!(distance_in_1.to_string(), "5in");
 
+    let distance_km_2 = Distance::from_km(value_2);
+    assert_eq!(distance_km_2.to_string(), "8.642km");
     let distance_m_2 = Distance::from_m(value_2);
     assert_eq!(distance_m_2.to_string(), "8.642m");
     let distance_cm_2 = Distance::from_cm(value_2);
     assert_eq!(distance_cm_2.to_string(), "8.642cm");
+    let distance_mm_2 = Distance::from_mm(value_2);
+    assert_eq!(distance_mm_2.to_string(), "8.642mm");
     let distance_ft_2 = Distance::from_ft(value_2);
     assert_eq!(distance_ft_2.to_string(), "8.642ft");
     let distance_in_2 = Distance::from_in(value_2);
@@ -284,6 +352,22 @@ fn test_distance_divide() {
     let distance_m_1 = Distance::from_m(350f64);
     let distance_m_2 = Distance::from_m(70f64);
     assert_eq!(distance_m_1 / 5, distance_m_2);
+}
+
+#[test]
+fn test_energy_sum() {
+    let distance_1 = Distance::from_m(30f64);
+    let distance_2 = Distance::from_m(20f64);
+    let distance_3 = Distance::from_m(50f64).to_ft();
+    let distance_4 = Distance::from_m(20f64).to_ft();
+    let distance_5 = Distance::from_m(130f64).to_ft();
+    let distance_total = Distance::from_m(250f64);
+
+    let distances = vec![distance_1, distance_2, distance_3, distance_4, distance_5];
+
+    let sum: Distance = distances.iter().map(|distance| *distance * 2).sum();
+    assert_eq!(sum.get_unit(), distance_5.get_unit());
+    assert_eq!(sum, (distance_total * 2).to_unit(distance_5.get_unit()));
 }
 
 #[test]

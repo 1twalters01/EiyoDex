@@ -1,5 +1,5 @@
 use std::{collections::BTreeSet, str::FromStr};
-use units::energy::EnergyUnit;
+use units::{energy::EnergyUnit, measurement_system::MeasurementSystem};
 
 #[test]
 fn test_get_energy_unit_enumerations() {
@@ -29,6 +29,18 @@ fn test_get_plural_unit_types() {
     assert_eq!(
         EnergyUnit::Kilocalorie.as_unit_type_plural(),
         "kilocalories"
+    );
+}
+
+#[test]
+fn test_get_measurement_systems() {
+    assert_eq!(
+        EnergyUnit::Kilojoule.get_measurement_system(),
+        MeasurementSystem::Metric,
+    );
+    assert_eq!(
+        EnergyUnit::Kilocalorie.get_measurement_system(),
+        MeasurementSystem::Metric,
     );
 }
 

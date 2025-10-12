@@ -24,6 +24,7 @@ macro_rules! define_masses {
             fmt,
             ops::{Add, Div, Mul, Sub},
             str::FromStr,
+            iter::Sum,
         };
         use serde::{Deserialize, Serialize};
 
@@ -219,6 +220,12 @@ where
 
     fn div(self, rhs: T) -> Self {
         Self::new(self.get_value() / rhs.into(), self.unit)
+    }
+}
+
+impl Sum for Mass {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Mass::new(0f64, MassUnit::Kilogram), |a, b| b + a)
     }
 }
 

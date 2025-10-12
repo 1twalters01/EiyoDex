@@ -1,5 +1,5 @@
 use std::{collections::BTreeSet, str::FromStr};
-use units::mass::MassUnit;
+use units::{mass::MassUnit, measurement_system::MeasurementSystem};
 
 #[test]
 fn test_get_mass_unit_enumerations() {
@@ -42,6 +42,30 @@ fn test_get_plural_unit_types() {
     assert_eq!(MassUnit::Kilogram.as_unit_type_plural(), "kilograms");
     assert_eq!(MassUnit::Microgram.as_unit_type_plural(), "micrograms");
     assert_eq!(MassUnit::Ounce.as_unit_type_plural(), "ounces");
+}
+
+#[test]
+fn test_get_measurement_systems() {
+    assert_eq!(
+        MassUnit::Gram.get_measurement_system(),
+        MeasurementSystem::Metric
+    );
+    assert_eq!(
+        MassUnit::Milligram.get_measurement_system(),
+        MeasurementSystem::Metric
+    );
+    assert_eq!(
+        MassUnit::Kilogram.get_measurement_system(),
+        MeasurementSystem::Metric
+    );
+    assert_eq!(
+        MassUnit::Microgram.get_measurement_system(),
+        MeasurementSystem::Metric
+    );
+    assert_eq!(
+        MassUnit::Ounce.get_measurement_system(),
+        MeasurementSystem::Imperial
+    );
 }
 
 #[test]

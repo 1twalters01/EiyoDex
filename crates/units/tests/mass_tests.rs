@@ -61,7 +61,7 @@ fn test_mass_as_fn() {
     assert!((mass_g.as_ug() - value * 1e6).abs() / mass_g.as_ug() < percentage_err);
     assert!((mass_g.as_oz() - value * 0.0352739).abs() / mass_g.as_oz() < percentage_err);
 
-    assert!((mass_mg.as_g() - value * 0.001 as f64).abs() / mass_mg.as_g() < percentage_err);
+    assert!((mass_mg.as_g() - value * 0.001).abs() / mass_mg.as_g() < percentage_err);
     assert!((mass_mg.as_kg() - value * 1e-6).abs() / mass_mg.as_kg() < percentage_err);
     assert!((mass_mg.as_ug() - value * 1_000 as f64).abs() / mass_mg.as_ug() < percentage_err);
     assert!((mass_mg.as_oz() - value * 3.527396e-5).abs() / mass_mg.as_oz() < percentage_err);
@@ -294,6 +294,22 @@ fn test_mass_divide() {
     let mass_g_2 = Mass::from_g(70f64);
 
     assert_eq!(mass_g_1 / 5, mass_g_2);
+}
+
+#[test]
+fn test_energy_sum() {
+    let mass_1 = Mass::from_kg(30f64);
+    let mass_2 = Mass::from_kg(20f64);
+    let mass_3 = Mass::from_kg(50f64).to_oz();
+    let mass_4 = Mass::from_kg(20f64).to_oz();
+    let mass_5 = Mass::from_kg(130f64);
+    let mass_total = Mass::from_kg(250f64);
+
+    let masses = vec![mass_1, mass_2, mass_3, mass_4, mass_5];
+
+    let sum: Mass = masses.iter().map(|mass| *mass * 2).sum();
+    assert_eq!(sum.get_unit(), mass_5.get_unit());
+    assert_eq!(sum, (mass_total * 2).to_unit(mass_5.get_unit()));
 }
 
 #[test]

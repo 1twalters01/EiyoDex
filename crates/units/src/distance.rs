@@ -23,7 +23,8 @@ macro_rules! define_distances {
             cmp::Ordering,
             fmt,
             ops::{Add, Div, Mul, Sub},
-            str::FromStr
+            iter::Sum,
+            str::FromStr,
         };
         use serde::{Deserialize, Serialize};
 
@@ -220,6 +221,12 @@ where
 
     fn div(self, rhs: T) -> Self {
         Self::new(self.get_value() / rhs.into(), self.unit)
+    }
+}
+
+impl Sum for Distance {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Distance::new(0f64, DistanceUnit::Meter), |a, b| b + a)
     }
 }
 

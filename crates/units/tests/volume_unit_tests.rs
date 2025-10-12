@@ -1,5 +1,5 @@
 use std::{collections::BTreeSet, str::FromStr};
-use units::volume::VolumeUnit;
+use units::{measurement_system::MeasurementSystem, volume::VolumeUnit};
 
 #[test]
 fn test_get_volume_unit_enumerations() {
@@ -53,7 +53,39 @@ fn test_get_plural_unit_types() {
 }
 
 #[test]
-fn test_get_liters_factor() {
+fn test_get_measurement_systems() {
+    assert_eq!(
+        VolumeUnit::Liter.get_measurement_system(),
+        MeasurementSystem::Metric
+    );
+    assert_eq!(
+        VolumeUnit::Milliliter.get_measurement_system(),
+        MeasurementSystem::Metric
+    );
+    assert_eq!(
+        VolumeUnit::Pint.get_measurement_system(),
+        MeasurementSystem::Imperial
+    );
+    assert_eq!(
+        VolumeUnit::Gallon.get_measurement_system(),
+        MeasurementSystem::Imperial
+    );
+    assert_eq!(
+        VolumeUnit::FluidOunce.get_measurement_system(),
+        MeasurementSystem::Imperial
+    );
+    assert_eq!(
+        VolumeUnit::Tablespoon.get_measurement_system(),
+        MeasurementSystem::Imperial
+    );
+    assert_eq!(
+        VolumeUnit::Teaspoon.get_measurement_system(),
+        MeasurementSystem::Imperial
+    );
+}
+
+#[test]
+fn test_get_si_factor() {
     assert_eq!(VolumeUnit::Liter.si_factor(), 0.001);
     assert_eq!(VolumeUnit::Milliliter.si_factor(), 0.000001);
     assert_eq!(VolumeUnit::Pint.si_factor(), 0.0005682612);

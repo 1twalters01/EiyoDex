@@ -23,6 +23,7 @@ macro_rules! define_volumes {
             cmp::Ordering,
             fmt,
             ops::{Add, Div, Mul, Sub},
+            iter::Sum,
             str::FromStr,
         };
         use serde::{Deserialize, Serialize};
@@ -220,6 +221,12 @@ where
 
     fn div(self, rhs: T) -> Self {
         Self::new(self.get_value() / rhs.into(), self.unit)
+    }
+}
+
+impl Sum for Volume {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Volume::new(0f64, VolumeUnit::Liter), |a, b| b + a)
     }
 }
 
