@@ -29,7 +29,7 @@ macro_rules! define_specific_currencies {
                     as_fn_name: $json_as_fn_name: ident,
                     to_fn_name: $json_to_fn_name: ident,
                     currency_unit_variant: $json_currency_unit_variant: ident,
-                    denominator_unit_variant: $json_duration_unit_variant:ident,
+                    denominator_unit_variant: $json_denominator_unit_variant:ident,
                     denominator_unit_type: $json_denominator_unit_type:ident,
                     denominator_measurement_system: $json_denominator_measurement_system: ident,
                     symbol: $json_symbol: expr,
@@ -40,6 +40,48 @@ macro_rules! define_specific_currencies {
                     unit_type_plural_lc: $json_unit_type_plural_lc: expr,
                     identifier_lc: $json_identifier_lc: expr,
                     si_factor: $json_si_factor: expr
+                }
+            ),* $(,)?
+        },
+        mass: {
+            $(
+                $mass_variant:ident => {
+                    from_fn_name: $mass_from_fn_name: ident,
+                    as_fn_name: $mass_as_fn_name: ident,
+                    to_fn_name: $mass_to_fn_name: ident,
+                    currency_unit_variant: $mass_currency_unit_variant: ident,
+                    denominator_unit_variant: $mass_denominator_unit_variant:ident,
+                    denominator_unit_type: $mass_denominator_unit_type:ident,
+                    denominator_measurement_system: $mass_denominator_measurement_system: ident,
+                    symbol: $mass_symbol: expr,
+                    symbol_lc: $mass_symbol_lc: expr,
+                    unit_type: $mass_unit_type: expr,
+                    unit_type_lc: $mass_unit_type_lc: expr,
+                    unit_type_plural: $mass_unit_type_plural: expr,
+                    unit_type_plural_lc: $mass_unit_type_plural_lc: expr,
+                    identifier_lc: $mass_identifier_lc: expr,
+                    si_factor: $mass_si_factor: expr
+                }
+            ),* $(,)?
+        },
+        volume: {
+            $(
+                $volume_variant:ident => {
+                    from_fn_name: $volume_from_fn_name: ident,
+                    as_fn_name: $volume_as_fn_name: ident,
+                    to_fn_name: $volume_to_fn_name: ident,
+                    currency_unit_variant: $volume_currency_unit_variant: ident,
+                    denominator_unit_variant: $volume_denominator_unit_variant:ident,
+                    denominator_unit_type: $volume_denominator_unit_type:ident,
+                    denominator_measurement_system: $volume_denominator_measurement_system: ident,
+                    symbol: $volume_symbol: expr,
+                    symbol_lc: $volume_symbol_lc: expr,
+                    unit_type: $volume_unit_type: expr,
+                    unit_type_lc: $volume_unit_type_lc: expr,
+                    unit_type_plural: $volume_unit_type_plural: expr,
+                    unit_type_plural_lc: $volume_unit_type_plural_lc: expr,
+                    identifier_lc: $volume_identifier_lc: expr,
+                    si_factor: $volume_si_factor: expr
                 }
             ),* $(,)?
         },
@@ -58,15 +100,20 @@ macro_rules! define_specific_currencies {
                 CurrencyUnit::{self, *},
             },
             measurement_system::MeasurementSystem,
-            mass::Mass,
-            volume::Volume,
+            mass::{ Mass, MassUnit },
+            volume::{ Volume, VolumeUnit },
             density::Density,
         };
 
         #[derive(PartialEq)]
         pub enum Denominator {
-            Mass,
-            Volume,
+            MassDenominator(MassUnit),
+            VolumeDenominator(VolumeUnit),
+        }
+
+        pub enum DenominatorType {
+            MassDenominator,
+            VolumeDenominator,
         }
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -75,6 +122,21 @@ macro_rules! define_specific_currencies {
         }
 
         impl SpecificCurrencyUnit {
+            pub fn from_variants(currency_unit: CurrencyUnit, denominator: Denominator) -> SpecificCurrencyUnit {
+                match denominator {
+                    Denominator::MassDenominator(mass_unit) => {
+                        match (currency_unit, mass_unit) {
+                            $((CurrencyUnit::$mass_currency_unit_variant, MassUnit::$mass_denominator_unit_variant) => SpecificCurrencyUnit::$mass_variant,)+
+                        }
+                    },
+                    Denominator::VolumeDenominator(volume_unit) => {
+                        match (currency_unit, volume_unit) {
+                            $((CurrencyUnit::$volume_currency_unit_variant, VolumeUnit::$volume_denominator_unit_variant) => SpecificCurrencyUnit::$volume_variant,)+
+                        }
+                    }
+                }
+            }
+
             pub fn get_all_enumerations() -> &'static [Self] {
                 &[$(SpecificCurrencyUnit::$all_variant),+]
             }
@@ -107,15 +169,32 @@ macro_rules! define_specific_currencies {
                 }
             }
 
-            pub fn get_denominator_unit_type(&self) -> Denominator {
+            pub fn get_denominator_type(&self) -> DenominatorType {
                 match self {
-                    $(SpecificCurrencyUnit::$all_variant => Denominator::$all_denominator_unit_type,)+
+                    $(SpecificCurrencyUnit::$all_variant => DenominatorType::$all_denominator_unit_type,)+
                 }
             }
 
             pub fn get_currency_unit(&self) -> CurrencyUnit {
                 match self {
                     $(SpecificCurrencyUnit::$all_variant => CurrencyUnit::$all_currency_unit_variant),+
+                }
+            }
+
+            pub fn get_denominator(&self) -> Denominator {
+                match self.get_denominator_type() {
+                    DenominatorType::MassDenominator => {
+                        match self {
+                            $(SpecificCurrencyUnit::$mass_variant => Denominator::MassDenominator(MassUnit::$mass_denominator_unit_variant),)+
+                            _ => panic!("Volume based specific currency can not have a mass denominator"),
+                        }
+                    },
+                    DenominatorType::VolumeDenominator => {
+                        match self {
+                            $(SpecificCurrencyUnit::$volume_variant => Denominator::VolumeDenominator(VolumeUnit::$volume_denominator_unit_variant),)+
+                            _ => panic!("Mass based specific currency can not have a mass denominator"),
+                        }
+                    },
                 }
             }
 
@@ -168,7 +247,7 @@ macro_rules! define_specific_currencies {
 
             $(
                 pub fn $all_as_fn_name(&self) -> Result<f64, &'static str> {
-                    if self.get_unit().get_denominator_unit_type() == Denominator::$all_denominator_unit_type {
+                    if let DenominatorType::$all_denominator_unit_type = self.get_unit().get_denominator_type() {
                         let numerator_factor: f64 = get_current_exchange_rate_sync(self.unit.get_currency_unit(), $all_currency_unit_variant).expect("Unable to get_current_exchange_rate_sync");
                         let denominator_factor: f64 = self.unit.si_factor() / $all_si_factor;
                         return Ok(self.value * numerator_factor * denominator_factor)
@@ -218,8 +297,8 @@ macro_rules! define_specific_currencies {
                 self.unit = unit;
             }
 
-            pub fn get_denominator_unit_type(&self) -> Denominator {
-                self.unit.get_denominator_unit_type()
+            pub fn get_denominator_type(&self) -> DenominatorType {
+                self.unit.get_denominator_type()
             }
 
             pub fn get_symbol(&self) -> &'static str {
@@ -262,52 +341,21 @@ where
     }
 }
 
-// Make this use their currency, not just usd
 impl Mul<Volume> for SpecificCurrency {
     type Output = Currency;
 
     fn mul(self, rhs: Volume) -> Currency {
-        let ml = rhs.as_ml();
-        let usd_per_ml = self
-            .as_usd_per_ml()
-            .expect("Cannot multiply volume based Specific Currency with mass");
-        Currency::new(ml * usd_per_ml, CurrencyUnit::USD)
-    }
-}
+        let currency_unit = self.get_unit().get_currency_unit();
+        let volume_unit = match self.get_unit().get_denominator() {
+            Denominator::VolumeDenominator(volume_unit) => volume_unit,
+            Denominator::MassDenominator(_) => {
+                panic!("Cannot multiply Mass based Specific Currency with Volume")
+            }
+        };
 
-impl Mul<Mass> for SpecificCurrency {
-    type Output = Currency;
+        let specific_currency_value = self.get_value() * rhs.to_unit(volume_unit).get_value();
 
-    fn mul(self, rhs: Mass) -> Currency {
-        let kg = rhs.as_kg();
-        let usd_per_kg = self
-            .as_usd_per_kg()
-            .expect("Cannot multiply mass based Specific Currency with volume");
-        Currency::new(kg * usd_per_kg, CurrencyUnit::USD)
-    }
-}
-
-impl Mul<Density> for SpecificCurrency {
-    type Output = Currency;
-
-    fn mul(self, rhs: Density) -> Currency {
-        let kg_per_l = rhs.as_kg_per_l();
-        let usd_per_kg = self
-            .as_usd_per_kg()
-            .expect("Cannot multiply volume based Specific Currency with density");
-        Currency::new(kg_per_l * usd_per_kg, CurrencyUnit::USD)
-    }
-}
-
-impl Mul<SpecificCurrency> for Density {
-    type Output = Currency;
-
-    fn mul(self, rhs: SpecificCurrency) -> Currency {
-        let kg_per_l = self.as_kg_per_l();
-        let usd_per_kg = rhs
-            .as_usd_per_kg()
-            .expect("Cannot multiply volume based Specific Currency with density");
-        Currency::new(kg_per_l * usd_per_kg, CurrencyUnit::USD)
+        Currency::new(specific_currency_value, currency_unit)
     }
 }
 
@@ -315,11 +363,35 @@ impl Mul<SpecificCurrency> for Volume {
     type Output = Currency;
 
     fn mul(self, rhs: SpecificCurrency) -> Currency {
-        let ml = self.as_ml();
-        let usd_per_ml = rhs
-            .as_usd_per_ml()
-            .expect("Cannot multiply volume based Specific Currency with mass");
-        Currency::new(ml * usd_per_ml, CurrencyUnit::USD)
+        let currency_unit = rhs.get_unit().get_currency_unit();
+        let volume_unit = match rhs.get_unit().get_denominator() {
+            Denominator::VolumeDenominator(volume_unit) => volume_unit,
+            Denominator::MassDenominator(_) => {
+                panic!("Cannot multiply Mass based Specific Currency with Volume")
+            }
+        };
+
+        let specific_currency_value = rhs.get_value() * self.to_unit(volume_unit).get_value();
+
+        Currency::new(specific_currency_value, currency_unit)
+    }
+}
+
+impl Mul<Mass> for SpecificCurrency {
+    type Output = Currency;
+
+    fn mul(self, rhs: Mass) -> Currency {
+        let currency_unit = self.get_unit().get_currency_unit();
+        let mass_unit = match self.get_unit().get_denominator() {
+            Denominator::MassDenominator(mass_unit) => mass_unit,
+            Denominator::VolumeDenominator(_) => {
+                panic!("Cannot multiply Volume based Specific Currency with Mass")
+            }
+        };
+
+        let specific_currency_value = self.get_value() * rhs.to_unit(mass_unit).get_value();
+
+        Currency::new(specific_currency_value, currency_unit)
     }
 }
 
@@ -327,11 +399,66 @@ impl Mul<SpecificCurrency> for Mass {
     type Output = Currency;
 
     fn mul(self, rhs: SpecificCurrency) -> Currency {
-        let kg = self.as_kg();
-        let usd_per_kg = rhs
-            .as_usd_per_kg()
-            .expect("Cannot multiply mass based Specific Currency with volume");
-        Currency::new(kg * usd_per_kg, CurrencyUnit::USD)
+        let currency_unit = rhs.get_unit().get_currency_unit();
+        let mass_unit = match rhs.get_unit().get_denominator() {
+            Denominator::MassDenominator(mass_unit) => mass_unit,
+            Denominator::VolumeDenominator(_) => {
+                panic!("Cannot multiply Volume based Specific Currency with Mass")
+            }
+        };
+
+        let specific_currency_value = rhs.get_value() * self.to_unit(mass_unit).get_value();
+        Currency::new(specific_currency_value, currency_unit)
+    }
+}
+
+impl Mul<Density> for SpecificCurrency {
+    type Output = SpecificCurrency;
+
+    fn mul(self, rhs: Density) -> SpecificCurrency {
+        let sc_currency_unit = self.get_unit().get_currency_unit();
+        let sc_mass_unit = match self.get_unit().get_denominator() {
+            Denominator::MassDenominator(mass_unit) => mass_unit,
+            Denominator::VolumeDenominator(_) => {
+                panic!("Cannot multiply Volume based Specific Currency with Density")
+            }
+        };
+
+        let d_volume_unit = rhs.get_unit().get_volume_variant();
+        let d_density_unit = DensityUnit::from_variants(sc_mass_unit, d_volume_unit);
+
+        let new_denominator = Denominator::VolumeDenominator(d_volume_unit);
+        let new_specific_currency_unit =
+            SpecificCurrencyUnit::from_variants(sc_currency_unit, new_denominator);
+
+        let density = rhs.to_unit(d_density_unit).get_value();
+        let specific_currency = self.get_value();
+        SpecificCurrency::new(density * specific_currency, new_specific_currency_unit)
+    }
+}
+
+impl Mul<SpecificCurrency> for Density {
+    type Output = SpecificCurrency;
+
+    fn mul(self, rhs: SpecificCurrency) -> SpecificCurrency {
+        let sc_currency_unit = rhs.get_unit().get_currency_unit();
+        let sc_mass_unit = match rhs.get_unit().get_denominator() {
+            Denominator::MassDenominator(mass_unit) => mass_unit,
+            Denominator::VolumeDenominator(_) => {
+                panic!("Cannot multiply Volume based Specific Currency with Density")
+            }
+        };
+
+        let d_volume_unit = self.get_unit().get_volume_variant();
+        let d_density_unit = DensityUnit::from_variants(sc_mass_unit, d_volume_unit);
+
+        let new_denominator = Denominator::VolumeDenominator(d_volume_unit);
+        let new_specific_currency_unit =
+            SpecificCurrencyUnit::from_variants(sc_currency_unit, new_denominator);
+
+        let density = self.to_unit(d_density_unit).get_value();
+        let specific_currency = rhs.get_value();
+        SpecificCurrency::new(density * specific_currency, new_specific_currency_unit)
     }
 }
 
@@ -350,12 +477,15 @@ impl Div<Volume> for Currency {
     type Output = SpecificCurrency;
 
     fn div(self, rhs: Volume) -> SpecificCurrency {
-        let usd = self
-            .convert_to_sync(CurrencyUnit::USD)
-            .expect("Could not convert")
-            .get_value();
-        let ml = rhs.as_ml();
-        SpecificCurrency::from_usd_per_ml(usd / ml)
+        let currency_unit = self.get_unit();
+        let volume_unit = rhs.get_unit();
+        let denominator = Denominator::VolumeDenominator(volume_unit);
+
+        let specific_currency_value = self.get_value() / rhs.get_value();
+        let specific_currency_unit =
+            SpecificCurrencyUnit::from_variants(currency_unit, denominator);
+
+        SpecificCurrency::new(specific_currency_value, specific_currency_unit)
     }
 }
 
@@ -363,12 +493,15 @@ impl Div<Mass> for Currency {
     type Output = SpecificCurrency;
 
     fn div(self, rhs: Mass) -> SpecificCurrency {
-        let usd = self
-            .convert_to_sync(CurrencyUnit::USD)
-            .expect("Could not convert")
-            .get_value();
-        let kg = rhs.as_kg();
-        SpecificCurrency::from_usd_per_ml(usd / kg)
+        let currency_unit = self.get_unit();
+        let mass_unit = rhs.get_unit();
+        let denominator = Denominator::MassDenominator(mass_unit);
+
+        let specific_currency_value = self.get_value() / rhs.get_value();
+        let specific_currency_unit =
+            SpecificCurrencyUnit::from_variants(currency_unit, denominator);
+
+        SpecificCurrency::new(specific_currency_value, specific_currency_unit)
     }
 }
 
@@ -376,11 +509,24 @@ impl Div<Density> for SpecificCurrency {
     type Output = SpecificCurrency;
 
     fn div(self, rhs: Density) -> SpecificCurrency {
-        let usd_per_ml = self
-            .as_usd_per_ml()
-            .expect("Cannot multiply volume based Specific Currency with mass");
-        let kg_per_ml = rhs.as_kg_per_ml();
-        SpecificCurrency::new(usd_per_ml / kg_per_ml, SpecificCurrencyUnit::USDPerKilogram)
+        let sc_currency_unit = self.get_unit().get_currency_unit();
+        let sc_volume_unit = match self.get_unit().get_denominator() {
+            Denominator::VolumeDenominator(volume_unit) => volume_unit,
+            Denominator::MassDenominator(_) => {
+                panic!("Cannot divide Mass based Specific Currency with Density")
+            }
+        };
+
+        let d_mass_unit = rhs.get_unit().get_mass_variant();
+        let d_density_unit = DensityUnit::from_variants(d_mass_unit, sc_volume_unit);
+
+        let new_denominator = Denominator::MassDenominator(d_mass_unit);
+        let new_specific_currency_unit =
+            SpecificCurrencyUnit::from_variants(sc_currency_unit, new_denominator);
+
+        let density = rhs.to_unit(d_density_unit).get_value();
+        let specific_currency = self.get_value();
+        SpecificCurrency::new(specific_currency / density, new_specific_currency_unit)
     }
 }
 
@@ -396,6 +542,8 @@ impl PartialOrd for SpecificCurrency {
 }
 
 use specific_currency_macro::include_specific_currencies_from_json;
+
+use crate::density::DensityUnit;
 include_specific_currencies_from_json!(
     CurrencyUnit => "data/units/currency",
     VolumeUnit => "data/units/volume",

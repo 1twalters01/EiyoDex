@@ -117,6 +117,10 @@ macro_rules! define_currencies {
                 self.unit.as_symbol()
             }
 
+            pub fn get_unit(&self) -> CurrencyUnit {
+                self.unit
+            }
+
             pub fn get_unit_type(&self) -> &'static str {
                 self.unit.as_unit_type()
             }
