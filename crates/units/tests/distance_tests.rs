@@ -313,13 +313,13 @@ fn test_mass_add() {
     let distance_m_2 = Distance::from_m(5f64);
     let distance_cm = Distance::from_cm(200f64);
 
-    let mass_m_1_plus_m_2 = Distance::from_m(6f64);
-    let mass_cm_plus_m_1 = Distance::from_cm(300f64);
-    let mass_m_2_plus_cm = Distance::from_m(7f64);
+    let distance_m_1_plus_m_2 = Distance::from_m(6f64);
+    let distance_cm_plus_m_1 = Distance::from_cm(300f64);
+    let distance_m_2_plus_cm = Distance::from_m(7f64);
 
-    assert_eq!(distance_m_1 + distance_m_2, mass_m_1_plus_m_2);
-    assert_eq!(distance_cm + distance_m_1, mass_cm_plus_m_1);
-    assert_eq!(distance_m_2 + distance_cm, mass_m_2_plus_cm);
+    assert_eq!(distance_m_1 + distance_m_2, distance_m_1_plus_m_2);
+    assert_eq!(distance_cm + distance_m_1, distance_cm_plus_m_1);
+    assert_eq!(distance_m_2 + distance_cm, distance_m_2_plus_cm);
 }
 
 #[test]

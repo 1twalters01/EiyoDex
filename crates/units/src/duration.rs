@@ -104,11 +104,18 @@ macro_rules! define_durations {
 
         impl DurationWrapper {
             pub fn new(value: f64, unit: DurationUnit) -> Self {
-                let seconds = value * unit.si_factor();
-                let duration = Duration::seconds(seconds.round() as i64);
                 match unit {
-                    $(DurationUnit::$variant => Self { value: duration, unit },)+
+                    $(DurationUnit::$variant => {
+                        let nanoseconds = value * unit.si_factor() * 1e9;
+                        let approximate_duration = nanoseconds.round() as i64;
+                        let duration = Duration::nanoseconds(approximate_duration);
+                        return Self { value: duration, unit }
+                    })+
                 }
+            }
+
+            pub fn from_duration(value: Duration, unit: DurationUnit) -> Self {
+                Self { value, unit }
             }
 
             $(
@@ -134,7 +141,8 @@ macro_rules! define_durations {
             )+
 
             pub fn get_duration(&self) -> f64 {
-                self.value.as_seconds_f64() / self.unit.si_factor()
+                let duration = self.value.as_seconds_f64() / self.unit.si_factor();
+                return duration
             }
 
             pub fn is_zero(&self) -> bool {
@@ -173,8 +181,19 @@ macro_rules! define_durations {
                 self.unit.as_unit_type_plural()
             }
 
-            pub fn to_string(&self) -> String {
-                format!("{}{}", self.value.to_string().trim(), self.get_symbol().trim())
+            pub fn to_string(&self, precision: Option<usize>) -> String {
+                let duration = self.get_duration();
+                let unit_type_plural = self.get_unit_type_plural();
+                match precision {
+                    None => format!("{} {}", duration, unit_type_plural),
+                    Some(precision) => {
+                        let factor = 10f64.powi(precision as i32);
+                        println!("just duration: {}", self.get_duration());
+                        println!("after round: {}", (self.get_duration() * factor).round());
+                        let rounded_duration = (self.get_duration() * factor).round() / factor;
+                        format!("{:.*} {}", precision, rounded_duration, unit_type_plural)
+                    },
+                }
             }
         }
     };
@@ -182,27 +201,22 @@ macro_rules! define_durations {
 
 impl fmt::Display for DurationWrapper {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", self.get_duration(), self.get_symbol())
+        let precision = Some(2);
+        write!(f, "{}", self.to_string(precision))
     }
 }
 
 impl Add for DurationWrapper {
     type Output = Self;
     fn add(self, rhs: Self) -> Self {
-        Self::new(
-            self.get_duration() + rhs.to_unit(self.unit).get_duration(),
-            self.unit,
-        )
+        Self::from_duration(self.get_value() + rhs.get_value(), self.unit)
     }
 }
 
 impl Sub for DurationWrapper {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self {
-        Self::new(
-            self.get_duration() - rhs.to_unit(self.unit).get_duration(),
-            self.unit,
-        )
+        Self::from_duration(self.get_value() - rhs.get_value(), self.unit)
     }
 }
 
