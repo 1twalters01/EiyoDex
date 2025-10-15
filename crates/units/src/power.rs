@@ -55,6 +55,7 @@ macro_rules! define_powers {
             cmp::Ordering,
             fmt,
             ops::{Add, Div, Mul, Sub},
+            iter::Sum,
             str::FromStr,
         };
 
@@ -341,6 +342,14 @@ impl Mul<Power> for DurationWrapper {
         let duration: f64 = self.to_unit(power_duration_variant).get_duration();
         let power = rhs.get_value();
         Energy::new(power * duration, power_energy_variant)
+    }
+}
+
+impl Sum for Power {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Power::new(0f64, PowerUnit::KilojoulePerSecond), |a, b| {
+            b + a
+        })
     }
 }
 

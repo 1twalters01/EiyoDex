@@ -240,7 +240,7 @@ fn test_distance_get_measurement_system() {
 }
 
 #[test]
-fn test_mass_get_unit_type() {
+fn test_distance_get_unit_type() {
     let value = 4.2;
     let distance_km = Distance::from_km(value);
     let distance_m = Distance::from_m(value);
@@ -258,7 +258,7 @@ fn test_mass_get_unit_type() {
 }
 
 #[test]
-fn test_mass_get_unit_type_plural() {
+fn test_distance_get_unit_type_plural() {
     let value = 8.52;
     let distance_km = Distance::from_km(value);
     let distance_m = Distance::from_m(value);
@@ -276,7 +276,7 @@ fn test_mass_get_unit_type_plural() {
 }
 
 #[test]
-fn test_mass_to_string() {
+fn test_distance_to_string() {
     let value_1 = 5f64;
     let value_2 = 8.642;
 
@@ -308,7 +308,7 @@ fn test_mass_to_string() {
 }
 
 #[test]
-fn test_mass_add() {
+fn test_distance_add() {
     let distance_m_1 = Distance::from_m(1f64);
     let distance_m_2 = Distance::from_m(5f64);
     let distance_cm = Distance::from_cm(200f64);
@@ -323,7 +323,7 @@ fn test_mass_add() {
 }
 
 #[test]
-fn test_mass_subtract() {
+fn test_distance_subtract() {
     let distance_m_1 = Distance::from_m(67f64);
     let distance_m_2 = Distance::from_m(47f64);
     let distance_cm = Distance::from_cm(1000f64);
@@ -338,7 +338,7 @@ fn test_mass_subtract() {
 }
 
 #[test]
-fn test_mass_multiply() {
+fn test_distance_multiply() {
     let distance_m_1 = Distance::from_m(70f64);
     let distance_m_2 = Distance::from_m(350f64);
     let mass_g_3 = Distance::from_m(267.4f64);
@@ -355,7 +355,7 @@ fn test_distance_divide() {
 }
 
 #[test]
-fn test_energy_sum() {
+fn test_distance_sum() {
     let distance_1 = Distance::from_m(30f64);
     let distance_2 = Distance::from_m(20f64);
     let distance_3 = Distance::from_m(50f64).to_ft();
@@ -371,7 +371,7 @@ fn test_energy_sum() {
 }
 
 #[test]
-fn test_mass_partial_order() {
+fn test_distance_partial_order() {
     let distance_m_1 = Distance::from_m(6f64);
     let distance_m_2 = Distance::from_m(4f64);
     let distance_cm = Distance::from_cm(520f64);
