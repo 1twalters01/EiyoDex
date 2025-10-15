@@ -4,7 +4,10 @@ use units::{
 };
 
 #[test]
-fn test_new_power() {}
+fn test_power_from_variants() {}
+
+#[test]
+fn test_power_new() {}
 
 #[test]
 fn test_power_rounding() {}
@@ -40,7 +43,7 @@ fn test_power_set_unit() {}
 fn test_power_get_symbol() {}
 
 #[test]
-fn test_power_measurement_system() {}
+fn test_power_get_measurement_system() {}
 
 #[test]
 fn test_power_get_unit_type() {}

@@ -53,6 +53,7 @@ macro_rules! define_densities {
             cmp::Ordering,
             fmt,
             ops::{Add, Div, Mul, Sub},
+            iter::Sum,
             str::FromStr,
         };
         use serde::{Deserialize, Serialize};
@@ -167,15 +168,15 @@ macro_rules! define_densities {
         }
 
         impl Density {
-            pub fn new(value: f64, unit: DensityUnit) -> Self {
-                Self { value, unit }
-            }
-
             pub fn from_variants(value: f64, mass_unit: MassUnit, volume_unit: VolumeUnit) -> Self {
                 Self {
                     value,
                     unit: DensityUnit::from_variants(mass_unit, volume_unit),
                 }
+            }
+
+            pub fn new(value: f64, unit: DensityUnit) -> Self {
+                Self { value, unit }
             }
 
             $(
@@ -336,6 +337,14 @@ impl Div<Volume> for Mass {
         let mass_unit = self.get_unit();
         let volume_unit = rhs.get_unit();
         Density::from_variants(value, mass_unit, volume_unit)
+    }
+}
+
+impl Sum for Density {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Density::new(0f64, DensityUnit::KilogramPerLiter), |a, b| {
+            b + a
+        })
     }
 }
 
