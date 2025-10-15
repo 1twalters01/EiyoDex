@@ -79,38 +79,17 @@ fn test_get_si_factor() {
 
 #[test]
 fn test_from_str() {
-    assert_eq!(
-        DurationUnit::from_str("week").unwrap(),
-        DurationUnit::Week
-    );
-    assert_eq!(
-        DurationUnit::from_str("weeks").unwrap(),
-        DurationUnit::Week
-    );
+    assert_eq!(DurationUnit::from_str("week").unwrap(), DurationUnit::Week);
+    assert_eq!(DurationUnit::from_str("weeks").unwrap(), DurationUnit::Week);
 
     assert_eq!(DurationUnit::from_str("day").unwrap(), DurationUnit::Day);
-    assert_eq!(
-        DurationUnit::from_str("dAy").unwrap(),
-        DurationUnit::Day
-    );
-    assert_eq!(
-        DurationUnit::from_str("Day").unwrap(),
-        DurationUnit::Day
-    );
+    assert_eq!(DurationUnit::from_str("dAy").unwrap(), DurationUnit::Day);
+    assert_eq!(DurationUnit::from_str("Day").unwrap(), DurationUnit::Day);
     assert_ne!(DurationUnit::from_str("week").unwrap(), DurationUnit::Day);
 
-    assert_eq!(
-        DurationUnit::from_str("hr").unwrap(),
-        DurationUnit::Hour
-    );
-    assert_eq!(
-        DurationUnit::from_str("hour").unwrap(),
-        DurationUnit::Hour
-    );
-    assert_eq!(
-        DurationUnit::from_str("hours").unwrap(),
-        DurationUnit::Hour
-    );
+    assert_eq!(DurationUnit::from_str("hr").unwrap(), DurationUnit::Hour);
+    assert_eq!(DurationUnit::from_str("hour").unwrap(), DurationUnit::Hour);
+    assert_eq!(DurationUnit::from_str("hours").unwrap(), DurationUnit::Hour);
 
     assert_eq!(
         DurationUnit::from_str("minute").unwrap(),
@@ -120,13 +99,15 @@ fn test_from_str() {
         DurationUnit::from_str("minutes").unwrap(),
         DurationUnit::Minute
     );
-    assert_eq!(
-        DurationUnit::from_str("min").unwrap(),
-        DurationUnit::Minute
-    );
+    assert_eq!(DurationUnit::from_str("min").unwrap(), DurationUnit::Minute);
 
     assert_eq!(DurationUnit::from_str("s").unwrap(), DurationUnit::Second);
-    assert_eq!(DurationUnit::from_str("second").unwrap(), DurationUnit::Second);
-    assert_eq!(DurationUnit::from_str("seconds").unwrap(), DurationUnit::Second);
+    assert_eq!(
+        DurationUnit::from_str("second").unwrap(),
+        DurationUnit::Second
+    );
+    assert_eq!(
+        DurationUnit::from_str("seconds").unwrap(),
+        DurationUnit::Second
+    );
 }
-

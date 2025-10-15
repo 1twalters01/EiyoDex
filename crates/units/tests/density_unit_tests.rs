@@ -811,10 +811,7 @@ fn test_get_measurement_system() {
 
 #[test]
 fn test_get_mass_variant() {
-    assert_eq!(
-        DensityUnit::GramPerLiter.get_mass_variant(),
-        MassUnit::Gram,
-    );
+    assert_eq!(DensityUnit::GramPerLiter.get_mass_variant(), MassUnit::Gram,);
     assert_eq!(
         DensityUnit::KilogramPerPint.get_mass_variant(),
         MassUnit::Kilogram,
@@ -875,7 +872,16 @@ fn test_get_si_factor() {
 
 #[test]
 fn test_from_str() {
-    assert_eq!(DensityUnit::from_str("grams per liter").unwrap(), DensityUnit::GramPerLiter);
-    assert_eq!(DensityUnit::from_str("gram per liter").unwrap(), DensityUnit::GramPerLiter);
-    assert_eq!(DensityUnit::from_str("g/l").unwrap(), DensityUnit::GramPerLiter);
+    assert_eq!(
+        DensityUnit::from_str("grams per liter").unwrap(),
+        DensityUnit::GramPerLiter
+    );
+    assert_eq!(
+        DensityUnit::from_str("gram per liter").unwrap(),
+        DensityUnit::GramPerLiter
+    );
+    assert_eq!(
+        DensityUnit::from_str("g/l").unwrap(),
+        DensityUnit::GramPerLiter
+    );
 }
