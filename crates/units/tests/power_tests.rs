@@ -285,10 +285,98 @@ fn test_power_get_measurement_system() {
 }
 
 #[test]
-fn test_power_get_unit_type() {}
+fn test_power_get_unit_type() {
+    let value = 4.86;
+
+    assert_eq!(
+        Power::from_kcal_per_s(value).get_symbol(),
+        "kilocalorie per second"
+    );
+    assert_eq!(
+        Power::from_kcal_per_min(value).get_symbol(),
+        "kilocalorie per minute"
+    );
+    assert_eq!(
+        Power::from_kcal_per_hr(value).get_symbol(),
+        "kilocalorie per hour"
+    );
+    assert_eq!(
+        Power::from_kcal_per_day(value).get_symbol(),
+        "kilocalorie per day"
+    );
+    assert_eq!(
+        Power::from_kcal_per_week(value).get_symbol(),
+        "kilocalorie per week"
+    );
+
+    assert_eq!(
+        Power::from_kj_per_s(value).get_symbol(),
+        "kilojoule per second"
+    );
+    assert_eq!(
+        Power::from_kj_per_min(value).get_symbol(),
+        "kilojoule per minute"
+    );
+    assert_eq!(
+        Power::from_kj_per_hr(value).get_symbol(),
+        "kilojoule per hour"
+    );
+    assert_eq!(
+        Power::from_kj_per_day(value).get_symbol(),
+        "kilojoule per day"
+    );
+    assert_eq!(
+        Power::from_kj_per_week(value).get_symbol(),
+        "kilojoule per week"
+    );
+}
 
 #[test]
-fn test_power_get_unit_type_plural() {}
+fn test_power_get_unit_type_plural() {
+    let value = 4.86;
+
+    assert_eq!(
+        Power::from_kcal_per_s(value).get_symbol_plural(),
+        "kilocalories per second"
+    );
+    assert_eq!(
+        Power::from_kcal_per_min(value).get_symbol_plural(),
+        "kilocalories per minute"
+    );
+    assert_eq!(
+        Power::from_kcal_per_hr(value).get_symbol_plural(),
+        "kilocalories per hour"
+    );
+    assert_eq!(
+        Power::from_kcal_per_day(value).get_symbol_plural(),
+        "kilocalories per day"
+    );
+    assert_eq!(
+        Power::from_kcal_per_week(value).get_symbol_plural(),
+        "kilocalories per week"
+    );
+
+    assert_eq!(
+        Power::from_kj_per_s(value).get_symbol_plural(),
+        "kilojoules per second"
+    );
+    assert_eq!(
+        Power::from_kj_per_min(value).get_symbol_plural(),
+        "kilojoules per minute"
+    );
+    assert_eq!(
+        Power::from_kj_per_hr(value).get_symbol_plural(),
+        "kilojoules per hour"
+    );
+    assert_eq!(
+        Power::from_kj_per_day(value).get_symbol_plural(),
+        "kilojoules per day"
+    );
+    assert_eq!(
+        Power::from_kj_per_week(value).get_symbol_plural(),
+        "kilojoules per week"
+    );
+}
 
 #[test]
 fn test_power_to_string() {}
