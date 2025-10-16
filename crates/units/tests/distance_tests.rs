@@ -132,11 +132,6 @@ fn test_distance_to_fn() {
     let distance_m = Distance::from_m(value);
     let distance_cm = Distance::from_cm(new_value);
     let distance_m_to_cm = distance_m.to_cm();
-
-    print!(
-        "distance_centimeters1: {},\ndistance_centimeters2: {}",
-        distance_cm, distance_m_to_cm
-    );
     assert_eq!(distance_cm, distance_m_to_cm);
 }
 
