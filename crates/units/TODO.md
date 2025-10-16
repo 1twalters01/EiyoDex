@@ -6,7 +6,6 @@
     * Get an API for currency conversion
   * Create tests for
     * Currency
-    * Density
     * Specific currency
   * Write apis in Readme
   * Write doc comments
