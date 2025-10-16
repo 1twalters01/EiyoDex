@@ -204,10 +204,10 @@ fn test_density_rounding() {
     let density_manual = Density::new(5.68033, DensityUnit::KilogramPerPint);
     assert_eq!(density_rounded, density_manual);
 
-    let mut distance_new_2 = Density::new(value_2, DensityUnit::OuncePerPint);
-    let distance_rounded_2 = distance_new_2.round(5);
-    let distance_coded_2 = Density::new(147.20473, DensityUnit::OuncePerPint);
-    assert_eq!(distance_rounded_2, distance_coded_2);
+    let mut density_new_2 = Density::new(value_2, DensityUnit::OuncePerPint);
+    let density_rounded_2 = density_new_2.round(5);
+    let density_coded_2 = Density::new(147.20473, DensityUnit::OuncePerPint);
+    assert_eq!(density_rounded_2, density_coded_2);
 }
 
 #[test]
