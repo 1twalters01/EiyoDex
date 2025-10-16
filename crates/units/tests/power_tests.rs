@@ -485,4 +485,11 @@ fn test_power_sum() {
 }
 
 #[test]
-fn test_power_partial_order() {}
+fn test_power_partial_order() {
+    let power_1 = Power::from_kcal_per_hr(50f64);
+    let power_2 = Power::from_kj_per_day(6000f64);
+    let power_3 = Power::from_kcal_per_day(2000f64);
+    assert!(power_1 < power_2);
+    assert!(power_1 < power_3);
+    assert!(power_2 < power_3);
+}

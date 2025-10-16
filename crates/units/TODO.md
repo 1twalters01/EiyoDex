@@ -7,7 +7,6 @@
   * Create tests for
     * Currency
     * Density
-    * Power
     * Specific currency
   * Write apis in Readme
   * Write doc comments
