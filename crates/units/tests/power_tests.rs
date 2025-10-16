@@ -159,7 +159,51 @@ fn test_power_set_unit() {
 }
 
 #[test]
-fn test_power_get_symbol() {}
+fn test_power_get_symbol() {
+    let value = 4.86;
+
+    assert_eq!(
+        Power::from_kcal_per_s(value).get_symbol(),
+        "kcal/s"
+    );
+    assert_eq!(
+        Power::from_kcal_per_min(value).get_symbol(),
+        "kcal/min"
+    );
+    assert_eq!(
+        Power::from_kcal_per_hr(value).get_symbol(),
+        "kcal/hr"
+    );
+    assert_eq!(
+        Power::from_kcal_per_day(value).get_symbol(),
+        "kcal/day"
+    );
+    assert_eq!(
+        Power::from_kcal_per_week(value).get_symbol(),
+        "kcal/week"
+    );
+
+    assert_eq!(
+        Power::from_kj_per_s(value).get_symbol(),
+        "kj/s"
+    );
+    assert_eq!(
+        Power::from_kj_per_min(value).get_symbol(),
+        "kj/min"
+    );
+    assert_eq!(
+        Power::from_kj_per_hr(value).get_symbol(),
+        "kj/hr"
+    );
+    assert_eq!(
+        Power::from_kj_per_day(value).get_symbol(),
+        "kj/day"
+    );
+    assert_eq!(
+        Power::from_kj_per_week(value).get_symbol(),
+        "kj/week"
+    );
+}
 
 #[test]
 fn test_power_get_measurement_system() {
