@@ -85,8 +85,7 @@ struct DurationJson {
     si_factor: f64,
 }
 
-#[proc_macro]
-pub fn include_powers_from_json(input: TokenStream) -> TokenStream {
+pub fn generate(input: TokenStream) -> TokenStream {
     let mut power_all: HashMap<String, Power> = HashMap::new();
     let mut energy_data: HashMap<String, EnergyJson> = HashMap::new();
     let mut duration_data: HashMap<String, DurationJson> = HashMap::new();

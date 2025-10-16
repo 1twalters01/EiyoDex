@@ -511,5 +511,5 @@ pub fn fetch_unit_to_usd_exchange_rate_sync(
     }
 }
 
-use currency_macro::include_currencies_from_json;
+use units_macro::include_currencies_from_json;
 include_currencies_from_json!("data/units/currency");

@@ -237,5 +237,5 @@ impl PartialOrd for Volume {
     }
 }
 
-use volume_macro::include_volumes_from_json;
+use units_macro::include_volumes_from_json;
 include_volumes_from_json!("data/units/volume",);

@@ -377,30 +377,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "currency_macro"
-version = "0.1.0"
-dependencies = [
- "glob",
- "quote",
- "serde",
- "serde_json",
- "syn",
-]
-
-[[package]]
 name = "data_sync"
 version = "0.1.0"
-
-[[package]]
-name = "density_macro"
-version = "0.1.0"
-dependencies = [
- "glob",
- "quote",
- "serde",
- "serde_json",
- "syn",
-]
 
 [[package]]
 name = "der"
@@ -441,32 +419,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "distance_macro"
-version = "0.1.0"
-dependencies = [
- "glob",
- "quote",
- "serde",
- "serde_json",
- "syn",
-]
-
-[[package]]
 name = "dotenvy"
 version = "0.15.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b"
-
-[[package]]
-name = "duration_macro"
-version = "0.1.0"
-dependencies = [
- "glob",
- "quote",
- "serde",
- "serde_json",
- "syn",
-]
 
 [[package]]
 name = "either"
@@ -484,17 +440,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "75030f3c4f45dafd7586dd6780965a8c7e8e285a5ecb86713e63a79c5b2766f3"
 dependencies = [
  "cfg-if",
-]
-
-[[package]]
-name = "energy_macro"
-version = "0.1.0"
-dependencies = [
- "glob",
- "quote",
- "serde",
- "serde_json",
- "syn",
 ]
 
 [[package]]
@@ -1261,17 +1206,6 @@ name = "markdown"
 version = "0.1.0"
 
 [[package]]
-name = "mass_macro"
-version = "0.1.0"
-dependencies = [
- "glob",
- "quote",
- "serde",
- "serde_json",
- "syn",
-]
-
-[[package]]
 name = "md-5"
 version = "0.10.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1279,17 +1213,6 @@ checksum = "d89e7ee0cfbedfc4da3340218492196241d89eefb6dab27de5df917a6d2e78cf"
 dependencies = [
  "cfg-if",
  "digest",
-]
-
-[[package]]
-name = "measurement_system_macro"
-version = "0.1.0"
-dependencies = [
- "glob",
- "quote",
- "serde",
- "serde_json",
- "syn",
 ]
 
 [[package]]
@@ -1588,17 +1511,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "84df19adbe5b5a0782edcab45899906947ab039ccf4573713735ee7de1e6b08a"
 dependencies = [
  "zerovec",
-]
-
-[[package]]
-name = "power_macro"
-version = "0.1.0"
-dependencies = [
- "glob",
- "quote",
- "serde",
- "serde_json",
- "syn",
 ]
 
 [[package]]
@@ -2050,17 +1962,6 @@ checksum = "233504af464074f9d066d7b5416c5f9b894a5862a6506e306f7b816cdd6f1807"
 dependencies = [
  "libc",
  "windows-sys 0.59.0",
-]
-
-[[package]]
-name = "specific_currency_macro"
-version = "0.1.0"
-dependencies = [
- "glob",
- "quote",
- "serde",
- "serde_json",
- "syn",
 ]
 
 [[package]]
@@ -2620,19 +2521,21 @@ name = "units"
 version = "0.1.0"
 dependencies = [
  "chrono",
- "currency_macro",
- "density_macro",
- "distance_macro",
- "duration_macro",
- "energy_macro",
- "mass_macro",
- "measurement_system_macro",
- "power_macro",
  "reqwest",
  "serde",
- "specific_currency_macro",
+ "units_macro",
  "utils",
- "volume_macro",
+]
+
+[[package]]
+name = "units_macro"
+version = "0.1.0"
+dependencies = [
+ "glob",
+ "quote",
+ "serde",
+ "serde_json",
+ "syn",
 ]
 
 [[package]]
@@ -2716,17 +2619,6 @@ name = "version_check"
 version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
-
-[[package]]
-name = "volume_macro"
-version = "0.1.0"
-dependencies = [
- "glob",
- "quote",
- "serde",
- "serde_json",
- "syn",
-]
 
 [[package]]
 name = "want"

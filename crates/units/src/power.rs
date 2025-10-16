@@ -360,7 +360,7 @@ impl PartialOrd for Power {
     }
 }
 
-use power_macro::include_powers_from_json;
+use units_macro::include_powers_from_json;
 include_powers_from_json!(
     EnergyUnit => "data/units/energy",
     PowerUnit => "data/units/power",

@@ -237,5 +237,5 @@ impl PartialOrd for Distance {
     }
 }
 
-use distance_macro::include_distances_from_json;
+use units_macro::include_distances_from_json;
 include_distances_from_json!("data/units/distance",);

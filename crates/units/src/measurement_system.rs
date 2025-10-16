@@ -16,7 +16,7 @@ macro_rules! define_measurement_systems {
     };
 }
 
-use measurement_system_macro::include_measurement_systems_from_json;
+use units_macro::include_measurement_systems_from_json;
 include_measurement_systems_from_json!(
     MassUnit => "data/units/mass",
     VolumeUnit => "data/units/volume",

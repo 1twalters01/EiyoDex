@@ -15,8 +15,7 @@ struct CurrencyJson {
     unit_type_plural: String,
 }
 
-#[proc_macro]
-pub fn include_currencies_from_json(input: TokenStream) -> TokenStream {
+pub fn generate(input: TokenStream) -> TokenStream {
     let mut currencies: HashMap<String, CurrencyJson> = HashMap::new();
 
     let file_paths = syn::parse_macro_input!(input with syn::punctuated::Punctuated::<LitStr, syn::Token![,]>::parse_terminated);

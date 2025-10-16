@@ -86,8 +86,7 @@ struct VolumeJson {
     si_factor: f64,
 }
 
-#[proc_macro]
-pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
+pub fn generate(input: TokenStream) -> TokenStream {
     let mut density_all: HashMap<String, Density> = HashMap::new();
     let mut mass_data: HashMap<String, MassJson> = HashMap::new();
     let mut volume_data: HashMap<String, VolumeJson> = HashMap::new();

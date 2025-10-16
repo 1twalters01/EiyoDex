@@ -8,7 +8,7 @@ use std::{collections::HashMap, env, fs, path::Path};
 use syn::LitStr;
 
 #[derive(Debug, Deserialize)]
-struct VolumeJson {
+struct MassJson {
     identifier: String,
     symbol: String,
     unit_type: String,
@@ -17,9 +17,8 @@ struct VolumeJson {
     si_factor: f64,
 }
 
-#[proc_macro]
-pub fn include_volumes_from_json(input: TokenStream) -> TokenStream {
-    let mut volumes: HashMap<String, VolumeJson> = HashMap::new();
+pub fn generate(input: TokenStream) -> TokenStream {
+    let mut masses: HashMap<String, MassJson> = HashMap::new();
 
     let file_paths = syn::parse_macro_input!(input with syn::punctuated::Punctuated::<LitStr, syn::Token![,]>::parse_terminated);
     for file_path_lit in file_paths.iter() {
@@ -40,16 +39,16 @@ pub fn include_volumes_from_json(input: TokenStream) -> TokenStream {
             let file_content = fs::read_to_string(&full_path)
                 .unwrap_or_else(|_| panic!("Unable to read file: {}", full_path.display()));
 
-            let json_results: HashMap<String, VolumeJson> =
+            let json_results: HashMap<String, MassJson> =
                 serde_json::from_str(&file_content).expect("Invalid JSON format");
 
             for (key, value) in json_results {
-                volumes.insert(key, value);
+                masses.insert(key, value);
             }
         }
     }
 
-    let variants = volumes.iter().map(|(key, data)| {
+    let variants = masses.iter().map(|(key, data)| {
         let variant = format_ident!("{}", key);
         let from_fn_name = format_ident!("from_{}", data.identifier);
         let as_fn_name = format_ident!("as_{}", data.identifier);
@@ -83,7 +82,7 @@ pub fn include_volumes_from_json(input: TokenStream) -> TokenStream {
     });
 
     let expanded = quote! {
-        define_volumes! {
+        define_masses! {
             #(#variants),*
         }
     };

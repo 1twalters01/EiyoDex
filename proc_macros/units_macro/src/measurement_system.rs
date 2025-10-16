@@ -68,8 +68,7 @@ struct DurationJson {
     measurement_system: String,
 }
 
-#[proc_macro]
-pub fn include_measurement_systems_from_json(input: TokenStream) -> TokenStream {
+pub fn generate(input: TokenStream) -> TokenStream {
     let mut measurement_systems = HashSet::new();
 
     let parsed_input = syn::parse_macro_input!(input as EnumSourceGroup);

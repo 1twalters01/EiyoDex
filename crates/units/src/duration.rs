@@ -257,5 +257,5 @@ impl PartialOrd for DurationWrapper {
     }
 }
 
-use duration_macro::include_durations_from_json;
+use units_macro::include_durations_from_json;
 include_durations_from_json!("data/units/duration");

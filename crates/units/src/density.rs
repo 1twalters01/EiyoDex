@@ -355,7 +355,7 @@ impl PartialOrd for Density {
     }
 }
 
-use density_macro::include_densities_from_json;
+use units_macro::include_densities_from_json;
 include_densities_from_json!(
     DensityUnit => "data/units/density",
     MassUnit => "data/units/mass",

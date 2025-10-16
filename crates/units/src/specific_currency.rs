@@ -102,7 +102,7 @@ macro_rules! define_specific_currencies {
             measurement_system::MeasurementSystem,
             mass::{ Mass, MassUnit },
             volume::{ Volume, VolumeUnit },
-            density::Density,
+            density::{ Density, DensityUnit },
         };
 
         #[derive(PartialEq)]
@@ -541,9 +541,7 @@ impl PartialOrd for SpecificCurrency {
     }
 }
 
-use specific_currency_macro::include_specific_currencies_from_json;
-
-use crate::density::DensityUnit;
+use units_macro::include_specific_currencies_from_json;
 include_specific_currencies_from_json!(
     CurrencyUnit => "data/units/currency",
     VolumeUnit => "data/units/volume",

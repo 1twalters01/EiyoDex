@@ -241,5 +241,5 @@ impl PartialOrd for Energy {
     }
 }
 
-use energy_macro::include_energies_from_json;
+use units_macro::include_energies_from_json;
 include_energies_from_json!("data/units/energy");

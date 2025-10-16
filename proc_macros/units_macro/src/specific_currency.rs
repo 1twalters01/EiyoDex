@@ -78,8 +78,7 @@ struct DenominatorJson {
     si_factor: f64,
 }
 
-#[proc_macro]
-pub fn include_specific_currencies_from_json(input: TokenStream) -> TokenStream {
+pub fn generate(input: TokenStream) -> TokenStream {
     let mut specific_currency_all: HashMap<String, SpecificCurrency> = HashMap::new();
     let mut specific_currency: HashMap<String, SpecificCurrency> = HashMap::new();
     let mut specific_currency_mass: HashMap<String, SpecificCurrency> = HashMap::new();
