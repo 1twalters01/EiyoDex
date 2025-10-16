@@ -162,7 +162,83 @@ fn test_power_set_unit() {
 fn test_power_get_symbol() {}
 
 #[test]
-fn test_power_get_measurement_system() {}
+fn test_power_get_measurement_system() {
+    let value = 4.86;
+    let metric_energy_measurement_system = MeasurementSystem::Metric;
+    let si_duration_measurement_system = MeasurementSystem::SI;
+
+    assert_eq!(
+        Power::from_kcal_per_s(value).get_measurement_system(),
+        PowerMeasurementSystem::new(
+            metric_energy_measurement_system,
+            si_duration_measurement_system
+        )
+    );
+    assert_eq!(
+        Power::from_kcal_per_min(value).get_measurement_system(),
+        PowerMeasurementSystem::new(
+            metric_energy_measurement_system,
+            si_duration_measurement_system
+        )
+    );
+    assert_eq!(
+        Power::from_kcal_per_hr(value).get_measurement_system(),
+        PowerMeasurementSystem::new(
+            metric_energy_measurement_system,
+            si_duration_measurement_system
+        )
+    );
+    assert_eq!(
+        Power::from_kcal_per_day(value).get_measurement_system(),
+        PowerMeasurementSystem::new(
+            metric_energy_measurement_system,
+            si_duration_measurement_system
+        )
+    );
+    assert_eq!(
+        Power::from_kcal_per_week(value).get_measurement_system(),
+        PowerMeasurementSystem::new(
+            metric_energy_measurement_system,
+            si_duration_measurement_system
+        )
+    );
+
+    assert_eq!(
+        Power::from_kj_per_s(value).get_measurement_system(),
+        PowerMeasurementSystem::new(
+            metric_energy_measurement_system,
+            si_duration_measurement_system
+        )
+    );
+    assert_eq!(
+        Power::from_kj_per_min(value).get_measurement_system(),
+        PowerMeasurementSystem::new(
+            metric_energy_measurement_system,
+            si_duration_measurement_system
+        )
+    );
+    assert_eq!(
+        Power::from_kj_per_hr(value).get_measurement_system(),
+        PowerMeasurementSystem::new(
+            metric_energy_measurement_system,
+            si_duration_measurement_system
+        )
+    );
+    assert_eq!(
+        Power::from_kj_per_day(value).get_measurement_system(),
+        PowerMeasurementSystem::new(
+            metric_energy_measurement_system,
+            si_duration_measurement_system
+        )
+    );
+    assert_eq!(
+        Power::from_kj_per_week(value).get_measurement_system(),
+        PowerMeasurementSystem::new(
+            metric_energy_measurement_system,
+            si_duration_measurement_system
+        )
+    );
+}
 
 #[test]
 fn test_power_get_unit_type() {}
