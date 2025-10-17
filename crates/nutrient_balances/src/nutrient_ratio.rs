@@ -1,4 +1,4 @@
-use nutrients::nutrient::NutrientAmount;
+use nutrients::nutrient_amount::NutrientAmount;
 use utils::base_types::Percentage;
 
 pub struct NutrientRatio {

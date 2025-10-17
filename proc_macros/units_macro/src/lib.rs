@@ -1,13 +1,13 @@
-mod measurement_system;
-mod mass;
-mod volume;
-mod energy;
-mod distance;
-mod duration;
 mod currency;
 mod density;
+mod distance;
+mod duration;
+mod energy;
+mod mass;
+mod measurement_system;
 mod power;
 mod specific_currency;
+mod volume;
 
 use proc_macro::TokenStream;
 
@@ -60,4 +60,3 @@ pub fn include_powers_from_json(input: TokenStream) -> TokenStream {
 pub fn include_specific_currencies_from_json(input: TokenStream) -> TokenStream {
     specific_currency::generate(input)
 }
-

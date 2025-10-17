@@ -1,4 +1,4 @@
-use nutrients::nutrient::{Nutrient, Unit};
+use nutrients::{nutrient::Nutrient, units::NutrientUnit};
 use units::mass::MassUnit;
 use uuid::Uuid;
 
@@ -9,8 +9,8 @@ fn test_new_nutrient() {
     let name = String::from("Potassium");
     let name2 = String::from("Calcium");
     let description = "Test description".to_string();
-    let main_unit = Unit::Mass(MassUnit::Milligram);
-    let main_unit2 = Unit::Mass(MassUnit::Microgram);
+    let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
+    let main_unit2 = NutrientUnit::Mass(MassUnit::Microgram);
 
     let mut nutrient = Nutrient::new(id, name.clone(), main_unit);
 
@@ -37,7 +37,7 @@ fn test_new_nutrient() {
 fn test_from_nutrient() {
     let id: Uuid = Uuid::from_u128(0xa1a2a3a4b1b2c1c2d1d2d3d4d5d6d7d8u128);
     let name = String::from("Potassium");
-    let main_unit = Unit::Mass(MassUnit::Milligram);
+    let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
 
     let nutrient = Nutrient::new(Some(id), name.clone(), main_unit);
 

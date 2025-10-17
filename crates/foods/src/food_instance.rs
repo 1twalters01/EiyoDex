@@ -1,5 +1,5 @@
 use crate::sources::DataSource;
-use nutrients::nutrient::{NutrientAmount, Unit};
+use nutrients::{nutrient_amount::NutrientAmount, units::NutrientUnit};
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
 use units::energy::Energy;
 use uuid::Uuid;
@@ -207,7 +207,7 @@ impl FoodInstance {
                     if nutrient.get_nutrient().borrow().get_name() == "Calories" {
                         let unit = nutrient.get_nutrient().borrow().get_main_unit();
                         match unit {
-                            Unit::Energy(energy_unit) => {
+                            NutrientUnit::Energy(energy_unit) => {
                                 energy = Energy::new(nutrient.get_value(), energy_unit);
                                 break;
                             }

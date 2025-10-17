@@ -1,55 +1,63 @@
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Energy {
-    Carbohydrates(Carbohydrates),
-    Proteins(Proteins),
-    Lipids(Lipids),
+    Carbohydrate(Carbohydrate),
+    Protein(Protein),
+    Lipid(Lipid),
     Alcohol,
 }
 
+impl Energy {
+    pub fn use_in_net_carbs(&self) -> bool {
+        match self {
+            Self::Carbohydrate(carbohydrate) => carbohydrate.use_in_net_carbs(),
+            _ => false,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub enum Carbohydrates {
+pub enum Carbohydrate {
     Fiber,
     Starch,
     Sugar,
-    SugarAlcohols,
+    SugarAlcohol,
     AddedSugar,
 }
 
-impl Carbohydrates {
-    pub fn use_in_net_calculation(&self) -> bool {
+impl Carbohydrate {
+    pub fn use_in_net_carbs(&self) -> bool {
         match self {
-            Carbohydrates::Fiber => false,
-            Carbohydrates::SugarAlcohols => false,
+            Carbohydrate::Fiber | Carbohydrate::SugarAlcohol => false,
             _ => true,
         }
     }
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub enum Proteins {
-    EssentialAminoAcids,
-    ConditionallyEssentialAminoAcids,
-    NonEssentialAminoAcids,
+pub enum Protein {
+    EssentialAminoAcid,
+    ConditionallyEssentialAminoAcid,
+    NonEssentialAminoAcid,
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub enum Lipids {
-    Fats(Fats),
-    TransFats(TransFats),
+pub enum Lipid {
+    Fats(Fat),
+    TransFats(TransFat),
     Cholesterol,
     Phytosterol,
-    Phospholipids,
+    Phospholipid,
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub enum Fats {
+pub enum Fat {
     Monounsaturated,
     Polyunsaturated,
     Saturated,
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub enum TransFats {
+pub enum TransFat {
     Natural,
     Artificial,
 }
