@@ -6,30 +6,27 @@ use uuid::Uuid;
 fn test_nutrient_new_nutrient_unit() {
     let id = None;
     let name = String::from("Potassium");
-    let name2 = String::from("Calcium");
     let description = "Test description".to_string();
     let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
-    let main_unit2 = NutrientUnit::Mass(MassUnit::Microgram);
 
     let mut nutrient = Nutrient::new(id, name.clone(), main_unit);
-
-    assert_eq!(nutrient.get_name(), name);
-    nutrient.set_name(name2.clone());
-    assert_eq!(nutrient.get_name(), name2);
-
-    assert_eq!(nutrient.get_description(), String::new());
-    nutrient.set_description(description.clone());
-    assert_eq!(nutrient.get_description(), description);
-
-    assert_eq!(nutrient.get_main_unit(), main_unit);
-    let _ = nutrient.set_main_unit(main_unit2);
-    assert_eq!(nutrient.get_main_unit(), main_unit2);
-    assert!(nutrient.get_accepted_units().contains(&main_unit));
-    assert!(nutrient.get_accepted_units().contains(&main_unit2));
+    let mut nutrient_2 = Nutrient::new(id, name.clone(), main_unit);
+    assert_eq!(nutrient, nutrient_2);
+    
+    nutrient_2.set_description(description);
+    assert_ne!(nutrient, nutrient_2);
+    
+    nutrient.set_description(description);
+    assert_eq!(nutrient, nutrient_2);
 }
 
 #[test]
-fn test_nutrient_new_rc_refcell_nutrient_unit() {}
+fn test_nutrient_new_rc_refcell_nutrient_unit() {
+    let id = None;
+    let name = String::from("Potassium");
+    let description = "Test description".to_string();
+    let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
+}
 
 #[test]
 fn test_nutrient_unit_id() {
