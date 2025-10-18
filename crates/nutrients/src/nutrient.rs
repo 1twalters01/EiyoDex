@@ -224,6 +224,10 @@ impl Nutrient {
     }
 
     pub fn set_main_unit(&mut self, main_unit: NutrientUnit) -> Result<(), &'static str> {
+        if self.main_unit == main_unit {
+            return Ok(());
+        }
+     
         if self.accepted_units.contains(&main_unit) {
             self.main_unit = main_unit;
             return Ok(());
@@ -233,6 +237,14 @@ impl Nutrient {
             NutrientUnit::Mass(_) => {
                 if let NutrientUnit::Mass(_) = main_unit {
                     let mass_units = MassUnit::get_enumerations();
+                    self.unit_conversions.extend(
+                        mass_enums
+                            .iter()
+                            .map(|mass_enum| UnitConversion {
+                                unit: NutrientUnit::Mass(*mass_enum)),
+                                main_unit: main_unit,
+                                unit_to_main_unit_factor: mass_enum.si_factor() / mass_unit.si_factor(),
+                            });
                     self.accepted_units.extend(
                         mass_units
                             .iter()
@@ -244,14 +256,40 @@ impl Nutrient {
             }
             NutrientUnit::Volume(_) => {
                 if let NutrientUnit::Volume(_) = main_unit {
-                    self.accepted_units.insert(main_unit);
+                    let volume_units = VolumeUnit::get_enumerations();
+                    self.unit_conversions.extend(
+                        volume_enums
+                            .iter()
+                            .map(|volume_enum| UnitConversion {
+                                unit: NutrientUnit::Volume(*volume_enum)),
+                                main_unit: main_unit,
+                                unit_to_main_unit_factor: volume_enum.si_factor() / volume_unit.si_factor(),
+                            });
+                    self.accepted_units.extend(
+                        mass_units
+                            .iter()
+                            .map(|mass_enum| NutrientUnit::Mass(*mass_enum)),
+                    );
                     self.main_unit = main_unit;
                     return Ok(());
                 }
             }
             NutrientUnit::Energy(_) => {
                 if let NutrientUnit::Energy(_) = main_unit {
-                    self.accepted_units.insert(main_unit);
+                    let energy_units = EnergyUnit::get_enumerations();
+                    self.unit_conversions.extend(
+                        energy_enums
+                            .iter()
+                            .map(|energy_enum| UnitConversion {
+                                unit: NutrientUnit::Energy(*energy_enum)),
+                                main_unit: main_unit,
+                                unit_to_main_unit_factor: energy_enum.si_factor() / energy_unit.si_factor(),
+                            });
+                    self.accepted_units.extend(
+                        energy_units
+                            .iter()
+                            .map(|energy_enum| NutrientUnit::Energy(*energy_enum)),
+                    );
                     self.main_unit = main_unit;
                     return Ok(());
                 }
