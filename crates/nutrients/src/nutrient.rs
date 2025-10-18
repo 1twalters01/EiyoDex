@@ -1,7 +1,7 @@
-use std::{
+ use std::{
     cell::RefCell,
     collections::{BTreeMap, BTreeSet, HashSet},
-    rc::Rc,
+    rc::{Rc, Weak},
 };
 use uuid::Uuid;
 
@@ -13,6 +13,12 @@ use units::{
 
 use crate::{schema::nutrients::NutrientType, units::NutrientUnit};
 
+pub struct UnitConversion {
+    unit: NutrientUnit,
+    main_unit: NutrientUnit,
+    unit_to_main_unit_factor: f64,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Nutrient {
     id: Uuid,
@@ -21,14 +27,71 @@ pub struct Nutrient {
     categories: HashSet<NutrientType>,
     main_unit: NutrientUnit,
     accepted_units: BTreeSet<NutrientUnit>,
-    unit_conversions: BTreeMap<(NutrientUnit, NutrientUnit), f64>,
-    parent_uuids: Vec<Uuid>,
-    child_uuids: Vec<Uuid>,
+    unit_conversions: BTreeSet<UnitConversion>,
+    parent_uuids: Vec<Weak<Refcell>>,
+    child_uuids: Vec<Rc<Refcell>>,
 }
 
 impl Nutrient {
     pub fn new(id: Option<Uuid>, name: String, main_unit: NutrientUnit) -> Self {
         let id = id.unwrap_or_else(Uuid::new_v4);
+        let (unit_conversions, accepted_units): (BTreeSet<UnitConversion>, BTreeSet<NutrientUnit>) = match main_unit {
+            NutrientUnit::Mass(mass_unit) => {
+                let mass_enums = MassUnit::get_enumerations();
+                let unit_conversions: BTreeSet<UnitConversion> = mass_enums
+                    .iter()
+                    .map(|mass_enum| UnitConversion {
+                        unit: NutrientUnit::Mass(*mass_enum)),
+                        main_unit: main_unit,
+                        unit_to_main_unit_factor: mass_enum.si_factor() / mass_unit.si_factor(),
+                    .collect::BTreeSet<UnitConversion>();
+                let accepted_units = unit_conversions
+                    .iter()
+                    .map(|unit_conversion| unit_conversion.unit)
+                    .collect::BTreeSet<NutrientUnit>();
+                (unit_conversions, accepted_units)
+            },
+            NutrientUnit::Volume(volume_unit) => {
+                let volume_enums = VolumeUnit::get_enumerations();
+                let unit_conversions: BTreeSet<UnitConversion> = volume_enums
+                    .iter()
+                    .map(|mass_enum| UnitConversion {
+                        unit: NutrientUnit::Volume(*volume_enum)),
+                        main_unit: main_unit,
+                        unit_to_main_unit_factor: volume_enum.si_factor() / volume_unit.si_factor(),
+                    .collect::BTreeSet<UnitConversion>();
+                let accepted_units = unit_conversions
+                    .iter()
+                    .map(|unit_conversion| unit_conversion.unit)
+                    .collect::BTreeSet<NutrientUnit>();
+                (unit_conversions, accepted_units)
+            },
+            NutrientUnit::Energy(energy_unit) => {
+                let energy_enums = EnergyUnit::get_enumerations();
+                let unit_conversions: BTreeSet<UnitConversion> = energy_enums
+                    .iter()
+                    .map(|energy_enum| UnitConversion {
+                        unit: NutrientUnit::Energy(*energy_enum)),
+                        main_unit: main_unit,
+                        unit_to_main_unit_factor: energy_enum.si_factor() / energy_unit.si_factor(),
+                    .collect::BTreeSet<UnitConversion>();
+                let accepted_units = unit_conversions
+                    .iter()
+                    .map(|unit_conversion| unit_conversion.unit)
+                    .collect::BTreeSet<NutrientUnit>();
+                (unit_conversions, accepted_units)
+            },
+            _ => {
+                let unit_conversions = BTreeSet::from(
+                    UnitConversion {
+                        unit: main_unit,
+                        main_unit: main_unit,
+                        unit_to_main_unit_factor: 1f64,
+                    }
+                );
+                let accepted_units = BTreeSet::from(main_unit);
+                (unit_conversions, accepted_units)
+        };
 
         Nutrient {
             id,
@@ -37,7 +100,7 @@ impl Nutrient {
             categories: HashSet::new(),
             main_unit,
             accepted_units: BTreeSet::from([main_unit]),
-            unit_conversions: BTreeMap::new(),
+            unit_conversions: unit_conversions,
             parent_uuids: Vec::new(),
             child_uuids: Vec::new(),
         }
@@ -49,15 +112,72 @@ impl Nutrient {
         main_unit: NutrientUnit,
     ) -> Rc<RefCell<Self>> {
         let id = id.unwrap_or_else(Uuid::new_v4);
-
+        let (unit_conversions, accepted_units): (BTreeSet<UnitConversion>, BTreeSet<NutrientUnit>) = match main_unit {
+            NutrientUnit::Mass(mass_unit) => {
+                let mass_enums = MassUnit::get_enumerations();
+                let unit_conversions: BTreeSet<UnitConversion> = mass_enums
+                    .iter()
+                    .map(|mass_enum| UnitConversion {
+                        unit: NutrientUnit::Mass(*mass_enum)),
+                        main_unit: main_unit,
+                        unit_to_main_unit_factor: mass_enum.si_factor() / mass_unit.si_factor(),
+                    .collect::BTreeSet<UnitConversion>();
+                let accepted_units = unit_conversions
+                    .iter()
+                    .map(|unit_conversion| unit_conversion.unit)
+                    .collect::BTreeSet<NutrientUnit>();
+                (unit_conversions, accepted_units)
+            },
+            NutrientUnit::Volume(volume_unit) => {
+                let volume_enums = VolumeUnit::get_enumerations();
+                let unit_conversions: BTreeSet<UnitConversion> = volume_enums
+                    .iter()
+                    .map(|mass_enum| UnitConversion {
+                        unit: NutrientUnit::Volume(*volume_enum)),
+                        main_unit: main_unit,
+                        unit_to_main_unit_factor: volume_enum.si_factor() / volume_unit.si_factor(),
+                    .collect::BTreeSet<UnitConversion>();
+                let accepted_units = unit_conversions
+                    .iter()
+                    .map(|unit_conversion| unit_conversion.unit)
+                    .collect::BTreeSet<NutrientUnit>();
+                (unit_conversions, accepted_units)
+            },
+            NutrientUnit::Energy(energy_unit) => {
+                let energy_enums = EnergyUnit::get_enumerations();
+                let unit_conversions: BTreeSet<UnitConversion> = energy_enums
+                    .iter()
+                    .map(|energy_enum| UnitConversion {
+                        unit: NutrientUnit::Energy(*energy_enum)),
+                        main_unit: main_unit,
+                        unit_to_main_unit_factor: energy_enum.si_factor() / energy_unit.si_factor(),
+                    .collect::BTreeSet<UnitConversion>();
+                let accepted_units = unit_conversions
+                    .iter()
+                    .map(|unit_conversion| unit_conversion.unit)
+                    .collect::BTreeSet<NutrientUnit>();
+                (unit_conversions, accepted_units)
+            },
+            _ => {
+                let unit_conversions = BTreeSet::from(
+                    UnitConversion {
+                        unit: main_unit,
+                        main_unit: main_unit,
+                        unit_to_main_unit_factor: 1f64,
+                    }
+                );
+                let accepted_units = BTreeSet::from(main_unit);
+                (unit_conversions, accepted_units)
+        };
+        
         Rc::new(RefCell::new(Nutrient {
             id,
             name,
             description: String::new(),
             categories: HashSet::new(),
             main_unit,
-            accepted_units: BTreeSet::from([main_unit]),
-            unit_conversions: BTreeMap::new(),
+            accepted_units: accepted_units,
+            unit_conversions: unit_conversions,
             parent_uuids: Vec::new(),
             child_uuids: Vec::new(),
         }))
