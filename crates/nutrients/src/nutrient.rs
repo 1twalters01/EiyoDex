@@ -103,7 +103,7 @@ impl Nutrient {
         self.main_unit
     }
 
-    pub fn set_main_unit(&mut self, main_unit: NutrientUnit) -> Result<(), String> {
+    pub fn set_main_unit(&mut self, main_unit: NutrientUnit) -> Result<(), &'static str> {
         if self.accepted_units.contains(&main_unit) {
             self.main_unit = main_unit;
             return Ok(());
@@ -112,15 +112,18 @@ impl Nutrient {
         match self.main_unit {
             NutrientUnit::Mass(_) => {
                 if let NutrientUnit::Mass(_) = main_unit {
-                    self.accepted_units.remove(&self.main_unit);
-                    self.accepted_units.insert(main_unit);
+                    let mass_units = MassUnit::get_enumerations();
+                    self.accepted_units.extend(
+                        mass_units
+                            .iter()
+                            .map(|mass_enum| NutrientUnit::Mass(*mass_enum)),
+                    );
                     self.main_unit = main_unit;
                     return Ok(());
                 }
             }
             NutrientUnit::Volume(_) => {
                 if let NutrientUnit::Volume(_) = main_unit {
-                    self.accepted_units.remove(&self.main_unit);
                     self.accepted_units.insert(main_unit);
                     self.main_unit = main_unit;
                     return Ok(());
@@ -128,16 +131,15 @@ impl Nutrient {
             }
             NutrientUnit::Energy(_) => {
                 if let NutrientUnit::Energy(_) = main_unit {
-                    self.accepted_units.remove(&self.main_unit);
                     self.accepted_units.insert(main_unit);
                     self.main_unit = main_unit;
                     return Ok(());
                 }
             }
-            _ => return Err(String::from("New main unit not in accepted units")),
+            _ => return Err("New main unit not in accepted units"),
         }
 
-        Err(String::from("New main unit not in accepted units"))
+        Err("New main unit not in accepted units")
     }
 
     pub fn get_accepted_units(&self) -> BTreeSet<NutrientUnit> {
@@ -181,6 +183,10 @@ impl Nutrient {
             }
         }
         accepted_units
+    }
+
+    pub fn push_to_accepted_units(&mut self, accepted_unit: NutrientUnit) {
+        self.accepted_units.insert(accepted_unit);
     }
 
     pub fn convert(&self, value: f64, from: NutrientUnit, to: NutrientUnit) -> Result<f64, String> {
