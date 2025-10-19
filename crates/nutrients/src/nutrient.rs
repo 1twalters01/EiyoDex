@@ -210,6 +210,10 @@ impl Nutrient {
         self.categories.insert(category);
     }
 
+    pub fn extend_category(&mut self, categories: Vec<NutrientType>) {
+        self.categories.extend(categories);
+    }
+
     pub fn get_main_unit(&self) -> NutrientUnit {
         self.main_unit
     }
@@ -218,7 +222,8 @@ impl Nutrient {
         if self.main_unit == main_unit {
             return Ok(());
         }
-     
+
+        self.update_accepted_units(main_unit);
         let accepted_units = self.get_accepted_units();
         if accepted_units.contains(&main_unit) {
             self.main_unit = main_unit;
@@ -229,7 +234,12 @@ impl Nutrient {
     }
 
     pub fn get_accepted_units(&mut self) -> BTreeSet<NutrientUnit> {
-        let accepted_units = self.unit_conversions.iter().map(|conversion| conversion.unit).collect();
+        self.unit_conversions.iter().map(|conversion| conversion.unit).collect()
+    }
+
+    // update this to take in a main unit and use this for calculations
+    pub fn update_accepted_units(&mut self) {
+        let accepted_units = self.get_accepted_units();
 
         let contains_mass = accepted_units.iter().any(|unit| matches!(unit, NutrientUnit::Mass(_)));
         if contains_mass {
@@ -344,8 +354,6 @@ impl Nutrient {
                 }
             }
         }
-
-        return accepted_units
     }
 
     pub fn convert(&self, value: f64, from: NutrientUnit, to: NutrientUnit) -> Result<f64, String> {
@@ -385,114 +393,87 @@ impl Nutrient {
         }
     }
 
-    pub fn remove_conversion(&mut self, from: NutrientUnit, to: NutrientUnit) {
-        self.unit_conversions.remove(&(from, to));
-
-        let (mut found_from, mut found_to) = (false, false);
-        for (key, _) in &self.unit_conversions {
-            if key.0 == from || key.1 == from {
-                found_from = true;
-            }
-            if key.0 == to || key.1 == to {
-                found_to = true;
-            }
+    pub fn remove_conversion(&mut self, unit: NutrientUnit) -> Result<(), &'static> {
+        if unit == main_unit {
+            return Err("Cannot remove a conversion if it is the main unit")
         }
 
-        if found_from == false {
-            self.accepted_units.remove(&from);
-        }
-        if found_to == false {
-            self.accepted_units.remove(&to);
+        self.unit_conversions.remove(&UnitConversion { unit, main_unit: self.main_unit });
+
+        match unit {
+            NutrientUnit::Mass(_) => {
+                let all_masses = MassUnit::get_enumerations();
+                all_masses.iter().foreach(|mass_unit| self.unit_conversions.remove(&UnitConversion { 
+                    unit: NutrientUnit::Mass(mass_unit),
+                    main_unit: self.main_unit
+                }));
+            },
+            NutrientUnit::Volume(volume_unit) => {
+                let all_volumes = VolumeUnit::get_enumerations();
+                all_volumes.iter().foreach(|volume_unit| self.unit_conversions.remove(&UnitConversion {
+                    unit: NutrientUnit::Volume(volume_unit),
+                    main_unit: self.main_unit
+                }));
+            },
+            NutrientUnit::Energy(energy_unit) => {
+                let all_energies = EnergyUnit::get_enumerations();
+                all_energies.iter().foreach(|energy_unit| self.unit_conversions.remove(&UnitConversion {
+                    unit: NutrientUnit::Energy(energy_unit),
+                    main_unit: self.main_unit
+                }));
+            },
         }
     }
 
     pub fn add_conversion(
         &mut self,
-        from: NutrientUnit,
-        to: NutrientUnit,
-        factor: f64,
+        unit: NutrientUnit,
+        factor: Option<f64>,
     ) -> Result<(), String> {
-        if factor == 0 as f64 {
-            return Err(String::from("Conversion factor may not equal 0"));
+        match unit {
+            NutrientUnit::Mass(mass_unit) => {
+                MassUnit::get_enumerations()
+                    .iter()
+                    .foreach(|mass_unit| {
+                        self.unit_conversions.extend(UnitConversion {
+                            unit: NutrientUnit::Mass(mass_unit),
+                            main_unit: self.main_unit,
+                        })
+                    })
+            },
+            NutrientUnit::Volume(volume_unit) => {
+                VolumeUnit::get_enumerations()
+                    .iter()
+                    .foreach(|volume_unit| {
+                        self.unit_conversions.extend(UnitConversion {
+                            unit: NutrientUnit::Volume(volume_unit),
+                            main_unit: self.main_unit,
+                        })
+                    })
+            },
+            NutrientUnit::Energy(energy_unit) => {
+                EnergyUnit::get_enumerations()
+                    .iter()
+                    .foreach(|energy_unit| {
+                        self.unit_conversions.extend(UnitConversion {
+                            unit: NutrientUnit::Energy(energy_unit),
+                            main_unit: self.main_unit,
+                        })
+                    })
+            },
+            _ => {
+                match factor {
+                    Some(factor) => self.unit_conversions.insert(
+                        &UnitConversion {
+                            unit,
+                            main_unit: self.main_unit,
+                        },
+                        factor,
+                        ),
+                    None => Err("No unit to main unit factor was given")
+                }
+            }
         }
-
-        let (from_unit, from_factor): (NutrientUnit, f64) = match from {
-            NutrientUnit::Mass(mass_unit) => {
-                let _ = MassUnit::get_enumerations()
-                    .iter()
-                    .map(|mass_unit| self.accepted_units.insert(NutrientUnit::Mass(*mass_unit)));
-
-                let mass = Mass::new(1 as f64, mass_unit);
-                (NutrientUnit::Mass(MassUnit::Gram), mass.as_g())
-            }
-            NutrientUnit::Volume(volume_unit) => {
-                let _ = VolumeUnit::get_enumerations().iter().map(|volume_unit| {
-                    self.accepted_units
-                        .insert(NutrientUnit::Volume(*volume_unit))
-                });
-
-                let volume = Volume::new(1 as f64, volume_unit);
-                (NutrientUnit::Volume(VolumeUnit::Milliliter), volume.as_ml())
-            }
-            NutrientUnit::Energy(energy_unit) => {
-                let _ = EnergyUnit::get_enumerations().iter().map(|energy_unit| {
-                    self.accepted_units
-                        .insert(NutrientUnit::Energy(*energy_unit))
-                });
-
-                let energy = Energy::new(1 as f64, energy_unit);
-                (
-                    NutrientUnit::Energy(EnergyUnit::Kilocalorie),
-                    energy.as_kcal(),
-                )
-            }
-            _ => {
-                self.accepted_units.insert(from);
-                (to, 1 as f64)
-            }
-        };
-
-        let (to_unit, to_factor): (NutrientUnit, f64) = match to {
-            NutrientUnit::Mass(mass_unit) => {
-                let _ = MassUnit::get_enumerations()
-                    .iter()
-                    .map(|mass_unit| self.accepted_units.insert(NutrientUnit::Mass(*mass_unit)));
-
-                let mass = Mass::new(1 as f64, mass_unit);
-                (NutrientUnit::Mass(MassUnit::Gram), mass.as_g())
-            }
-            NutrientUnit::Volume(volume_unit) => {
-                let _ = VolumeUnit::get_enumerations().iter().map(|volume_unit| {
-                    self.accepted_units
-                        .insert(NutrientUnit::Volume(*volume_unit))
-                });
-
-                let volume = Volume::new(1 as f64, volume_unit);
-                (NutrientUnit::Volume(VolumeUnit::Milliliter), volume.as_ml())
-            }
-            NutrientUnit::Energy(energy_unit) => {
-                let _ = EnergyUnit::get_enumerations().iter().map(|energy_unit| {
-                    self.accepted_units
-                        .insert(NutrientUnit::Energy(*energy_unit))
-                });
-
-                let energy = Energy::new(1 as f64, energy_unit);
-                (
-                    NutrientUnit::Energy(EnergyUnit::Kilocalorie),
-                    energy.as_kcal(),
-                )
-            }
-            _ => {
-                self.accepted_units.insert(from);
-                (to, 1 as f64)
-            }
-        };
-
-        let new_factor = factor * from_factor * to_factor;
-        self.unit_conversions
-            .insert((from_unit, to_unit), new_factor);
-        self.unit_conversions
-            .insert((to_unit, from_unit), 1.0 / new_factor);
 
         Ok(())
     }
