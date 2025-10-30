@@ -15,4 +15,13 @@ pub enum NutrientUnit {
     DIAAS3, // Digestible Indispensable Amino Acid Score Over 3 years
 }
 
-impl NutrientUnit {}
+impl NutrientUnit {
+    pub fn si_factor(&self) -> Option<f64> {
+        match self {
+            Self::Mass(unit) => Some(unit.si_factor()),
+            Self::Volume(unit) => Some(unit.si_factor()),
+            Self::Energy(unit) => Some(unit.si_factor()),
+            _ => None,
+        }
+    }
+}
