@@ -27,8 +27,8 @@ pub struct Nutrient {
     categories: HashSet<NutrientType>,
     main_unit: NutrientUnit,
     unit_conversions: BTreeMap<UnitConversion, f64>, // f64 = unit_to_main_unit_factor
-    parent: Vec<Rc<RefCell<Nutrient>>>,
-    child: Vec<Rc<RefCell<Nutrient>>>,
+    parents: Vec<Rc<RefCell<Nutrient>>>,
+    children: Vec<Rc<RefCell<Nutrient>>>,
 }
 
 impl Nutrient {
@@ -435,7 +435,7 @@ impl Nutrient {
         return Ok(())
     }
 
-    pub fn convert(&self, value: f64, from: NutrientUnit, to: NutrientUnit) -> Result<f64, String> {
+    pub fn convert(&self, value: f64, from: NutrientUnit, to: NutrientUnit) -> Result<f64, &'static str> {
         if from == to {
             return Ok(1f64);
         }
@@ -467,19 +467,17 @@ impl Nutrient {
 
             let to_factor = match self.unit_conversions.get(&to_conversion) {
                 Some(factor) => *factor,
-                None => return Err(String::from("Conversion factor not found")),
+                None => return Err("Conversion factor not found"),
             };
             let from_factor = match self.unit_conversions.get(&from_conversion) {
                 Some(factor) => *factor,
-                None => return Err(String::from("Conversion factor not found")),
+                None => return Err("Conversion factor not found"),
             };
             let factor = to_factor / from_factor;
             let new_value = value * factor;
             return Ok(new_value)
         } else {
-            Err(String::from(
-                "Conversion must use values accepted by nutrient",
-            ))
+            return Err("Conversion must use values accepted by nutrient")
         }
     }
 
@@ -529,102 +527,50 @@ impl Nutrient {
         return Ok(())
     }
 
-    pub fn add_conversion(
-        &mut self,
-        unit: NutrientUnit,
-        factor: f64,
-    ) -> Result<(), &'static str> {
-        match unit {
-            NutrientUnit::Mass(mass_unit) => {
-                let si_factor = match unit.si_factor() {
-                    Some(si_factor) => si_factor,
-                    None => return Err("invalid mass"),
-                };
-                MassUnit::get_enumerations()
-                    .iter()
-                    .for_each(|mass_unit| {
-                        let conversion = UnitConversion {
-                            unit: NutrientUnit::Mass(*mass_unit),
-                            main_unit: self.main_unit,
-                        };
-
-                        let mass_factor = si_factor / mass_unit.si_factor();
-
-                        self.unit_conversions.insert(
-                            conversion,
-                            mass_factor,
-                        );
-                    });
-            },
-            NutrientUnit::Volume(volume_unit) => {
-                let si_factor = match unit.si_factor() {
-                    Some(si_factor) => si_factor,
-                    None => return Err("invalid mass"),
-                };
-                VolumeUnit::get_enumerations()
-                    .iter()
-                    .for_each(|volume_unit| {
-                        let conversion = UnitConversion {
-                            unit: NutrientUnit::Volume(*volume_unit),
-                            main_unit: self.main_unit,
-                        };
-
-                        let mass_factor = si_factor / volume_unit.si_factor();
-
-                        self.unit_conversions.insert(
-                            conversion,
-                            mass_factor,
-                        );
-                    });
-            },
-            NutrientUnit::Energy(energy_unit) => {
-                let si_factor = match unit.si_factor() {
-                    Some(si_factor) => si_factor,
-                    None => return Err("invalid mass"),
-                };
-                EnergyUnit::get_enumerations()
-                    .iter()
-                    .for_each(|energy_unit| {
-                        let conversion = UnitConversion {
-                            unit: NutrientUnit::Energy(*energy_unit),
-                            main_unit: self.main_unit,
-                        };
-
-                        let mass_factor = si_factor / energy_unit.si_factor();
-
-                        self.unit_conversions.insert(
-                            conversion,
-                            mass_factor,
-                        );
-                    });
-            },
-            _ => {
-                self.unit_conversions.insert(
-                    UnitConversion {
-                        unit,
-                        main_unit: self.main_unit,
-                    },
-                    factor,
-                );
-            },
+    pub fn add_conversion(&mut self, unit: NutrientUnit, factor: f64) -> Result<(), &'static str> {
+        let conversion = UnitConversion {
+            unit,
+            main_unit: self.main_unit,
         }
+        self.unit_conversions.insert(
+            conversion,
+            factor,
+        );
+
+        self.update_accepted_units(main_unit)?;
 
         Ok(())
     }
 
-    pub fn add_parent(&self, parent_uuid: Uuid) {
-        todo!()
+    pub fn get_parents(&self) -> Vec<Rc<RefCell<Nutrient>>> {
+        self.parents
     }
 
-    pub fn remove_parent(&self, parent_uuid: Uuid) {
-        todo!()
+    pub fn set_parents(&self, parents: Vec<Rc<RefCell<Nutrient>>>) {
+        self.parents = parents;
     }
 
-    pub fn add_child(&self, parent_uuid: Uuid) {
-        todo!()
+    pub fn add_parent(&self, parent: Rc<RefCell<Nutrient>>) {
+        self.parents.insert(parent);
     }
 
-    pub fn remove_child(&self, parent_uuid: Uuid) {
-        todo!()
+    pub fn remove_parent(&self, parent: Rc<RefCell<Nutrient>>) {
+        self.parents.remove(parent);
+    }
+
+    pub fn get_children(&self) -> Vec<Rc<RefCell<Nutrient>>> {
+        self.children
+    }
+
+    pub fn set_children(&self, children: Vec<Rc<RefCell<Nutrient>>>) {
+        self.children = children;
+    }
+
+    pub fn add_child(&self, child: Rc<RefCell<Nutrient>>) {
+        self.children.insert(child);
+    }
+
+    pub fn remove_child(&self, child: Rc<RefCell<Nutrient>>) {
+        self.children.remove(child);
     }
 }

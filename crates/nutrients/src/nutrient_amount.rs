@@ -61,7 +61,7 @@ impl NutrientAmount {
         return self.clone();
     }
 
-    pub fn convert(&self, unit: NutrientUnit) -> Result<f64, String> {
+    pub fn convert(&self, unit: NutrientUnit) -> Result<f64,  &'static str> {
         let n = self.nutrient.borrow();
         n.convert(self.get_value(), n.get_main_unit(), unit)
     }
