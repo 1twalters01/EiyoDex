@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+foods = { path = "../foods" }
 nutrients = { path = "../nutrients" }
 utils = { path = "../utils" }
 
