@@ -236,6 +236,7 @@ impl Nutrient {
     }
 
     pub fn get_accepted_units(&self) -> BTreeSet<NutrientUnit> {
+        // self.update_accepted_units(self.main_unit);
         self.unit_conversions.iter().map(|conversion| conversion.0.unit).collect()
     }
 
@@ -302,25 +303,6 @@ impl Nutrient {
                 };
                 self.unit_conversions.insert(conversion, factor);
             }
-
-            // for unit in included_mass_units {
-            for unit in accepted_units.clone() {
-                if self.main_unit != new_main_unit {
-                    let old_conversion = UnitConversion {
-                        unit, main_unit: self.main_unit
-                    };
-                    let new_conversion = UnitConversion {
-                        unit, main_unit: new_main_unit
-                    };
-                    let conversion_factor: f64 = match self.unit_conversions.get(&old_conversion) {
-                        Some(factor) => *factor,
-                        None => return Err("factor not found"),
-                    };
-                    let new_conversion_factor = conversion_factor * new_factor;
-                    self.unit_conversions.insert(new_conversion, new_conversion_factor);
-                    self.unit_conversions.remove(&old_conversion);
-                 }
-            }
         }
 
         if !volume_units.is_empty() {
@@ -356,20 +338,6 @@ impl Nutrient {
                     None => return Err("factor not found"),
                 };
                 self.unit_conversions.insert(conversion, factor);
-            }
-
-            for unit in included_volume_units {
-                 if self.main_unit != new_main_unit {
-                    let conversion = UnitConversion {
-                        unit, main_unit: self.main_unit
-                    };
-                    let conversion_factor: f64 = match self.unit_conversions.get(&conversion) {
-                        Some(factor) => *factor,
-                        None => return Err("factor not found"),
-                    };
-                    let new_conversion_factor = conversion_factor * new_factor;
-                    self.unit_conversions.insert(conversion, new_conversion_factor);
-                }
             }
         }
 
@@ -407,36 +375,26 @@ impl Nutrient {
                 };
                 self.unit_conversions.insert(conversion, factor);
             }
-
-            for unit in included_energy_units {
-                if self.main_unit != new_main_unit {
-                    let conversion = UnitConversion {
-                       unit, main_unit: self.main_unit
-                    };
-                    let conversion_factor: f64 = match self.unit_conversions.get(&conversion) {
-                        Some(factor) => *factor,
-                        None => return Err("factor not found"),
-                    };
-                    let new_conversion_factor = conversion_factor * new_factor;
-                    self.unit_conversions.insert(conversion, new_conversion_factor);
-                }
-            }
         }
 
-        for unit in other_units {
+        for unit in accepted_units.clone() {
             if self.main_unit != new_main_unit {
-                let conversion = UnitConversion {
-                    unit: *unit, main_unit: self.main_unit
+                let old_conversion = UnitConversion {
+                    unit, main_unit: self.main_unit
                 };
-                let conversion_factor: f64 = match self.unit_conversions.get(&conversion) {
+                let new_conversion = UnitConversion {
+                    unit, main_unit: new_main_unit
+                };
+                let conversion_factor: f64 = match self.unit_conversions.get(&old_conversion) {
                     Some(factor) => *factor,
                     None => return Err("factor not found"),
                 };
                 let new_conversion_factor = conversion_factor * new_factor;
-                self.unit_conversions.insert(conversion, new_conversion_factor);
-            }
+                self.unit_conversions.insert(new_conversion, new_conversion_factor);
+                self.unit_conversions.remove(&old_conversion);
+             }
         }
-
+        
         return Ok(())
     }
 
@@ -480,11 +438,7 @@ impl Nutrient {
             };
             let from_factor = match self.unit_conversions.get(&from_conversion) {
                 Some(factor) => *factor,
-                // None => return Err("From conversion factor not found"),
-                None => {
-                    panic!("To unit: {:#?}\nFrom unit: {:#?}", to_conversion, from_conversion);
-                    return Err("From conversion factor not found");
-                }
+                None => return Err("From conversion factor not found"),
             };
             let factor = to_factor * from_factor;
             return Ok(factor)

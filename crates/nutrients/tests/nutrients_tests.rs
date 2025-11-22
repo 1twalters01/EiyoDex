@@ -1,7 +1,7 @@
 use nutrients::{nutrient::Nutrient, schema::nutrients::NutrientType, units::NutrientUnit};
 use units::{mass::MassUnit, volume::VolumeUnit};
 use uuid::Uuid;
-use std::collections::HashSet;
+use std::collections::{BTreeSet, HashSet};
 
 #[test]
 fn test_nutrient_new_nutrient_unit() {
@@ -102,10 +102,101 @@ fn test_nutrient_unit_categories() {
 
 #[test]
 fn test_accepted_units() {
+    let id = None;
+    let name = String::from("Potassium");
+    let milligram_unit = NutrientUnit::Mass(MassUnit::Milligram);
+    let mass_accepted_units: BTreeSet<NutrientUnit> = MassUnit::get_enumerations().iter().map(|mass| NutrientUnit::Mass(*mass)).collect();
+
+    let main_unit = milligram_unit;
+    let nutrient = Nutrient::new_rc_refcell(id, name.clone(), main_unit);
+
+    assert_eq!(nutrient.borrow().get_accepted_units(), mass_accepted_units);
+
+    let milliliter_unit = NutrientUnit::Volume(VolumeUnit::Milliliter);
+    let volume_accepted_units: BTreeSet<NutrientUnit> = VolumeUnit::get_enumerations().iter().map(|volume| NutrientUnit::Volume(*volume)).collect();
+    let mut mass_and_volume_accepted_units = mass_accepted_units.clone();
+    mass_and_volume_accepted_units.extend(volume_accepted_units.iter());
+    assert_ne!(nutrient.borrow().get_accepted_units(), volume_accepted_units);
+
+    // 1ml = 5mg
+    let from_unit = milliliter_unit;
+    let to_unit = milligram_unit;
+    let factor = 5f64;
+    let _ = nutrient.borrow_mut().add_conversion(from_unit, to_unit, factor);
+    assert_eq!(nutrient.borrow().get_accepted_units(), mass_and_volume_accepted_units);
 }
 
 #[test]
 fn test_convert() {
+    let id = None;
+    let name = String::from("Potassium");
+    let microgram_unit = NutrientUnit::Mass(MassUnit::Microgram);
+    let milligram_unit = NutrientUnit::Mass(MassUnit::Milligram);
+    let kilogram_unit = NutrientUnit::Mass(MassUnit::Kilogram);
+    let ounce_unit = NutrientUnit::Mass(MassUnit::Ounce);
+    let liter_unit = NutrientUnit::Volume(VolumeUnit::Liter);
+    let milliliter_unit = NutrientUnit::Volume(VolumeUnit::Milliliter);
+
+    // First set of tests
+    let main_unit = milligram_unit;
+    let nutrient = Nutrient::new_rc_refcell(id, name.clone(), main_unit);
+    assert_eq!(nutrient.borrow().get_main_unit(), milligram_unit);
+
+    let mut res = nutrient.borrow().convert(kilogram_unit, ounce_unit);
+    assert_eq!(res, Ok(MassUnit::Kilogram.si_factor() / MassUnit::Ounce.si_factor()));
+
+    res = nutrient.borrow().convert(kilogram_unit, milligram_unit);
+    assert_eq!(res, Ok(MassUnit::Kilogram.si_factor() / MassUnit::Milligram.si_factor()));
+
+    res = nutrient.borrow().convert(milligram_unit, microgram_unit);
+    assert_eq!(res, Ok(MassUnit::Milligram.si_factor() / MassUnit::Microgram.si_factor()));
+
+    res = nutrient.borrow().convert(milligram_unit, liter_unit);
+    assert!(res.is_err());
+
+
+    // Change the main unit and repeat conversions
+    let _ = nutrient.borrow_mut().set_main_unit(kilogram_unit);
+    assert_eq!(nutrient.borrow().get_main_unit(), kilogram_unit);
+
+    let mut res = nutrient.borrow().convert(kilogram_unit, ounce_unit);
+    assert_eq!(res, Ok(MassUnit::Kilogram.si_factor() / MassUnit::Ounce.si_factor()));
+
+    res = nutrient.borrow().convert(kilogram_unit, milligram_unit);
+    assert_eq!(res, Ok(MassUnit::Kilogram.si_factor() / MassUnit::Milligram.si_factor()));
+
+    res = nutrient.borrow().convert(milligram_unit, microgram_unit);
+    assert_eq!(res, Ok(MassUnit::Milligram.si_factor() / MassUnit::Microgram.si_factor()));
+
+    res = nutrient.borrow().convert(milligram_unit, liter_unit);
+    assert!(res.is_err());
+
+
+    // Add a different conversion, change to it and test conversions
+    // 1mg = 5ml in this example
+    let from_unit = milligram_unit;
+    let to_unit = milliliter_unit;
+    let factor = 5f64;
+    let res = nutrient.borrow_mut().add_conversion(from_unit, to_unit, factor);
+    assert!(res.is_ok());
+
+    let mut res = nutrient.borrow().convert(kilogram_unit, ounce_unit);
+    assert_eq!(res, Ok(MassUnit::Kilogram.si_factor() / MassUnit::Ounce.si_factor()));
+
+    res = nutrient.borrow().convert(kilogram_unit, milligram_unit);
+    assert_eq!(res, Ok(MassUnit::Kilogram.si_factor() / MassUnit::Milligram.si_factor()));
+
+    res = nutrient.borrow().convert(milligram_unit, microgram_unit);
+    assert_eq!(res, Ok(MassUnit::Milligram.si_factor() / MassUnit::Microgram.si_factor()));
+
+    res = nutrient.borrow().convert(milligram_unit, liter_unit);
+    assert!(res.is_ok());
+
+    res = nutrient.borrow().convert(kilogram_unit, milliliter_unit);
+    assert_eq!(res, Ok(5f64 * MassUnit::Kilogram.si_factor() / MassUnit::Milligram.si_factor()));
+
+    res = nutrient.borrow().convert(milliliter_unit, liter_unit);
+    assert_eq!(res, Ok(VolumeUnit::Milliliter.si_factor() / VolumeUnit::Liter.si_factor()));
 }
 
 #[test]
@@ -142,9 +233,6 @@ fn test_nutrient_unit_main_unit() {
     println!("{:#?}", nutrient.borrow().get_conversions());
     assert_eq!(nutrient.borrow().convert(from_unit, to_unit).unwrap(), 5f64);
 }
-
-#[test]
-fn test_mutate_conversion() {}
 
 #[test]
 fn test_parents() {}
