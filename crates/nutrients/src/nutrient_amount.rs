@@ -14,7 +14,7 @@ pub struct NutrientAmount {
 }
 
 impl NutrientAmount {
-    pub fn new(value: f64, nutrient: Nutrient, unit: NutrientUnit) -> Result<Self, String> {
+    pub fn new(value: f64, nutrient: Nutrient, unit: NutrientUnit) -> Result<Self, &'static str> {
         match nutrient.convert(value, unit, nutrient.get_main_unit()) {
             Ok(conversion_factor) => Ok(Self {
                 value: value * conversion_factor,

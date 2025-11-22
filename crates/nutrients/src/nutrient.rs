@@ -97,8 +97,8 @@ impl Nutrient {
             categories: HashSet::new(),
             main_unit,
             unit_conversions: unit_conversions,
-            parent: Vec::new(),
-            child: Vec::new(),
+            parents: Vec::new(),
+            children: Vec::new(),
         }
     }
 
@@ -171,8 +171,8 @@ impl Nutrient {
             categories: HashSet::new(),
             main_unit,
             unit_conversions: unit_conversions,
-            parent: Vec::new(),
-            child: Vec::new(),
+            parents: Vec::new(),
+            children: Vec::new(),
         }))
     }
 
@@ -204,12 +204,12 @@ impl Nutrient {
         self.categories.clone()
     }
 
+     pub fn insert_category(&mut self, category: NutrientType) {
+         self.categories.insert(category);
+     }
+
     pub fn remove_category(&mut self, category: NutrientType) {
         self.categories.remove(&category);
-    }
-
-    pub fn insert_category(&mut self, category: NutrientType) {
-        self.categories.insert(category);
     }
 
     pub fn extend_category(&mut self, categories: Vec<NutrientType>) {
@@ -435,6 +435,10 @@ impl Nutrient {
         return Ok(())
     }
 
+    pub fn get_conversions(&self) -> BTreeMap<UnitConversion, f64> {
+        self.unit_conversions.clone()
+    }
+
     pub fn convert(&self, value: f64, from: NutrientUnit, to: NutrientUnit) -> Result<f64, &'static str> {
         if from == to {
             return Ok(1f64);
@@ -531,46 +535,46 @@ impl Nutrient {
         let conversion = UnitConversion {
             unit,
             main_unit: self.main_unit,
-        }
+        };
         self.unit_conversions.insert(
             conversion,
             factor,
         );
 
-        self.update_accepted_units(main_unit)?;
+        self.update_accepted_units(self.main_unit)?;
 
         Ok(())
     }
 
     pub fn get_parents(&self) -> Vec<Rc<RefCell<Nutrient>>> {
-        self.parents
+        self.parents.clone()
     }
 
-    pub fn set_parents(&self, parents: Vec<Rc<RefCell<Nutrient>>>) {
+    pub fn set_parents(&mut self, parents: Vec<Rc<RefCell<Nutrient>>>) {
         self.parents = parents;
     }
 
-    pub fn add_parent(&self, parent: Rc<RefCell<Nutrient>>) {
-        self.parents.insert(parent);
+    pub fn add_parent(&mut self, parent: Rc<RefCell<Nutrient>>) {
+        self.parents.push(parent);
     }
 
-    pub fn remove_parent(&self, parent: Rc<RefCell<Nutrient>>) {
-        self.parents.remove(parent);
+    pub fn remove_parent(&mut self, target: Rc<RefCell<Nutrient>>) {
+        self.parents.retain(|parent| !Rc::ptr_eq(parent, &target));
     }
 
     pub fn get_children(&self) -> Vec<Rc<RefCell<Nutrient>>> {
-        self.children
+        self.children.clone()
     }
 
-    pub fn set_children(&self, children: Vec<Rc<RefCell<Nutrient>>>) {
+    pub fn set_children(&mut self, children: Vec<Rc<RefCell<Nutrient>>>) {
         self.children = children;
     }
 
-    pub fn add_child(&self, child: Rc<RefCell<Nutrient>>) {
-        self.children.insert(child);
+    pub fn add_child(&mut self, child: Rc<RefCell<Nutrient>>) {
+        self.children.push(child);
     }
 
-    pub fn remove_child(&self, child: Rc<RefCell<Nutrient>>) {
-        self.children.remove(child);
+    pub fn remove_child(&mut self, target: Rc<RefCell<Nutrient>>) {
+        self.parents.retain(|child| !Rc::ptr_eq(child, &target));
     }
 }

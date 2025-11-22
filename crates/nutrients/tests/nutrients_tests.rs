@@ -1,6 +1,7 @@
-use nutrients::{nutrient::Nutrient, units::NutrientUnit};
+use nutrients::{nutrient::Nutrient, schema::nutrients::NutrientType, units::NutrientUnit};
 use units::{mass::MassUnit, volume::VolumeUnit};
 use uuid::Uuid;
+use std::collections::HashSet;
 
 #[test]
 fn test_nutrient_new_nutrient_unit() {
@@ -78,7 +79,26 @@ fn test_nutrient_unit_description() {
 }
 
 #[test]
-fn test_nutrient_unit_categories() {}
+fn test_nutrient_unit_categories() {
+    let id = None;
+    let name = String::from("Potassium");
+    let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
+
+    let nutrient = Nutrient::new_rc_refcell(id, name.clone(), main_unit);
+
+    assert_eq!(nutrient.borrow().get_categories(), HashSet::new());
+
+    let mineral_category = NutrientType::Mineral;
+    nutrient.borrow_mut().insert_category(mineral_category.clone());
+    assert_eq!(nutrient.borrow().get_categories(), HashSet::from([mineral_category]));
+
+    nutrient.borrow_mut().remove_category(mineral_category);
+    assert_eq!(nutrient.borrow().get_categories(), HashSet::new());
+
+    let other_category = NutrientType::Other;
+    nutrient.borrow_mut().extend_category(Vec::from([mineral_category, other_category]));
+    assert_eq!(nutrient.borrow().get_categories(), HashSet::from([other_category, mineral_category]));
+}
 
 #[test]
 fn test_nutrient_unit_main_unit() {
