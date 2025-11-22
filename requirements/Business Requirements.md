@@ -40,24 +40,25 @@ This app intends to support plugins to allow users to add their own functionalit
 
 
 # Business Requirements
-## Product Requirements
-| ID    | Requirement                                                                   | Rationale         | Business Goal Link   |
-
-## Technical Requirements
-| ID    | Requirement                                                                   | Rationale         | Business Goal Link   |
-| BR-1  | Eiyodex shall be available on Linux.                                          |
-| BR-2  | Eiyodex shall be available on Windows.                                        |
-| BR-3  | Eiyodex shall be available on Mac.                                            |
-| BR-4  | The Linux, Windows and Mac apps shall be free.                                |
-| BR-5  | Eiyodex shall be available on Android.                                        |
-| BR-6  | Eiyodex shall be available on iOS.                                            |
-| BR-7  | The Android and iOS apps shall cost a one-time fee.                           |
-| BR-8  | There shall be an accompanying site to get plugins, data sets and more        |
-| BR-9  | All App information and metadata shall be complete and accurate               |
-
-## Legal Requirements
-| ID    | Requirement                                                                   | Rationale         | Business Goal Link   |
-| BR-7  | Eiyodex shall establish compliance with relevant data privacy regulations.    |
-
 ## User Requirements
 | ID    | Requirement                                                                   | Rationale         | Business Goal Link   |
+
+## Product Requirements
+| ID    | Requirement                                                                   | Rationale                                 | Business Goal Link    |
+
+## Technical Requirements
+| ID    | Requirement                                                                   | Rationale                                 | Business Goal Link    |
+| BR-1  | Eiyodex shall be available on Linux.                                          | Placeholder                               | 3.1                   |
+| BR-2  | Eiyodex shall be available on Windows.                                        | Placeholder                               | 3.1                   |
+| BR-3  | Eiyodex shall be available on Mac.                                            | Placeholder                               | 3.1                   |
+| BR-4  | The Linux, Windows and Mac experiences shall be free.                         | Placeholder                               | 3.1                   |
+| BR-5  | Eiyodex shall be available on Android.                                        | Placeholder                               | 3.2                   |
+| BR-6  | Eiyodex shall be available on iOS.                                            | Placeholder                               | 3.2                   | 
+| BR-7  | The Android and iOS apps shall cost a one-time fee.                           | Placeholder                               | 3.2                   | 
+| BR-8  | All App information and metadata shall be complete and accurate.              | Required to publish to app stores         | 3.2                   |
+| BR-9  | There shall be an accompanying site to get plugins, data sets and more.       | Placeholder                               |
+
+## Legal Requirements
+| ID    | Requirement                                                                   | Rationale                                 | Business Goal Link    |
+| BR-10 | Eiyodex shall establish compliance with relevant data privacy regulations.    |
+

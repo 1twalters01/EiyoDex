@@ -10,7 +10,7 @@ fn test_nutrient_new_nutrient_unit() {
     let description = "Test description".to_string();
     let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
 
-    let mut nutrient = Nutrient::new(id, name.clone(), main_unit);
+    let mut nutrient = Nutrient::new(id, name, main_unit);
     let mut nutrient_2 = nutrient.clone();
     assert_eq!(nutrient, nutrient_2);
     
@@ -43,7 +43,7 @@ fn test_nutrient_unit_id() {
     let name = String::from("Potassium");
     let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
 
-    let mut nutrient = Nutrient::new(Some(id), name.clone(), main_unit);
+    let mut nutrient = Nutrient::new(Some(id), name, main_unit);
 
     assert_eq!(nutrient.get_id(), id);
     nutrient.set_id(id2);
@@ -71,7 +71,7 @@ fn test_nutrient_unit_description() {
     let description = "Test description".to_string();
     let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
 
-    let mut nutrient = Nutrient::new(id, name.clone(), main_unit);
+    let mut nutrient = Nutrient::new(id, name, main_unit);
 
     assert_eq!(nutrient.get_description(), String::new());
     nutrient.set_description(description.clone());
@@ -84,7 +84,7 @@ fn test_nutrient_unit_categories() {
     let name = String::from("Potassium");
     let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
 
-    let nutrient = Nutrient::new_rc_refcell(id, name.clone(), main_unit);
+    let nutrient = Nutrient::new_rc_refcell(id, name, main_unit);
 
     assert_eq!(nutrient.borrow().get_categories(), HashSet::new());
 
@@ -101,46 +101,47 @@ fn test_nutrient_unit_categories() {
 }
 
 #[test]
-fn test_nutrient_unit_main_unit() {
-    // let id = None;
-    // let name = String::from("Potassium");
-    // let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
-    // let main_unit_2 = NutrientUnit::Mass(MassUnit::Microgram);
-    // let main_unit_3 = NutrientUnit::Volume(VolumeUnit::Pint);
-    //
-    // let mut nutrient = Nutrient::new(id, name.clone(), main_unit);
-    // assert_eq!(nutrient.get_main_unit(), main_unit);
-    //
-    // let _ = nutrient.set_main_unit(main_unit_2);
-    // assert_eq!(nutrient.get_main_unit(), main_unit_2);
-    // assert!(nutrient.get_accepted_units().contains(&main_unit));
-    // assert!(nutrient.get_accepted_units().contains(&main_unit_2));
-    //
-    // let mass_enums = MassUnit::get_enumerations();
-    // let mass_units: Vec<NutrientUnit> = mass_enums
-    //     .iter()
-    //     .map(|mass_enum| NutrientUnit::Mass(*mass_enum))
-    //     .collect();
-    // assert!(mass_units
-    //     .iter()
-    //     .all(|mass_unit| nutrient.get_accepted_units().contains(mass_unit)));
-    //
-    // let res = nutrient.set_main_unit(main_unit_3);
-    // assert_eq!(res.err(), Some("New main unit not in accepted units"));
-    //
-    // nutrient.push_to_accepted_units(main_unit_3);
-    // let _ = nutrient.set_main_unit(main_unit_3);
-    // assert_eq!(nutrient.get_main_unit(), main_unit_3);
-    // assert!(nutrient.get_accepted_units().contains(&main_unit));
-    // assert!(nutrient.get_accepted_units().contains(&main_unit_2));
-    // assert!(nutrient.get_accepted_units().contains(&main_unit_3));
+fn test_accepted_units() {
 }
 
 #[test]
-fn tst_accepted_units() {}
+fn test_convert() {
+}
 
 #[test]
-fn test_convert() {}
+fn test_nutrient_unit_main_unit() {
+    let id = None;
+    let name = String::from("Potassium");
+    let milligram_unit = NutrientUnit::Mass(MassUnit::Milligram);
+    let microgram_unit = NutrientUnit::Mass(MassUnit::Microgram);
+    let milliliter_unit = NutrientUnit::Volume(VolumeUnit::Milliliter);
+
+    let nutrient = Nutrient::new_rc_refcell(id, name.clone(), milligram_unit);
+    assert_eq!(nutrient.borrow().get_main_unit(), milligram_unit);
+
+    // Test setting a value that is in the conversions
+    let mut res = nutrient.borrow_mut().set_main_unit(microgram_unit);
+    assert!(res.is_ok());
+    assert_eq!(nutrient.borrow().get_main_unit(), microgram_unit);
+    assert!(nutrient.borrow().get_accepted_units().contains(&milligram_unit));
+    assert!(nutrient.borrow().get_accepted_units().contains(&microgram_unit));
+    assert!(!nutrient.borrow().get_accepted_units().contains(&milliliter_unit));
+
+    // Test setting a value that is not in the conversions
+    res = nutrient.borrow_mut().set_main_unit(milliliter_unit);
+    assert!(res.is_err());
+
+    // Add to conversions
+    // 1mg = 5ml in this example
+    let from_unit = milligram_unit;
+    let to_unit = milliliter_unit;
+    let factor = 5f64;
+    let res = nutrient.borrow_mut().add_conversion(from_unit, to_unit, factor);
+    assert!(res.is_ok());
+
+    println!("{:#?}", nutrient.borrow().get_conversions());
+    assert_eq!(nutrient.borrow().convert(from_unit, to_unit).unwrap(), 5f64);
+}
 
 #[test]
 fn test_mutate_conversion() {}

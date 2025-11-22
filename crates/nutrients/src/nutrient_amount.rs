@@ -15,7 +15,7 @@ pub struct NutrientAmount {
 
 impl NutrientAmount {
     pub fn new(value: f64, nutrient: Nutrient, unit: NutrientUnit) -> Result<Self, &'static str> {
-        match nutrient.convert(value, unit, nutrient.get_main_unit()) {
+        match nutrient.convert(unit, nutrient.get_main_unit()) {
             Ok(conversion_factor) => Ok(Self {
                 value: value * conversion_factor,
                 nutrient: Rc::new(RefCell::new(nutrient)),
@@ -31,7 +31,7 @@ impl NutrientAmount {
     ) -> Result<Self, String> {
         let conversion_factor = {
             let n = nutrient.borrow();
-            n.convert(value, unit, n.get_main_unit())?
+            n.convert(unit, n.get_main_unit())?
         };
         Ok(Self {
             value: value * conversion_factor,
@@ -63,7 +63,7 @@ impl NutrientAmount {
 
     pub fn convert(&self, unit: NutrientUnit) -> Result<f64,  &'static str> {
         let n = self.nutrient.borrow();
-        n.convert(self.get_value(), n.get_main_unit(), unit)
+        n.convert(n.get_main_unit(), unit).and_then(|c| Ok(c * self.get_value()))
     }
 }
 

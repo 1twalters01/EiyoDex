@@ -303,17 +303,22 @@ impl Nutrient {
                 self.unit_conversions.insert(conversion, factor);
             }
 
-            for unit in included_mass_units {
+            // for unit in included_mass_units {
+            for unit in accepted_units.clone() {
                 if self.main_unit != new_main_unit {
-                    let conversion = UnitConversion {
+                    let old_conversion = UnitConversion {
                         unit, main_unit: self.main_unit
                     };
-                    let conversion_factor: f64 = match self.unit_conversions.get(&conversion) {
+                    let new_conversion = UnitConversion {
+                        unit, main_unit: new_main_unit
+                    };
+                    let conversion_factor: f64 = match self.unit_conversions.get(&old_conversion) {
                         Some(factor) => *factor,
                         None => return Err("factor not found"),
                     };
                     let new_conversion_factor = conversion_factor * new_factor;
-                    self.unit_conversions.insert(conversion, new_conversion_factor);
+                    self.unit_conversions.insert(new_conversion, new_conversion_factor);
+                    self.unit_conversions.remove(&old_conversion);
                  }
             }
         }
@@ -439,7 +444,7 @@ impl Nutrient {
         self.unit_conversions.clone()
     }
 
-    pub fn convert(&self, value: f64, from: NutrientUnit, to: NutrientUnit) -> Result<f64, &'static str> {
+    pub fn convert(&self, from: NutrientUnit, to: NutrientUnit) -> Result<f64, &'static str> {
         if from == to {
             return Ok(1f64);
         }
@@ -471,15 +476,18 @@ impl Nutrient {
 
             let to_factor = match self.unit_conversions.get(&to_conversion) {
                 Some(factor) => *factor,
-                None => return Err("Conversion factor not found"),
+                None => return Err("To conversion factor not found"),
             };
             let from_factor = match self.unit_conversions.get(&from_conversion) {
                 Some(factor) => *factor,
-                None => return Err("Conversion factor not found"),
+                // None => return Err("From conversion factor not found"),
+                None => {
+                    panic!("To unit: {:#?}\nFrom unit: {:#?}", to_conversion, from_conversion);
+                    return Err("From conversion factor not found");
+                }
             };
-            let factor = to_factor / from_factor;
-            let new_value = value * factor;
-            return Ok(new_value)
+            let factor = to_factor * from_factor;
+            return Ok(factor)
         } else {
             return Err("Conversion must use values accepted by nutrient")
         }
@@ -531,14 +539,47 @@ impl Nutrient {
         return Ok(())
     }
 
-    pub fn add_conversion(&mut self, unit: NutrientUnit, factor: f64) -> Result<(), &'static str> {
+    pub fn add_conversion(&mut self, from_unit: NutrientUnit, to_unit: NutrientUnit, factor: f64) -> Result<(), &'static str> {
+        let accepted_units = self.get_accepted_units();
+
+        if !accepted_units.contains(&to_unit) && !accepted_units.contains(&from_unit) {
+             return Err("At least one unit must be an accepted unit");
+        }
+
+        if accepted_units.contains(&to_unit) && accepted_units.contains(&from_unit) {
+             return Err("At least one unit must be a new unit");
+        }
+
+
+        let new_unit = if !accepted_units.contains(&to_unit) {
+            to_unit
+        } else {
+            from_unit
+        };
+
+        let to_conversion_factor = match self.convert(to_unit, self.main_unit) {
+            Ok(factor) => Some(factor),
+            Err(_) => None,
+        };
+
+        let from_conversion_factor = match self.convert(self.main_unit, from_unit) {
+            Ok(factor) => Some(factor),
+            Err(_) => None,
+        };
+
+        if to_conversion_factor.is_none() && from_conversion_factor.is_none() {
+            return Err("Both conversions are none")
+        }
+
+        let conversion_factor = to_conversion_factor.unwrap_or(1f64) * from_conversion_factor.unwrap_or(1f64);
+
         let conversion = UnitConversion {
-            unit,
+            unit: new_unit,
             main_unit: self.main_unit,
         };
         self.unit_conversions.insert(
             conversion,
-            factor,
+            factor * conversion_factor,
         );
 
         self.update_accepted_units(self.main_unit)?;
