@@ -51,6 +51,10 @@ impl NutrientAmount {
         self.nutrient.clone()
     }
 
+    pub fn set_nutrient_rc_refcell(&mut self, nutrient: Rc<RefCell<Nutrient>>) {
+        self.nutrient = nutrient;
+    }
+
     pub fn set_nutrient(&mut self, nutrient: Nutrient) {
         self.nutrient = Rc::new(RefCell::new(nutrient));
     }

@@ -1,5 +1,33 @@
-use nutrients::{nutrient::Nutrient, nutrient_amount::NutrientAmount, units::NutrientUnit};
+use nutrients::{nutrient::{link_parent_child, Nutrient}, nutrient_amount::NutrientAmount, units::NutrientUnit};
 use units::mass::MassUnit;
+
+#[test]
+fn test_nutrient() {
+    let id = None;
+    let potassium = Nutrient::new_rc_refcell(
+        id,
+        String::from("Potassium"),
+        NutrientUnit::Mass(MassUnit::Milligram),
+    );
+    let calcium = Nutrient::new_rc_refcell(
+        id,
+        String::from("Calcium"),
+        NutrientUnit::Mass(MassUnit::Microgram),
+    );
+
+    let value = 5.2134;
+    let mut nutrient: NutrientAmount = NutrientAmount::from_rc_refcell(
+        value,
+        potassium.clone(),
+        NutrientUnit::Mass(MassUnit::Kilogram),
+    )
+    .unwrap();
+
+    assert_eq!(nutrient.get_nutrient(), potassium);
+
+    nutrient.set_nutrient_rc_refcell(calcium.clone());
+    assert_eq!(nutrient.get_nutrient(), calcium);
+}
 
 #[test]
 fn test_rounding() {
@@ -172,4 +200,77 @@ fn test_ordering() {
     .unwrap();
 
     assert!(nutrient_1 > nutrient_2 && nutrient_2 > nutrient_3);
+}
+
+#[test]
+fn test_parent_vec() {
+    let id = None;
+
+    // Create iron, heme iron and non-heme iron
+    let value_1 = 15f64;
+    let iron = Nutrient::new_rc_refcell(
+        id,
+        String::from("Iron"),
+        NutrientUnit::Mass(MassUnit::Milligram),
+    );
+    let iron_amount: NutrientAmount = NutrientAmount::from_rc_refcell(
+        value_1,
+        iron.clone(),
+        NutrientUnit::Mass(MassUnit::Kilogram),
+    )
+    .unwrap();
+
+    let value_2 = 7.5;
+    let heme_iron = Nutrient::new_rc_refcell(
+        id,
+        String::from("Iron"),
+        NutrientUnit::Mass(MassUnit::Milligram),
+    );
+    let heme_iron_amount: NutrientAmount = NutrientAmount::from_rc_refcell(
+        value_2,
+        heme_iron.clone(),
+        NutrientUnit::Mass(MassUnit::Kilogram),
+    )
+    .unwrap();
+
+    let value_3 = 2.5;
+    let non_heme_iron = Nutrient::new_rc_refcell(
+        id,
+        String::from("Iron"),
+        NutrientUnit::Mass(MassUnit::Milligram),
+    );
+    let non_heme_iron_amount: NutrientAmount = NutrientAmount::from_rc_refcell(
+        value_3,
+        non_heme_iron.clone(),
+        NutrientUnit::Mass(MassUnit::Kilogram),
+    )
+    .unwrap();
+
+    let value_4 = 50f64;
+    let potassium = Nutrient::new_rc_refcell(
+        id,
+        String::from("Potassium"),
+        NutrientUnit::Mass(MassUnit::Milligram),
+    );
+    let potassium_amount: NutrientAmount = NutrientAmount::from_rc_refcell(
+        value_4,
+        potassium.clone(),
+        NutrientUnit::Mass(MassUnit::Kilogram),
+    )
+    .unwrap();
+
+    // Create a dedecated type (probably a wrapper arround Vec with some functions) as a holder of
+    // different nutrient amounts?
+    let minerals = Vec::from([iron_amount, heme_iron_amount, non_heme_iron_amount, potassium_amount]);
+
+
+    // Link parents and children
+    link_parent_child(&iron, &heme_iron);
+    link_parent_child(&iron, &non_heme_iron);
+
+
+    // Want to get total amount from iron amount which should be itself's value + value from children
+
+
+    // Want to get child amount from iron amount which should be the sum of values from children
 }
