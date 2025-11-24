@@ -26,8 +26,22 @@ pub struct Profile {
 }
 
 impl Profile {
-    // id
-    // name
+    pub fn get_id(&self) -> Uuid {
+        self.id
+    }
+
+    pub fn set_id(&mut self, id: Uuid) {
+        self.id = id;
+    }
+
+    pub fn get_name(&self) -> Name {
+        self.name
+    }
+
+    pub fn set_name(&mut self, name: Name) {
+        self.name = name;
+    }
+
     pub fn get_date_of_birth(&self) -> NaiveDate {
         self.date_of_birth
     }
@@ -46,7 +60,15 @@ impl Profile {
             return today.year() - dob.year();
         }
     }
-    // language
+
+    pub fn get_language(&self) -> Language {
+        self.language
+    }
+
+    pub fn set_language(&mut self, language: Language) {
+        self.language = language;
+    }
+    
     pub fn get_gender(&self) -> Gender {
         self.gender.clone()
     }
@@ -55,8 +77,21 @@ impl Profile {
         self.gender = gender;
     }
 
-    // ethnicity
-    // preferred_units
+    pub fn get_ethnicity(&self) -> Option<Ethnicity> {
+        self.ethnicity
+    }
+
+    pub fn set_ethnicity(&mut self, ethnicity: Option<Ethnicity> ) {
+        self.ethnicity = ethnicity;
+    }
+
+    pub fn get_preferred_units(&self) -> PreferredUnits {
+        self.preferred_units
+    }
+
+    pub fn set_preferred_units(&mut self, preferred_units: PreferredUnits) {
+        self.preferred_units = preferred_units;
+    }
 
     pub fn get_height(&self) -> Distance {
         self.height
@@ -74,8 +109,21 @@ impl Profile {
         self.weight = weight;
     }
 
-    // target weight
-    // target weight deadline
+    pub fn get_target_weight(&self) -> Mass {
+        self.target_weight
+    }
+
+    pub fn set_target_weight(&self, target_weight: Mass) {
+        self.target_weight = target_weight;
+    }
+
+    pub fn get_target_weight_deadline(&self) -> Option<NaiveDate> {
+        self.target_weight_deadline
+    }
+
+    pub fn set_target_weight_deadline(&mut self, target_weight_deadline: Option<NaiveDate>) {
+        self.target_weight_deadline = target_weight_deadline;
+    }
 
     pub fn get_waist_circumference(&self) -> Distance {
         self.waist_circumference
@@ -85,8 +133,21 @@ impl Profile {
         self.waist_circumference = waist_circumference;
     }
 
-    // hip circumference
-    // body fat percentage
+    pub fn get_hip_circumference(&self) -> Distance {
+        self.hip_circumference
+    }
+
+    pub fn set_hip_circumference(&mut self, hip_circumference: Distance) {
+        self.hip_circumference = hip_circumference;
+    }
+
+    pub fn get_body_fat_percentage(&self) -> Percentage {
+        self.body_fat_percentage
+    }
+
+    pub fn set_body_fat_percentage(&mut self, body_fat_percentage: Percentage) {
+        self.body_fat_percentage = body_fat_percentage;
+    }
 }
 
 #[derive(Clone)]
