@@ -11,14 +11,20 @@ use crate::{nutrient::Nutrient, units::NutrientUnit};
 pub struct NutrientAmount {
     value: f64,
     nutrient: Rc<RefCell<Nutrient>>,
+    output_unit: NutrientUnit,
 }
 
 impl NutrientAmount {
-    pub fn new(value: f64, nutrient: Nutrient, unit: NutrientUnit) -> Result<Self, &'static str> {
-        match nutrient.convert(unit, nutrient.get_main_unit()) {
-            Ok(conversion_factor) => Ok(Self {
-                value: value * conversion_factor,
+    pub fn new(
+        value: f64,
+        nutrient: Nutrient,
+        output_unit: NutrientUnit
+    ) -> Result<Self, &'static str> {
+        match nutrient.convert(output_unit, nutrient.get_main_unit()) {
+            Ok(_) => Ok(Self {
+                value,
                 nutrient: Rc::new(RefCell::new(nutrient)),
+                output_unit,
             }),
             Err(err) => Err(err),
         }
@@ -27,16 +33,17 @@ impl NutrientAmount {
     pub fn from_rc_refcell(
         value: f64,
         nutrient: Rc<RefCell<Nutrient>>,
-        unit: NutrientUnit,
+        output_unit: NutrientUnit,
     ) -> Result<Self, String> {
-        let conversion_factor = {
-            let n = nutrient.borrow();
-            n.convert(unit, n.get_main_unit())?
-        };
-        Ok(Self {
-            value: value * conversion_factor,
-            nutrient: nutrient,
-        })
+        let n = nutrient.borrow();
+        match n.convert(output_unit, nutrient.get_main_unit()) {
+            Ok(_) => Ok(Self {
+                value,
+                nutrient,
+                output_unit,
+            }),
+            Err(err) => Err(err),
+        }
     }
 
     pub fn get_value(&self) -> f64 {
@@ -57,6 +64,17 @@ impl NutrientAmount {
 
     pub fn set_nutrient(&mut self, nutrient: Nutrient) {
         self.nutrient = Rc::new(RefCell::new(nutrient));
+    }
+
+    pub fn get_output_unit(&self) -> NutrientUnit {
+        self.output_unit
+    }
+
+    pub fn set_output_unit(&mut self, output_unit: NutrientUnit) {
+        let n = self.nutrient.borrow();
+        let conversion_factor = n.convert(self.output_unit, output_unit)
+        self.value = value * conversion_factor;
+        self.output_unit = output_unit;
     }
 
     pub fn round(&mut self, dp: u8) -> Self {
@@ -93,8 +111,10 @@ impl Ord for NutrientAmount {
             return id_cmp;
         }
 
+        let other_nutrient = other.nutrient.borrow();
+        let conversion_factor = other_nutrient.convert(other.output_unit, self.output_unit);
         self.value
-            .partial_cmp(&other.value)
+            .partial_cmp(&other.value * conversion_factor)
             .unwrap_or(Ordering::Equal)
     }
 }
@@ -109,8 +129,10 @@ impl Add for NutrientAmount {
                 self.nutrient, rhs.nutrient
             );
         }
+        let rhs_nutrient = rhs.nutrient.borrow();
+        let conversion_factor = rhs_nutrient.convert(rhs.output_unit, self.output_unit);
         Self {
-            value: self.value + rhs.value,
+            value: self.value + rhs.value * conversion_factor,
             nutrient: self.nutrient,
         }
     }
@@ -126,8 +148,10 @@ impl Sub for NutrientAmount {
                 self.nutrient, rhs.nutrient
             );
         }
+        let rhs_nutrient = rhs.nutrient.borrow();
+        let ocnversion_factor = rhs_nutrient.convert(rhs.output_unit, self.output_unit);
         Self {
-            value: self.value - rhs.value,
+            value: self.value - rhs.value * conversion_factor,
             nutrient: self.nutrient,
         }
     }
