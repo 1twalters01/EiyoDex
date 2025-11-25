@@ -1,4 +1,5 @@
 // https://api.frankfurter.app/latest?amount=1&from=GBP&to=JPY
+// https://api.frankfurter.app/2020-01-15?from=GBP&to=JPY
 // No api key or usage caps (but still be responsible)
 
 #[macro_export]
