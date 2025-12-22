@@ -34,12 +34,12 @@ impl NutrientAmount {
         value: f64,
         nutrient: Rc<RefCell<Nutrient>>,
         output_unit: NutrientUnit,
-    ) -> Result<Self, String> {
-        let n = nutrient.borrow();
-        match n.convert(output_unit, nutrient.get_main_unit()) {
+    ) -> Result<Self, &'static str> {
+        let nutrient_borrowed = nutrient.borrow();
+        match nutrient_borrowed.convert(output_unit, nutrient_borrowed.get_main_unit()) {
             Ok(_) => Ok(Self {
                 value,
-                nutrient,
+                nutrient: nutrient.clone(),
                 output_unit,
             }),
             Err(err) => Err(err),
@@ -71,9 +71,9 @@ impl NutrientAmount {
     }
 
     pub fn set_output_unit(&mut self, output_unit: NutrientUnit) {
-        let n = self.nutrient.borrow();
-        let conversion_factor = n.convert(self.output_unit, output_unit)
-        self.value = value * conversion_factor;
+        let nutrient_borrowed = self.nutrient.borrow();
+        let conversion_factor = nutrient_borrowed.convert(self.output_unit, output_unit).unwrap();
+        self.value = self.value * conversion_factor;
         self.output_unit = output_unit;
     }
 
@@ -84,17 +84,20 @@ impl NutrientAmount {
     }
 
     pub fn convert(&self, unit: NutrientUnit) -> Result<f64, &'static str> {
-        let n = self.nutrient.borrow();
-        n.convert(n.get_main_unit(), unit)
+        let nutrient_borrowed = self.nutrient.borrow();
+        nutrient_borrowed.convert(nutrient_borrowed.get_main_unit(), unit)
             .and_then(|c| Ok(c * self.get_value()))
     }
 }
 
 impl PartialOrd for NutrientAmount {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        let n = self.nutrient.borrow();
-        self.get_value()
-            .partial_cmp(&other.convert(n.get_main_unit()).unwrap())
+        let other_nutrient = other.nutrient.borrow();
+        let from_unit = other.output_unit;
+        let to_unit = self.output_unit;
+        let conversion_factor = other_nutrient.convert(from_unit, to_unit).unwrap();
+        self.value
+            .partial_cmp(&(other.value * conversion_factor))
     }
 }
 
@@ -102,6 +105,7 @@ impl Eq for NutrientAmount {}
 
 impl Ord for NutrientAmount {
     fn cmp(&self, other: &Self) -> Ordering {
+        println!("hi");
         let id_cmp = self
             .get_nutrient()
             .borrow()
@@ -112,9 +116,11 @@ impl Ord for NutrientAmount {
         }
 
         let other_nutrient = other.nutrient.borrow();
-        let conversion_factor = other_nutrient.convert(other.output_unit, self.output_unit);
+        let from_unit = other.output_unit;
+        let to_unit = self.output_unit;
+        let conversion_factor = other_nutrient.convert(from_unit, to_unit).unwrap();
         self.value
-            .partial_cmp(&other.value * conversion_factor)
+            .partial_cmp(&(other.value * conversion_factor))
             .unwrap_or(Ordering::Equal)
     }
 }
@@ -130,10 +136,11 @@ impl Add for NutrientAmount {
             );
         }
         let rhs_nutrient = rhs.nutrient.borrow();
-        let conversion_factor = rhs_nutrient.convert(rhs.output_unit, self.output_unit);
+        let conversion_factor = rhs_nutrient.convert(rhs.output_unit, self.output_unit).unwrap();
         Self {
             value: self.value + rhs.value * conversion_factor,
             nutrient: self.nutrient,
+            output_unit: self.output_unit
         }
     }
 }
@@ -149,10 +156,11 @@ impl Sub for NutrientAmount {
             );
         }
         let rhs_nutrient = rhs.nutrient.borrow();
-        let ocnversion_factor = rhs_nutrient.convert(rhs.output_unit, self.output_unit);
+        let conversion_factor = rhs_nutrient.convert(rhs.output_unit, self.output_unit).unwrap();
         Self {
             value: self.value - rhs.value * conversion_factor,
             nutrient: self.nutrient,
+            output_unit: self.output_unit
         }
     }
 }
@@ -160,8 +168,8 @@ impl Sub for NutrientAmount {
 impl Mul<f64> for NutrientAmount {
     type Output = Self;
     fn mul(self, rhs: f64) -> Self {
-        let n = self.nutrient.borrow();
-        let main_unit = n.get_main_unit();
+        let nutrient_borrowed = self.nutrient.borrow();
+        let main_unit = nutrient_borrowed.get_main_unit();
         Self::from_rc_refcell(self.value * rhs, self.get_nutrient(), main_unit).unwrap()
     }
 }
@@ -169,8 +177,8 @@ impl Mul<f64> for NutrientAmount {
 impl Div<f64> for NutrientAmount {
     type Output = Self;
     fn div(self, rhs: f64) -> Self {
-        let n = self.nutrient.borrow();
-        let main_unit = n.get_main_unit();
+        let nutrient_borrowed = self.nutrient.borrow();
+        let main_unit = nutrient_borrowed.get_main_unit();
         Self::from_rc_refcell(self.get_value() / rhs, self.get_nutrient(), main_unit).unwrap()
     }
 }

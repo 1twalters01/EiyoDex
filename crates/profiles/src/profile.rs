@@ -35,7 +35,7 @@ impl Profile {
     }
 
     pub fn get_name(&self) -> Name {
-        self.name
+        self.name.clone()
     }
 
     pub fn set_name(&mut self, name: Name) {
@@ -62,7 +62,7 @@ impl Profile {
     }
 
     pub fn get_language(&self) -> Language {
-        self.language
+        self.language.clone()
     }
 
     pub fn set_language(&mut self, language: Language) {
@@ -78,7 +78,7 @@ impl Profile {
     }
 
     pub fn get_ethnicity(&self) -> Option<Ethnicity> {
-        self.ethnicity
+        self.ethnicity.clone()
     }
 
     pub fn set_ethnicity(&mut self, ethnicity: Option<Ethnicity> ) {
@@ -86,7 +86,7 @@ impl Profile {
     }
 
     pub fn get_preferred_units(&self) -> PreferredUnits {
-        self.preferred_units
+        self.preferred_units.clone()
     }
 
     pub fn set_preferred_units(&mut self, preferred_units: PreferredUnits) {
@@ -113,7 +113,7 @@ impl Profile {
         self.target_weight
     }
 
-    pub fn set_target_weight(&self, target_weight: Mass) {
+    pub fn set_target_weight(&mut self, target_weight: Mass) {
         self.target_weight = target_weight;
     }
 

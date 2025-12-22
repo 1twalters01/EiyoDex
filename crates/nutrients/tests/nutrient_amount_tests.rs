@@ -199,7 +199,8 @@ fn test_ordering() {
     )
     .unwrap();
 
-    assert!(nutrient_1 > nutrient_2 && nutrient_2 > nutrient_3);
+    assert!(nutrient_1 > nutrient_2);
+    assert!(nutrient_2 > nutrient_3);
 }
 
 #[test]

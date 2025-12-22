@@ -434,7 +434,7 @@ pub async fn fetch_unit_to_usd_exchange_rate(
     match datetime {
         None => {
             let url = format!(
-                "https://api.frankfurter.app/latest?amount=1&from={}&to={}"
+                "https://api.frankfurter.app/latest?amount=1&from={}&to={}",
                 unit.to_string(),
                 CurrencyUnit::USD.to_string(),
             );
@@ -445,7 +445,7 @@ pub async fn fetch_unit_to_usd_exchange_rate(
         Some(datetime) => {
             let date_str = datetime.format("%Y-%m-%d").to_string();
             let url = format!(
-                "https://api.frankfurter.app/{}?from={}&to={}"
+                "https://api.frankfurter.app/{}?from={}&to={}",
                 date_str,
                 unit.to_string(),
                 CurrencyUnit::USD.to_string(),
@@ -476,7 +476,7 @@ pub fn fetch_unit_to_usd_exchange_rate_sync(
     match datetime {
         None => {
             let url = format!(
-                "https://api.frankfurter.app/latest?amount=1&from={}&to={}"
+                "https://api.frankfurter.app/latest?amount=1&from={}&to={}",
                 unit.to_string(),
                 CurrencyUnit::USD.to_string(),
             );
@@ -487,7 +487,7 @@ pub fn fetch_unit_to_usd_exchange_rate_sync(
         Some(datetime) => {
             let date_str = datetime.format("%Y-%m-%d").to_string();
             let url = format!(
-                "https://api.frankfurter.app/{}?from={}&to={}"
+                "https://api.frankfurter.app/{}?from={}&to={}",
                 date_str,
                 unit.to_string(),
                 CurrencyUnit::USD.to_string(),
