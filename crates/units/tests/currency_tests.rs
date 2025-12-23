@@ -193,7 +193,7 @@ fn test_current_conversion_sync() {
 
 #[test]
 fn test_historic_conversion_async() {
-    let date = NaiveDate::from_ymd_opt(1999, 11, 25)
+    let date = NaiveDate::from_ymd_opt(1999, 11, 25);
 
     let value = 4.23;
     let currency_usd = Currency::from_usd(value);
@@ -209,6 +209,8 @@ fn test_historic_conversion_async() {
 
 #[test]
 fn test_historic_conversion_sync() {
+    let date = NaiveDate::from_ymd_opt(1999, 11, 25);
+
     let value = 4.23;
     let currency_usd = Currency::from_usd(value);
     let currency_gbp = Currency::from_gbp(value);
