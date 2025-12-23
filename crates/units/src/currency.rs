@@ -14,6 +14,7 @@ macro_rules! define_currencies {
     (
         $(
             $variant:ident => {
+                from_fn_name: $from_fn_name:ident,
                 symbol: $symbol:expr,
                 code: $code:expr,
                 unit_type: $unit_type:expr,
@@ -368,6 +369,12 @@ macro_rules! define_currencies {
             pub fn new(value: f64, unit: CurrencyUnit) -> Self {
                 Self { value, unit }
             }
+        
+            $(
+                pub fn $from_fn_name(value: f64) -> Self {
+                    Self::new(value, CurrencyUnit::$variant)
+                }
+            )+
 
             pub fn is_zero(&self) -> bool {
                 self.value == 0.0
@@ -377,12 +384,24 @@ macro_rules! define_currencies {
                 self.value < 0.0
             }
 
-            pub fn get_symbol(&self) -> &'static str {
-                self.unit.as_symbol()
+            pub fn get_value(&self) -> f64 {
+                self.value
+            }
+
+            pub fn set_value(&mut self, value: f64) {
+                self.value = value;
             }
 
             pub fn get_unit(&self) -> CurrencyUnit {
                 self.unit
+            }
+
+            pub fn set_unit(&mut self, unit: CurrencyUnit) {
+                self.unit = unit;
+            }
+
+            pub fn get_symbol(&self) -> &'static str {
+                self.unit.as_symbol()
             }
 
             pub fn get_unit_type(&self) -> &'static str {
@@ -395,10 +414,6 @@ macro_rules! define_currencies {
 
             pub fn get_code(&self) -> &'static str {
                 self.unit.as_code()
-            }
-
-            pub fn get_value(&self) -> f64 {
-                self.value
             }
 
             pub async fn convert_to_async(&self, target_unit: CurrencyUnit) -> Result<Currency, String> {
