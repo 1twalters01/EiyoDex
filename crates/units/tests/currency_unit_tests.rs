@@ -1,5 +1,5 @@
-use std::{collections::BTreeSet, str::FromStr};
 use chrono::NaiveDate;
+use std::{collections::BTreeSet, str::FromStr};
 use units::currency::CurrencyUnit;
 
 #[test]
@@ -67,7 +67,8 @@ fn test_to_dollar_now_sync() {
 async fn test_to_dollar_at_time_async() {
     // let date = NaiveDate::from_ymd_opt(1999, 11, 25).unwrap();
     // assert_eq!(CurrencyUnit::USD.to_usd_at_time_async(date).await, Ok(1f64));
-    // assert_eq!(CurrencyUnit::GBP.to_usd_at_time_async(date).await, Ok(1.615));
+    // assert_eq!(CurrencyUnit::GBP.to_usd_at_time_async(date).await,
+    // Ok(1.615));
 }
 
 #[test]
@@ -79,20 +80,33 @@ fn test_to_dollar_at_time_sync() {
 
 #[tokio::test]
 async fn test_get_current_exchange_rate_async() {
-    // assert_eq!(CurrencyUnit::USD.get_current_exchange_rate_async(&CurrencyUnit::USD).await, Ok(1f64));
-    // assert_eq!(CurrencyUnit::GBP.get_current_exchange_rate_async(&CurrencyUnit::USD).await, Ok(1.3435));
-    // assert_eq!(CurrencyUnit::USD.get_current_exchange_rate_async(&CurrencyUnit::GBP).await, Ok(0.744324525493115));
-    // assert_eq!(CurrencyUnit::GBP.get_current_exchange_rate_async(&CurrencyUnit::EUR).await, Ok(1.1438910174542356));
-    assert_eq!(CurrencyUnit::GBP.get_current_exchange_rate_async(&CurrencyUnit::GBP).await, Ok(1f64));
+    // assert_eq!(CurrencyUnit::USD.get_current_exchange_rate_async(&
+    // CurrencyUnit::USD).await, Ok(1f64)); assert_eq!(CurrencyUnit::GBP.
+    // get_current_exchange_rate_async(&CurrencyUnit::USD).await, Ok(1.3435));
+    // assert_eq!(CurrencyUnit::USD.get_current_exchange_rate_async(&
+    // CurrencyUnit::GBP).await, Ok(0.744324525493115));
+    // assert_eq!(CurrencyUnit::GBP.get_current_exchange_rate_async(&
+    // CurrencyUnit::EUR).await, Ok(1.1438910174542356));
+    assert_eq!(
+        CurrencyUnit::GBP
+            .get_current_exchange_rate_async(&CurrencyUnit::GBP)
+            .await,
+        Ok(1f64)
+    );
 }
 
 #[test]
 fn test_get_current_exchange_rate_sync() {
-    // assert_eq!(CurrencyUnit::USD.get_current_exchange_rate_sync(&CurrencyUnit::USD), Ok(1f64));
-    // assert_eq!(CurrencyUnit::GBP.get_current_exchange_rate_sync(&CurrencyUnit::USD), Ok(1.3435));
-    // assert_eq!(CurrencyUnit::USD.get_current_exchange_rate_sync(&CurrencyUnit::GBP), Ok(0.744324525493115));
-    // assert_eq!(CurrencyUnit::GBP.get_current_exchange_rate_sync(&CurrencyUnit::EUR), Ok(1.1438910174542356));
-    assert_eq!(CurrencyUnit::GBP.get_current_exchange_rate_sync(&CurrencyUnit::GBP), Ok(1f64));
+    // assert_eq!(CurrencyUnit::USD.get_current_exchange_rate_sync(&
+    // CurrencyUnit::USD), Ok(1f64)); assert_eq!(CurrencyUnit::GBP.
+    // get_current_exchange_rate_sync(&CurrencyUnit::USD), Ok(1.3435));
+    // assert_eq!(CurrencyUnit::USD.get_current_exchange_rate_sync(&
+    // CurrencyUnit::GBP), Ok(0.744324525493115)); assert_eq!(CurrencyUnit::GBP.
+    // get_current_exchange_rate_sync(&CurrencyUnit::EUR), Ok(1.1438910174542356));
+    assert_eq!(
+        CurrencyUnit::GBP.get_current_exchange_rate_sync(&CurrencyUnit::GBP),
+        Ok(1f64)
+    );
 }
 
 #[test]

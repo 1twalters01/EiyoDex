@@ -68,7 +68,7 @@ impl Profile {
     pub fn set_language(&mut self, language: Language) {
         self.language = language;
     }
-    
+
     pub fn get_gender(&self) -> Gender {
         self.gender.clone()
     }
@@ -81,7 +81,7 @@ impl Profile {
         self.ethnicity.clone()
     }
 
-    pub fn set_ethnicity(&mut self, ethnicity: Option<Ethnicity> ) {
+    pub fn set_ethnicity(&mut self, ethnicity: Option<Ethnicity>) {
         self.ethnicity = ethnicity;
     }
 

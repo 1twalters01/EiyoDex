@@ -1,8 +1,12 @@
-use nutrients::{nutrient::{link_parent_child, Nutrient}, schema::nutrients::NutrientType, units::NutrientUnit};
+use nutrients::{
+    nutrient::{link_parent_child, Nutrient},
+    schema::nutrients::NutrientType,
+    units::NutrientUnit,
+};
 use std::{
     cell::RefCell,
     collections::{BTreeSet, HashSet},
-    rc::{Rc},
+    rc::Rc,
 };
 use units::{mass::MassUnit, volume::VolumeUnit};
 use uuid::Uuid;
@@ -331,7 +335,9 @@ fn test_parents() {
     );
 
     let iron_weak = Rc::downgrade(&iron);
-    non_heme_iron.borrow_mut().add_parent_weak(iron_weak.clone());
+    non_heme_iron
+        .borrow_mut()
+        .add_parent_weak(iron_weak.clone());
     assert_eq!(
         non_heme_iron
             .borrow()
@@ -381,7 +387,8 @@ fn test_children() {
 
     link_parent_child(&iron.clone(), &non_heme_iron);
     assert_eq!(
-        non_heme_iron.borrow()
+        non_heme_iron
+            .borrow()
             .get_parents()
             .iter()
             .filter_map(|p| p.upgrade())
@@ -389,7 +396,10 @@ fn test_children() {
         Vec::from([iron.clone()])
     );
 
-    assert_eq!(iron.borrow().get_children(), Vec::from([heme_iron.clone(), non_heme_iron.clone()]));
+    assert_eq!(
+        iron.borrow().get_children(),
+        Vec::from([heme_iron.clone(), non_heme_iron.clone()])
+    );
     heme_iron.borrow_mut().add_parent(iron.clone());
     assert_eq!(
         heme_iron

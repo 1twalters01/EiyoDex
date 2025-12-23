@@ -1,4 +1,8 @@
-use nutrients::{nutrient::{link_parent_child, Nutrient}, nutrient_amount::NutrientAmount, units::NutrientUnit};
+use nutrients::{
+    nutrient::{link_parent_child, Nutrient},
+    nutrient_amount::NutrientAmount,
+    units::NutrientUnit,
+};
 use units::mass::MassUnit;
 
 #[test]
@@ -260,18 +264,22 @@ fn test_parent_vec() {
     )
     .unwrap();
 
-    // Create a dedecated type (probably a wrapper arround Vec with some functions) as a holder of
-    // different nutrient amounts?
-    let minerals = Vec::from([iron_amount, heme_iron_amount, non_heme_iron_amount, potassium_amount]);
-
+    // Create a dedecated type (probably a wrapper arround Vec with some functions)
+    // as a holder of different nutrient amounts?
+    let minerals = Vec::from([
+        iron_amount,
+        heme_iron_amount,
+        non_heme_iron_amount,
+        potassium_amount,
+    ]);
 
     // Link parents and children
     link_parent_child(&iron, &heme_iron);
     link_parent_child(&iron, &non_heme_iron);
 
+    // Want to get total amount from iron amount which should be itself's value
+    // + value from children
 
-    // Want to get total amount from iron amount which should be itself's value + value from children
-
-
-    // Want to get child amount from iron amount which should be the sum of values from children
+    // Want to get child amount from iron amount which should be the sum of
+    // values from children
 }

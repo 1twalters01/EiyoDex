@@ -371,7 +371,7 @@ macro_rules! define_currencies {
             pub fn new(value: f64, unit: CurrencyUnit) -> Self {
                 Self { value, unit }
             }
-        
+
             $(
                 pub fn $from_fn_name(value: f64) -> Self {
                     Self::new(value, CurrencyUnit::$variant)

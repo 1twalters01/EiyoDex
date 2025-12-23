@@ -1,7 +1,5 @@
 use chrono::NaiveDate;
-use units::{
-    currency::{Currency, CurrencyUnit},
-};
+use units::currency::{Currency, CurrencyUnit};
 
 #[test]
 fn test_new_currency() {
@@ -169,25 +167,31 @@ fn test_get_codes() {
 //     let currency_usd = Currency::from_usd(value);
 //     let currency_gbp = Currency::from_gbp(value);
 //
-//     assert_eq!(currency_usd.convert_to_async(CurrencyUnit::USD).await, Ok(Currency::from_usd(1f64 * value)));
-//     assert_eq!(currency_gbp.convert_to_async(CurrencyUnit::USD).await, Ok(Currency::from_usd(1.3435 * value)));
-//     assert_eq!(currency_usd.convert_to_async(CurrencyUnit::GBP).await, Ok(Currency::from_gbp(0.744324525493115 * value)));
-//     assert_eq!(currency_gbp.convert_to_async(CurrencyUnit::EUR).await, Ok(Currency::from_eur(1.1438910174542356 * value)));
-//     assert_eq!(currency_gbp.convert_to_async(CurrencyUnit::GBP).await, Ok(Currency::from_gbp(1f64 * value)));
-// }
+//     assert_eq!(currency_usd.convert_to_async(CurrencyUnit::USD).await,
+// Ok(Currency::from_usd(1f64 * value)));     assert_eq!(currency_gbp.
+// convert_to_async(CurrencyUnit::USD).await, Ok(Currency::from_usd(1.3435 *
+// value)));     assert_eq!(currency_usd.convert_to_async(CurrencyUnit::GBP).
+// await, Ok(Currency::from_gbp(0.744324525493115 * value)));     assert_eq!
+// (currency_gbp.convert_to_async(CurrencyUnit::EUR).await,
+// Ok(Currency::from_eur(1.1438910174542356 * value)));     assert_eq!
+// (currency_gbp.convert_to_async(CurrencyUnit::GBP).await,
+// Ok(Currency::from_gbp(1f64 * value))); }
 
 // #[test]
 // fn test_current_conversion_sync() {
 //     let value = 4.23;
 //     let currency_usd = Currency::from_usd(value);
 //     let currency_gbp = Currency::from_gbp(value);
-//     
-//     assert_eq!(currency_usd.convert_to_sync(CurrencyUnit::USD), Ok(Currency::from_usd(1f64 * value)));
-//     assert_eq!(currency_gbp.convert_to_sync(CurrencyUnit::USD), Ok(Currency::from_usd(1.3435 * value)));
-//     assert_eq!(currency_usd.convert_to_sync(CurrencyUnit::GBP), Ok(Currency::from_gbp(0.744324525493115 * value)));
-//     assert_eq!(currency_gbp.convert_to_sync(CurrencyUnit::EUR), Ok(Currency::from_eur(1.1438910174542356 * value)));
-//     assert_eq!(currency_gbp.convert_to_sync(CurrencyUnit::GBP), Ok(Currency::from_gbp(1f64 * value)));
-// }
+//
+//     assert_eq!(currency_usd.convert_to_sync(CurrencyUnit::USD),
+// Ok(Currency::from_usd(1f64 * value)));     assert_eq!(currency_gbp.
+// convert_to_sync(CurrencyUnit::USD), Ok(Currency::from_usd(1.3435 * value)));
+//     assert_eq!(currency_usd.convert_to_sync(CurrencyUnit::GBP),
+// Ok(Currency::from_gbp(0.744324525493115 * value)));     assert_eq!
+// (currency_gbp.convert_to_sync(CurrencyUnit::EUR),
+// Ok(Currency::from_eur(1.1438910174542356 * value)));     assert_eq!
+// (currency_gbp.convert_to_sync(CurrencyUnit::GBP), Ok(Currency::from_gbp(1f64
+// * value))); }
 
 // #[tokio::test]
 // async fn test_historic_conversion_async() {
@@ -197,12 +201,16 @@ fn test_get_codes() {
 //     let currency_usd = Currency::from_usd(value);
 //     let currency_gbp = Currency::from_gbp(value);
 //
-//     assert_eq!(currency_usd.convert_to_historic_async(CurrencyUnit::USD, date).await, Ok(Currency::from_usd(1f64 * value)));
-//     assert_eq!(currency_gbp.convert_to_historic_async(CurrencyUnit::USD, date).await, Ok(Currency::from_usd(1.615 * value)));
-//     assert_eq!(currency_usd.convert_to_historic_async(CurrencyUnit::GBP, date).await, Ok(Currency::from_gbp(0.744324525493115 * value)));
-//     assert_eq!(currency_gbp.convert_to_historic_async(CurrencyUnit::EUR, date).await, Ok(Currency::from_eur(1.3750532141336738 * value)));
-//     assert_eq!(currency_gbp.convert_to_historic_async(CurrencyUnit::GBP, date).await, Ok(Currency::from_gbp(1f64 * value)));
-// }
+//     assert_eq!(currency_usd.convert_to_historic_async(CurrencyUnit::USD,
+// date).await, Ok(Currency::from_usd(1f64 * value)));     assert_eq!
+// (currency_gbp.convert_to_historic_async(CurrencyUnit::USD, date).await,
+// Ok(Currency::from_usd(1.615 * value)));     assert_eq!(currency_usd.
+// convert_to_historic_async(CurrencyUnit::GBP, date).await,
+// Ok(Currency::from_gbp(0.744324525493115 * value)));     assert_eq!
+// (currency_gbp.convert_to_historic_async(CurrencyUnit::EUR, date).await,
+// Ok(Currency::from_eur(1.3750532141336738 * value)));     assert_eq!
+// (currency_gbp.convert_to_historic_async(CurrencyUnit::GBP, date).await,
+// Ok(Currency::from_gbp(1f64 * value))); }
 
 // #[test]
 // fn test_historic_conversion_sync() {
@@ -212,9 +220,13 @@ fn test_get_codes() {
 //     let currency_usd = Currency::from_usd(value);
 //     let currency_gbp = Currency::from_gbp(value);
 //
-//     assert_eq!(currency_usd.convert_to_historic_sync(CurrencyUnit::USD, date), Ok(Currency::from_usd(1f64 * 4.23)));
-//     assert_eq!(currency_gbp.convert_to_historic_sync(CurrencyUnit::USD, date), Ok(Currency::from_usd(1.615 * 4.23)));
-//     assert_eq!(currency_usd.convert_to_historic_sync(CurrencyUnit::GBP, date), Ok(Currency::from_gbp(0.744324525493115 * 4.23)));
-//     assert_eq!(currency_gbp.convert_to_historic_sync(CurrencyUnit::EUR, date), Ok(Currency::from_eur(1.3750532141336738 * 4.23)));
-//     assert_eq!(currency_gbp.convert_to_historic_sync(CurrencyUnit::GBP, date), Ok(Currency::from_gbp(1f64 * 4.23)));
-// }
+//     assert_eq!(currency_usd.convert_to_historic_sync(CurrencyUnit::USD,
+// date), Ok(Currency::from_usd(1f64 * 4.23)));     assert_eq!(currency_gbp.
+// convert_to_historic_sync(CurrencyUnit::USD, date),
+// Ok(Currency::from_usd(1.615 * 4.23)));     assert_eq!(currency_usd.
+// convert_to_historic_sync(CurrencyUnit::GBP, date),
+// Ok(Currency::from_gbp(0.744324525493115 * 4.23)));     assert_eq!
+// (currency_gbp.convert_to_historic_sync(CurrencyUnit::EUR, date),
+// Ok(Currency::from_eur(1.3750532141336738 * 4.23)));     assert_eq!
+// (currency_gbp.convert_to_historic_sync(CurrencyUnit::GBP, date),
+// Ok(Currency::from_gbp(1f64 * 4.23))); }

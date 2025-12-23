@@ -5,11 +5,7 @@ use std::{
 };
 use uuid::Uuid;
 
-use units::{
-    energy::EnergyUnit,
-    mass::MassUnit,
-    volume::VolumeUnit,
-};
+use units::{energy::EnergyUnit, mass::MassUnit, volume::VolumeUnit};
 
 use crate::{schema::nutrients::NutrientType, units::NutrientUnit};
 
@@ -655,21 +651,23 @@ impl Nutrient {
     }
 }
 
-pub fn link_parent_child(
-    parent: &Rc<RefCell<Nutrient>>,
-    child:  &Rc<RefCell<Nutrient>>,
-) {
+pub fn link_parent_child(parent: &Rc<RefCell<Nutrient>>, child: &Rc<RefCell<Nutrient>>) {
     // Add child to parent's children (strong reference)
-    if !parent.borrow().children.iter()
+    if !parent
+        .borrow()
+        .children
+        .iter()
         .any(|c| Rc::ptr_eq(c, child))
     {
         parent.borrow_mut().children.push(Rc::clone(child));
     }
 
     // Add parent to child's parents (weak reference)
-    if !child.borrow().parents.iter()
-        .any(|p| p.upgrade().map(|p_rc| Rc::ptr_eq(&p_rc, parent)).unwrap_or(false))
-    {
+    if !child.borrow().parents.iter().any(|p| {
+        p.upgrade()
+            .map(|p_rc| Rc::ptr_eq(&p_rc, parent))
+            .unwrap_or(false)
+    }) {
         child.borrow_mut().parents.push(Rc::downgrade(parent));
     }
 }

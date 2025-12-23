@@ -104,12 +104,13 @@ macro_rules! define_specific_currencies {
             density::{ Density, DensityUnit },
         };
 
-        #[derive(PartialEq)]
+        #[derive(Debug, PartialEq)]
         pub enum Denominator {
             MassDenominator(MassUnit),
             VolumeDenominator(VolumeUnit),
         }
 
+        #[derive(Debug, PartialEq)]
         pub enum DenominatorType {
             MassDenominator,
             VolumeDenominator,
@@ -214,7 +215,29 @@ macro_rules! define_specific_currencies {
                     _ => {
                         match formatted_string.as_str() {
                             $($all_identifier_lc | $all_unit_type_plural_lc=> Ok(SpecificCurrencyUnit::$all_variant),)+
-                            _ => Err("Unknown density unit"),
+                            _ => {
+                                let (currency_str, denominator_str) = formatted_string.split_once("/").ok_or("InvalidFormat")?;
+                                let currency_unit = CurrencyUnit::from_str(currency_str);
+                                let mass_unit = MassUnit::from_str(denominator_str);
+                                let volume_unit = VolumeUnit::from_str(denominator_str);
+
+                                if currency_unit.is_err() {
+                                    return Err("Unknown currency unit")
+                                }
+                                if mass_unit.is_err() && volume_unit.is_err() {
+                                    return Err("Unknown denominator")
+                                }
+                                if mass_unit.is_ok() {
+                                    let denominator = Denominator::MassDenominator(mass_unit.unwrap());
+                                    return Ok(SpecificCurrencyUnit::from_variants(currency_unit.unwrap(), denominator))
+                                }
+                                if volume_unit.is_ok() {
+                                    let denominator = Denominator::VolumeDenominator(volume_unit.unwrap());
+                                    return Ok(SpecificCurrencyUnit::from_variants(currency_unit.unwrap(), denominator))
+                                }
+
+                                return Err("Unknown specific currency unit");
+                            }
                         }
                     }
                 }
