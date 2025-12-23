@@ -251,6 +251,13 @@ macro_rules! define_specific_currencies {
         }
 
         impl SpecificCurrency {
+            pub fn from_variants(value: f64, currency_unit: CurrencyUnit, denominator: Denominator) -> Self {
+                Self {
+                    value,
+                    unit: SpecificCurrencyUnit::from_variants(currency_unit, denominator),
+                }
+            }
+
             pub fn new(value: f64, unit: SpecificCurrencyUnit) -> Self {
                 Self { value, unit }
             }

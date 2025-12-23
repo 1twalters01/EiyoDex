@@ -230,3 +230,47 @@ fn test_get_codes() {
 // Ok(Currency::from_eur(1.3750532141336738 * 4.23)));     assert_eq!
 // (currency_gbp.convert_to_historic_sync(CurrencyUnit::GBP, date),
 // Ok(Currency::from_gbp(1f64 * 4.23))); }
+
+#[test]
+fn test_multiplication() {
+    let value = 4.23;
+    let value_2 = 8.46;
+    let currency = Currency::from_usd(value);
+    let currency_2 = Currency::from_usd(value_2);
+
+    assert_eq!(currency * 2f64, currency_2);
+}
+
+#[test]
+fn test_division() {
+    let value = 8.46;
+    let value_2 = 4.23;
+    let currency = Currency::from_usd(value);
+    let currency_2 = Currency::from_usd(value_2);
+
+    assert_eq!(currency / 2f64, currency_2);
+}
+
+#[test]
+fn test_addition() {
+    let value_1 = 4.23;
+    let value_2 = 2.32;
+    let value_3 = 6.55;
+    let currency_1 = Currency::from_usd(value_1);
+    let currency_2 = Currency::from_usd(value_2);
+    let currency_3 = Currency::from_usd(value_3);
+
+    assert_eq!((currency_1 + currency_2).round(2), currency_3);
+}
+
+#[test]
+fn test_subtraction() {
+    let value_1 = 6.55;
+    let value_2 = 2.32;
+    let value_3 = 4.23;
+    let currency_1 = Currency::from_usd(value_1);
+    let currency_2 = Currency::from_usd(value_2);
+    let currency_3 = Currency::from_usd(value_3);
+
+    assert_eq!((currency_1 - currency_2).round(2), currency_3);
+}
