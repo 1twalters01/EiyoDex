@@ -16,6 +16,7 @@ macro_rules! define_currencies {
             $variant:ident => {
                 from_fn_name: $from_fn_name:ident,
                 as_fn_name: $as_fn_name:ident,
+                to_fn_name: $to_fn_name:ident,
                 symbol: $symbol:expr,
                 code: $code:expr,
                 unit_type: $unit_type:expr,
@@ -471,13 +472,13 @@ macro_rules! define_currencies {
                 pub fn $as_fn_name(&self) -> Result<f64, String> {
                     self.convert_to_sync(CurrencyUnit::$variant).map(|currency| currency.value)
                 }
-            )
+            )+
 
             $(
                 pub fn $to_fn_name(&self) -> Result<Currency, String> {
                     self.convert_to_sync(CurrencyUnit::$variant)
                 }
-            )
+            )+
         }
 
         impl fmt::Display for Currency {

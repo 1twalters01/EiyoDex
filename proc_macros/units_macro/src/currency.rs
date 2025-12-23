@@ -47,6 +47,9 @@ pub fn generate(input: TokenStream) -> TokenStream {
     }
 
     let variants = currencies.iter().map(|(key, data)| {
+        let from_fn_name = format_ident!("from_{}", data.code.to_lowercase());
+        let as_fn_name = format_ident!("as_{}", data.code.to_lowercase());
+        let to_fn_name = format_ident!("to_{}", data.code.to_lowercase());
         let variant = format_ident!("{}", key);
         let symbol = &data.symbol;
         let code = &data.code;
@@ -55,6 +58,9 @@ pub fn generate(input: TokenStream) -> TokenStream {
 
         quote! {
             #variant => {
+                from_fn_name: #from_fn_name,
+                as_fn_name: #as_fn_name,
+                to_fn_name: #to_fn_name,
                 symbol: #symbol,
                 code: #code,
                 unit_type: #unit_type,
