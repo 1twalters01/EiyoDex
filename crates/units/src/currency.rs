@@ -1,3 +1,14 @@
+#[derive(Deserialize)]
+struct ExchangeResponse {
+    rates: Rates,
+}
+
+#[derive(Deserialize)]
+struct Rates {
+    #[serde(rename = "USD")]
+    usd: f64,
+}
+
 #[macro_export]
 macro_rules! define_currencies {
     (
@@ -10,7 +21,7 @@ macro_rules! define_currencies {
             }
         ),+ $(,)?
     ) => {
-        use chrono::{NaiveDateTime, Duration};
+        use chrono::{NaiveDate, Duration};
         use std::{
             cmp::Ordering,
             fmt,
@@ -37,17 +48,6 @@ macro_rules! define_currencies {
                 &[$(CurrencyUnit::$variant),+]
             }
 
-            pub fn metadata(&self) -> CurrencyMetadata {
-                match self {
-                    $(CurrencyUnit::$variant => CurrencyMetadata {
-                        symbol: $symbol,
-                        code: $code,
-                        unit_type: $unit_type,
-                        unit_type_plural: $unit_type_plural,
-                    }),+
-                }
-            }
-
             pub fn as_symbol(&self) -> &'static str {
                 match self {
                     $(CurrencyUnit::$variant => $symbol),+
@@ -71,6 +71,271 @@ macro_rules! define_currencies {
                     $(CurrencyUnit::$variant => $unit_type_plural),+
                 }
             }
+
+            pub async fn to_usd_now_async(&self) -> Result<f64, String> {
+                if self == &CurrencyUnit::USD {
+                    return Ok(1f64)
+                }
+
+                let url = format!(
+                    "https://api.frankfurter.app/latest?amount=1&from={}&to={}",
+                    self.to_string(),
+                    CurrencyUnit::USD.as_code(),
+                );
+                let resp = reqwest::get(&url).await.map_err(|e| e.to_string())?;
+                let data: ExchangeResponse = resp.json().await.map_err(|e| e.to_string())?;
+                Ok(data.rates.usd)
+            }
+
+            pub fn to_usd_now_sync(&self) -> Result<f64, String> {
+                if self == &CurrencyUnit::USD {
+                    return Ok(1f64)
+                }
+
+                let url = format!(
+                    "https://api.frankfurter.app/latest?amount=1&from={}&to={}",
+                    self.to_string(),
+                    CurrencyUnit::USD.as_code(),
+                );
+                let resp = reqwest::blocking::get(&url).map_err(|e| e.to_string())?;
+                let data: ExchangeResponse = resp.json().map_err(|e| e.to_string())?;
+                Ok(data.rates.usd)
+            }
+
+            pub async fn to_usd_at_time_async(&self, date: NaiveDate) -> Result<f64, String> {
+                if self == &CurrencyUnit::USD {
+                    return Ok(1f64)
+                }
+
+                let date_str = date.format("%Y-%m-%d").to_string();
+                let url = format!(
+                    "https://api.frankfurter.app/{}?from={}&to={}",
+                    date_str,
+                    self.to_string(),
+                    CurrencyUnit::USD.to_string(),
+                );
+
+                let resp = reqwest::get(&url).await.map_err(|e| e.to_string())?;
+                let data: ExchangeResponse = resp.json().await.map_err(|e| e.to_string())?;
+                Ok(data.rates.usd)
+            }
+
+
+            pub fn to_usd_at_time_sync(&self, date: NaiveDate) -> Result<f64, String> {
+                if self == &CurrencyUnit::USD {
+                    return Ok(1f64)
+                }
+
+                let date_str = date.format("%Y-%m-%d").to_string();
+                let url = format!(
+                    "https://api.frankfurter.app/{}?from={}&to={}",
+                    date_str,
+                    self.to_string(),
+                    CurrencyUnit::USD.to_string(),
+                );
+
+                let resp = reqwest::blocking::get(&url).map_err(|e| e.to_string())?;
+                let data: ExchangeResponse = resp.json().map_err(|e| e.to_string())?;
+                Ok(data.rates.usd)
+            }
+
+            pub async fn get_current_exchange_rate_async(&self, target_unit: &CurrencyUnit) -> Result<f64, String> {
+                if self == target_unit {
+                    return Ok(1f64)
+                }
+
+                let cache_service = CacheService::new().map_err(|e| e.to_string())?;
+                let duration_in_seconds: Option<u64> = Some(Duration::days(1).num_seconds() as u64);
+
+                let current_key = format!("exchange_rate: {} to {}", self, CurrencyUnit::USD);
+                let current_value: f64 = match self {
+                    CurrencyUnit::USD => 1f64,
+                    _ => {
+                        match cache_service.get_value(current_key.as_str()) {
+                            Ok(Some(current_value)) => current_value,
+                            Ok(None) => {
+                                let current_value: f64 = match self.to_usd_now_async().await {
+                                    Ok(val) => val,
+                                    Err(err) => return Err(err)
+                                };
+                                let _ = cache_service.store_key_value(current_key.as_str(), current_value, duration_in_seconds);
+                                current_value
+                            },
+                            Err(err) => return Err(err.to_string()),
+                        }
+                    }
+                };
+
+                let target_key = format!("exchange_rate: {} to {}", target_unit, CurrencyUnit::USD);
+                let target_value: f64 = match target_unit {
+                    CurrencyUnit::USD => 1f64,
+                    _ => {
+                        match cache_service.get_value(target_key.as_str()) {
+                            Ok(Some(target_value)) => target_value,
+                            Ok(None) => {
+                                let target_value: f64 = match target_unit.to_usd_now_async().await {
+                                    Ok(val) => val,
+                                    Err(err) => return Err(err)
+                                };
+                                let _ = cache_service.store_key_value(target_key.as_str(), target_value, duration_in_seconds);
+                                target_value
+                            }
+                            Err(err) => return Err(err.to_string()),
+                        }
+                    }
+                };
+
+                Ok(current_value / target_value)
+            }
+
+            pub fn get_current_exchange_rate_sync(&self, target_unit: &CurrencyUnit) -> Result<f64, String> {
+                if self == target_unit {
+                    return Ok(1f64)
+                }
+
+                let cache_service = CacheService::new().map_err(|e| e.to_string())?;
+                let duration_in_seconds: Option<u64> = Some(Duration::days(1).num_seconds() as u64);
+
+                let current_key = format!("exchange_rate: {} to {}", self, CurrencyUnit::USD);
+                let current_value: f64 = match self {
+                    CurrencyUnit::USD => 1f64,
+                    _ => {
+                        match cache_service.get_value(current_key.as_str()) {
+                            Ok(Some(current_value)) => current_value,
+                            Ok(None) => {
+                                let current_value: f64 = match self.to_usd_now_sync() {
+                                    Ok(val) => val,
+                                    Err(err) => return Err(err)
+                                };
+                                let _ = cache_service.store_key_value(current_key.as_str(), current_value, duration_in_seconds);
+                                current_value
+                            },
+                            Err(err) => return Err(err.to_string()),
+                        }
+                    }
+                };
+
+                let target_key = format!("exchange_rate: {} to {}", target_unit, CurrencyUnit::USD);
+                let target_value: f64 = match target_unit {
+                    CurrencyUnit::USD => 1f64,
+                    _ => {
+                        match cache_service.get_value(target_key.as_str()) {
+                            Ok(Some(target_value)) => target_value,
+                            Ok(None) => {
+                                let target_value: f64 = match target_unit.to_usd_now_sync() {
+                                    Ok(val) => val,
+                                    Err(err) => return Err(err)
+                                };
+                                let _ = cache_service.store_key_value(target_key.as_str(), target_value, duration_in_seconds);
+                                target_value
+                            }
+                            Err(err) => return Err(err.to_string()),
+                        }
+                    }
+                };
+
+                Ok(current_value / target_value)
+            }
+
+            pub async fn get_past_exchange_rate_async(&self, target_unit: &CurrencyUnit, datetime: NaiveDate) -> Result<f64, String> {
+                if self == target_unit {
+                    return Ok(1f64)
+                }
+
+                let cache_service = CacheService::new().map_err(|e| e.to_string())?;
+                let duration_in_seconds: Option<u64> = Some(Duration::days(1).num_seconds() as u64);
+                let date_str = datetime.format("%Y-%m-%d").to_string();
+
+                let current_key = format!("historical_exchange_rate: {} to {} at {}", self, CurrencyUnit::USD, date_str);
+                let current_value: f64 = match self {
+                    CurrencyUnit::USD => 1f64,
+                    _ => {
+                        match cache_service.get_value(current_key.as_str()) {
+                            Ok(Some(current_value)) => current_value,
+                            Ok(None) => {
+                                let current_value: f64 = match self.to_usd_at_time_async(datetime).await {
+                                    Ok(val) => val,
+                                    Err(err) => return Err(err)
+                                };
+                                let _ = cache_service.store_key_value(current_key.as_str(), current_value, duration_in_seconds);
+                                current_value
+                            },
+                            Err(err) => return Err(err.to_string()),
+                        }
+                    }
+                };
+
+                let target_key = format!("exchange_rate: {} to {}", target_unit, CurrencyUnit::USD);
+                let target_value: f64 = match target_unit {
+                    CurrencyUnit::USD => 1f64,
+                    _ => {
+                        match cache_service.get_value(target_key.as_str()) {
+                            Ok(Some(target_value)) => target_value,
+                            Ok(None) => {
+                                let target_value: f64 = match self.to_usd_at_time_async(datetime).await {
+                                    Ok(val) => val,
+                                    Err(err) => return Err(err)
+                                };
+                                let _ = cache_service.store_key_value(target_key.as_str(), target_value, duration_in_seconds);
+                                target_value
+                            }
+                            Err(err) => return Err(err.to_string()),
+                        }
+                    }
+                };
+
+                Ok(current_value / target_value)
+            }
+
+            pub fn get_past_exchange_rate_sync(&self, target_unit: &CurrencyUnit, datetime: NaiveDate) -> Result<f64, String> {
+                if self == target_unit {
+                    return Ok(1f64)
+                }
+
+                let cache_service = CacheService::new().map_err(|e| e.to_string())?;
+                let duration_in_seconds: Option<u64> = Some(Duration::days(1).num_seconds() as u64);
+                let date_str = datetime.format("%Y-%m-%d").to_string();
+
+                let current_key = format!("historical_exchange_rate: {} to {} at {}", self, CurrencyUnit::USD, date_str);
+                let current_value: f64 = match self {
+                    CurrencyUnit::USD => 1f64,
+                    _ => {
+                        match cache_service.get_value(current_key.as_str()) {
+                            Ok(Some(current_value)) => current_value,
+                            Ok(None) => {
+                                let current_value: f64 = match self.to_usd_at_time_sync(datetime) {
+                                    Ok(val) => val,
+                                    Err(err) => return Err(err)
+                                };
+                                let _ = cache_service.store_key_value(current_key.as_str(), current_value, duration_in_seconds);
+                                current_value
+                            },
+                            Err(err) => return Err(err.to_string()),
+                        }
+                    }
+                };
+
+                let target_key = format!("exchange_rate: {} to {}", target_unit, CurrencyUnit::USD);
+                let target_value: f64 = match target_unit {
+                    CurrencyUnit::USD => 1f64,
+                    _ => {
+                        match cache_service.get_value(target_key.as_str()) {
+                            Ok(Some(target_value)) => target_value,
+                            Ok(None) => {
+                                let target_value: f64 = match self.to_usd_at_time_sync(datetime) {
+                                    Ok(val) => val,
+                                    Err(err) => return Err(err)
+                                };
+                                let _ = cache_service.store_key_value(target_key.as_str(), target_value, duration_in_seconds);
+                                target_value
+                            }
+                            Err(err) => return Err(err.to_string()),
+                        }
+                    }
+                };
+
+                Ok(current_value / target_value)
+            }
         }
 
         impl FromStr for CurrencyUnit {
@@ -79,8 +344,7 @@ macro_rules! define_currencies {
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 let formatted_string = s.trim().to_uppercase();
                 for variant in Self::get_enumerations() {
-                    let variant_metadata = variant.metadata();
-                    if formatted_string == variant_metadata.code || formatted_string == variant_metadata.symbol {
+                    if formatted_string == variant.as_code() || formatted_string == variant.as_symbol() {
                         return Ok(*variant);
                     }
                 }
@@ -137,11 +401,11 @@ macro_rules! define_currencies {
                 self.value
             }
 
-            pub async fn convert_to(&self, target_unit: CurrencyUnit) -> Result<Currency, String> {
+            pub async fn convert_to_async(&self, target_unit: CurrencyUnit) -> Result<Currency, String> {
                 if self.unit == target_unit {
                     Ok(*self)
                 } else {
-                    match get_current_exchange_rate(self.unit, target_unit).await {
+                    match self.unit.get_current_exchange_rate_async(&target_unit).await {
                         Ok(rate) => Ok(Currency::new(self.value * rate, target_unit)),
                         Err(err) => Err(err),
                     }
@@ -152,7 +416,29 @@ macro_rules! define_currencies {
                 if self.unit == target_unit {
                     Ok(*self)
                 } else {
-                    match get_current_exchange_rate_sync(self.unit, target_unit) {
+                    match self.unit.get_current_exchange_rate_sync(&target_unit) {
+                        Ok(rate) => Ok(Currency::new(self.value * rate, target_unit)),
+                        Err(err) => Err(err),
+                    }
+                }
+            }
+
+            pub async fn convert_to_historic_async(&self, target_unit: CurrencyUnit, date: NaiveDate) -> Result<Currency, String> {
+                if self.unit == target_unit {
+                    Ok(*self)
+                } else {
+                    match self.unit.get_past_exchange_rate_async(&target_unit, date).await {
+                        Ok(rate) => Ok(Currency::new(self.value * rate, target_unit)),
+                        Err(err) => Err(err),
+                    }
+                }
+            }
+
+            pub fn convert_to_historic_sync(&self, target_unit: CurrencyUnit, date: NaiveDate) -> Result<Currency, String> {
+                if self.unit == target_unit {
+                    Ok(*self)
+                } else {
+                    match self.unit.get_past_exchange_rate_sync(&target_unit, date) {
                         Ok(rate) => Ok(Currency::new(self.value * rate, target_unit)),
                         Err(err) => Err(err),
                     }
@@ -211,304 +497,7 @@ macro_rules! define_currencies {
                 }
             }
         }
-
-
-        #[derive(Deserialize)]
-        struct ExchangeResponse {
-            result: f64,
-        }
-
-        pub async fn get_current_exchange_rate(current_unit: CurrencyUnit, target_unit: CurrencyUnit) -> Result<f64, String> {
-            if current_unit == target_unit {
-                return Ok(1f64)
-            }
-            let datetime = None;
-
-            let cache_service = CacheService::new().map_err(|e| e.to_string())?;
-            let duration_in_seconds: Option<u64> = Some(Duration::days(1).num_seconds() as u64);
-
-            let current_key = format!("exchange_rate: {} to {}", current_unit, CurrencyUnit::USD);
-            let current_value: f64 = match current_unit {
-                CurrencyUnit::USD => 1f64,
-                _ => {
-                    match cache_service.get_value(current_key.as_str()) {
-                        Ok(Some(current_value)) => current_value,
-                        Ok(None) => {
-                            let current_value: f64 = match fetch_unit_to_usd_exchange_rate(current_unit, datetime).await {
-                                Ok(val) => val,
-                                Err(err) => return Err(err)
-                            };
-                            let _ = cache_service.store_key_value(current_key.as_str(), current_value, duration_in_seconds);
-                            current_value
-                        },
-                        Err(err) => return Err(err.to_string()),
-                    }
-                }
-            };
-
-            let target_key = format!("exchange_rate: {} to {}", target_unit, CurrencyUnit::USD);
-            let target_value: f64 = match target_unit {
-                CurrencyUnit::USD => 1f64,
-                _ => {
-                    match cache_service.get_value(target_key.as_str()) {
-                        Ok(Some(target_value)) => target_value,
-                        Ok(None) => {
-                            let target_value: f64 = match fetch_unit_to_usd_exchange_rate(target_unit, datetime).await {
-                                Ok(val) => val,
-                                Err(err) => return Err(err)
-                            };
-                            let _ = cache_service.store_key_value(target_key.as_str(), target_value, duration_in_seconds);
-                            target_value
-                        }
-                        Err(err) => return Err(err.to_string()),
-                    }
-                }
-            };
-
-            return Ok(current_value / target_value)
-        }
-
-        pub fn get_current_exchange_rate_sync(current_unit: CurrencyUnit, target_unit: CurrencyUnit) -> Result<f64, String> {
-            if current_unit == target_unit {
-                return Ok(1f64)
-            }
-
-            let datetime = None;
-
-            let cache_service = CacheService::new().map_err(|e| e.to_string())?;
-            let duration_in_seconds: Option<u64> = Some(Duration::days(1).num_seconds() as u64);
-
-            let current_key = format!("exchange_rate: {} to {}", current_unit, CurrencyUnit::USD);
-            let current_value: f64 = match current_unit {
-                CurrencyUnit::USD => 1f64,
-                _ => {
-                    match cache_service.get_value(current_key.as_str()) {
-                        Ok(Some(current_value)) => current_value,
-                        Ok(None) => {
-                            let current_value: f64 = match fetch_unit_to_usd_exchange_rate_sync(current_unit, datetime) {
-                                Ok(val) => val,
-                                Err(err) => return Err(err)
-                            };
-                            let _ = cache_service.store_key_value(current_key.as_str(), current_value, duration_in_seconds);
-                            current_value
-                        },
-                        Err(err) => return Err(err.to_string()),
-                    }
-                }
-            };
-
-            let target_key = format!("exchange_rate: {} to {}", target_unit, CurrencyUnit::USD);
-            let target_value: f64 = match target_unit {
-                CurrencyUnit::USD => 1f64,
-                _ => {
-                    match cache_service.get_value(target_key.as_str()) {
-                        Ok(Some(target_value)) => target_value,
-                        Ok(None) => {
-                            let target_value: f64 = match fetch_unit_to_usd_exchange_rate_sync(target_unit, datetime) {
-                                Ok(val) => val,
-                                Err(err) => return Err(err)
-                            };
-                            let _ = cache_service.store_key_value(target_key.as_str(), target_value, duration_in_seconds);
-                            target_value
-                        }
-                        Err(err) => return Err(err.to_string()),
-                    }
-                }
-            };
-
-            Ok(current_value / target_value)
-        }
-
-        // example: {rates":{"EUR":0.92}}
-        #[derive(Deserialize)]
-        struct HistoricalResponse {
-            rates: std::collections::HashMap<String, f64>,
-        }
-
-        pub async fn get_past_exchange_rate(current_unit: CurrencyUnit, target_unit: CurrencyUnit, datetime: NaiveDateTime) -> Result<f64, String> {
-            if current_unit == target_unit {
-                return Ok(1f64)
-            }
-
-            let cache_service = CacheService::new().map_err(|e| e.to_string())?;
-            let duration_in_seconds: Option<u64> = Some(Duration::days(1).num_seconds() as u64);
-            let date_str = datetime.format("%Y-%m-%d").to_string();
-
-            let current_key = format!("historical_exchange_rate: {} to {} at {}", current_unit, CurrencyUnit::USD, date_str);
-            let current_value: f64 = match current_unit {
-                CurrencyUnit::USD => 1f64,
-                _ => {
-                    match cache_service.get_value(current_key.as_str()) {
-                        Ok(Some(current_value)) => current_value,
-                        Ok(None) => {
-                            let current_value: f64 = match fetch_unit_to_usd_exchange_rate_sync(current_unit, Some(datetime)) {
-                                Ok(val) => val,
-                                Err(err) => return Err(err)
-                            };
-                            let _ = cache_service.store_key_value(current_key.as_str(), current_value, duration_in_seconds);
-                            current_value
-                        },
-                        Err(err) => return Err(err.to_string()),
-                    }
-                }
-            };
-
-            let target_key = format!("exchange_rate: {} to {}", target_unit, CurrencyUnit::USD);
-            let target_value: f64 = match target_unit {
-                CurrencyUnit::USD => 1f64,
-                _ => {
-                    match cache_service.get_value(target_key.as_str()) {
-                        Ok(Some(target_value)) => target_value,
-                        Ok(None) => {
-                            let target_value: f64 = match fetch_unit_to_usd_exchange_rate(target_unit, Some(datetime)).await {
-                                Ok(val) => val,
-                                Err(err) => return Err(err)
-                            };
-                            let _ = cache_service.store_key_value(target_key.as_str(), target_value, duration_in_seconds);
-                            target_value
-                        }
-                        Err(err) => return Err(err.to_string()),
-                    }
-                }
-            };
-
-            Ok(current_value / target_value)
-        }
-
-        pub fn get_past_exchange_rate_sync(current_unit: CurrencyUnit, target_unit: CurrencyUnit, datetime: NaiveDateTime) -> Result<f64, String> {
-            if current_unit == target_unit {
-                return Ok(1f64)
-            }
-
-            let cache_service = CacheService::new().map_err(|e| e.to_string())?;
-            let duration_in_seconds: Option<u64> = Some(Duration::days(1).num_seconds() as u64);
-            let date_str = datetime.format("%Y-%m-%d").to_string();
-
-            let current_key = format!("historical_exchange_rate: {} to {} at {}", current_unit, CurrencyUnit::USD, date_str);
-            let current_value: f64 = match current_unit {
-                CurrencyUnit::USD => 1f64,
-                _ => {
-                    match cache_service.get_value(current_key.as_str()) {
-                        Ok(Some(current_value)) => current_value,
-                        Ok(None) => {
-                            let current_value: f64 = match fetch_unit_to_usd_exchange_rate_sync(current_unit, Some(datetime)) {
-                                Ok(val) => val,
-                                Err(err) => return Err(err)
-                            };
-                            let _ = cache_service.store_key_value(current_key.as_str(), current_value, duration_in_seconds);
-                            current_value
-                        },
-                        Err(err) => return Err(err.to_string()),
-                    }
-                }
-            };
-
-            let target_key = format!("exchange_rate: {} to {}", target_unit, CurrencyUnit::USD);
-            let target_value: f64 = match target_unit {
-                CurrencyUnit::USD => 1f64,
-                _ => {
-                    match cache_service.get_value(target_key.as_str()) {
-                        Ok(Some(target_value)) => target_value,
-                        Ok(None) => {
-                            let target_value: f64 = match fetch_unit_to_usd_exchange_rate_sync(target_unit, Some(datetime)) {
-                                Ok(val) => val,
-                                Err(err) => return Err(err)
-                            };
-                            let _ = cache_service.store_key_value(target_key.as_str(), target_value, duration_in_seconds);
-                            target_value
-                        }
-                        Err(err) => return Err(err.to_string()),
-                    }
-                }
-            };
-
-            Ok(current_value / target_value)
-        }
    };
-}
-
-pub async fn fetch_unit_to_usd_exchange_rate(
-    unit: CurrencyUnit,
-    datetime: Option<NaiveDateTime>,
-) -> Result<f64, String> {
-    match datetime {
-        None => {
-            let url = format!(
-                "https://api.frankfurter.app/latest?amount=1&from={}&to={}",
-                unit.to_string(),
-                CurrencyUnit::USD.to_string(),
-            );
-            let resp = reqwest::get(&url).await.map_err(|e| e.to_string())?;
-            let data: ExchangeResponse = resp.json().await.map_err(|e| e.to_string())?;
-            Ok(data.result)
-        }
-        Some(datetime) => {
-            let date_str = datetime.format("%Y-%m-%d").to_string();
-            let url = format!(
-                "https://api.frankfurter.app/{}?from={}&to={}",
-                date_str,
-                unit.to_string(),
-                CurrencyUnit::USD.to_string(),
-            );
-
-            let resp = reqwest::get(&url).await.map_err(|e| e.to_string())?;
-
-            let data: HistoricalResponse = resp.json().await.map_err(|e| e.to_string())?;
-            let value = data
-                .rates
-                .get(&unit.to_string())
-                .cloned()
-                .ok_or_else(|| "Rate not found".to_string())
-                .ok();
-
-            match value {
-                Some(val) => Ok(val),
-                None => return Err(String::from("No rate found")),
-            }
-        }
-    }
-}
-
-pub fn fetch_unit_to_usd_exchange_rate_sync(
-    unit: CurrencyUnit,
-    datetime: Option<NaiveDateTime>,
-) -> Result<f64, String> {
-    match datetime {
-        None => {
-            let url = format!(
-                "https://api.frankfurter.app/latest?amount=1&from={}&to={}",
-                unit.to_string(),
-                CurrencyUnit::USD.to_string(),
-            );
-            let resp = reqwest::blocking::get(&url).map_err(|e| e.to_string())?;
-            let data: ExchangeResponse = resp.json().map_err(|e| e.to_string())?;
-            Ok(data.result)
-        }
-        Some(datetime) => {
-            let date_str = datetime.format("%Y-%m-%d").to_string();
-            let url = format!(
-                "https://api.frankfurter.app/{}?from={}&to={}",
-                date_str,
-                unit.to_string(),
-                CurrencyUnit::USD.to_string(),
-            );
-
-            let resp = reqwest::blocking::get(&url).map_err(|e| e.to_string())?;
-
-            let data: HistoricalResponse = resp.json().map_err(|e| e.to_string())?;
-            let value = data
-                .rates
-                .get(&unit.to_string())
-                .cloned()
-                .ok_or_else(|| "Rate not found".to_string())
-                .ok();
-
-            match value {
-                Some(val) => Ok(val),
-                None => return Err(String::from("No rate found")),
-            }
-        }
-    }
 }
 
 use units_macro::include_currencies_from_json;

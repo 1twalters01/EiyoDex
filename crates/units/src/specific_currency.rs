@@ -95,7 +95,6 @@ macro_rules! define_specific_currencies {
         use serde::{Deserialize, Serialize};
         use crate::{
             currency::{
-                get_current_exchange_rate_sync,
                 Currency,
                 CurrencyUnit::{self, *},
             },
@@ -248,7 +247,7 @@ macro_rules! define_specific_currencies {
             $(
                 pub fn $all_as_fn_name(&self) -> Result<f64, &'static str> {
                     if let DenominatorType::$all_denominator_unit_type = self.get_unit().get_denominator_type() {
-                        let numerator_factor: f64 = get_current_exchange_rate_sync(self.unit.get_currency_unit(), $all_currency_unit_variant).expect("Unable to get_current_exchange_rate_sync");
+                        let numerator_factor: f64 = self.unit.get_currency_unit().get_current_exchange_rate_sync(&$all_currency_unit_variant).expect("Unable to get_current_exchange_rate_sync");
                         let denominator_factor: f64 = self.unit.si_factor() / $all_si_factor;
                         return Ok(self.value * numerator_factor * denominator_factor)
                     } else {
