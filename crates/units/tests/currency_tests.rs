@@ -4,22 +4,62 @@ use units::{
 
 #[test]
 fn test_new_currency() {
+    let value = 10f64;
+
+    let new_dollars = Currency::new(value, CurrencyUnit::USD);
+    let from_dollars = Currency::from_usd(value);
+    assert_eq!(new_dollars, from_dollars);
+
+    let new_pounds = Currency::new(value, CurrencyUnit::GBP);
+    let from_pounds = Currency::from_gbp(value);
+    assert_eq!(new_pounds, from_pounds);
+
+    let new_euros = Currency::new(value, CurrencyUnit::EUR);
+    let from_euros = Currency::from_eur(value);
+    assert_eq!(new_euros, from_euros);
+
+    let new_yen = Currency::new(value, CurrencyUnit::JPY);
+    let from_yen = Currency::from_jpy(value);
+    assert_eq!(new_yen, from_yen);
 }
 
 #[test]
 fn test_currency_rounding() {
+    let value = 5.6803294822;
+    let value_2 = 147.20473186;
+
+    let mut currency_new = Currency::new(value, CurrencyUnit::USD);
+    let currency_rounded = currency_new.round(5);
+    let currency_coded = Currency::new(5.68033, CurrencyUnit::USD);
+    assert_eq!(currency_rounded, currency_coded);
+
+    let mut currency_new_2 = Currency::new(value_2, CurrencyUnit::USD);
+    let currency_rounded_2 = mass_new_2.round(5);
+    let currency_coded_2 = Currency::new(147.20473, CurrencyUnit::USD);
+    assert_eq!(currency_rounded_2, currency_coded_2);
 }
 
 #[test]
 fn test_currency_as_fn() {
-}
+    let value_gbp = 5.67;
+    let gbp = Currency::from_gbp(value_gbp);
+    let gbp_to_eur = gbp.as_eur();
 
-#[test]
-fn test_currency_to_unit() {
+    let value_eur = value_gbp * 1.15;
+
+    assert_eq!(value_eur, gbp_to_eur.unwrap().value);
 }
 
 #[test]
 fn test_currency_to_fn() {
+    let value_gbp = 5.67;
+    let value_eur = value_gbp * 1.15;
+
+    let gbp = Currency::from_gbp(value_gbp);
+    let eur = Currency::from_eur(value_eur);
+    let gbp_to_eur = gbp.as_eur();
+
+    assert_eq!(eur, gbp_to_eur.unwrap());
 }
 
 #[test]
@@ -122,10 +162,61 @@ fn test_get_codes() {
     assert_eq!(currency_jpy.get_code(), "JPY");
 }
 
-#[test]
-fn test_current_conversion() {
+#[tokio::test]
+async fn test_current_conversion_async() {
+    let value = 4.23;
+    let currency_usd = Currency::from_usd(value);
+    let currency_gbp = Currency::from_gbp(value);
+    let currency_eur = Currency::from_eur(value);
+
+    assert_eq!(currency_usd.convert_to_async(CurrencyUnit::USD).await, Ok(1f64 * 4.23));
+    assert_eq!(currency_gbp.convert_to_async(CurrencyUnit::USD).await, Ok(1.3435 * 4.23));
+    assert_eq!(currency_usd.convert_to_async(CurrencyUnit::GBP).await, Ok(0.74 * 4.23));
+    assert_eq!(currency_gbp.convert_to_async(CurrencyUnit::EUR).await, Ok(1.15 * 4.23));
+    assert_eq!(currency_gbp.convert_to_async(CurrencyUnit::GBP).await, Ok(1f64 * 4.23));
 }
 
 #[test]
-fn test_historic_conversion() {
+fn test_current_conversion_sync() {
+    let value = 4.23;
+    let currency_usd = Currency::from_usd(value);
+    let currency_gbp = Currency::from_gbp(value);
+    let currency_eur = Currency::from_eur(value);
+
+    assert_eq!(currency_usd.convert_to_sync(CurrencyUnit::USD), Ok(1f64 * 4.23));
+    assert_eq!(currency_gbp.convert_to_sync(CurrencyUnit::USD), Ok(1.3435 * 4.23));
+    assert_eq!(currency_usd.convert_to_sync(CurrencyUnit::GBP), Ok(0.74 * 4.23));
+    assert_eq!(currency_gbp.convert_to_sync(CurrencyUnit::EUR), Ok(1.15 * 4.23));
+    assert_eq!(currency_gbp.convert_to_sync(&CurrencyUnit::GBP), Ok(1f64 * 4.23));
+
+}
+
+#[test]
+fn test_historic_conversion_async() {
+    let date = NaiveDate::from_ymd_opt(1999, 11, 25)
+
+    let value = 4.23;
+    let currency_usd = Currency::from_usd(value);
+    let currency_gbp = Currency::from_gbp(value);
+    let currency_eur = Currency::from_eur(value);
+
+    assert_eq!(currency_usd.convert_to_historic_async(CurrencyUnit::USD, date).await, Ok(1f64 * 4.23));
+    assert_eq!(currency_gbp.convert_to_historic_async(CurrencyUnit::USD, date).await, Ok(1.3435 * 4.23));
+    assert_eq!(currency_usd.convert_to_historic_async(CurrencyUnit::GBP, date).await, Ok(0.74 * 4.23));
+    assert_eq!(currency_gbp.convert_to_historic_async(CurrencyUnit::EUR, date).await, Ok(1.15 * 4.23));
+    assert_eq!(currency_gbp.convert_to_historic_async(CurrencyUnit::GBP, date).await, Ok(1f64 * 4.23));
+}
+
+#[test]
+fn test_historic_conversion_sync() {
+    let value = 4.23;
+    let currency_usd = Currency::from_usd(value);
+    let currency_gbp = Currency::from_gbp(value);
+    let currency_eur = Currency::from_eur(value);
+
+    assert_eq!(currency_usd.convert_to_historic_sync(CurrencyUnit::USD, date), Ok(1f64));
+    assert_eq!(currency_gbp.convert_to_historic_sync(CurrencyUnit::USD, date), Ok(1.3435));
+    assert_eq!(currency_usd.convert_to_historic_sync(CurrencyUnit::GBP, date), Ok(0.74 * 4.23));
+    assert_eq!(currency_gbp.convert_to_historic_sync(CurrencyUnit::EUR, date), Ok(1.15 * 4.23));
+    assert_eq!(currency_gbp.convert_to_historic_sync(CurrencyUnit::GBP, date), Ok(1f64 * 4.23));
 }
