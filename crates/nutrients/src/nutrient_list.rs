@@ -2,7 +2,7 @@ use crate::{nutrient::Nutrient, nutrient_amount::NutrientAmount, units::Nutrient
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
 use uuid::Uuid;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct NutrientAmountList {
     id: Uuid,
     nutrient_amounts: BTreeSet<NutrientAmount>,
@@ -49,6 +49,14 @@ impl NutrientAmountList {
 
     pub fn set_nutrient_amounts(&mut self, nutrient_amounts: BTreeSet<NutrientAmount>) {
         self.nutrient_amounts = nutrient_amounts;
+    }
+
+    pub fn push(&mut self, nutrient_amount: NutrientAmount) {
+        self.nutrient_amounts.insert(nutrient_amount);
+    }
+
+    pub fn remove(&mut self, nutrient_amount: &NutrientAmount) {
+        self.nutrient_amounts.remove(nutrient_amount);
     }
 
     pub fn sum_amounts_from_ancestors_rc_refcell(&self, nutrient: Rc<RefCell<Nutrient>>) -> SumResult {

@@ -1,5 +1,5 @@
 use crate::sources::DataSource;
-use nutrients::{nutrient_amount::NutrientAmount, units::NutrientUnit};
+use nutrients::{nutrient_amount::NutrientAmount, nutrient_list::NutrientAmountList, units::NutrientUnit};
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
 use units::energy::Energy;
 use uuid::Uuid;
@@ -203,7 +203,7 @@ impl FoodInstance {
         let mut energy: Energy = Energy::new(0f64, units::energy::EnergyUnit::Kilocalorie);
         match food_data {
             Some(data) => {
-                for nutrient_amount in data.get_nutrients() {
+                for nutrient_amount in data.get_nutrients().get_nutrient_amounts() {
                     match nutrient_amount.get_nutrient() {
                         Some(nutrient) => {
                             if nutrient.borrow().get_name() == "Calories" {
@@ -301,14 +301,14 @@ impl FoodTag {
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FoodData {
     data_source: DataSource,
-    nutrient_amounts: BTreeSet<NutrientAmount>,
+    nutrient_amount_list: NutrientAmountList,
 }
 
 impl FoodData {
-    pub fn new(data_source: DataSource, nutrient_amounts: BTreeSet<NutrientAmount>) -> Self {
+    pub fn new(data_source: DataSource, nutrient_amount_list: NutrientAmountList) -> Self {
         Self {
             data_source,
-            nutrient_amounts,
+            nutrient_amount_list,
         }
     }
 
@@ -320,16 +320,16 @@ impl FoodData {
         self.data_source = data_source;
     }
 
-    pub fn get_nutrients(&self) -> BTreeSet<NutrientAmount> {
-        self.nutrient_amounts.clone()
+    pub fn get_nutrients(&self) -> NutrientAmountList {
+        self.nutrient_amount_list.clone()
     }
 
-    pub fn set_nutrients(&mut self, nutrients: BTreeSet<NutrientAmount>) {
-        self.nutrient_amounts = nutrients;
+    pub fn set_nutrients(&mut self, nutrient_amount_list: NutrientAmountList) {
+        self.nutrient_amount_list = nutrient_amount_list;
     }
 
     pub fn add_nutrient(&mut self, nutrient_amount: NutrientAmount) -> Result<(), &'static str> {
-        for self_nutrient_amount in self.nutrient_amounts.iter() {
+            for self_nutrient_amount in self.nutrient_amount_list.get_nutrient_amounts().iter() {
             if let Some(self_nutrient) = self_nutrient_amount.get_nutrient() {
                 if let Some(nutrient) = nutrient_amount.get_nutrient() {
                     if Rc::ptr_eq(&self_nutrient, &nutrient) {
@@ -344,12 +344,12 @@ impl FoodData {
             }
 
         }
-        self.nutrient_amounts.insert(nutrient_amount);
+        self.nutrient_amount_list.push(nutrient_amount);
 
         return Ok(());
     }
 
-    pub fn remove_nutrient(&mut self, nutrient: &NutrientAmount) {
-        self.nutrient_amounts.remove(nutrient);
+    pub fn remove_nutrient(&mut self, nutrient_amount: &NutrientAmount) {
+        self.nutrient_amount_list.remove(nutrient_amount);
     }
 }
