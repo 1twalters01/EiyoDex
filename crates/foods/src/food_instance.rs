@@ -203,16 +203,22 @@ impl FoodInstance {
         let mut energy: Energy = Energy::new(0f64, units::energy::EnergyUnit::Kilocalorie);
         match food_data {
             Some(data) => {
-                for nutrient in data.get_nutrients() {
-                    if nutrient.get_nutrient().borrow().get_name() == "Calories" {
-                        let unit = nutrient.get_nutrient().borrow().get_main_unit();
-                        match unit {
-                            NutrientUnit::Energy(energy_unit) => {
-                                energy = Energy::new(nutrient.get_value(), energy_unit);
-                                break;
+                for nutrient_amount in data.get_nutrients() {
+                    match nutrient_amount.get_nutrient() {
+                        Some(nutrient) => {
+                            if nutrient.borrow().get_name() == "Calories" {
+                                let unit = nutrient.borrow().get_main_unit();
+                                match unit {
+                                    NutrientUnit::Energy(energy_unit) => {
+                                        energy = Energy::new(nutrient_amount.get_value(), energy_unit);
+                                        break;
+                                    }
+                                    _ => {}
+                                };
                             }
-                            _ => {}
-                        };
+                        },
+                        None => {
+                        },
                     }
                 }
             }
@@ -295,14 +301,14 @@ impl FoodTag {
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FoodData {
     data_source: DataSource,
-    nutrients: BTreeSet<NutrientAmount>,
+    nutrient_amounts: BTreeSet<NutrientAmount>,
 }
 
 impl FoodData {
-    pub fn new(data_source: DataSource, nutrients: BTreeSet<NutrientAmount>) -> Self {
+    pub fn new(data_source: DataSource, nutrient_amounts: BTreeSet<NutrientAmount>) -> Self {
         Self {
             data_source,
-            nutrients,
+            nutrient_amounts,
         }
     }
 
@@ -315,31 +321,35 @@ impl FoodData {
     }
 
     pub fn get_nutrients(&self) -> BTreeSet<NutrientAmount> {
-        self.nutrients.clone()
+        self.nutrient_amounts.clone()
     }
 
     pub fn set_nutrients(&mut self, nutrients: BTreeSet<NutrientAmount>) {
-        self.nutrients = nutrients;
+        self.nutrient_amounts = nutrients;
     }
 
-    pub fn add_nutrient(&mut self, nutrient: NutrientAmount) -> Result<(), &'static str> {
-        for self_nutrient in self.nutrients.iter() {
-            if Rc::ptr_eq(&self_nutrient.get_nutrient(), &nutrient.get_nutrient()) {
-                return Err("Nutrient already in nutrients");
+    pub fn add_nutrient(&mut self, nutrient_amount: NutrientAmount) -> Result<(), &'static str> {
+        for self_nutrient_amount in self.nutrient_amounts.iter() {
+            if let Some(self_nutrient) = self_nutrient_amount.get_nutrient() {
+                if let Some(nutrient) = nutrient_amount.get_nutrient() {
+                    if Rc::ptr_eq(&self_nutrient, &nutrient) {
+                        return Err("Nutrient already in nutrients");
+                    }
+                    if self_nutrient.borrow().get_id()
+                    == nutrient.borrow().get_id()
+                    {
+                        return Err("Nutrient already in nutrients");
+                    }
+                }
             }
 
-            if self_nutrient.get_nutrient().borrow().get_id()
-                == nutrient.get_nutrient().borrow().get_id()
-            {
-                return Err("Nutrient already in nutrients");
-            }
         }
-        self.nutrients.insert(nutrient);
+        self.nutrient_amounts.insert(nutrient_amount);
 
         return Ok(());
     }
 
     pub fn remove_nutrient(&mut self, nutrient: &NutrientAmount) {
-        self.nutrients.remove(nutrient);
+        self.nutrient_amounts.remove(nutrient);
     }
 }

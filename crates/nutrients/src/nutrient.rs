@@ -608,6 +608,33 @@ impl Nutrient {
         self.parents.clone()
     }
 
+    pub fn get_ancestors(&self) -> Vec<Rc<RefCell<Nutrient>>> {
+        let mut result = Vec::new();
+
+        for parent_weak in self.get_parents() {
+            if let Some(parent) = parent_weak.upgrade() {
+                result.push(parent.clone());
+                Self::collect_ancestors(&parent, &mut result);
+            }
+        }
+
+        result
+    }
+
+    pub fn collect_ancestors(node: &Rc<RefCell<Self>>, out: &mut Vec<Rc<RefCell<Self>>>) {
+        let parents = {
+            let n = node.borrow();
+            n.parents.clone()
+        };
+
+        for parent_weak in parents {
+            if let Some(parent) = parent_weak.upgrade() {
+                out.push(parent.clone());
+                Self::collect_ancestors(&parent, out);
+            }
+        }
+    }
+
     pub fn set_parents(&mut self, parents: Vec<Weak<RefCell<Nutrient>>>) {
         self.parents = parents;
     }
@@ -636,6 +663,29 @@ impl Nutrient {
 
     pub fn get_children(&self) -> Vec<Rc<RefCell<Nutrient>>> {
         self.children.clone()
+    }
+
+    pub fn get_descendants(&self) -> Vec<Rc<RefCell<Nutrient>>> {
+        let mut result = Vec::new();
+
+        for child in self.get_children() {
+            result.push(child.clone());
+            Self::collect_descendants(&child, &mut result);
+        }
+
+        result
+    }
+
+    pub fn collect_descendants(node: &Rc<RefCell<Self>>, out: &mut Vec<Rc<RefCell<Self>>>) {
+        let children = {
+            let n = node.borrow();
+            n.children.clone()
+        };
+
+        for child in children {
+            out.push(child.clone());
+            Self::collect_descendants(&child, out);
+        }
     }
 
     pub fn set_children(&mut self, children: Vec<Rc<RefCell<Nutrient>>>) {
