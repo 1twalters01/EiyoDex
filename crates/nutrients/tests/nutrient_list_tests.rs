@@ -98,6 +98,10 @@ fn test_push_and_remove_from_nutrient_list() {
 }
 
 #[test]
+fn test_sum_ascendants_vec() {
+}
+
+#[test]
 fn test_sum_descendants_vec() {
     let id = None;
 
