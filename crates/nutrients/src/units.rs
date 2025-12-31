@@ -13,7 +13,7 @@ pub enum NutrientUnit {
     DIAAS1, // Digestible Indispensable Amino Acid Score 0 to 6 months
     DIAAS2, // Digestible Indispensable Amino Acid Score 6 months to 3 years
     DIAAS3, // Digestible Indispensable Amino Acid Score Over 3 years
-    None, // None
+    None,   // None
 }
 
 impl NutrientUnit {

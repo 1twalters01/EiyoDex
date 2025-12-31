@@ -6,9 +6,11 @@ use std::{
     rc::Rc,
 };
 
+use uuid::Uuid;
+
 use crate::{nutrient::Nutrient, units::NutrientUnit};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct NutrientAmount {
     value: f64,
     nutrient: Option<Rc<RefCell<Nutrient>>>,
@@ -22,22 +24,20 @@ impl NutrientAmount {
         output_unit: NutrientUnit,
     ) -> Result<Self, &'static str> {
         match nutrient {
-            Some(nutrient) => {
-                match nutrient.convert(output_unit, nutrient.get_main_unit()) {
-                    Ok(_) => Ok(Self {
-                        value,
-                        nutrient: Some(Rc::new(RefCell::new(nutrient))),
-                        output_unit,
-                    }),
-                    Err(err) => Err(err),
-                }
+            Some(nutrient) => match nutrient.convert(output_unit, nutrient.get_main_unit()) {
+                Ok(_) => Ok(Self {
+                    value,
+                    nutrient: Some(Rc::new(RefCell::new(nutrient))),
+                    output_unit,
+                }),
+                Err(err) => Err(err),
             },
             None => {
                 if value != 0f64 {
-                    return Err("Value of empty nutrient must be 0")
+                    return Err("Value of empty nutrient must be 0");
                 }
                 if output_unit != NutrientUnit::None {
-                    return Err("Nutrient unit of an empty nutrient must be 'None'")
+                    return Err("Nutrient unit of an empty nutrient must be 'None'");
                 }
 
                 Ok(Self {
@@ -45,7 +45,7 @@ impl NutrientAmount {
                     nutrient: None,
                     output_unit: NutrientUnit::None,
                 })
-            },
+            }
         }
     }
 
@@ -65,13 +65,13 @@ impl NutrientAmount {
                     }),
                     Err(err) => Err(err),
                 }
-            },
+            }
             None => {
                 if value != 0f64 {
-                    return Err("Value of empty nutrient must be 0")
+                    return Err("Value of empty nutrient must be 0");
                 }
                 if output_unit != NutrientUnit::None {
-                    return Err("Nutrient unit of an empty nutrient must be 'None'")
+                    return Err("Nutrient unit of an empty nutrient must be 'None'");
                 }
 
                 Ok(Self {
@@ -79,7 +79,7 @@ impl NutrientAmount {
                     nutrient: None,
                     output_unit: NutrientUnit::None,
                 })
-            },
+            }
         }
     }
 
@@ -91,8 +91,25 @@ impl NutrientAmount {
         self.value = value;
     }
 
+    pub fn get_value_in(&self, nutrient_unit: NutrientUnit) -> f64 {
+        match self.nutrient.clone() {
+            Some(nutrient) => {
+                let nutrient_borrowed = nutrient.borrow();
+                let conversion_factor = nutrient_borrowed
+                    .convert(self.output_unit, nutrient_unit)
+                    .unwrap();
+                return self.value * conversion_factor;
+            },
+            None => return 0f64,
+        }
+    }
+
     pub fn get_nutrient(&self) -> Option<Rc<RefCell<Nutrient>>> {
         self.nutrient.clone()
+    }
+
+    pub fn get_nutrient_id(&self) -> Option<Uuid> {
+        self.get_nutrient().map(|nutrient| nutrient.borrow().get_id())
     }
 
     pub fn set_nutrient_rc_refcell(&mut self, nutrient: Option<Rc<RefCell<Nutrient>>>) {
@@ -115,8 +132,8 @@ impl NutrientAmount {
                     .convert(self.output_unit, output_unit)
                     .unwrap();
                 self.value = self.value * conversion_factor;
-            },
-            None => {},
+            }
+            None => {}
         }
 
         self.output_unit = output_unit;
@@ -132,34 +149,16 @@ impl NutrientAmount {
         if let Some(nutrient) = self.nutrient.clone() {
             let nutrient_borrowed = nutrient.borrow();
             return nutrient_borrowed
-                    .convert(nutrient_borrowed.get_main_unit(), unit)
-                    .and_then(|c| Ok(c * self.get_value()))
-            
+                .convert(nutrient_borrowed.get_main_unit(), unit)
+                .and_then(|c| Ok(c * self.get_value()));
         }
         return Err("");
     }
 }
 
-impl PartialOrd for NutrientAmount {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        if self.nutrient.is_none() && other.nutrient.is_none() {
-            return Some(Ordering::Equal);
-        }
-
-        else if self.nutrient.is_some() && other.nutrient.is_none() {
-            return Some(Ordering::Greater)
-        }
-
-        if self.nutrient.is_none() && other.nutrient.is_none() {
-            return Some(Ordering::Less)
-        }
-
-        let other_nutrient_option = other.nutrient.clone().unwrap();
-        let other_nutrient = other_nutrient_option.borrow();
-        let from_unit = other.output_unit;
-        let to_unit = self.output_unit;
-        let conversion_factor = other_nutrient.convert(from_unit, to_unit).unwrap();
-        self.value.partial_cmp(&(other.value * conversion_factor))
+impl PartialEq for NutrientAmount {
+    fn eq(&self, other: &Self) -> bool {
+        self.get_nutrient_id() == other.get_nutrient_id()
     }
 }
 
@@ -167,36 +166,13 @@ impl Eq for NutrientAmount {}
 
 impl Ord for NutrientAmount {
     fn cmp(&self, other: &Self) -> Ordering {
-        if self.nutrient.is_none() && other.nutrient.is_none() {
-            return Ordering::Equal;
-        }
+        self.get_nutrient_id().cmp(&other.get_nutrient_id())
+    }
+}
 
-        else if self.nutrient.is_some() && other.nutrient.is_none() {
-            return Ordering::Greater
-        }
-
-        if self.nutrient.is_none() && other.nutrient.is_none() {
-            return Ordering::Less
-        }
-
-        let id_cmp = self
-            .get_nutrient()
-            .unwrap()
-            .borrow()
-            .get_name()
-            .cmp(&other.get_nutrient().unwrap().borrow().get_name());
-        if id_cmp != Ordering::Equal {
-            return id_cmp;
-        }
-
-        let other_nutrient_option = other.nutrient.clone().unwrap();
-        let other_nutrient = other_nutrient_option.borrow();
-        let from_unit = other.output_unit;
-        let to_unit = self.output_unit;
-        let conversion_factor = other_nutrient.convert(from_unit, to_unit).unwrap();
-        self.value
-            .partial_cmp(&(other.value * conversion_factor))
-            .unwrap_or(Ordering::Equal)
+impl PartialOrd for NutrientAmount {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
@@ -256,10 +232,8 @@ impl Mul<f64> for NutrientAmount {
                 let nutrient_borrowed = nutrient.borrow();
                 let main_unit = nutrient_borrowed.get_main_unit();
                 Self::from_rc_refcell(self.value * rhs, self.get_nutrient(), main_unit).unwrap()
-            },
-            None => {
-                Self::from_rc_refcell(0f64 * rhs, None, NutrientUnit::None).unwrap()
-            },
+            }
+            None => Self::from_rc_refcell(0f64 * rhs, None, NutrientUnit::None).unwrap(),
         }
     }
 }
@@ -272,10 +246,8 @@ impl Div<f64> for NutrientAmount {
                 let nutrient_borrowed = nutrient.borrow();
                 let main_unit = nutrient_borrowed.get_main_unit();
                 Self::from_rc_refcell(self.value / rhs, self.get_nutrient(), main_unit).unwrap()
-            },
-            None => {
-                Self::from_rc_refcell(0f64 * rhs, None, NutrientUnit::None).unwrap()
-            },
+            }
+            None => Self::from_rc_refcell(0f64 * rhs, None, NutrientUnit::None).unwrap(),
         }
     }
 }
@@ -286,7 +258,10 @@ impl Sum<NutrientAmount> for NutrientAmount {
 
         let nutrient = match iter.peek() {
             Some(n) => n.clone(),
-            None => return NutrientAmount::new(0f64, None, NutrientUnit::None).unwrap(),
+            None => {
+                println!("yoooo");
+                return NutrientAmount::new(0f64, None, NutrientUnit::None).unwrap();
+            }
             // None => panic!("Nothing in iter"),
             // None => return NutrientAmount::new(0.0, Default::default()),
         };
@@ -295,7 +270,9 @@ impl Sum<NutrientAmount> for NutrientAmount {
         iter.fold(
             NutrientAmount::new(
                 0.0,
-                nutrient.get_nutrient().map(|nutrient| nutrient.borrow().clone()),
+                nutrient
+                    .get_nutrient()
+                    .map(|nutrient| nutrient.borrow().clone()),
                 nutrient.get_output_unit(),
             )
             .unwrap(),
