@@ -1,6 +1,6 @@
 use chrono::{NaiveDate, NaiveDateTime};
 use exercise::exercise::ExerciseAmount;
-use foods::food::FoodAmount;
+use foods::food_amount::FoodAmount;
 use profiles::profile::Profile;
 use units::energy::Energy;
 use uuid::Uuid;

@@ -9,3 +9,4 @@ pub struct NutrientAmount {
     nutrient: Option<Nutrient>,
     output_unit: NutrientUnit,
 }
+In fact, it probably shouldn't use ord at all
