@@ -76,11 +76,14 @@ fn test_push_and_remove_from_nutrient_list() {
 
     let mut nutrient_amount_list_iron = NutrientAmountList::from_vec(Vec::from([iron.clone()]));
     nutrient_amount_list_iron.set_id(nutrient_list_id);
-    let mut nutrient_amount_list_potassium = NutrientAmountList::from_vec(Vec::from([potassium.clone()]));
+    let mut nutrient_amount_list_potassium =
+        NutrientAmountList::from_vec(Vec::from([potassium.clone()]));
     nutrient_amount_list_potassium.set_id(nutrient_list_id);
-    let mut nutrient_amount_list_iron_and_potassium = NutrientAmountList::from_vec(Vec::from([iron.clone(), potassium.clone()]));
+    let mut nutrient_amount_list_iron_and_potassium =
+        NutrientAmountList::from_vec(Vec::from([iron.clone(), potassium.clone()]));
     nutrient_amount_list_iron_and_potassium.set_id(nutrient_list_id);
-    let mut nutrient_amount_list_potassium_and_iron = NutrientAmountList::from_vec(Vec::from([potassium.clone(), iron.clone()]));
+    let mut nutrient_amount_list_potassium_and_iron =
+        NutrientAmountList::from_vec(Vec::from([potassium.clone(), iron.clone()]));
     nutrient_amount_list_potassium_and_iron.set_id(nutrient_list_id);
 
     let mut nutrient_amount_list = NutrientAmountList::from_vec(Vec::from([iron.clone()]));
@@ -90,16 +93,21 @@ fn test_push_and_remove_from_nutrient_list() {
     assert_eq!(nutrient_amount_list, nutrient_amount_list_iron);
 
     nutrient_amount_list.push(potassium);
-    assert_eq!(nutrient_amount_list, nutrient_amount_list_iron_and_potassium);
-    assert_eq!(nutrient_amount_list, nutrient_amount_list_potassium_and_iron);
+    assert_eq!(
+        nutrient_amount_list,
+        nutrient_amount_list_iron_and_potassium
+    );
+    assert_eq!(
+        nutrient_amount_list,
+        nutrient_amount_list_potassium_and_iron
+    );
 
     nutrient_amount_list.remove(&iron);
     assert_eq!(nutrient_amount_list, nutrient_amount_list_potassium);
 }
 
 #[test]
-fn test_sum_ascendants_vec() {
-}
+fn test_sum_ascendants_vec() {}
 
 #[test]
 fn test_sum_descendants_vec() {

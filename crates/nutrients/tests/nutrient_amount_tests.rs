@@ -222,22 +222,18 @@ fn test_ordering() {
     )
     .unwrap();
 
-    
     assert!(
-        nutrient_1
-            .get_value_in(NutrientUnit::Mass(MassUnit::Milligram))
+        nutrient_1.get_value_in(NutrientUnit::Mass(MassUnit::Milligram))
             > nutrient_2.get_value_in(NutrientUnit::Mass(MassUnit::Milligram))
     );
 
     assert!(
-        nutrient_1
-            .get_value_in(NutrientUnit::Mass(MassUnit::Milligram))
+        nutrient_1.get_value_in(NutrientUnit::Mass(MassUnit::Milligram))
             > nutrient_3.get_value_in(NutrientUnit::Mass(MassUnit::Milligram))
     );
 
     assert!(
-        nutrient_2
-            .get_value_in(NutrientUnit::Mass(MassUnit::Milligram))
+        nutrient_2.get_value_in(NutrientUnit::Mass(MassUnit::Milligram))
             > nutrient_3.get_value_in(NutrientUnit::Mass(MassUnit::Milligram))
     );
 }

@@ -99,7 +99,7 @@ impl NutrientAmount {
                     .convert(self.output_unit, nutrient_unit)
                     .unwrap();
                 return self.value * conversion_factor;
-            },
+            }
             None => return 0f64,
         }
     }
@@ -109,7 +109,8 @@ impl NutrientAmount {
     }
 
     pub fn get_nutrient_id(&self) -> Option<Uuid> {
-        self.get_nutrient().map(|nutrient| nutrient.borrow().get_id())
+        self.get_nutrient()
+            .map(|nutrient| nutrient.borrow().get_id())
     }
 
     pub fn set_nutrient_rc_refcell(&mut self, nutrient: Option<Rc<RefCell<Nutrient>>>) {
@@ -252,6 +253,8 @@ impl Div<f64> for NutrientAmount {
     }
 }
 
+// Very stinky
+// TODO: Revisit NutrientAmount summation semantics
 impl Sum<NutrientAmount> for NutrientAmount {
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
         let mut iter = iter.peekable();
@@ -259,13 +262,9 @@ impl Sum<NutrientAmount> for NutrientAmount {
         let nutrient = match iter.peek() {
             Some(n) => n.clone(),
             None => {
-                println!("yoooo");
                 return NutrientAmount::new(0f64, None, NutrientUnit::None).unwrap();
             }
-            // None => panic!("Nothing in iter"),
-            // None => return NutrientAmount::new(0.0, Default::default()),
         };
-        // println!("nutrient: {:#?}", nutrient);
 
         iter.fold(
             NutrientAmount::new(

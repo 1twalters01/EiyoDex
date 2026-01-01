@@ -1,4 +1,11 @@
-use units::{currency::{Currency, CurrencyUnit}, density::{Density, DensityUnit}, mass::{Mass, MassUnit}, measurement_system::MeasurementSystem, specific_currency::{Denominator, DenominatorType, SpecificCurrency, SpecificCurrencyUnit}, volume::{Volume, VolumeUnit}};
+use units::{
+    currency::{Currency, CurrencyUnit},
+    density::{Density, DensityUnit},
+    mass::{Mass, MassUnit},
+    measurement_system::MeasurementSystem,
+    specific_currency::{Denominator, DenominatorType, SpecificCurrency, SpecificCurrencyUnit},
+    volume::{Volume, VolumeUnit},
+};
 
 #[test]
 fn test_density_from_variants() {
@@ -32,14 +39,16 @@ fn test_density_new() {
 //     let value = 5.6803294822;
 //     let value_2 = 147.20472986;
 //
-//     let mut specific_currency_new = SpecificCurrency::new(value, SpecificCurrencyUnit::GBPPerLiter);
-//     let specific_currency_rounded = specific_currency_new.round(5);
-//     let specific_currency_manual = SpecificCurrency::new(5.68033, SpecificCurrencyUnit::GBPPerLiter);
+//     let mut specific_currency_new = SpecificCurrency::new(value,
+// SpecificCurrencyUnit::GBPPerLiter);     let specific_currency_rounded =
+// specific_currency_new.round(5);     let specific_currency_manual =
+// SpecificCurrency::new(5.68033, SpecificCurrencyUnit::GBPPerLiter);
 //     assert_eq!(specific_currency_rounded, specific_currency_manual);
 //
-//     let mut specific_currency_new_2 = SpecificCurrency::new(value_2, SpecificCurrencyUnit::GBPPerLiter);
-//     let specific_currency_rounded_2 = specific_currency_new_2.round(5);
-//     let specific_currency_coded_2 = SpecificCurrency::new(147.20473, SpecificCurrencyUnit::GBPPerLiter);
+//     let mut specific_currency_new_2 = SpecificCurrency::new(value_2,
+// SpecificCurrencyUnit::GBPPerLiter);     let specific_currency_rounded_2 =
+// specific_currency_new_2.round(5);     let specific_currency_coded_2 =
+// SpecificCurrency::new(147.20473, SpecificCurrencyUnit::GBPPerLiter);
 //     assert_eq!(specific_currency_rounded_2, specific_currency_coded_2);
 // }
 
@@ -67,11 +76,12 @@ fn test_density_new() {
 //     let eur_per_l = SpecificCurrency::from_eur_per_l(value);
 //     let eur_per_ml = SpecificCurrency::from_eur_per_ml(new_value);
 //     let gbp_per_l = SpecificCurrency::from_gbp_per_l(new_value_2);
-//     let eur_per_ml_transformed = eur_per_l.to_unit(SpecificCurrencyUnit::EURPerMilliliter).unwrap();
-//     let gbp_per_l_transformed = eur_per_l.to_unit(SpecificCurrencyUnit::GBPPerLiter).unwrap();
-//     assert_eq!(eur_per_ml, eur_per_ml_transformed);
-//     assert_eq!(gbp_per_l, gbp_per_l_transformed);
-// }
+//     let eur_per_ml_transformed =
+// eur_per_l.to_unit(SpecificCurrencyUnit::EURPerMilliliter).unwrap();
+//     let gbp_per_l_transformed =
+// eur_per_l.to_unit(SpecificCurrencyUnit::GBPPerLiter).unwrap();     assert_eq!
+// (eur_per_ml, eur_per_ml_transformed);     assert_eq!(gbp_per_l,
+// gbp_per_l_transformed); }
 
 // #[test]
 // fn test_specific_currency_to_fn() {
@@ -123,15 +133,24 @@ fn test_density_set_value() {
 #[test]
 fn test_density_get_unit() {
     let specific_currency = SpecificCurrency::new(6.882, SpecificCurrencyUnit::USDPerKilogram);
-    assert_eq!(specific_currency.get_unit(), SpecificCurrencyUnit::USDPerKilogram);
+    assert_eq!(
+        specific_currency.get_unit(),
+        SpecificCurrencyUnit::USDPerKilogram
+    );
 }
 
 #[test]
 fn test_density_set_unit() {
     let mut specific_currency = SpecificCurrency::new(6.882, SpecificCurrencyUnit::GBPPerGallon);
-    assert_eq!(specific_currency.get_unit(), SpecificCurrencyUnit::GBPPerGallon);
+    assert_eq!(
+        specific_currency.get_unit(),
+        SpecificCurrencyUnit::GBPPerGallon
+    );
     specific_currency.set_unit(SpecificCurrencyUnit::USDPerPint);
-    assert_eq!(specific_currency.get_unit(), SpecificCurrencyUnit::USDPerPint);
+    assert_eq!(
+        specific_currency.get_unit(),
+        SpecificCurrencyUnit::USDPerPint
+    );
 }
 
 #[test]
@@ -158,7 +177,10 @@ fn test_specific_currency_get_symbol() {
 #[test]
 fn test_specific_currency_get_measurement_system() {
     let specific_currency = SpecificCurrency::new(6.882, SpecificCurrencyUnit::USDPerGram);
-    assert_eq!(specific_currency.get_measurement_system(), MeasurementSystem::Metric);
+    assert_eq!(
+        specific_currency.get_measurement_system(),
+        MeasurementSystem::Metric
+    );
 }
 
 #[test]
@@ -212,7 +234,6 @@ fn test_specific_currency_multiplication_density_and_specific_currency() {
     assert_eq!((density * specific_currency).round(2), specific_currency_2);
     assert_eq!((specific_currency * density).round(2), specific_currency_2);
 }
-
 
 #[test]
 fn test_specific_currency_division() {

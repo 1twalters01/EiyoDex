@@ -391,8 +391,13 @@ fn get_si_factor() {
     let percentage_error = 0.005;
 
     assert!((SpecificCurrencyUnit::USDPerKilogram.si_factor() - 1f64) / 1f64 < percentage_error);
-    assert!((SpecificCurrencyUnit::GBPPerKilogram.si_factor() - 1f64 * 1.35) / 1f64 < percentage_error);
-    assert!((SpecificCurrencyUnit::USDPerMilliliter.si_factor() - 1_000_000f64) / 1_000_000f64 < percentage_error);
+    assert!(
+        (SpecificCurrencyUnit::GBPPerKilogram.si_factor() - 1f64 * 1.35) / 1f64 < percentage_error
+    );
+    assert!(
+        (SpecificCurrencyUnit::USDPerMilliliter.si_factor() - 1_000_000f64) / 1_000_000f64
+            < percentage_error
+    );
 }
 
 #[test]
@@ -414,4 +419,3 @@ fn test_from_str() {
         SpecificCurrencyUnit::GBPPerPint
     );
 }
-

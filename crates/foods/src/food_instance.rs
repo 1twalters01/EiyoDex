@@ -1,6 +1,12 @@
-use crate::sources::DataSource;
-use nutrients::{nutrient_amount::NutrientAmount, nutrient_list::NutrientAmountList, units::NutrientUnit};
-use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
+use crate::{data_sources::DataSource, food_nutrition_data::FoodNutritionData};
+use nutrients::{
+    nutrient_amount::NutrientAmount, nutrient_list::NutrientAmountList, units::NutrientUnit,
+};
+use std::{
+    cell::RefCell,
+    collections::BTreeSet,
+    rc::{Rc, Weak},
+};
 use units::energy::Energy;
 use uuid::Uuid;
 
@@ -106,9 +112,8 @@ pub struct FoodInstance {
     id: Uuid,
     name: String,
     description: String,
-    favourite: bool,
     tags: BTreeSet<FoodTag>,
-    food_data: BTreeSet<FoodData>,
+    food_data: BTreeSet<FoodNutritionData>,
 }
 
 impl FoodInstance {
@@ -122,7 +127,6 @@ impl FoodInstance {
             id,
             name,
             description: String::new(),
-            favourite: false,
             tags: BTreeSet::new(),
             food_data: BTreeSet::new(),
         }
@@ -152,14 +156,6 @@ impl FoodInstance {
         self.description = description;
     }
 
-    pub fn get_favourite_status(&self) -> bool {
-        self.favourite
-    }
-
-    pub fn set_favourite_status(&mut self, favourite_status: bool) {
-        self.favourite = favourite_status;
-    }
-
     pub fn get_tags(&self) -> BTreeSet<FoodTag> {
         self.tags.clone()
     }
@@ -176,24 +172,24 @@ impl FoodInstance {
         self.tags.remove(&tag);
     }
 
-    pub fn get_food_data(&self) -> BTreeSet<FoodData> {
+    pub fn get_food_data(&self) -> BTreeSet<FoodNutritionData> {
         self.food_data.clone()
     }
 
-    pub fn set_food_data(&mut self, food_data: BTreeSet<FoodData>) {
+    pub fn set_food_data(&mut self, food_data: BTreeSet<FoodNutritionData>) {
         self.food_data = food_data;
     }
 
-    pub fn add_food_data(&mut self, food_data: FoodData) {
+    pub fn add_food_data(&mut self, food_data: FoodNutritionData) {
         self.food_data.insert(food_data);
     }
 
-    pub fn remove_food_data(&mut self, food_data: FoodData) {
+    pub fn remove_food_data(&mut self, food_data: FoodNutritionData) {
         self.food_data.remove(&food_data);
     }
 
     pub fn get_calories(&self, food_data_uuid: Uuid) -> Energy {
-        let mut food_data: Option<FoodData> = None;
+        let mut food_data: Option<FoodNutritionData> = None;
         for data in self.food_data.clone() {
             if data.get_data_source().get_id() == food_data_uuid {
                 food_data = Some(data)
@@ -203,22 +199,22 @@ impl FoodInstance {
         let mut energy: Energy = Energy::new(0f64, units::energy::EnergyUnit::Kilocalorie);
         match food_data {
             Some(data) => {
-                for nutrient_amount in data.get_nutrients().get_nutrient_amounts() {
+                for nutrient_amount in data.get_nutrient_amount_list().get_nutrient_amounts() {
                     match nutrient_amount.get_nutrient() {
                         Some(nutrient) => {
                             if nutrient.borrow().get_name() == "Calories" {
                                 let unit = nutrient.borrow().get_main_unit();
                                 match unit {
                                     NutrientUnit::Energy(energy_unit) => {
-                                        energy = Energy::new(nutrient_amount.get_value(), energy_unit);
+                                        energy =
+                                            Energy::new(nutrient_amount.get_value(), energy_unit);
                                         break;
                                     }
                                     _ => {}
                                 };
                             }
-                        },
-                        None => {
-                        },
+                        }
+                        None => {}
                     }
                 }
             }
@@ -295,61 +291,5 @@ impl FoodTag {
         {
             self.applicable_categories.remove(pos);
         }
-    }
-}
-
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct FoodData {
-    data_source: DataSource,
-    nutrient_amount_list: NutrientAmountList,
-}
-
-impl FoodData {
-    pub fn new(data_source: DataSource, nutrient_amount_list: NutrientAmountList) -> Self {
-        Self {
-            data_source,
-            nutrient_amount_list,
-        }
-    }
-
-    pub fn get_data_source(&self) -> DataSource {
-        self.data_source.clone()
-    }
-
-    pub fn set_data_source(&mut self, data_source: DataSource) {
-        self.data_source = data_source;
-    }
-
-    pub fn get_nutrients(&self) -> NutrientAmountList {
-        self.nutrient_amount_list.clone()
-    }
-
-    pub fn set_nutrients(&mut self, nutrient_amount_list: NutrientAmountList) {
-        self.nutrient_amount_list = nutrient_amount_list;
-    }
-
-    pub fn add_nutrient(&mut self, nutrient_amount: NutrientAmount) -> Result<(), &'static str> {
-            for self_nutrient_amount in self.nutrient_amount_list.get_nutrient_amounts().iter() {
-            if let Some(self_nutrient) = self_nutrient_amount.get_nutrient() {
-                if let Some(nutrient) = nutrient_amount.get_nutrient() {
-                    if Rc::ptr_eq(&self_nutrient, &nutrient) {
-                        return Err("Nutrient already in nutrients");
-                    }
-                    if self_nutrient.borrow().get_id()
-                    == nutrient.borrow().get_id()
-                    {
-                        return Err("Nutrient already in nutrients");
-                    }
-                }
-            }
-
-        }
-        self.nutrient_amount_list.push(nutrient_amount);
-
-        return Ok(());
-    }
-
-    pub fn remove_nutrient(&mut self, nutrient_amount: &NutrientAmount) {
-        self.nutrient_amount_list.remove(nutrient_amount);
     }
 }
