@@ -1,9 +1,14 @@
 use std::{cell::RefCell, rc::Rc};
 
+use uuid::Uuid;
+
 use crate::food_instance::FoodInstance;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FoodCategory {
+    id: Uuid,
+    name: String,
+    description: String,
     parents: Vec<Rc<RefCell<FoodCategory>>>,
     children: Vec<Rc<RefCell<FoodCategory>>>,
     food_instance: Option<FoodInstance>,
@@ -12,6 +17,9 @@ pub struct FoodCategory {
 impl FoodCategory {
     pub fn new() -> FoodCategory {
         FoodCategory {
+            id: Uuid::new_v4(),
+            name: String::new(),
+            description: String::new(),
             parents: Vec::new(),
             children: Vec::new(),
             food_instance: None,
