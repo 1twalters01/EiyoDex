@@ -92,10 +92,10 @@ impl FoodInstance {
         self.food_data.remove(&food_data);
     }
 
-    pub fn get_calories(&self, food_data_uuid: Uuid) -> Energy {
+    pub fn get_calories(&self, data_source_uuid: Uuid) -> Energy {
         let mut food_data: Option<FoodNutritionData> = None;
         for data in self.food_data.clone() {
-            if data.get_data_source().get_id() == food_data_uuid {
+            if data.get_data_source().get_id() == data_source_uuid {
                 food_data = Some(data)
             }
         }
