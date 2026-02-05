@@ -14,7 +14,7 @@ pub struct Food {
     description: String,
     food_instances: BTreeSet<FoodInstance>,
     food_instance_uuid: Uuid,
-    data_source_uuid: Uuid
+    data_source_uuid: Uuid,
     price_metadata: Option<PriceMetadata>,
 }
 

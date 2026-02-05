@@ -1,12 +1,15 @@
+use std::{cell::RefCell, rc::Rc};
+
 use units::energy::Energy;
 use uuid::Uuid;
 
-use crate::food::Food;
+use crate::{data_sources::DataSource, food::Food};
 
 #[derive(Clone, PartialEq)]
 pub struct FoodAmount {
     value: f64,
     food: Food,
+    data_source: Rc<RefCell<DataSource>>,
 }
 
 impl FoodAmount {
@@ -25,7 +28,7 @@ impl FoodAmount {
     }
 
     pub fn get_calories(&self, food_data_uuid: Uuid) -> Energy {
-        self.food.get_calories(food_data_uuid) * self.value
+        self.food.get_calories(food_data_uuid, self.data_source.borrow().get_id()) * self.value
     }
 }
 
