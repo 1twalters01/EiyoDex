@@ -1,4 +1,7 @@
-# Food
+# Foods
+Crate for handling food items
+
+## Food
 Metadata: {
     id: uuid4
     name: String
@@ -27,7 +30,7 @@ Data: {
 }[]
 
 
-# Tag
+## Tag
 id: uuid
 name: String
 subset of: tag_id | None

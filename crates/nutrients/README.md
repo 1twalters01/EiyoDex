@@ -1,4 +1,7 @@
-# Features
+# Nutrients
+Structs for nutrients
+
+## Features
 * Has comprehensive default nutrient profile
     * Nutrients can be toggled on/off, thus not counting them
     * Nutrients can be hidden, which does effect counting
@@ -16,7 +19,7 @@
     * User can add or remove guide bars (max min)
     * Allows user to move where nutrients are in hierarchy
 
-# Default Fields
+## Default Fields
 * Energy
     * Carbohydrates
         * Fiber

@@ -1,6 +1,7 @@
 # Nutrient balances
+Crate for calculating nutrient balances
 
-Defaults
+## Defaults
 * % Omega-6 (LA)
 * Omega-6 to Omega-3 (omega 6 (g) / omega 3 (g))
 * Zinc to Copper - zinc (mg) / copper (mg) - between 8 : 1 and 15 : 1, target 10 : 1

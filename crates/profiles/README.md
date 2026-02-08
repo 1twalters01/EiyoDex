@@ -1,4 +1,7 @@
 # Profiles
+User profiles crate
+
+Modularise the parameters for health and nutrition and make them optional in the future?
 
 ## Define different user profiles
 Takes in:
