@@ -1,3 +1,6 @@
+# Units
+A crate that uses proc-macros to dynamically create structs for various units of measurement.
+
 Datatypes for:
 * Energy (kcal and kJ)
 * Mass (g, mg, kg, oz)

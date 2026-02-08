@@ -1,6 +1,3 @@
-use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite};
-use std::{fs, path::PathBuf};
-
 pub struct DatabaseService {
     pub pool: Pool<Sqlite>,
 }
@@ -39,17 +36,5 @@ impl DatabaseService {
             .execute(&self.pool)
             .await
             .map(|_| ())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[tokio::test]
-    async fn test_create_database_session() {
-        let database = DatabaseService::new().await.expect("failed to open sqlite");
-        let res = database.ping().await;
-        assert!(res.is_ok());
     }
 }

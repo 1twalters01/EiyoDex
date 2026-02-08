@@ -16,6 +16,8 @@ pub struct Food {
     food_instance_uuid: Uuid,
     data_source_uuid: Uuid,
     price_metadata: Option<PriceMetadata>,
+    // Move price metadata to be inside food instances?
+    // Or create a container type with food instances and price metadata inside?
 }
 
 impl Food {

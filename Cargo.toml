@@ -4,10 +4,18 @@ members = [
     'apps/*',
     'xtask',
     'ui/gtk',
-    # 'proc_macros/*/*',
     'crates/*',
     "proc_macros/*",
 ]
 exclude = [
     "crates/proc_macros",
 ]
+
+# Create separate diet and exercise modules in case I want to separate them more clearly
+# and flesh out an exercise module to be more than just calories?
+# Maybe include things like muscles worked, volume (sets / reps), Reps in reserve, etc.?
+# Could have a modular experience where people choose what modules they may want?
+# Maybe have something to do with learning as well in the far future?
+
+# Could then add effects on food on things like recovery/strength gain, etc.
+# Or on your mind/body?

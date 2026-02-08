@@ -18,7 +18,7 @@ pub struct Exercise {
     id: Uuid,
     name: String,
     description: String,
-    power: Power,
+    power: Power, // Energy burned per time unit
 }
 
 impl Exercise {

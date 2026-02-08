@@ -10,6 +10,7 @@ pub struct FoodCategory {
     name: String,
     description: String,
     parents: Vec<Rc<RefCell<FoodCategory>>>,
+    // Make parents a Vec<Weak<RefCell>> as parents are not owned by children
     children: Vec<Rc<RefCell<FoodCategory>>>,
     food_instance: Option<FoodInstance>,
 }
