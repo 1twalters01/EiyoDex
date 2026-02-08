@@ -1,3 +1,7 @@
+# Auto Update
+Handle automatic updates
+
+## Steps
 1. Read current project version
 2. Fetch latest release metadata
 3. Compare versions

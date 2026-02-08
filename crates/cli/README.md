@@ -1,4 +1,6 @@
-# CLI functionality
+# CLI
+Manage CLI functionality
+
 ## Profile
 eiyodex profile new
 eiyodex profile <profileName>
