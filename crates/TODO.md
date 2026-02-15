@@ -33,4 +33,3 @@ i18n/
 food_suggestions/
 external/
 extensions/
-
