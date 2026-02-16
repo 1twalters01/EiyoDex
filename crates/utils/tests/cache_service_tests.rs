@@ -1,10 +1,5 @@
-use serde::{de::DeserializeOwned, Serialize};
-use sled::Db;
-use std::{
-    path::PathBuf,
-    time::{Duration, SystemTime, UNIX_EPOCH},
-    thread::sleep,
-};
+use std::{thread::sleep, time::Duration};
+use utils::cache::CacheService;
 
 #[test]
 fn test_create_db_connection() {

@@ -1,4 +1,4 @@
-use base_types::Angle;
+use utils::base_types::angle::Angle;
 
 #[test]
 fn test_angle_one_revolution() {

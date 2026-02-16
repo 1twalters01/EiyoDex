@@ -1,4 +1,4 @@
-use base_types::Normalized;
+use utils::base_types::normalized::Normalized;
 
 #[test]
 fn test_normalization() {

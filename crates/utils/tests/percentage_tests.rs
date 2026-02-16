@@ -1,4 +1,4 @@
-use base_types::Percentage;
+use utils::base_types::percentage::Percentage;
 
 #[test]
 fn test_percentages() {

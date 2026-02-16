@@ -1,5 +1,4 @@
-use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite};
-use std::{fs, path::PathBuf};
+use utils::database::DatabaseService;
 
 #[tokio::test]
 async fn test_create_database_session() {
