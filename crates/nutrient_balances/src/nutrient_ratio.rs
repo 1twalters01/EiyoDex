@@ -1,5 +1,5 @@
 use nutrients::nutrient_amount::NutrientAmount;
-use utils::base_types::Percentage;
+use utils::base_types::percentage::Percentage;
 
 pub struct NutrientRatio {
     parts: Vec<NutrientAmount>,

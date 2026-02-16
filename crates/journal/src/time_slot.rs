@@ -1,3 +1,10 @@
+use chrono::NaiveDateTime;
+use nutrients::{nutrient::Nutrient, nutrient_amount::NutrientAmount};
+use units::energy::Energy;
+use uuid::Uuid;
+
+use crate::entry::Entry;
+
 // (e.g. breakfast, lunch, snack 1)
 #[derive(Clone, PartialEq)]
 pub struct TimeSlot {
@@ -78,12 +85,18 @@ impl TimeSlot {
     pub fn get_nutrient_amount(&self, nutrient: Nutrient) -> Option<NutrientAmount> {
         self.entries
             .iter()
-            .map(|entry| entry.get_nutrient_amount(nutrient))
+            .map(|entry| entry.get_nutrient_amount(nutrient.clone()))
+            .sum()
+    }
+    pub fn get_flat_nutrient_amount(&self, nutrient: Nutrient) -> NutrientAmount {
+        self.entries
+            .iter()
+            .map(|entry| entry.get_flat_nutrient_amount(nutrient.clone()))
             .sum()
     }
     pub fn contains_nutrient(&self, nutrient: Nutrient) -> bool {
         self.entries
             .iter()
-            .any(|entry| entry.contains_nutrient)
+            .any(|entry| entry.contains_nutrient(nutrient.clone()))
     }
 }

@@ -1,9 +1,9 @@
-use chrono::{NaiveDate, NaiveDateTime};
-use exercise::exercise::ExerciseAmount;
-use foods::food_amount::FoodAmount;
-use profiles::profile::Profile;
+use chrono::NaiveDateTime;
+use nutrients::{nutrient::Nutrient, nutrient_amount::NutrientAmount};
 use units::energy::Energy;
 use uuid::Uuid;
+
+use crate::entry_item::EntryItem;
 
 #[derive(Clone, PartialEq)]
 pub struct Entry {
@@ -70,9 +70,19 @@ impl Entry {
     pub fn get_carbs(&self) {}
     pub fn get_fats(&self) {}
     pub fn get_water(&self) {}
+    
     pub fn get_nutrient_amount(&self, nutrient: Nutrient) -> Option<NutrientAmount> {
-        self.entry_item.get_nutrient_amount(nutrient:Nutrient)
+        self.entry_item.get_nutrient_amount(nutrient)
     }
+
+    pub fn get_flat_nutrient_amount(&self, nutrient: Nutrient) -> NutrientAmount {
+        let nutrient_amount_option = self.entry_item.get_nutrient_amount(nutrient.clone());
+        match nutrient_amount_option {
+            Some(nutrient_amount) => return nutrient_amount,
+            None => return NutrientAmount::new(0f64, Some(nutrient.clone()), nutrient.get_main_unit()).unwrap()
+        }
+    }
+
     pub fn contains_nutrient(&self, nutrient: Nutrient) -> bool {
         self.entry_item.contains_nutrient(nutrient)
     }

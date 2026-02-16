@@ -1,5 +1,5 @@
 use super::{hex_color::HexColor, packed_rgb::PackedRGB, rgb::RGB};
-use crate::base_types::{Angle, Normalized};
+use crate::base_types::{angle::Angle, normalized::Normalized};
 
 #[derive(Debug, PartialEq)]
 pub struct HSL {

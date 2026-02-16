@@ -1,3 +1,11 @@
+use chrono::NaiveDate;
+use nutrients::{nutrient::Nutrient, nutrient_amount::NutrientAmount};
+use profiles::profile::Profile;
+use units::energy::Energy;
+use uuid::Uuid;
+
+use crate::{entry::Entry, time_slot::TimeSlot};
+
 pub struct JournalEntry {
     id: Uuid,
     profile: Profile,
@@ -102,19 +110,19 @@ impl JournalEntry {
     pub fn get_carbs(&self) {}
     pub fn get_fats(&self) {}
     pub fn get_water(&self) {}
-    pub fn get_nutrient_amount(&self, nutrient: Nutrient) -> Option<NutrientAmount> {
+    pub fn get_nutrient_amount(&self, nutrient: Nutrient) -> NutrientAmount {
         let uncategorised_nutrient_amount: NutrientAmount = self
             .uncategorised_time_slots
             .iter()
-            .map(|entry| entry.get_nutrient_amount(nutrient))
+            .map(|entry| entry.get_flat_nutrient_amount(nutrient.clone()))
             .sum();
-        let time_slot_nutrients: NutrientAmount = self
+        let time_slot_nutrient_amount: NutrientAmount = self
             .time_slots
             .iter()
-            .map(|time_slot| time_slot.get_nutrient_amount(nutrient))
+            .map(|time_slot| time_slot.get_flat_nutrient_amount(nutrient.clone()))
             .sum();
 
-        let total_nutrient_amount: NutrientAmount = uncategorised_nutrients + time_slot_nutrients;
+        let total_nutrient_amount: NutrientAmount = uncategorised_nutrient_amount + time_slot_nutrient_amount;
         return total_nutrient_amount;
     }
 
@@ -122,12 +130,12 @@ impl JournalEntry {
         let uncategorised_nutrient_res: bool = self
             .uncategorised_time_slots
             .iter()
-            .any(|entry| entry.contains_nutrient(nutrient));
+            .any(|entry| entry.contains_nutrient(nutrient.clone()));
 
         let time_slot_nutrient_res: bool = self
             .time_slots
             .iter()
-            .any(|time_slot| time_slot.contains_nutrient(nutrient));
+            .any(|time_slot| time_slot.contains_nutrient(nutrient.clone()));
 
         let contains_nutrient = uncategorised_nutrient_res || time_slot_nutrient_res;
         return contains_nutrient;

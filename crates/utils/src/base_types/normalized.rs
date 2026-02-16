@@ -1,5 +1,3 @@
-use std::ops::{Add, Sub};
-
 /// A wrapper around an f64 representing a Normalized Value
 #[derive(Debug, PartialEq)]
 pub struct Normalized {

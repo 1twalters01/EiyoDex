@@ -1,5 +1,6 @@
 use std::collections::BTreeSet;
 
+use nutrients::{nutrient::Nutrient, nutrient_amount::NutrientAmount};
 use units::energy::Energy;
 use uuid::Uuid;
 
@@ -56,6 +57,19 @@ impl Food {
         match food_instance {
             Some(instance) => instance.get_calories(data_source_uuid),
             None => Energy::new(0f64, units::energy::EnergyUnit::Kilocalorie),
+        }
+    }
+
+    pub fn get_nutrient_amount(&self, nutrient: Nutrient, food_instance_uuid: Uuid, data_source_uuid: Uuid) -> Option<NutrientAmount> {
+        let food_instance = self.food_instances
+            .iter()
+            .filter(|instance| instance.get_id() == food_instance_uuid)
+            .cloned()
+            .collect::<Vec<FoodInstance>>()
+            .first().cloned();
+        match food_instance {
+            Some(instance) => instance.get_nutrient_amount(nutrient, data_source_uuid),
+            None => { None },
         }
     }
 }

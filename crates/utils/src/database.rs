@@ -1,3 +1,6 @@
+use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite};
+use std::{fs, path::PathBuf};
+
 pub struct DatabaseService {
     pub pool: Pool<Sqlite>,
 }

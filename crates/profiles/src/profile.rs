@@ -4,7 +4,7 @@ use units::{
     mass::{Mass, MassUnit},
     volume::VolumeUnit,
 };
-use utils::base_types::Percentage;
+use utils::base_types::percentage::Percentage;
 use uuid::Uuid;
 
 #[derive(Clone)]
