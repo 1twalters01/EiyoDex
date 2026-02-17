@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub};
+use std::ops::{Add, Sub, Mul, Div};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Percentage {
@@ -34,5 +34,27 @@ impl Sub for Percentage {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self {
         Self::new(self.get_value() - rhs.get_value())
+    }
+}
+
+impl<T> Mul<T> for Percentage
+where
+    T: Into<f64> + Copy,
+{
+    type Output = Self;
+
+    fn mul(self, rhs: T) -> Self {
+        Self::new(self.get_value() * rhs.into())
+    }
+}
+
+impl<T> Div<T> for Percentage
+where
+    T: Into<f64> + Copy,
+{
+    type Output = Self;
+
+    fn div(self, rhs: T) -> Self {
+        Self::new(self.get_value() / rhs.into())
     }
 }
