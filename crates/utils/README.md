@@ -4,8 +4,8 @@ A list of utilities for EiyoDex
 ## Color
 Color structs and functions for themes, charts
 
-# Redis
+## Redis
 Pool for redis
 
-# Postgres
+## Postgres
 Pool for postgres
