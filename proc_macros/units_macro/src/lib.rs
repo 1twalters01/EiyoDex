@@ -37,6 +37,11 @@ pub fn include_distances_from_json(input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
+pub fn include_distance_units_from_json(input: TokenStream) -> TokenStream {
+    distance::generate_units(input)
+}
+
+#[proc_macro]
 pub fn include_durations_from_json(input: TokenStream) -> TokenStream {
     duration::generate(input)
 }

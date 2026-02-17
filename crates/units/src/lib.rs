@@ -4,6 +4,7 @@ pub mod density;
 pub mod density_measurement_system;
 pub mod density_unit;
 pub mod distance;
+pub mod distance_unit;
 pub mod duration;
 pub mod energy;
 pub mod into_f64;

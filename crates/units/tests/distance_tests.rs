@@ -1,5 +1,6 @@
 use units::{
-    distance::{Distance, DistanceUnit},
+    distance::Distance,
+    distance_unit::DistanceUnit,
     measurement_system::MeasurementSystem,
 };
 

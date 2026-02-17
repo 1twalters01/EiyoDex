@@ -18,8 +18,6 @@ pub struct CurrencyJson {
 pub fn populate_currencies(input: TokenStream) -> HashMap<String, CurrencyJson> {
     let mut currencies: HashMap<String, CurrencyJson> = HashMap::new();
 
-    // let file_paths = syn::parse_macro_input!(input with
-    // syn::punctuated::Punctuated::<LitStr, syn::Token![,]>::parse_terminated);
     let parser = syn::punctuated::Punctuated::<LitStr, syn::Token![,]>::parse_terminated;
     let file_paths = parser
         .parse(input)
