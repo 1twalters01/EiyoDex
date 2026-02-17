@@ -34,7 +34,7 @@ pub fn test_food_tag_description() {
     let name = String::from("Fermented");
     let description = String::from("Food that is fermented");
     let mut food_tag = FoodTag::new(Some(id), name);
-    
+
     assert_eq!(food_tag.get_description(), String::new());
     food_tag.set_description(description.clone());
     assert_eq!(food_tag.get_description(), description);

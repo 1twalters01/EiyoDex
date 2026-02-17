@@ -1,4 +1,2 @@
 #[test]
-pub fn (){
-
-}
+pub fn themes_test() {}

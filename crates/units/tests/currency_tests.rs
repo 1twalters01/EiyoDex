@@ -1,5 +1,5 @@
-use chrono::NaiveDate;
-use units::currency::{Currency, CurrencyUnit};
+// use chrono::NaiveDate;
+use units::{currency::Currency, currency_unit::CurrencyUnit};
 
 #[test]
 fn test_new_currency() {

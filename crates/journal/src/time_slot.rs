@@ -72,10 +72,7 @@ impl TimeSlot {
     }
 
     pub fn get_calories(&self) -> Energy {
-        self.entries
-            .iter()
-            .map(|entry| entry.get_calories())
-            .sum()
+        self.entries.iter().map(|entry| entry.get_calories()).sum()
     }
 
     pub fn get_protein(&self) {}

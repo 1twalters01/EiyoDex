@@ -55,4 +55,3 @@ impl HSL {
         self.to_rgb().to_hex_color()
     }
 }
-

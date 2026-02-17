@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::{BTreeSet}, rc::Rc};
+use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
 
 use uuid::Uuid;
 
@@ -58,7 +58,10 @@ impl FoodTag {
         self.applicable_categories.clone()
     }
 
-    pub fn set_applicable_categories(&mut self, food_categories: BTreeSet<Rc<RefCell<FoodCategory>>>) {
+    pub fn set_applicable_categories(
+        &mut self,
+        food_categories: BTreeSet<Rc<RefCell<FoodCategory>>>,
+    ) {
         self.applicable_categories = food_categories;
     }
 
@@ -66,12 +69,15 @@ impl FoodTag {
         self.applicable_categories.insert(food_category);
     }
 
-    pub fn extend_applicable_categories(&mut self, food_categories: Vec<Rc<RefCell<FoodCategory>>>) {
+    pub fn extend_applicable_categories(
+        &mut self,
+        food_categories: Vec<Rc<RefCell<FoodCategory>>>,
+    ) {
         self.applicable_categories.extend(food_categories);
     }
 
     pub fn remove_applicable_category(&mut self, food_category: Rc<RefCell<FoodCategory>>) {
-        self.applicable_categories.retain(|category| !Rc::ptr_eq(category, &food_category));
+        self.applicable_categories
+            .retain(|category| !Rc::ptr_eq(category, &food_category));
     }
 }
-

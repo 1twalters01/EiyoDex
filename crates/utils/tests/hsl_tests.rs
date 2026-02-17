@@ -152,4 +152,3 @@ fn test_normal_to_hex() {
     let manual_hex = HexColor::new("#333a99".to_string()).unwrap();
     assert_eq!(created_hex, manual_hex);
 }
-

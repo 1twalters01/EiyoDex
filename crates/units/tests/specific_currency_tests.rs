@@ -1,6 +1,8 @@
 use units::{
-    currency::{Currency, CurrencyUnit},
-    density::{Density, DensityUnit},
+    currency::Currency,
+    currency_unit::CurrencyUnit,
+    density::Density,
+    density_unit::DensityUnit,
     mass::{Mass, MassUnit},
     measurement_system::MeasurementSystem,
     specific_currency::{Denominator, DenominatorType, SpecificCurrency, SpecificCurrencyUnit},

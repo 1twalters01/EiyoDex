@@ -6,7 +6,6 @@ use uuid::Uuid;
 
 use crate::{food_instance::FoodInstance, price_metadata::PriceMetadata};
 
-
 // TODO - per whatever unit (100g?)
 #[derive(Clone, PartialEq)]
 pub struct Food {
@@ -48,28 +47,37 @@ impl Food {
     }
 
     pub fn get_calories(&self, food_instance_uuid: Uuid, data_source_uuid: Uuid) -> Energy {
-        let food_instance = self.food_instances
+        let food_instance = self
+            .food_instances
             .iter()
             .filter(|instance| instance.get_id() == food_instance_uuid)
             .cloned()
             .collect::<Vec<FoodInstance>>()
-            .first().cloned();
+            .first()
+            .cloned();
         match food_instance {
             Some(instance) => instance.get_calories(data_source_uuid),
             None => Energy::new(0f64, units::energy::EnergyUnit::Kilocalorie),
         }
     }
 
-    pub fn get_nutrient_amount(&self, nutrient: Nutrient, food_instance_uuid: Uuid, data_source_uuid: Uuid) -> Option<NutrientAmount> {
-        let food_instance = self.food_instances
+    pub fn get_nutrient_amount(
+        &self,
+        nutrient: Nutrient,
+        food_instance_uuid: Uuid,
+        data_source_uuid: Uuid,
+    ) -> Option<NutrientAmount> {
+        let food_instance = self
+            .food_instances
             .iter()
             .filter(|instance| instance.get_id() == food_instance_uuid)
             .cloned()
             .collect::<Vec<FoodInstance>>()
-            .first().cloned();
+            .first()
+            .cloned();
         match food_instance {
             Some(instance) => instance.get_nutrient_amount(nutrient, data_source_uuid),
-            None => { None },
+            None => None,
         }
     }
 }

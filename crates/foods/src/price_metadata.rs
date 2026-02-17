@@ -33,4 +33,3 @@ impl PriceMetadata {
         self.specific_currency = specific_currency;
     }
 }
-

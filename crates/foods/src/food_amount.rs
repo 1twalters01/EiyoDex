@@ -30,15 +30,28 @@ impl FoodAmount {
     }
 
     pub fn get_calories(&self) -> Energy {
-        self.food.get_calories(self.food_data_uuid, self.data_source.borrow().get_id()) * self.value
+        self.food
+            .get_calories(self.food_data_uuid, self.data_source.borrow().get_id())
+            * self.value
     }
 
     pub fn get_nutrient_amount(&self, nutrient: Nutrient) -> Option<NutrientAmount> {
-        self.food.get_nutrient_amount(nutrient, self.food_data_uuid, self.data_source.borrow().get_id()).and_then(|amount| Some(amount * self.value))
+        self.food
+            .get_nutrient_amount(
+                nutrient,
+                self.food_data_uuid,
+                self.data_source.borrow().get_id(),
+            )
+            .and_then(|amount| Some(amount * self.value))
     }
 
     pub fn contains_nutrient(&self, nutrient: Nutrient) -> bool {
-        self.food.get_nutrient_amount(nutrient, self.food_data_uuid, self.data_source.borrow().get_id()).is_some()
+        self.food
+            .get_nutrient_amount(
+                nutrient,
+                self.food_data_uuid,
+                self.data_source.borrow().get_id(),
+            )
+            .is_some()
     }
 }
-

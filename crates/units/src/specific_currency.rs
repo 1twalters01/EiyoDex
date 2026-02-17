@@ -94,14 +94,13 @@ macro_rules! define_specific_currencies {
         };
         use serde::{Deserialize, Serialize};
         use crate::{
-            currency::{
-                Currency,
-                CurrencyUnit::{self, *},
-            },
+            currency::Currency,
+            currency_unit::CurrencyUnit::{self, *},
             measurement_system::MeasurementSystem,
             mass::{ Mass, MassUnit },
             volume::{ Volume, VolumeUnit },
-            density::{ Density, DensityUnit },
+            density::Density,
+            density_unit::DensityUnit,
         };
 
         #[derive(Debug, PartialEq)]

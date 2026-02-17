@@ -122,7 +122,8 @@ impl JournalEntry {
             .map(|time_slot| time_slot.get_flat_nutrient_amount(nutrient.clone()))
             .sum();
 
-        let total_nutrient_amount: NutrientAmount = uncategorised_nutrient_amount + time_slot_nutrient_amount;
+        let total_nutrient_amount: NutrientAmount =
+            uncategorised_nutrient_amount + time_slot_nutrient_amount;
         return total_nutrient_amount;
     }
 

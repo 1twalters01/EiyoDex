@@ -56,4 +56,3 @@ impl Merchant {
         self.website = website;
     }
 }
-

@@ -1,6 +1,6 @@
 use std::{collections::BTreeSet, str::FromStr};
 use units::{
-    currency::CurrencyUnit,
+    currency_unit::CurrencyUnit,
     mass::MassUnit,
     measurement_system::MeasurementSystem,
     specific_currency::{Denominator, DenominatorType, SpecificCurrencyUnit},

@@ -107,4 +107,3 @@ impl FoodCategory {
         self.food_instance = food_instance;
     }
 }
-

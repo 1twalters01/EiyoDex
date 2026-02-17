@@ -31,4 +31,3 @@ impl PackedRGB {
         HexColor { value: hex }
     }
 }
-

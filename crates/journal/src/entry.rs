@@ -70,7 +70,7 @@ impl Entry {
     pub fn get_carbs(&self) {}
     pub fn get_fats(&self) {}
     pub fn get_water(&self) {}
-    
+
     pub fn get_nutrient_amount(&self, nutrient: Nutrient) -> Option<NutrientAmount> {
         self.entry_item.get_nutrient_amount(nutrient)
     }
@@ -79,7 +79,10 @@ impl Entry {
         let nutrient_amount_option = self.entry_item.get_nutrient_amount(nutrient.clone());
         match nutrient_amount_option {
             Some(nutrient_amount) => return nutrient_amount,
-            None => return NutrientAmount::new(0f64, Some(nutrient.clone()), nutrient.get_main_unit()).unwrap()
+            None => {
+                return NutrientAmount::new(0f64, Some(nutrient.clone()), nutrient.get_main_unit())
+                    .unwrap()
+            }
         }
     }
 

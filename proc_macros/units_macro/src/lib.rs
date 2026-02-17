@@ -47,8 +47,18 @@ pub fn include_currencies_from_json(input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
+pub fn include_currency_units_from_json(input: TokenStream) -> TokenStream {
+    currency::generate_units(input)
+}
+
+#[proc_macro]
 pub fn include_densities_from_json(input: TokenStream) -> TokenStream {
     density::generate(input)
+}
+
+#[proc_macro]
+pub fn include_density_units_from_json(input: TokenStream) -> TokenStream {
+    density::generate_units(input)
 }
 
 #[proc_macro]

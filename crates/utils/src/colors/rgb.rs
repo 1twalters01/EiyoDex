@@ -75,4 +75,3 @@ impl RGB {
         HexColor { value: hex }
     }
 }
-
