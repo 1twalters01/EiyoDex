@@ -1,7 +1,10 @@
 use std::collections::BTreeSet;
 
 use nutrients::{nutrient::Nutrient, nutrient_amount::NutrientAmount};
-use units::energy::Energy;
+use units::{
+    energy::Energy,
+    energy_unit::EnergyUnit,
+};
 use uuid::Uuid;
 
 use crate::{food_instance::FoodInstance, price_metadata::PriceMetadata};
@@ -57,7 +60,7 @@ impl Food {
             .cloned();
         match food_instance {
             Some(instance) => instance.get_calories(data_source_uuid),
-            None => Energy::new(0f64, units::energy::EnergyUnit::Kilocalorie),
+            None => Energy::new(0f64, EnergyUnit::Kilocalorie),
         }
     }
 

@@ -3,9 +3,6 @@ macro_rules! define_mass_units {
     (
         $(
             $variant:ident => {
-                from_fn_name: $from_fn_name:ident,
-                as_fn_name: $as_fn_name:ident,
-                to_fn_name: $to_fn_name:ident,
                 measurement_system: $measurement_system:ident,
                 symbol: $symbol:expr,
                 symbol_lc: $symbol_lc:expr,
@@ -20,11 +17,7 @@ macro_rules! define_mass_units {
     ) => {
         use crate::measurement_system::MeasurementSystem;
         use std::{
-            cmp::Ordering,
-            fmt,
-            ops::{Add, Div, Mul, Sub},
             str::FromStr,
-            iter::Sum,
         };
         use serde::{Deserialize, Serialize};
 

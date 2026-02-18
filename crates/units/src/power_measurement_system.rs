@@ -1,4 +1,6 @@
-#[derive(Debug, Deserialize, PartialEq)]
+use crate::measurement_system::MeasurementSystem;
+
+#[derive(Debug, PartialEq)]
 pub struct PowerMeasurementSystem {
     energy_measurement_system: MeasurementSystem,
     duration_measurement_system: MeasurementSystem,

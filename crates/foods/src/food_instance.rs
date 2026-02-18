@@ -8,7 +8,10 @@ use std::{
     collections::BTreeSet,
     rc::{Rc, Weak},
 };
-use units::energy::Energy;
+use units::{
+    energy::Energy,
+    energy_unit::EnergyUnit,
+};
 use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -100,7 +103,7 @@ impl FoodInstance {
             }
         }
 
-        let mut energy: Energy = Energy::new(0f64, units::energy::EnergyUnit::Kilocalorie);
+        let mut energy: Energy = Energy::new(0f64, EnergyUnit::Kilocalorie);
         match food_data {
             Some(data) => {
                 for nutrient_amount in data.get_nutrient_amount_list().get_nutrient_amounts() {
@@ -122,7 +125,7 @@ impl FoodInstance {
                     }
                 }
             }
-            None => energy = Energy::new(0f64, units::energy::EnergyUnit::Kilocalorie),
+            None => energy = Energy::new(0f64, EnergyUnit::Kilocalorie),
         };
         return energy;
     }

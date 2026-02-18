@@ -1,5 +1,5 @@
 use std::{collections::BTreeSet, str::FromStr};
-use units::{mass::MassUnit, measurement_system::MeasurementSystem};
+use units::{mass_unit::MassUnit, measurement_system::MeasurementSystem};
 
 #[test]
 fn test_get_mass_unit_enumerations() {

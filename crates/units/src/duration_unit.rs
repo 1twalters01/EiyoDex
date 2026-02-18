@@ -1,11 +1,8 @@
 #[macro_export]
-macro_rules! define_durations {
+macro_rules! define_duration_units {
     (
         $(
             $variant:ident => {
-                from_fn_name: $from_fn_name:ident,
-                as_fn_name: $as_fn_name:ident,
-                to_fn_name: $to_fn_name:ident,
                 chrono_name: $chrono_name: ident,
                 measurement_system: $measurement_system:ident,
                 symbol: $symbol:expr,
@@ -94,3 +91,6 @@ macro_rules! define_durations {
         }
     }
 }
+
+use units_macro::include_duration_units_from_json;
+include_duration_units_from_json!("data/units/duration");

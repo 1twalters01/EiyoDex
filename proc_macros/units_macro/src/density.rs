@@ -12,7 +12,7 @@ use std::{
 use syn::parse::{Parse, ParseStream, Result as ParseResult};
 use syn::{Ident, LitStr, Token};
 
-pub struct EnumSourceGroup {
+struct EnumSourceGroup {
     items: Vec<(Ident, Vec<LitStr>)>,
 }
 
@@ -97,7 +97,7 @@ pub struct DensityHashMaps {
     density_all: HashMap<String, Density>,
 }
 
-pub fn populate_densities_masses_and_volumes(parsed_input: EnumSourceGroup) -> JsonHashes {
+fn populate_densities_masses_and_volumes(parsed_input: EnumSourceGroup) -> JsonHashes {
     let mut density_data: HashSet<DensityJson> = HashSet::new();
     let mut mass_data: HashMap<String, MassJson> = HashMap::new();
     let mut volume_data: HashMap<String, VolumeJson> = HashMap::new();

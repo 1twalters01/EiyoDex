@@ -1,10 +1,10 @@
 use std::{collections::BTreeSet, str::FromStr};
 use units::{
     currency_unit::CurrencyUnit,
-    mass::MassUnit,
+    mass_unit::MassUnit,
     measurement_system::MeasurementSystem,
-    specific_currency::{Denominator, DenominatorType, SpecificCurrencyUnit},
-    volume::VolumeUnit,
+    specific_currency_unit::{Denominator, DenominatorType, SpecificCurrencyUnit},
+    volume_unit::VolumeUnit,
 };
 
 #[test]

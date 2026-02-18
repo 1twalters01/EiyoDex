@@ -8,7 +8,7 @@ use std::{
     collections::{BTreeSet, HashSet},
     rc::Rc,
 };
-use units::{mass::MassUnit, volume::VolumeUnit};
+use units::{mass_unit::MassUnit, volume_unit::VolumeUnit};
 use uuid::Uuid;
 
 #[test]

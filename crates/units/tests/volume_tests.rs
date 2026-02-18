@@ -1,6 +1,7 @@
 use units::{
     measurement_system::MeasurementSystem,
-    volume::{Volume, VolumeUnit},
+    volume::Volume,
+    volume_unit::VolumeUnit,
 };
 
 #[test]

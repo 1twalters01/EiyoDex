@@ -5,10 +5,10 @@ use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use serde::Deserialize;
 use std::{collections::HashMap, env, fs, path::Path};
-use syn::LitStr;
+use syn::{LitStr, parse::Parser};
 
 #[derive(Debug, Deserialize)]
-struct EnergyJson {
+pub struct EnergyJson {
     identifier: String,
     symbol: String,
     unit_type: String,
@@ -17,10 +17,14 @@ struct EnergyJson {
     si_factor: f64,
 }
 
-pub fn generate(input: TokenStream) -> TokenStream {
+pub fn populate_energies(input: TokenStream) -> HashMap<String, EnergyJson> {
     let mut energies: HashMap<String, EnergyJson> = HashMap::new();
 
-    let file_paths = syn::parse_macro_input!(input with syn::punctuated::Punctuated::<LitStr, syn::Token![,]>::parse_terminated);
+    let parser = syn::punctuated::Punctuated::<LitStr, syn::Token![,]>::parse_terminated;
+    let file_paths = parser
+        .parse(input)
+        .expect("Failed to parse input as comma-separated string literals");
+
     for file_path_lit in file_paths.iter() {
         let rel_path = file_path_lit.value();
 
@@ -48,11 +52,43 @@ pub fn generate(input: TokenStream) -> TokenStream {
         }
     }
 
+    return energies;
+}
+
+pub fn generate(input: TokenStream) -> TokenStream {
+    let energies: HashMap<String, EnergyJson> = populate_energies(input);
+
     let variants = energies.iter().map(|(key, data)| {
         let variant = format_ident!("{}", key);
         let from_fn_name = format_ident!("from_{}", data.symbol);
         let as_fn_name = format_ident!("as_{}", data.symbol);
         let to_fn_name = format_ident!("to_{}", data.symbol);
+        let si_factor = &data.si_factor;
+
+        quote! {
+            #variant => {
+                from_fn_name: #from_fn_name,
+                as_fn_name: #as_fn_name,
+                to_fn_name: #to_fn_name,
+                si_factor: #si_factor
+            }
+        }
+    });
+
+    let expanded = quote! {
+        define_energies! {
+            #(#variants),*
+        }
+    };
+
+    expanded.into()
+}
+
+pub fn generate_units(input: TokenStream) -> TokenStream {
+    let energies: HashMap<String, EnergyJson> = populate_energies(input);
+
+    let variants = energies.iter().map(|(key, data)| {
+        let variant = format_ident!("{}", key);
         let measurement_system = format_ident!("{}", data.measurement_system);
         let symbol = &data.symbol;
         let symbol_lc = &data.symbol.to_lowercase();
@@ -65,9 +101,6 @@ pub fn generate(input: TokenStream) -> TokenStream {
 
         quote! {
             #variant => {
-                from_fn_name: #from_fn_name,
-                as_fn_name: #as_fn_name,
-                to_fn_name: #to_fn_name,
                 measurement_system: #measurement_system,
                 symbol: #symbol,
                 symbol_lc: #symbol_lc,
@@ -82,7 +115,7 @@ pub fn generate(input: TokenStream) -> TokenStream {
     });
 
     let expanded = quote! {
-        define_energies! {
+        define_energy_units! {
             #(#variants),*
         }
     };

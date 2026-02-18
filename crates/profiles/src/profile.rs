@@ -1,8 +1,10 @@
 use chrono::{Datelike, Local, NaiveDate};
 use units::{
-    distance::{Distance, DistanceUnit},
-    mass::{Mass, MassUnit},
-    volume::VolumeUnit,
+    distance::Distance,
+    distance_unit::DistanceUnit,
+    mass::Mass,
+    mass_unit::MassUnit,
+    volume_unit::VolumeUnit,
 };
 use utils::base_types::percentage::Percentage;
 use uuid::Uuid;

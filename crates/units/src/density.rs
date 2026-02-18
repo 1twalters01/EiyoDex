@@ -25,8 +25,10 @@ macro_rules! define_densities {
         use crate::{
             density_unit::DensityUnit,
             density_measurement_system::DensityMeasurementSystem,
-            mass::{Mass, MassUnit},
-            volume::{Volume, VolumeUnit},
+            mass::Mass,
+            mass_unit::MassUnit,
+            volume::Volume,
+            volume_unit::VolumeUnit,
         };
         use std::{
             cmp::Ordering,

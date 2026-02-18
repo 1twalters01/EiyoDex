@@ -4,7 +4,7 @@ use nutrients::{
     nutrient_list::NutrientAmountList,
     units::NutrientUnit,
 };
-use units::mass::MassUnit;
+use units::mass_unit::MassUnit;
 use uuid::Uuid;
 
 #[test]

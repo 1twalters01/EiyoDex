@@ -22,13 +22,28 @@ pub fn include_masses_from_json(input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
+pub fn include_mass_units_from_json(input: TokenStream) -> TokenStream {
+    mass::generate_units(input)
+}
+
+#[proc_macro]
 pub fn include_volumes_from_json(input: TokenStream) -> TokenStream {
     volume::generate(input)
 }
 
 #[proc_macro]
+pub fn include_volume_units_from_json(input: TokenStream) -> TokenStream {
+    volume::generate_units(input)
+}
+
+#[proc_macro]
 pub fn include_energies_from_json(input: TokenStream) -> TokenStream {
     energy::generate(input)
+}
+
+#[proc_macro]
+pub fn include_energy_units_from_json(input: TokenStream) -> TokenStream {
+    energy::generate_units(input)
 }
 
 #[proc_macro]
@@ -44,6 +59,11 @@ pub fn include_distance_units_from_json(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn include_durations_from_json(input: TokenStream) -> TokenStream {
     duration::generate(input)
+}
+
+#[proc_macro]
+pub fn include_duration_units_from_json(input: TokenStream) -> TokenStream {
+    duration::generate_units(input)
 }
 
 #[proc_macro]
@@ -72,6 +92,16 @@ pub fn include_powers_from_json(input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
+pub fn include_power_units_from_json(input: TokenStream) -> TokenStream {
+    power::generate_units(input)
+}
+
+#[proc_macro]
 pub fn include_specific_currencies_from_json(input: TokenStream) -> TokenStream {
     specific_currency::generate(input)
+}
+
+#[proc_macro]
+pub fn include_specific_currency_units_from_json(input: TokenStream) -> TokenStream {
+    specific_currency::generate_units(input)
 }

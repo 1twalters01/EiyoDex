@@ -5,7 +5,7 @@ use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use serde::Deserialize;
 use std::{collections::HashMap, env, fs, path::Path};
-use syn::LitStr;
+use syn::{LitStr, parse::Parser};
 
 #[derive(Debug, Deserialize)]
 struct DurationJson {
@@ -17,10 +17,13 @@ struct DurationJson {
     si_factor: f64,
 }
 
-pub fn generate(input: TokenStream) -> TokenStream {
+fn populate_durations(input: TokenStream) -> HashMap<String, DurationJson> {
     let mut durations: HashMap<String, DurationJson> = HashMap::new();
 
-    let file_paths = syn::parse_macro_input!(input with syn::punctuated::Punctuated::<LitStr, syn::Token![,]>::parse_terminated);
+    let parser = syn::punctuated::Punctuated::<LitStr, syn::Token![,]>::parse_terminated;
+    let file_paths = parser
+        .parse(input)
+        .expect("Failed to parse input as comma-separated string literals");
     for file_path_lit in file_paths.iter() {
         let rel_path = file_path_lit.value();
 
@@ -48,11 +51,43 @@ pub fn generate(input: TokenStream) -> TokenStream {
         }
     }
 
+    return durations;
+}
+
+pub fn generate(input: TokenStream) -> TokenStream {
+    let durations = populate_durations(input);
+
     let variants = durations.iter().map(|(key, data)| {
         let variant = format_ident!("{}", key);
         let from_fn_name = format_ident!("from_{}", data.identifier);
         let as_fn_name = format_ident!("as_{}", data.identifier);
         let to_fn_name = format_ident!("to_{}", data.identifier);
+        let si_factor = &data.si_factor;
+
+        quote! {
+            #variant => {
+                from_fn_name: #from_fn_name,
+                as_fn_name: #as_fn_name,
+                to_fn_name: #to_fn_name,
+                si_factor: #si_factor
+            }
+        }
+    });
+
+    let expanded = quote! {
+        define_durations! {
+            #(#variants),*
+        }
+    };
+
+    expanded.into()
+}
+
+pub fn generate_units(input: TokenStream) -> TokenStream {
+    let durations = populate_durations(input);
+
+    let variants = durations.iter().map(|(key, data)| {
+        let variant = format_ident!("{}", key);
         let chrono_name = format_ident!("{}", &data.unit_type_plural.to_lowercase());
         let measurement_system = format_ident!("{}", data.measurement_system);
         let symbol = &data.symbol;
@@ -66,9 +101,6 @@ pub fn generate(input: TokenStream) -> TokenStream {
 
         quote! {
             #variant => {
-                from_fn_name: #from_fn_name,
-                as_fn_name: #as_fn_name,
-                to_fn_name: #to_fn_name,
                 chrono_name: #chrono_name,
                 measurement_system: #measurement_system,
                 symbol: #symbol,
@@ -84,7 +116,7 @@ pub fn generate(input: TokenStream) -> TokenStream {
     });
 
     let expanded = quote! {
-        define_durations! {
+        define_duration_units! {
             #(#variants),*
         }
     };

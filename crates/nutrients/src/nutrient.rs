@@ -5,7 +5,7 @@ use std::{
 };
 use uuid::Uuid;
 
-use units::{energy::EnergyUnit, mass::MassUnit, volume::VolumeUnit};
+use units::{energy_unit::EnergyUnit, mass_unit::MassUnit, volume_unit::VolumeUnit};
 
 use crate::{schema::nutrients::NutrientType, units::NutrientUnit};
 

@@ -4,9 +4,6 @@ macro_rules! define_specific_currency_units {
         all: {
             $(
                 $all_variant:ident => {
-                    from_fn_name: $all_from_fn_name:ident,
-                    as_fn_name: $all_as_fn_name:ident,
-                    to_fn_name: $all_to_fn_name:ident,
                     currency_unit_variant: $all_currency_unit_variant: ident,
                     denominator_unit_variant: $all_denominator_unit_variant:ident,
                     denominator_unit_type: $all_denominator_unit_type:ident,
@@ -25,9 +22,6 @@ macro_rules! define_specific_currency_units {
         json: {
             $(
                 $json_variant:ident => {
-                    from_fn_name: $json_from_fn_name: ident,
-                    as_fn_name: $json_as_fn_name: ident,
-                    to_fn_name: $json_to_fn_name: ident,
                     currency_unit_variant: $json_currency_unit_variant: ident,
                     denominator_unit_variant: $json_denominator_unit_variant:ident,
                     denominator_unit_type: $json_denominator_unit_type:ident,
@@ -46,9 +40,6 @@ macro_rules! define_specific_currency_units {
         mass: {
             $(
                 $mass_variant:ident => {
-                    from_fn_name: $mass_from_fn_name: ident,
-                    as_fn_name: $mass_as_fn_name: ident,
-                    to_fn_name: $mass_to_fn_name: ident,
                     currency_unit_variant: $mass_currency_unit_variant: ident,
                     denominator_unit_variant: $mass_denominator_unit_variant:ident,
                     denominator_unit_type: $mass_denominator_unit_type:ident,
@@ -67,9 +58,6 @@ macro_rules! define_specific_currency_units {
         volume: {
             $(
                 $volume_variant:ident => {
-                    from_fn_name: $volume_from_fn_name: ident,
-                    as_fn_name: $volume_as_fn_name: ident,
-                    to_fn_name: $volume_to_fn_name: ident,
                     currency_unit_variant: $volume_currency_unit_variant: ident,
                     denominator_unit_variant: $volume_denominator_unit_variant:ident,
                     denominator_unit_type: $volume_denominator_unit_type:ident,
@@ -87,20 +75,14 @@ macro_rules! define_specific_currency_units {
         },
     ) => {
         use std::{
-        cmp::Ordering,
-        fmt,
-        ops::{Div, Mul},
         str::FromStr,
         };
         use serde::{Deserialize, Serialize};
         use crate::{
-            currency::Currency,
-            currency_unit::CurrencyUnit::{self, *},
+            currency_unit::CurrencyUnit::self,
             measurement_system::MeasurementSystem,
-            mass::{ Mass, MassUnit },
-            volume::{ Volume, VolumeUnit },
-            density::Density,
-            density_unit::DensityUnit,
+            mass_unit::MassUnit,
+            volume_unit::VolumeUnit,
         };
 
         #[derive(Debug, PartialEq)]

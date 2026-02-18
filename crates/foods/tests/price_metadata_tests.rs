@@ -1,5 +1,6 @@
 use foods::{merchant::Merchant, price_metadata::PriceMetadata};
-use units::specific_currency::{SpecificCurrency, SpecificCurrencyUnit};
+use units::specific_currency::SpecificCurrency;
+use units::specific_currency_unit::SpecificCurrencyUnit;
 use uuid::Uuid;
 
 #[test]

@@ -78,17 +78,23 @@ struct DenominatorJson {
     si_factor: f64,
 }
 
-pub fn generate(input: TokenStream) -> TokenStream {
-    let mut specific_currency_all: HashMap<String, SpecificCurrency> = HashMap::new();
-    let mut specific_currency: HashMap<String, SpecificCurrency> = HashMap::new();
-    let mut specific_currency_mass: HashMap<String, SpecificCurrency> = HashMap::new();
-    let mut specific_currency_volume: HashMap<String, SpecificCurrency> = HashMap::new();
+struct JsonHashes {
+    denominator_data: HashMap<String, (DenominatorJson, String)>,
+    currency_data: HashMap<String, CurrencyJson>,
+    specific_currency_data: HashSet<SpecificCurrencyJson>,
+}
 
+struct SpecificCurrencyHashMaps {
+    specific_currency_all: HashMap<String, SpecificCurrency>,
+    specific_currency: HashMap<String, SpecificCurrency>,
+    specific_currency_mass: HashMap<String, SpecificCurrency>,
+    specific_currency_volume: HashMap<String, SpecificCurrency>,
+}
+
+fn populate_specific_currencies_denominators_currencies(parsed_input: EnumSourceGroup) -> JsonHashes {
     let mut currency_data: HashMap<String, CurrencyJson> = HashMap::new();
     let mut denominator_data: HashMap<String, (DenominatorJson, String)> = HashMap::new();
     let mut specific_currency_data: HashSet<SpecificCurrencyJson> = HashSet::new();
-
-    let parsed_input = syn::parse_macro_input!(input as EnumSourceGroup);
 
     for (enum_name, paths) in parsed_input.items {
         for file_path_lit in paths {
@@ -111,19 +117,19 @@ pub fn generate(input: TokenStream) -> TokenStream {
                 match enum_name.to_string().as_str() {
                     "SpecificCurrencyUnit" => {
                         let serde_res: Vec<SpecificCurrencyJson> =
-                            serde_json::from_str(&file_content).expect("Invalid JSON format");
+                        serde_json::from_str(&file_content).expect("Invalid JSON format");
                         specific_currency_data.extend(serde_res);
                     }
                     "CurrencyUnit" => {
                         let serde_res: HashMap<String, CurrencyJson> =
-                            serde_json::from_str(&file_content).expect("Invalid JSON format");
+                        serde_json::from_str(&file_content).expect("Invalid JSON format");
                         for (key, data) in serde_res {
                             currency_data.insert(key, data);
                         }
                     }
                     "MassUnit" => {
                         let serde_res: HashMap<String, DenominatorJson> =
-                            serde_json::from_str(&file_content).expect("Invalid JSON format");
+                        serde_json::from_str(&file_content).expect("Invalid JSON format");
                         for (key, data) in serde_res {
                             denominator_data
                                 .insert(key.clone(), (data, "MassDenominator".to_string()));
@@ -131,7 +137,7 @@ pub fn generate(input: TokenStream) -> TokenStream {
                     }
                     "VolumeUnit" => {
                         let serde_res: HashMap<String, DenominatorJson> =
-                            serde_json::from_str(&file_content).expect("Invalid JSON format");
+                        serde_json::from_str(&file_content).expect("Invalid JSON format");
                         for (key, data) in serde_res {
                             denominator_data
                                 .insert(key.clone(), (data, "VolumeDenominator".to_string()));
@@ -142,6 +148,24 @@ pub fn generate(input: TokenStream) -> TokenStream {
             }
         }
     }
+
+    return JsonHashes {
+        denominator_data,
+        currency_data,
+        specific_currency_data,
+    }
+}
+
+fn fill_specific_currency_hashmaps(
+    specific_currency_data: HashSet<SpecificCurrencyJson>,
+    currency_data: HashMap<String, CurrencyJson>,
+    denominator_data: HashMap<String, (DenominatorJson, String)>,
+) -> SpecificCurrencyHashMaps {
+    let mut specific_currency_all: HashMap<String, SpecificCurrency> = HashMap::new();
+    let mut specific_currency: HashMap<String, SpecificCurrency> = HashMap::new();
+    let mut specific_currency_mass: HashMap<String, SpecificCurrency> = HashMap::new();
+    let mut specific_currency_volume: HashMap<String, SpecificCurrency> = HashMap::new();
+
 
     for (currency_key, currency_value) in &currency_data {
         for (denominator_key, (denominator_value, denominator_unit_type)) in &denominator_data {
@@ -202,6 +226,28 @@ pub fn generate(input: TokenStream) -> TokenStream {
         }
     }
 
+    return SpecificCurrencyHashMaps {
+        specific_currency_all,
+        specific_currency,
+        specific_currency_mass,
+        specific_currency_volume
+    }
+}
+
+pub fn generate(input: TokenStream) -> TokenStream {
+    let parsed_input = syn::parse_macro_input!(input as EnumSourceGroup);
+
+    let json_data = populate_specific_currencies_denominators_currencies(parsed_input);
+    let specific_currency_data: HashSet<SpecificCurrencyJson> = json_data.specific_currency_data;
+    let currency_data: HashMap<String, CurrencyJson> = json_data.currency_data;
+    let denominator_data: HashMap<String, (DenominatorJson, String)> = json_data.denominator_data;
+
+    let specific_currency_hashmaps = fill_specific_currency_hashmaps(specific_currency_data, currency_data, denominator_data);
+    let specific_currency_all = specific_currency_hashmaps.specific_currency_all;
+    let specific_currency = specific_currency_hashmaps.specific_currency;
+    let specific_currency_mass = specific_currency_hashmaps.specific_currency_mass;
+    let specific_currency_volume = specific_currency_hashmaps.specific_currency_volume;
+
     let variants: Vec<_> = specific_currency
         .iter()
         .map(|(key, data)| {
@@ -209,6 +255,133 @@ pub fn generate(input: TokenStream) -> TokenStream {
             let from_fn_name = format_ident!("from_{}", data.identifier);
             let as_fn_name = format_ident!("as_{}", data.identifier);
             let to_fn_name = format_ident!("to_{}", data.identifier);
+            let currency_unit_variant = format_ident!("{}", &data.currency_unit);
+            let denominator_unit_variant = format_ident!("{}", &data.denominator_unit);
+            let denominator_unit_type = format_ident!("{}", &data.denominator_unit_type);
+            let si_factor = &data.si_factor;
+
+            quote! {
+                #json_variant => {
+                    from_fn_name: #from_fn_name,
+                    as_fn_name: #as_fn_name,
+                    to_fn_name: #to_fn_name,
+                    currency_unit_variant: #currency_unit_variant,
+                    denominator_unit_variant: #denominator_unit_variant,
+                    denominator_unit_type: #denominator_unit_type,
+                    si_factor: #si_factor
+                }
+            }
+        })
+        .collect();
+
+    let variants_all: Vec<_> = specific_currency_all
+        .iter()
+        .map(|(key, data)| {
+            let all_variant = format_ident!("{}", key);
+            let from_fn_name = format_ident!("from_{}", data.identifier);
+            let as_fn_name = format_ident!("as_{}", data.identifier);
+            let to_fn_name = format_ident!("to_{}", data.identifier);
+            let currency_unit_variant = format_ident!("{}", &data.currency_unit);
+            let denominator_unit_variant = format_ident!("{}", &data.denominator_unit);
+            let denominator_unit_type = format_ident!("{}", &data.denominator_unit_type);
+            let si_factor = &data.si_factor;
+
+            quote! {
+                #all_variant => {
+                    from_fn_name: #from_fn_name,
+                    as_fn_name: #as_fn_name,
+                    to_fn_name: #to_fn_name,
+                    currency_unit_variant: #currency_unit_variant,
+                    denominator_unit_variant: #denominator_unit_variant,
+                    denominator_unit_type: #denominator_unit_type,
+                    si_factor: #si_factor
+                }
+            }
+        })
+        .collect();
+
+    let variants_mass: Vec<_> = specific_currency_mass
+        .iter()
+        .map(|(key, data)| {
+            let mass_variant = format_ident!("{}", key);
+            let from_fn_name = format_ident!("from_{}", data.identifier);
+            let as_fn_name = format_ident!("as_{}", data.identifier);
+            let to_fn_name = format_ident!("to_{}", data.identifier);
+            let currency_unit_variant = format_ident!("{}", &data.currency_unit);
+            let denominator_unit_variant = format_ident!("{}", &data.denominator_unit);
+            let denominator_unit_type = format_ident!("{}", &data.denominator_unit_type);
+            let si_factor = &data.si_factor;
+
+            quote! {
+                #mass_variant => {
+                    from_fn_name: #from_fn_name,
+                    as_fn_name: #as_fn_name,
+                    to_fn_name: #to_fn_name,
+                    currency_unit_variant: #currency_unit_variant,
+                    denominator_unit_variant: #denominator_unit_variant,
+                    denominator_unit_type: #denominator_unit_type,
+                    si_factor: #si_factor
+                }
+            }
+        })
+        .collect();
+
+    let variants_volume: Vec<_> = specific_currency_volume
+        .iter()
+        .map(|(key, data)| {
+            let volume_variant = format_ident!("{}", key);
+            let from_fn_name = format_ident!("from_{}", data.identifier);
+            let as_fn_name = format_ident!("as_{}", data.identifier);
+            let to_fn_name = format_ident!("to_{}", data.identifier);
+            let currency_unit_variant = format_ident!("{}", &data.currency_unit);
+            let denominator_unit_variant = format_ident!("{}", &data.denominator_unit);
+            let denominator_unit_type = format_ident!("{}", &data.denominator_unit_type);
+            let si_factor = &data.si_factor;
+
+            quote! {
+                #volume_variant => {
+                    from_fn_name: #from_fn_name,
+                    as_fn_name: #as_fn_name,
+                    to_fn_name: #to_fn_name,
+                    currency_unit_variant: #currency_unit_variant,
+                    denominator_unit_variant: #denominator_unit_variant,
+                    denominator_unit_type: #denominator_unit_type,
+                    si_factor: #si_factor
+                }
+            }
+        })
+        .collect();
+
+    let expanded = quote! {
+        define_specific_currencies! {
+            all: { #(#variants_all),* },
+            json: { #(#variants),* },
+            mass: { #(#variants_mass),* },
+            volume: { #(#variants_volume),* },
+        }
+    };
+
+    expanded.into()
+}
+
+pub fn generate_units(input: TokenStream) -> TokenStream {
+    let parsed_input = syn::parse_macro_input!(input as EnumSourceGroup);
+
+    let json_data = populate_specific_currencies_denominators_currencies(parsed_input);
+    let specific_currency_data: HashSet<SpecificCurrencyJson> = json_data.specific_currency_data;
+    let currency_data: HashMap<String, CurrencyJson> = json_data.currency_data;
+    let denominator_data: HashMap<String, (DenominatorJson, String)> = json_data.denominator_data;
+
+    let specific_currency_hashmaps = fill_specific_currency_hashmaps(specific_currency_data, currency_data, denominator_data);
+    let specific_currency_all = specific_currency_hashmaps.specific_currency_all;
+    let specific_currency = specific_currency_hashmaps.specific_currency;
+    let specific_currency_mass = specific_currency_hashmaps.specific_currency_mass;
+    let specific_currency_volume = specific_currency_hashmaps.specific_currency_volume;
+
+    let variants: Vec<_> = specific_currency
+        .iter()
+        .map(|(key, data)| {
+            let json_variant = format_ident!("{}", key);
             let currency_unit_variant = format_ident!("{}", &data.currency_unit);
             let denominator_unit_variant = format_ident!("{}", &data.denominator_unit);
             let denominator_unit_type = format_ident!("{}", &data.denominator_unit_type);
@@ -225,9 +398,6 @@ pub fn generate(input: TokenStream) -> TokenStream {
 
             quote! {
                 #json_variant => {
-                    from_fn_name: #from_fn_name,
-                    as_fn_name: #as_fn_name,
-                    to_fn_name: #to_fn_name,
                     currency_unit_variant: #currency_unit_variant,
                     denominator_unit_variant: #denominator_unit_variant,
                     denominator_unit_type: #denominator_unit_type,
@@ -249,9 +419,6 @@ pub fn generate(input: TokenStream) -> TokenStream {
         .iter()
         .map(|(key, data)| {
             let all_variant = format_ident!("{}", key);
-            let from_fn_name = format_ident!("from_{}", data.identifier);
-            let as_fn_name = format_ident!("as_{}", data.identifier);
-            let to_fn_name = format_ident!("to_{}", data.identifier);
             let currency_unit_variant = format_ident!("{}", &data.currency_unit);
             let denominator_unit_variant = format_ident!("{}", &data.denominator_unit);
             let denominator_unit_type = format_ident!("{}", &data.denominator_unit_type);
@@ -268,9 +435,6 @@ pub fn generate(input: TokenStream) -> TokenStream {
 
             quote! {
                 #all_variant => {
-                    from_fn_name: #from_fn_name,
-                    as_fn_name: #as_fn_name,
-                    to_fn_name: #to_fn_name,
                     currency_unit_variant: #currency_unit_variant,
                     denominator_unit_variant: #denominator_unit_variant,
                     denominator_unit_type: #denominator_unit_type,
@@ -292,9 +456,6 @@ pub fn generate(input: TokenStream) -> TokenStream {
         .iter()
         .map(|(key, data)| {
             let mass_variant = format_ident!("{}", key);
-            let from_fn_name = format_ident!("from_{}", data.identifier);
-            let as_fn_name = format_ident!("as_{}", data.identifier);
-            let to_fn_name = format_ident!("to_{}", data.identifier);
             let currency_unit_variant = format_ident!("{}", &data.currency_unit);
             let denominator_unit_variant = format_ident!("{}", &data.denominator_unit);
             let denominator_unit_type = format_ident!("{}", &data.denominator_unit_type);
@@ -311,9 +472,6 @@ pub fn generate(input: TokenStream) -> TokenStream {
 
             quote! {
                 #mass_variant => {
-                    from_fn_name: #from_fn_name,
-                    as_fn_name: #as_fn_name,
-                    to_fn_name: #to_fn_name,
                     currency_unit_variant: #currency_unit_variant,
                     denominator_unit_variant: #denominator_unit_variant,
                     denominator_unit_type: #denominator_unit_type,
@@ -335,9 +493,6 @@ pub fn generate(input: TokenStream) -> TokenStream {
         .iter()
         .map(|(key, data)| {
             let volume_variant = format_ident!("{}", key);
-            let from_fn_name = format_ident!("from_{}", data.identifier);
-            let as_fn_name = format_ident!("as_{}", data.identifier);
-            let to_fn_name = format_ident!("to_{}", data.identifier);
             let currency_unit_variant = format_ident!("{}", &data.currency_unit);
             let denominator_unit_variant = format_ident!("{}", &data.denominator_unit);
             let denominator_unit_type = format_ident!("{}", &data.denominator_unit_type);
@@ -354,9 +509,6 @@ pub fn generate(input: TokenStream) -> TokenStream {
 
             quote! {
                 #volume_variant => {
-                    from_fn_name: #from_fn_name,
-                    as_fn_name: #as_fn_name,
-                    to_fn_name: #to_fn_name,
                     currency_unit_variant: #currency_unit_variant,
                     denominator_unit_variant: #denominator_unit_variant,
                     denominator_unit_type: #denominator_unit_type,
@@ -375,7 +527,7 @@ pub fn generate(input: TokenStream) -> TokenStream {
         .collect();
 
     let expanded = quote! {
-        define_specific_currencies! {
+        define_specific_currency_units! {
             all: { #(#variants_all),* },
             json: { #(#variants),* },
             mass: { #(#variants_mass),* },

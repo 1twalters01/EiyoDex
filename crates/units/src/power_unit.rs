@@ -4,9 +4,6 @@ macro_rules! define_power_units {
         all: {
             $(
                 $all_variant:ident => {
-                    from_fn_name: $all_from_fn_name:ident,
-                    as_fn_name: $all_as_fn_name:ident,
-                    to_fn_name: $all_to_fn_name:ident,
                     energy_unit_variant: $all_energy_unit_variant: ident,
                     duration_unit_variant: $all_duration_unit_variant:ident,
                     energy_measurement_system: $all_energy_measurement_system: ident,
@@ -25,9 +22,6 @@ macro_rules! define_power_units {
         json: {
             $(
                 $json_variant:ident => {
-                    from_fn_name: $json_from_fn_name: ident,
-                    as_fn_name: $json_as_fn_name: ident,
-                    to_fn_name: $json_to_fn_name: ident,
                     energy_unit_variant: $json_energy_unit_variant: ident,
                     duration_unit_variant: $json_duration_unit_variant:ident,
                     energy_measurement_system: $json_energy_measurement_system: ident,
@@ -46,11 +40,13 @@ macro_rules! define_power_units {
     ) => {
         use crate::{
             measurement_system::MeasurementSystem,
-            energy::{Energy, EnergyUnit},
-            duration::{DurationWrapper, DurationUnit},
+            energy::Energy,
+            energy_unit::EnergyUnit,
+            duration::DurationWrapper,
+            duration_unit::DurationUnit,
             into_f64::IntoF64Safe,
+            power_measurement_system::PowerMeasurementSystem,
         };
-        // use chrono::Duration;
         use std::{
             cmp::Ordering,
             fmt,
@@ -60,26 +56,6 @@ macro_rules! define_power_units {
         };
 
         use serde::{Deserialize, Serialize};
-
-        #[derive(Debug, Deserialize, PartialEq)]
-        pub struct PowerMeasurementSystem {
-            energy_measurement_system: MeasurementSystem,
-            duration_measurement_system: MeasurementSystem,
-        }
-
-        impl PowerMeasurementSystem {
-            pub fn new(energy_measurement_system: MeasurementSystem, duration_measurement_system: MeasurementSystem) -> PowerMeasurementSystem {
-                Self { energy_measurement_system, duration_measurement_system }
-            }
-
-            pub fn get_energy_measurement_system(&self) -> MeasurementSystem {
-                self.energy_measurement_system
-            }
-
-            pub fn get_duration_measurement_system(&self) -> MeasurementSystem {
-                self.duration_measurement_system
-            }
-        }
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
         pub enum PowerUnit {
@@ -121,10 +97,12 @@ macro_rules! define_power_units {
 
             pub fn get_measurement_system(&self) -> PowerMeasurementSystem {
                 match self {
-                    $(PowerUnit::$all_variant => PowerMeasurementSystem {
-                        energy_measurement_system: MeasurementSystem::$all_energy_measurement_system,
-                        duration_measurement_system: MeasurementSystem::$all_duration_measurement_system,
-                    }),+
+                    $(PowerUnit::$all_variant => PowerMeasurementSystem::new(
+                        MeasurementSystem::$all_energy_measurement_system,
+                        MeasurementSystem::$all_duration_measurement_system,
+                    )
+
+                    ),+
                 }
             }
 

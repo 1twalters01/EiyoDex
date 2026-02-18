@@ -1,5 +1,6 @@
 use units::{
-    energy::{Energy, EnergyUnit},
+    energy::Energy,
+    energy_unit::EnergyUnit,
     measurement_system::MeasurementSystem,
 };
 

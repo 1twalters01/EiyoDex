@@ -1,5 +1,6 @@
 use units::{
-    duration::{DurationUnit, DurationWrapper},
+    duration_unit::DurationUnit,
+    duration::DurationWrapper,
     measurement_system::MeasurementSystem,
 };
 

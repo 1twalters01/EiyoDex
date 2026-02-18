@@ -1,5 +1,5 @@
 use std::{collections::BTreeSet, str::FromStr};
-use units::{measurement_system::MeasurementSystem, volume::VolumeUnit};
+use units::{measurement_system::MeasurementSystem, volume_unit::VolumeUnit};
 
 #[test]
 fn test_get_volume_unit_enumerations() {

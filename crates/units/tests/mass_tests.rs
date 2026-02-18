@@ -1,5 +1,6 @@
 use units::{
-    mass::{Mass, MassUnit},
+    mass::Mass,
+    mass_unit::MassUnit,
     measurement_system::MeasurementSystem,
 };
 

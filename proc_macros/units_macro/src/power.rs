@@ -85,15 +85,22 @@ struct DurationJson {
     si_factor: f64,
 }
 
-pub fn generate(input: TokenStream) -> TokenStream {
-    let mut power_all: HashMap<String, Power> = HashMap::new();
+struct JsonHashes {
+    power_data: HashSet<PowerJson>,
+    energy_data: HashMap<String, EnergyJson>,
+    duration_data: HashMap<String, DurationJson>,
+}
+
+struct PowerHashmaps {
+    power_all: HashMap<String, Power>,
+    power: HashMap<String, Power>,
+}
+
+
+fn populate_powers_energies_durations(parsed_input: EnumSourceGroup) -> JsonHashes {
+    let mut power_data: HashSet<PowerJson> = HashSet::new();
     let mut energy_data: HashMap<String, EnergyJson> = HashMap::new();
     let mut duration_data: HashMap<String, DurationJson> = HashMap::new();
-
-    let mut power: HashMap<String, Power> = HashMap::new();
-    let mut power_data: HashSet<PowerJson> = HashSet::new();
-
-    let parsed_input = syn::parse_macro_input!(input as EnumSourceGroup);
 
     for (enum_name, paths) in parsed_input.items {
         for file_path_lit in paths {
@@ -139,6 +146,21 @@ pub fn generate(input: TokenStream) -> TokenStream {
         }
     }
 
+    return JsonHashes {
+        power_data,
+        energy_data,
+        duration_data,
+    }
+}
+
+fn fill_power_hashmaps(
+    power_data: HashSet<PowerJson>,
+    energy_data: HashMap<String, EnergyJson>,
+    duration_data: HashMap<String, DurationJson>,
+) -> PowerHashmaps {
+    let mut power_all: HashMap<String, Power> = HashMap::new();
+    let mut power: HashMap<String, Power> = HashMap::new();
+
     for (energy_key, energy_value) in &energy_data {
         for (duration_key, duration_value) in &duration_data {
             let power_variant = format!("{}Per{}", energy_key, duration_key);
@@ -182,6 +204,24 @@ pub fn generate(input: TokenStream) -> TokenStream {
         }
     }
 
+    return PowerHashmaps {
+        power_all,
+        power,
+    }
+}
+
+pub fn generate(input: TokenStream) -> TokenStream {
+    let parsed_input = syn::parse_macro_input!(input as EnumSourceGroup);
+
+    let json_hashes = populate_powers_energies_durations(parsed_input);
+    let power_data = json_hashes.power_data;
+    let energy_data = json_hashes.energy_data;
+    let duration_data = json_hashes.duration_data;
+
+    let power_hashmaps = fill_power_hashmaps(power_data, energy_data, duration_data);
+    let power_all = power_hashmaps.power_all;
+    let power = power_hashmaps.power;
+
     let variants: Vec<_> = power
         .iter()
         .map(|(key, data)| {
@@ -189,6 +229,65 @@ pub fn generate(input: TokenStream) -> TokenStream {
             let from_fn_name = format_ident!("from_{}", data.identifier);
             let as_fn_name = format_ident!("as_{}", data.identifier);
             let to_fn_name = format_ident!("to_{}", data.identifier);
+            let si_factor = &data.si_factor;
+
+            quote! {
+                #json_variant => {
+                    from_fn_name: #from_fn_name,
+                    as_fn_name: #as_fn_name,
+                    to_fn_name: #to_fn_name,
+                    si_factor: #si_factor
+                }
+            }
+        })
+        .collect();
+
+    let variants_all: Vec<_> = power_all
+        .iter()
+        .map(|(key, data)| {
+            let all_variant = format_ident!("{}", key);
+            let from_fn_name = format_ident!("from_{}", data.identifier);
+            let as_fn_name = format_ident!("as_{}", data.identifier);
+            let to_fn_name = format_ident!("to_{}", data.identifier);
+            let si_factor = &data.si_factor;
+
+            quote! {
+                #all_variant => {
+                    from_fn_name: #from_fn_name,
+                    as_fn_name: #as_fn_name,
+                    to_fn_name: #to_fn_name,
+                    si_factor: #si_factor
+                }
+            }
+        })
+        .collect();
+
+    let expanded = quote! {
+        define_powers! {
+            all: { #(#variants_all),* },
+            json: { #(#variants),* },
+        }
+    };
+
+    expanded.into()
+}
+
+pub fn generate_units(input: TokenStream) -> TokenStream {
+    let parsed_input = syn::parse_macro_input!(input as EnumSourceGroup);
+
+    let json_hashes = populate_powers_energies_durations(parsed_input);
+    let power_data = json_hashes.power_data;
+    let energy_data = json_hashes.energy_data;
+    let duration_data = json_hashes.duration_data;
+
+    let power_hashmaps = fill_power_hashmaps(power_data, energy_data, duration_data);
+    let power_all = power_hashmaps.power_all;
+    let power = power_hashmaps.power;
+
+    let variants: Vec<_> = power
+        .iter()
+        .map(|(key, data)| {
+            let json_variant = format_ident!("{}", key);
             let energy_unit_variant = format_ident!("{}", &data.energy_unit);
             let duration_unit_variant = format_ident!("{}", &data.duration_unit);
             let energy_measurement_system =
@@ -206,9 +305,6 @@ pub fn generate(input: TokenStream) -> TokenStream {
 
             quote! {
                 #json_variant => {
-                    from_fn_name: #from_fn_name,
-                    as_fn_name: #as_fn_name,
-                    to_fn_name: #to_fn_name,
                     energy_unit_variant: #energy_unit_variant,
                     duration_unit_variant: #duration_unit_variant,
                     energy_measurement_system: #energy_measurement_system,
@@ -230,9 +326,6 @@ pub fn generate(input: TokenStream) -> TokenStream {
         .iter()
         .map(|(key, data)| {
             let all_variant = format_ident!("{}", key);
-            let from_fn_name = format_ident!("from_{}", data.identifier);
-            let as_fn_name = format_ident!("as_{}", data.identifier);
-            let to_fn_name = format_ident!("to_{}", data.identifier);
             let energy_unit_variant = format_ident!("{}", &data.energy_unit);
             let duration_unit_variant = format_ident!("{}", &data.duration_unit);
             let energy_measurement_system =
@@ -250,9 +343,6 @@ pub fn generate(input: TokenStream) -> TokenStream {
 
             quote! {
                 #all_variant => {
-                    from_fn_name: #from_fn_name,
-                    as_fn_name: #as_fn_name,
-                    to_fn_name: #to_fn_name,
                     energy_unit_variant: #energy_unit_variant,
                     duration_unit_variant: #duration_unit_variant,
                     energy_measurement_system: #energy_measurement_system,
@@ -271,7 +361,7 @@ pub fn generate(input: TokenStream) -> TokenStream {
         .collect();
 
     let expanded = quote! {
-        define_powers! {
+        define_power_units! {
             all: { #(#variants_all),* },
             json: { #(#variants),* },
         }
