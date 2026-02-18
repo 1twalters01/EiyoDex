@@ -1,8 +1,8 @@
 # Done
 utils/
+units/
 
 # In progress
-units/
 nutrients/
 foods/
 journal/
