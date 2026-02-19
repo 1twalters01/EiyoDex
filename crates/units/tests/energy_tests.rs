@@ -1,8 +1,4 @@
-use units::{
-    energy::Energy,
-    energy_unit::EnergyUnit,
-    measurement_system::MeasurementSystem,
-};
+use units::{energy::Energy, energy_unit::EnergyUnit, measurement_system::MeasurementSystem};
 
 #[test]
 fn test_new_energy() {

@@ -1,9 +1,6 @@
 use chrono::{Datelike, Local, NaiveDate};
 use units::{
-    distance::Distance,
-    distance_unit::DistanceUnit,
-    mass::Mass,
-    mass_unit::MassUnit,
+    distance::Distance, distance_unit::DistanceUnit, mass::Mass, mass_unit::MassUnit,
     volume_unit::VolumeUnit,
 };
 use utils::base_types::percentage::Percentage;

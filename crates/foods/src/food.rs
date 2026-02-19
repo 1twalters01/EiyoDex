@@ -1,10 +1,7 @@
 use std::collections::BTreeSet;
 
 use nutrients::{nutrient::Nutrient, nutrient_amount::NutrientAmount};
-use units::{
-    energy::Energy,
-    energy_unit::EnergyUnit,
-};
+use units::{energy::Energy, energy_unit::EnergyUnit};
 use uuid::Uuid;
 
 use crate::{food_instance::FoodInstance, price_metadata::PriceMetadata};

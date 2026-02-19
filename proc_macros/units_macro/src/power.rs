@@ -96,7 +96,6 @@ struct PowerHashmaps {
     power: HashMap<String, Power>,
 }
 
-
 fn populate_powers_energies_durations(parsed_input: EnumSourceGroup) -> JsonHashes {
     let mut power_data: HashSet<PowerJson> = HashSet::new();
     let mut energy_data: HashMap<String, EnergyJson> = HashMap::new();
@@ -150,7 +149,7 @@ fn populate_powers_energies_durations(parsed_input: EnumSourceGroup) -> JsonHash
         power_data,
         energy_data,
         duration_data,
-    }
+    };
 }
 
 fn fill_power_hashmaps(
@@ -204,10 +203,7 @@ fn fill_power_hashmaps(
         }
     }
 
-    return PowerHashmaps {
-        power_all,
-        power,
-    }
+    return PowerHashmaps { power_all, power };
 }
 
 pub fn generate(input: TokenStream) -> TokenStream {

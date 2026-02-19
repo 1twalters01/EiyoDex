@@ -1,63 +1,20 @@
+use crate::schema::{
+    carbohydrate::CarbohydrateNutrient, lipid::LipidNutrient, protein::ProteinNutrient,
+};
+
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-pub enum Energy {
-    Carbohydrate(Carbohydrate),
-    Protein(Protein),
-    Lipid(Lipid),
+pub enum EnergyYieldingNutrients {
+    Carbohydrate(CarbohydrateNutrient),
+    Protein(ProteinNutrient),
+    Lipid(LipidNutrient),
     Alcohol,
 }
 
-impl Energy {
+impl EnergyYieldingNutrients {
     pub fn use_in_net_carbs(&self) -> bool {
         match self {
-            Self::Carbohydrate(carbohydrate) => carbohydrate.use_in_net_carbs(),
+            Self::Carbohydrate(carbohydrate_nutrient) => carbohydrate_nutrient.use_in_net_carbs(),
             _ => false,
         }
     }
-}
-
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-pub enum Carbohydrate {
-    Fiber,
-    Starch,
-    Sugar,
-    SugarAlcohol,
-    AddedSugar,
-}
-
-impl Carbohydrate {
-    pub fn use_in_net_carbs(&self) -> bool {
-        match self {
-            Carbohydrate::Fiber | Carbohydrate::SugarAlcohol => false,
-            _ => true,
-        }
-    }
-}
-
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-pub enum Protein {
-    EssentialAminoAcid,
-    ConditionallyEssentialAminoAcid,
-    NonEssentialAminoAcid,
-}
-
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-pub enum Lipid {
-    Fats(Fat),
-    TransFats(TransFat),
-    Cholesterol,
-    Phytosterol,
-    Phospholipid,
-}
-
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-pub enum Fat {
-    Monounsaturated,
-    Polyunsaturated,
-    Saturated,
-}
-
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-pub enum TransFat {
-    Natural,
-    Artificial,
 }

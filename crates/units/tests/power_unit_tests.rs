@@ -1,10 +1,7 @@
 use std::{collections::BTreeSet, str::FromStr};
 use units::{
-    duration_unit::DurationUnit,
-    energy_unit::EnergyUnit,
-    measurement_system::MeasurementSystem,
-    power_unit::PowerUnit,
-    power_measurement_system::PowerMeasurementSystem,
+    duration_unit::DurationUnit, energy_unit::EnergyUnit, measurement_system::MeasurementSystem,
+    power_measurement_system::PowerMeasurementSystem, power_unit::PowerUnit,
 };
 
 #[test]

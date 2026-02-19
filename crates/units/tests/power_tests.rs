@@ -1,12 +1,7 @@
 use units::{
-    duration_unit::DurationUnit,
-    duration::DurationWrapper,
-    energy::Energy,
-    energy_unit::EnergyUnit,
-    measurement_system::MeasurementSystem,
-    power::Power,
-    power_unit::PowerUnit,
-    power_measurement_system::PowerMeasurementSystem,
+    duration::DurationWrapper, duration_unit::DurationUnit, energy::Energy,
+    energy_unit::EnergyUnit, measurement_system::MeasurementSystem, power::Power,
+    power_measurement_system::PowerMeasurementSystem, power_unit::PowerUnit,
 };
 
 #[test]

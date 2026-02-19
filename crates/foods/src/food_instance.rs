@@ -8,10 +8,7 @@ use std::{
     collections::BTreeSet,
     rc::{Rc, Weak},
 };
-use units::{
-    energy::Energy,
-    energy_unit::EnergyUnit,
-};
+use units::{energy::Energy, energy_unit::EnergyUnit};
 use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]

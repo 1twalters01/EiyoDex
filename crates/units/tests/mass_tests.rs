@@ -1,8 +1,4 @@
-use units::{
-    mass::Mass,
-    mass_unit::MassUnit,
-    measurement_system::MeasurementSystem,
-};
+use units::{mass::Mass, mass_unit::MassUnit, measurement_system::MeasurementSystem};
 
 #[test]
 fn test_new_mass() {

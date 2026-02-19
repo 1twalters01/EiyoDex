@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub, Mul, Div};
+use std::ops::{Add, Div, Mul, Sub};
 
 /// A wrapper around an f64 representing an Angle
 #[derive(Debug, PartialEq)]

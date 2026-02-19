@@ -1,8 +1,4 @@
-use units::{
-    measurement_system::MeasurementSystem,
-    volume::Volume,
-    volume_unit::VolumeUnit,
-};
+use units::{measurement_system::MeasurementSystem, volume::Volume, volume_unit::VolumeUnit};
 
 #[test]
 fn test_new_volume() {

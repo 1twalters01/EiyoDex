@@ -1,8 +1,8 @@
-use crate::schema::energy::Energy;
+use crate::schema::energy::EnergyYieldingNutrients;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum NutrientType {
-    Energy(Energy),
+    Energy(EnergyYieldingNutrients),
     Water,
     Vitamin,
     Mineral,
@@ -32,6 +32,14 @@ impl NutrientType {
         match self {
             Self::Vitamin | Self::Mineral => true,
             _ => false,
+        }
+    }
+
+    pub fn is_nutrient_type(&self, nutrient_type: &NutrientType) -> bool {
+        if self == nutrient_type {
+            return true;
+        } else {
+            return false;
         }
     }
 

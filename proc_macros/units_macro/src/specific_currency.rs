@@ -91,7 +91,9 @@ struct SpecificCurrencyHashMaps {
     specific_currency_volume: HashMap<String, SpecificCurrency>,
 }
 
-fn populate_specific_currencies_denominators_currencies(parsed_input: EnumSourceGroup) -> JsonHashes {
+fn populate_specific_currencies_denominators_currencies(
+    parsed_input: EnumSourceGroup,
+) -> JsonHashes {
     let mut currency_data: HashMap<String, CurrencyJson> = HashMap::new();
     let mut denominator_data: HashMap<String, (DenominatorJson, String)> = HashMap::new();
     let mut specific_currency_data: HashSet<SpecificCurrencyJson> = HashSet::new();
@@ -117,19 +119,19 @@ fn populate_specific_currencies_denominators_currencies(parsed_input: EnumSource
                 match enum_name.to_string().as_str() {
                     "SpecificCurrencyUnit" => {
                         let serde_res: Vec<SpecificCurrencyJson> =
-                        serde_json::from_str(&file_content).expect("Invalid JSON format");
+                            serde_json::from_str(&file_content).expect("Invalid JSON format");
                         specific_currency_data.extend(serde_res);
                     }
                     "CurrencyUnit" => {
                         let serde_res: HashMap<String, CurrencyJson> =
-                        serde_json::from_str(&file_content).expect("Invalid JSON format");
+                            serde_json::from_str(&file_content).expect("Invalid JSON format");
                         for (key, data) in serde_res {
                             currency_data.insert(key, data);
                         }
                     }
                     "MassUnit" => {
                         let serde_res: HashMap<String, DenominatorJson> =
-                        serde_json::from_str(&file_content).expect("Invalid JSON format");
+                            serde_json::from_str(&file_content).expect("Invalid JSON format");
                         for (key, data) in serde_res {
                             denominator_data
                                 .insert(key.clone(), (data, "MassDenominator".to_string()));
@@ -137,7 +139,7 @@ fn populate_specific_currencies_denominators_currencies(parsed_input: EnumSource
                     }
                     "VolumeUnit" => {
                         let serde_res: HashMap<String, DenominatorJson> =
-                        serde_json::from_str(&file_content).expect("Invalid JSON format");
+                            serde_json::from_str(&file_content).expect("Invalid JSON format");
                         for (key, data) in serde_res {
                             denominator_data
                                 .insert(key.clone(), (data, "VolumeDenominator".to_string()));
@@ -153,7 +155,7 @@ fn populate_specific_currencies_denominators_currencies(parsed_input: EnumSource
         denominator_data,
         currency_data,
         specific_currency_data,
-    }
+    };
 }
 
 fn fill_specific_currency_hashmaps(
@@ -165,7 +167,6 @@ fn fill_specific_currency_hashmaps(
     let mut specific_currency: HashMap<String, SpecificCurrency> = HashMap::new();
     let mut specific_currency_mass: HashMap<String, SpecificCurrency> = HashMap::new();
     let mut specific_currency_volume: HashMap<String, SpecificCurrency> = HashMap::new();
-
 
     for (currency_key, currency_value) in &currency_data {
         for (denominator_key, (denominator_value, denominator_unit_type)) in &denominator_data {
@@ -230,8 +231,8 @@ fn fill_specific_currency_hashmaps(
         specific_currency_all,
         specific_currency,
         specific_currency_mass,
-        specific_currency_volume
-    }
+        specific_currency_volume,
+    };
 }
 
 pub fn generate(input: TokenStream) -> TokenStream {
@@ -242,7 +243,8 @@ pub fn generate(input: TokenStream) -> TokenStream {
     let currency_data: HashMap<String, CurrencyJson> = json_data.currency_data;
     let denominator_data: HashMap<String, (DenominatorJson, String)> = json_data.denominator_data;
 
-    let specific_currency_hashmaps = fill_specific_currency_hashmaps(specific_currency_data, currency_data, denominator_data);
+    let specific_currency_hashmaps =
+        fill_specific_currency_hashmaps(specific_currency_data, currency_data, denominator_data);
     let specific_currency_all = specific_currency_hashmaps.specific_currency_all;
     let specific_currency = specific_currency_hashmaps.specific_currency;
     let specific_currency_mass = specific_currency_hashmaps.specific_currency_mass;
@@ -372,7 +374,8 @@ pub fn generate_units(input: TokenStream) -> TokenStream {
     let currency_data: HashMap<String, CurrencyJson> = json_data.currency_data;
     let denominator_data: HashMap<String, (DenominatorJson, String)> = json_data.denominator_data;
 
-    let specific_currency_hashmaps = fill_specific_currency_hashmaps(specific_currency_data, currency_data, denominator_data);
+    let specific_currency_hashmaps =
+        fill_specific_currency_hashmaps(specific_currency_data, currency_data, denominator_data);
     let specific_currency_all = specific_currency_hashmaps.specific_currency_all;
     let specific_currency = specific_currency_hashmaps.specific_currency;
     let specific_currency_mass = specific_currency_hashmaps.specific_currency_mass;

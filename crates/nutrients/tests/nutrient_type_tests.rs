@@ -1,26 +1,46 @@
 use nutrients::schema::{
-    energy::{Carbohydrate, Energy, Protein},
+    energy::{EnergyYieldingNutrients},
+    carbohydrate::{CarbohydrateNutrient, Carbohydrate},
+    protein::ProteinNutrient,
     nutrients::NutrientType,
 };
 
 #[test]
 pub fn test_nutrients_carbohydrate_net_calculation() {
-    let fiber = NutrientType::Energy(Energy::Carbohydrate(Carbohydrate::Fiber));
+    let fiber = NutrientType::Energy(EnergyYieldingNutrients::Carbohydrate(CarbohydrateNutrient{
+        carb_type: Carbohydrate::Fiber,
+        is_added: false,
+        glycemic_index: None,
+    }));
     assert_eq!(fiber.use_in_net_carbs(), false);
 
-    let starch = NutrientType::Energy(Energy::Carbohydrate(Carbohydrate::Starch));
+    let starch = NutrientType::Energy(EnergyYieldingNutrients::Carbohydrate(CarbohydrateNutrient {
+        carb_type: Carbohydrate::Starch,
+        is_added: false,
+        glycemic_index: None,
+    }));
     assert_eq!(starch.use_in_net_carbs(), true);
 
-    let sugar = NutrientType::Energy(Energy::Carbohydrate(Carbohydrate::Sugar));
+    let sugar = NutrientType::Energy(EnergyYieldingNutrients::Carbohydrate(CarbohydrateNutrient {
+        carb_type: Carbohydrate::Sugar,
+        is_added: true,
+        glycemic_index: None,
+    }));
     assert_eq!(sugar.use_in_net_carbs(), true);
 
-    let sugar_alcohol = NutrientType::Energy(Energy::Carbohydrate(Carbohydrate::SugarAlcohol));
+    let sugar_alcohol = NutrientType::Energy(EnergyYieldingNutrients::Carbohydrate(CarbohydrateNutrient {
+        carb_type: Carbohydrate::SugarAlcohol,
+        is_added: false,
+        glycemic_index: None,
+    }));
     assert_eq!(sugar_alcohol.use_in_net_carbs(), false);
 }
 
 #[test]
 pub fn test_nutrients_is_macronutrient() {
-    let essential_amino_acid = NutrientType::Energy(Energy::Protein(Protein::EssentialAminoAcid));
+    let essential_amino_acid = NutrientType::Energy(EnergyYieldingNutrients::Protein(ProteinNutrient {
+        is_bcaa: false,
+    }));
     assert_eq!(essential_amino_acid.is_macronutrient(), true);
 
     let water = NutrientType::Water;

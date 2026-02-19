@@ -44,7 +44,7 @@ pub fn populate_masses(input: TokenStream) -> HashMap<String, MassJson> {
                 .unwrap_or_else(|_| panic!("Unable to read file: {}", full_path.display()));
 
             let json_results: HashMap<String, MassJson> =
-            serde_json::from_str(&file_content).expect("Invalid JSON format");
+                serde_json::from_str(&file_content).expect("Invalid JSON format");
 
             for (key, value) in json_results {
                 masses.insert(key, value);
