@@ -8,7 +8,7 @@ use nutrients::{
 };
 use std::{
     cell::RefCell,
-    collections::{BTreeSet, HashSet},
+    collections::BTreeSet,
     rc::Rc,
 };
 use units::{mass_unit::MassUnit, volume_unit::VolumeUnit};

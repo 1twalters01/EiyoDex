@@ -1,6 +1,12 @@
 use foods::{data_sources::DataSource, food_nutrition_data::FoodNutritionData};
 use nutrients::{
-    nutrient::Nutrient, nutrient_amount::NutrientAmount, nutrient_list::NutrientAmountList,
+    nutrient::Nutrient,
+    nutrient_amount::NutrientAmount,
+    nutrient_list::NutrientAmountList,
+    schema::{
+        nutrient_classes::{ChemicalType, EssentialityType, QuantityType},
+        nutrient_type::NutrientType,
+    },
     units::NutrientUnit,
 };
 use units::mass_unit::MassUnit;
@@ -12,12 +18,18 @@ pub fn test_id() {
     let potassium_value = 10f64;
     let iron_id = None;
     let potassium_id = None;
+    let nutrient_type = NutrientType {
+        chemical_type: ChemicalType::Mineral,
+        quantity_type: QuantityType::Micronutrient,
+        essentiality_type: Some(EssentialityType::Essential),
+    };
 
     let iron: NutrientAmount = NutrientAmount::from_rc_refcell(
         iron_value,
         Some(Nutrient::new_rc_refcell(
             iron_id,
             String::from("Iron"),
+            nutrient_type.clone(),
             NutrientUnit::Mass(MassUnit::Milligram),
         )),
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -29,6 +41,7 @@ pub fn test_id() {
         Some(Nutrient::new_rc_refcell(
             potassium_id,
             String::from("Potassium"),
+            nutrient_type,
             NutrientUnit::Mass(MassUnit::Milligram),
         )),
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -55,12 +68,18 @@ pub fn test_data_source() {
     let potassium_value = 10f64;
     let iron_id = None;
     let potassium_id = None;
+    let nutrient_type = NutrientType {
+        chemical_type: ChemicalType::Mineral,
+        quantity_type: QuantityType::Micronutrient,
+        essentiality_type: Some(EssentialityType::Essential),
+    };
 
     let iron: NutrientAmount = NutrientAmount::from_rc_refcell(
         iron_value,
         Some(Nutrient::new_rc_refcell(
             iron_id,
             String::from("Iron"),
+            nutrient_type.clone(),
             NutrientUnit::Mass(MassUnit::Milligram),
         )),
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -72,6 +91,7 @@ pub fn test_data_source() {
         Some(Nutrient::new_rc_refcell(
             potassium_id,
             String::from("Potassium"),
+            nutrient_type.clone(),
             NutrientUnit::Mass(MassUnit::Milligram),
         )),
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -102,12 +122,18 @@ pub fn test_nutrient_amount_list() {
     let potassium_value = 10f64;
     let iron_id = None;
     let potassium_id = None;
+    let nutrient_type = NutrientType {
+        chemical_type: ChemicalType::Mineral,
+        quantity_type: QuantityType::Micronutrient,
+        essentiality_type: Some(EssentialityType::Essential),
+    };
 
     let iron: NutrientAmount = NutrientAmount::from_rc_refcell(
         iron_value,
         Some(Nutrient::new_rc_refcell(
             iron_id,
             String::from("Iron"),
+            nutrient_type.clone(),
             NutrientUnit::Mass(MassUnit::Milligram),
         )),
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -119,6 +145,7 @@ pub fn test_nutrient_amount_list() {
         Some(Nutrient::new_rc_refcell(
             potassium_id,
             String::from("Potassium"),
+            nutrient_type,
             NutrientUnit::Mass(MassUnit::Milligram),
         )),
         NutrientUnit::Mass(MassUnit::Milligram),
