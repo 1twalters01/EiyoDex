@@ -80,8 +80,7 @@ impl Entry {
         match nutrient_amount_option {
             Some(nutrient_amount) => return nutrient_amount,
             None => {
-                return NutrientAmount::new(0f64, Some(nutrient.clone()), nutrient.get_main_unit())
-                    .unwrap()
+                return NutrientAmount::new(0f64, nutrient.clone(), nutrient.get_main_unit())
             }
         }
     }

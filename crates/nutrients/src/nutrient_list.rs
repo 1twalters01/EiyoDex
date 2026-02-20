@@ -55,14 +55,10 @@ impl NutrientAmountList {
         self.nutrient_amounts = nutrient_amounts;
     }
 
-    pub fn get_names(&self) -> Vec<Option<String>> {
+    pub fn get_names(&self) -> Vec<String> {
         self.nutrient_amounts
             .iter()
-            .map(|nutrient_amount| {
-                nutrient_amount
-                    .get_nutrient()
-                    .map(|nutrient| nutrient.borrow().get_name())
-            })
+            .map(|nutrient_amount| nutrient_amount.get_nutrient().borrow().get_name())
             .collect()
     }
 
@@ -81,33 +77,23 @@ impl NutrientAmountList {
     pub fn sum_amounts_from_ancestors_rc_refcell(
         &self,
         nutrient: Rc<RefCell<Nutrient>>,
-    ) -> SumResult {
-        let nutrients_unformatted: Vec<Rc<RefCell<Nutrient>>> = nutrient.borrow().get_ancestors();
-        let nutrients: Vec<Option<Rc<RefCell<Nutrient>>>> = nutrients_unformatted
-            .into_iter()
-            .map(|nutrient| Some(nutrient))
-            .collect();
+    ) -> NutrientAmount {
+        let nutrients: Vec<Rc<RefCell<Nutrient>>> = nutrient.borrow().get_ancestors();
         let nutrient_amounts: Vec<NutrientAmount> = self
             .nutrient_amounts
             .iter()
-            .filter(|nutrient_amount| nutrients.contains(&nutrient_amount.get_nutrient()))
+            .filter(|nutrient_amount| nutrients.iter().any(|n| Rc::ptr_eq(n, &nutrient_amount.get_nutrient())))
+            // .filter(|nutrient_amount| nutrients.contains(&nutrient_amount.get_nutrient()))
             .cloned()
             .collect();
+        println!("nutrient_amounts: {:#?}", nutrient_amounts.iter().map(|n| n.get_nutrient().borrow().get_name()));
 
         let sum = nutrient_amounts.into_iter().sum::<NutrientAmount>();
-        let sum_result = SumResult {
-            value: sum.get_value(),
-            unit: sum.get_output_unit(),
-        };
-        return sum_result;
+        return sum;
     }
 
     pub fn sum_amounts_from_ancestors(&self, nutrient: Nutrient) -> NutrientAmount {
-        let nutrients_unformatted: Vec<Rc<RefCell<Nutrient>>> = nutrient.get_ancestors();
-        let nutrients: Vec<Option<Rc<RefCell<Nutrient>>>> = nutrients_unformatted
-            .into_iter()
-            .map(|nutrient| Some(nutrient))
-            .collect();
+        let nutrients: Vec<Rc<RefCell<Nutrient>>> = nutrient.get_ancestors();
         let nutrient_amounts: Vec<NutrientAmount> = self
             .nutrient_amounts
             .iter()
@@ -122,17 +108,16 @@ impl NutrientAmountList {
         &self,
         nutrient: Rc<RefCell<Nutrient>>,
     ) -> SumResult {
-        let nutrients_unformatted: Vec<Rc<RefCell<Nutrient>>> = nutrient.borrow().get_descendants();
-        let nutrients: Vec<Option<Rc<RefCell<Nutrient>>>> = nutrients_unformatted
-            .into_iter()
-            .map(|nutrient| Some(nutrient))
-            .collect();
+        let nutrients: Vec<Rc<RefCell<Nutrient>>> = nutrient.borrow().get_descendants();
         let nutrient_amounts: Vec<NutrientAmount> = self
             .nutrient_amounts
             .iter()
-            .filter(|nutrient_amount| nutrients.contains(&nutrient_amount.get_nutrient()))
+            .filter(|nutrient_amount| nutrients.iter().any(|n| Rc::ptr_eq(n, &nutrient_amount.get_nutrient())))
+            // .filter(|nutrient_amount| nutrients.contains(&nutrient_amount.get_nutrient()))
             .cloned()
             .collect();
+        let names: Vec<String> = nutrient_amounts.iter().map(|n| n.get_nutrient().borrow().get_name()).collect();
+        println!("nutrient_amountssss: {:#?}", names);
 
         let sum = nutrient_amounts.into_iter().sum::<NutrientAmount>();
         let sum_result = SumResult {
@@ -143,11 +128,7 @@ impl NutrientAmountList {
     }
 
     pub fn sum_amounts_from_descendants(&self, nutrient: Nutrient) -> NutrientAmount {
-        let nutrients_unformatted: Vec<Rc<RefCell<Nutrient>>> = nutrient.get_descendants();
-        let nutrients: Vec<Option<Rc<RefCell<Nutrient>>>> = nutrients_unformatted
-            .into_iter()
-            .map(|nutrient| Some(nutrient))
-            .collect();
+        let nutrients: Vec<Rc<RefCell<Nutrient>>> = nutrient.get_descendants();
         let nutrient_amounts: Vec<NutrientAmount> = self
             .nutrient_amounts
             .iter()

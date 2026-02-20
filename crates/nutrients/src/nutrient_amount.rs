@@ -13,73 +13,39 @@ use crate::{nutrient::Nutrient, units::NutrientUnit};
 #[derive(Debug, Clone)]
 pub struct NutrientAmount {
     value: f64,
-    nutrient: Option<Rc<RefCell<Nutrient>>>,
+    nutrient: Rc<RefCell<Nutrient>>,
     output_unit: NutrientUnit,
 }
 
 impl NutrientAmount {
-    pub fn new(
-        value: f64,
-        nutrient: Option<Nutrient>,
-        output_unit: NutrientUnit,
-    ) -> Result<Self, &'static str> {
-        match nutrient {
-            Some(nutrient) => match nutrient.convert(output_unit, nutrient.get_main_unit()) {
-                Ok(_) => Ok(Self {
-                    value,
-                    nutrient: Some(Rc::new(RefCell::new(nutrient))),
-                    output_unit,
-                }),
-                Err(err) => Err(err),
-            },
-            None => {
-                if value != 0f64 {
-                    return Err("Value of empty nutrient must be 0");
-                }
-                if output_unit != NutrientUnit::None {
-                    return Err("Nutrient unit of an empty nutrient must be 'None'");
-                }
-
-                Ok(Self {
-                    value: 0f64,
-                    nutrient: None,
-                    output_unit: NutrientUnit::None,
-                })
-            }
+    pub fn new(value: f64, nutrient: Nutrient, output_unit: NutrientUnit) -> Result<Self, &'static str> {
+        match nutrient
+            .get_conversion_factor(output_unit, nutrient.get_main_unit())
+        {
+            Ok(_) => Ok(Self {
+                value,
+                nutrient: Rc::new(RefCell::new(nutrient)),
+                output_unit,
+            }),
+            Err(err) => Err(err),
         }
     }
 
     pub fn from_rc_refcell(
         value: f64,
-        nutrient: Option<Rc<RefCell<Nutrient>>>,
+        nutrient: Rc<RefCell<Nutrient>>,
         output_unit: NutrientUnit,
     ) -> Result<Self, &'static str> {
-        match nutrient {
-            Some(nutrient) => {
-                let nutrient_borrowed = nutrient.borrow().clone();
-                match nutrient_borrowed.convert(output_unit, nutrient_borrowed.get_main_unit()) {
-                    Ok(_) => Ok(Self {
-                        value,
-                        nutrient: Some(nutrient),
-                        output_unit,
-                    }),
-                    Err(err) => Err(err),
-                }
-            }
-            None => {
-                if value != 0f64 {
-                    return Err("Value of empty nutrient must be 0");
-                }
-                if output_unit != NutrientUnit::None {
-                    return Err("Nutrient unit of an empty nutrient must be 'None'");
-                }
-
-                Ok(Self {
-                    value: 0f64,
-                    nutrient: None,
-                    output_unit: NutrientUnit::None,
-                })
-            }
+        let nutrient_borrowed = nutrient.borrow().clone();
+        match nutrient_borrowed
+            .get_conversion_factor(output_unit, nutrient_borrowed.get_main_unit())
+        {
+            Ok(_) => Ok(Self {
+                value,
+                nutrient: nutrient,
+                output_unit,
+            }),
+            Err(err) => Err(err),
         }
     }
 
@@ -91,69 +57,49 @@ impl NutrientAmount {
         self.value = value;
     }
 
-    pub fn get_value_in(&self, nutrient_unit: NutrientUnit) -> f64 {
-        match self.nutrient.clone() {
-            Some(nutrient) => {
-                let nutrient_borrowed = nutrient.borrow();
-                let conversion_factor = nutrient_borrowed
-                    .convert(self.output_unit, nutrient_unit)
-                    .unwrap();
-                return self.value * conversion_factor;
-            }
-            None => return 0f64,
-        }
+    pub fn get_value_in(&self, nutrient_unit: NutrientUnit) -> Result<f64, &'static str> {
+        let nutrient_borrowed = self.nutrient.borrow();
+        nutrient_borrowed
+            .get_conversion_factor(self.output_unit, nutrient_unit)
+            .and_then(|conversion_factor| Ok(self.value * conversion_factor))
     }
 
-    pub fn get_nutrient(&self) -> Option<Rc<RefCell<Nutrient>>> {
+    pub fn get_nutrient(&self) -> Rc<RefCell<Nutrient>> {
         self.nutrient.clone()
     }
 
-    pub fn get_nutrient_id(&self) -> Option<Uuid> {
-        self.get_nutrient()
-            .map(|nutrient| nutrient.borrow().get_id())
+    pub fn get_nutrient_id(&self) -> Uuid {
+        self.nutrient.borrow().get_id()
     }
 
-    pub fn set_nutrient_rc_refcell(&mut self, nutrient: Option<Rc<RefCell<Nutrient>>>) {
+    pub fn set_nutrient_rc_refcell(&mut self, nutrient: Rc<RefCell<Nutrient>>) {
         self.nutrient = nutrient;
     }
 
-    pub fn set_nutrient(&mut self, nutrient: Option<Nutrient>) {
-        self.nutrient = nutrient.map(|n| Rc::new(RefCell::new(n)));
+    pub fn set_nutrient(&mut self, nutrient: Nutrient) {
+        self.nutrient = Rc::new(RefCell::new(nutrient));
     }
 
     pub fn get_output_unit(&self) -> NutrientUnit {
         self.output_unit
     }
 
-    pub fn set_output_unit(&mut self, output_unit: NutrientUnit) {
-        match self.nutrient.clone() {
-            Some(nutrient) => {
-                let nutrient_borrowed = nutrient.borrow();
-                let conversion_factor = nutrient_borrowed
-                    .convert(self.output_unit, output_unit)
-                    .unwrap();
+    pub fn set_output_unit(&mut self, output_unit: NutrientUnit) -> Result<(), &'static str> {
+        let nutrient_borrowed = self.nutrient.borrow();
+        match nutrient_borrowed.get_conversion_factor(self.output_unit, output_unit) {
+            Ok(conversion_factor) => {
                 self.value = self.value * conversion_factor;
+                self.output_unit = output_unit;
+                Ok(())
             }
-            None => {}
+            Err(err) => Err(err),
         }
-
-        self.output_unit = output_unit;
     }
 
     pub fn round(&mut self, dp: u8) -> Self {
         let factor = 10f64.powi(dp as i32);
         self.value = (self.value * factor).round() / factor;
         return self.clone();
-    }
-
-    pub fn convert(&self, unit: NutrientUnit) -> Result<f64, &'static str> {
-        if let Some(nutrient) = self.nutrient.clone() {
-            let nutrient_borrowed = nutrient.borrow();
-            return nutrient_borrowed
-                .convert(nutrient_borrowed.get_main_unit(), unit)
-                .and_then(|c| Ok(c * self.get_value()));
-        }
-        return Err("");
     }
 }
 
@@ -181,17 +127,10 @@ impl Add for NutrientAmount {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
-        if self.nutrient.is_some() != rhs.nutrient.is_some() {
-            panic!(
-                "Tried to add an empty nutrient to a non-empty nutrient: {:#?} + {:#?}",
-                self.nutrient, rhs.nutrient
-            );
-        }
-
-        let rhs_nutrient_option = rhs.nutrient.clone().unwrap();
+        let rhs_nutrient_option = rhs.nutrient.clone();
         let rhs_nutrient = rhs_nutrient_option.borrow();
         let conversion_factor = rhs_nutrient
-            .convert(rhs.output_unit, self.output_unit)
+            .get_conversion_factor(rhs.output_unit, self.output_unit)
             .unwrap();
         Self {
             value: self.value + rhs.value * conversion_factor,
@@ -205,17 +144,10 @@ impl Sub for NutrientAmount {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        if self.nutrient.is_some() != rhs.nutrient.is_some() {
-            panic!(
-                "Tried to add an empty nutrient to a non-empty nutrient: {:#?} + {:#?}",
-                self.nutrient, rhs.nutrient
-            );
-        }
-
-        let rhs_nutrient_option = rhs.nutrient.clone().unwrap();
+        let rhs_nutrient_option = rhs.nutrient.clone();
         let rhs_nutrient = rhs_nutrient_option.borrow();
         let conversion_factor = rhs_nutrient
-            .convert(rhs.output_unit, self.output_unit)
+            .get_conversion_factor(rhs.output_unit, self.output_unit)
             .unwrap();
         Self {
             value: self.value - rhs.value * conversion_factor,
@@ -228,54 +160,30 @@ impl Sub for NutrientAmount {
 impl Mul<f64> for NutrientAmount {
     type Output = Self;
     fn mul(self, rhs: f64) -> Self {
-        match self.nutrient.clone() {
-            Some(nutrient) => {
-                let nutrient_borrowed = nutrient.borrow();
-                let main_unit = nutrient_borrowed.get_main_unit();
-                Self::from_rc_refcell(self.value * rhs, self.get_nutrient(), main_unit).unwrap()
-            }
-            None => Self::from_rc_refcell(0f64 * rhs, None, NutrientUnit::None).unwrap(),
-        }
+        let nutrient_borrowed = self.nutrient.borrow();
+        let main_unit = nutrient_borrowed.get_main_unit();
+        Self::from_rc_refcell(self.value * rhs, self.get_nutrient(), main_unit).unwrap()
     }
 }
 
 impl Div<f64> for NutrientAmount {
     type Output = Self;
     fn div(self, rhs: f64) -> Self {
-        match self.nutrient.clone() {
-            Some(nutrient) => {
-                let nutrient_borrowed = nutrient.borrow();
-                let main_unit = nutrient_borrowed.get_main_unit();
-                Self::from_rc_refcell(self.value / rhs, self.get_nutrient(), main_unit).unwrap()
-            }
-            None => Self::from_rc_refcell(0f64 * rhs, None, NutrientUnit::None).unwrap(),
-        }
+        let nutrient_borrowed = self.nutrient.borrow();
+        let main_unit = nutrient_borrowed.get_main_unit();
+        Self::from_rc_refcell(self.value / rhs, self.get_nutrient(), main_unit).unwrap()
     }
 }
 
-// Very stinky
-// TODO: Revisit NutrientAmount summation semantics
 impl Sum<NutrientAmount> for NutrientAmount {
-    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
-        let mut iter = iter.peekable();
-
-        let nutrient = match iter.peek() {
-            Some(n) => n.clone(),
-            None => {
-                return NutrientAmount::new(0f64, None, NutrientUnit::None).unwrap();
-            }
-        };
-
-        iter.fold(
-            NutrientAmount::new(
-                0.0,
-                nutrient
-                    .get_nutrient()
-                    .map(|nutrient| nutrient.borrow().clone()),
-                nutrient.get_output_unit(),
+    fn sum<I: Iterator<Item = Self>>(mut iter: I) -> Self {
+        if let Some(first) = iter.next() {
+            iter.fold(
+                first,
+                |acc, n| acc + n,
             )
-            .unwrap(),
-            |acc, n| acc + n.clone(),
-        )
+        } else {
+            NutrientAmount::new(0f64, Nutrient::default(), NutrientUnit::None).unwrap()
+        }
     }
 }

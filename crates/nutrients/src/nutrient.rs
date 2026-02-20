@@ -1,13 +1,20 @@
 use std::{
     cell::RefCell,
-    collections::{BTreeMap, BTreeSet},
+    collections::{BTreeMap, BTreeSet, HashSet},
     rc::{Rc, Weak},
 };
 use uuid::Uuid;
 
 use units::{energy_unit::EnergyUnit, mass_unit::MassUnit, volume_unit::VolumeUnit};
+use utils::dsa::{dfs::DFSTrait, node::GraphNode};
 
-use crate::{schema::nutrient_type::NutrientType, units::NutrientUnit};
+use crate::{
+    schema::{
+        nutrient_classes::{ChemicalType, QuantityType},
+        nutrient_type::NutrientType,
+    },
+    units::NutrientUnit,
+};
 
 #[derive(Debug, Clone)]
 pub struct Nutrient {
@@ -15,11 +22,24 @@ pub struct Nutrient {
     name: String,
     description: String,
     nutrient_type: NutrientType,
-    main_unit: NutrientUnit,
     unit_conversions: BTreeMap<NutrientUnit, f64>, // 1 unit = factor * main_unit
+    main_unit: NutrientUnit,
+
     parents: Vec<Weak<RefCell<Nutrient>>>,
     children: Vec<Rc<RefCell<Nutrient>>>,
 }
+
+impl GraphNode for Nutrient {
+    fn get_parents(&self) -> Vec<Weak<RefCell<Nutrient>>> {
+        self.parents.clone()
+    }
+
+    fn get_children(&self) -> Vec<Rc<RefCell<Nutrient>>> {
+        self.children.clone()
+    }
+}
+
+impl DFSTrait for Nutrient {}
 
 impl PartialEq for Nutrient {
     fn eq(&self, other: &Self) -> bool {
@@ -33,6 +53,24 @@ impl PartialEq for Nutrient {
 }
 
 impl Nutrient {
+    pub fn default() -> Self {
+        let nutrient_type = NutrientType {
+            chemical_type: ChemicalType::Other,
+            quantity_type: QuantityType::NonNutrient,
+            essentiality_type: None,
+        };
+        Nutrient {
+            id: Uuid::nil(),
+            name: String::new(),
+            description: String::new(),
+            nutrient_type: nutrient_type,
+            unit_conversions: BTreeMap::new(),
+            main_unit: NutrientUnit::None,
+            parents: Vec::new(),
+            children: Vec::new(),
+        }
+    }
+
     pub fn new(
         id: Option<Uuid>,
         name: String,
@@ -195,224 +233,46 @@ impl Nutrient {
         self.nutrient_type = nutrient_type;
     }
 
-    pub fn get_main_unit(&self) -> NutrientUnit {
-        self.main_unit
-    }
-
-    pub fn set_main_unit(&mut self, main_unit: NutrientUnit) -> Result<(), &'static str> {
-        if self.main_unit == main_unit {
-            return Ok(());
-        }
-
-        self.update_accepted_units(main_unit)?;
-        let accepted_units = self.get_accepted_units();
-        if accepted_units.contains(&main_unit) {
-            self.main_unit = main_unit;
-            return Ok(());
-        }
-
-        Err("Cannot convert to selected unit")
-    }
-
-    pub fn get_accepted_units(&self) -> BTreeSet<NutrientUnit> {
-        // self.update_accepted_units(self.main_unit);
-        self.unit_conversions.keys().cloned().collect()
-    }
-
-    pub fn update_accepted_units(
-        &mut self,
-        new_main_unit: NutrientUnit,
-    ) -> Result<(), &'static str> {
-        let new_factor = if self.main_unit == new_main_unit {
-            1f64
-        } else {
-            match self.unit_conversions.get(&new_main_unit) {
-                Some(factor) => 1f64 / *factor,
-                None => return Err("factor not found"),
-            }
-        };
-
-        let accepted_units = self.get_accepted_units();
-        let mut mass_units = Vec::new();
-        let mut volume_units = Vec::new();
-        let mut energy_units = Vec::new();
-        let mut other_units = Vec::new();
-
-        for unit in &accepted_units {
-            match unit {
-                NutrientUnit::Mass(mass_unit) => mass_units.push(NutrientUnit::Mass(*mass_unit)),
-                NutrientUnit::Volume(volume_unit) => {
-                    volume_units.push(NutrientUnit::Volume(*volume_unit))
-                }
-                NutrientUnit::Energy(energy_unit) => {
-                    energy_units.push(NutrientUnit::Energy(*energy_unit))
-                }
-                other => other_units.push(other),
-            }
-        }
-
-        if !mass_units.is_empty() {
-            let all_mass_units = MassUnit::get_enumerations()
-                .iter()
-                .map(|mass_enum| NutrientUnit::Mass(*mass_enum))
-                .collect::<BTreeSet<NutrientUnit>>();
-
-            let (included_mass_units, unincluded_mass_units): (
-                Vec<NutrientUnit>,
-                Vec<NutrientUnit>,
-            ) = all_mass_units
-                .into_iter()
-                .partition(|unit| accepted_units.contains(unit));
-
-            let initial_mass_unit = match included_mass_units.first() {
-                Some(unit) => unit,
-                None => return Err("No mass unit despite containing mass"),
-            };
-
-            for unit in unincluded_mass_units {
-                let initial_conversion_factor: f64 =
-                    match self.unit_conversions.get(initial_mass_unit) {
-                        Some(factor) => *factor,
-                        None => panic!("factor not found"),
-                    };
-
-                let factor = match unit.si_factor().zip(initial_mass_unit.si_factor()).map(
-                    |(unit, initial)| (unit / initial) * initial_conversion_factor * new_factor,
-                ) {
-                    Some(factor) => factor,
-                    None => return Err("factor not found"),
-                };
-                self.unit_conversions.insert(unit, factor);
-            }
-        }
-
-        if !volume_units.is_empty() {
-            let all_volume_units = VolumeUnit::get_enumerations()
-                .iter()
-                .map(|volume_enum| NutrientUnit::Volume(*volume_enum))
-                .collect::<BTreeSet<NutrientUnit>>();
-
-            let (included_volume_units, unincluded_volume_units): (
-                Vec<NutrientUnit>,
-                Vec<NutrientUnit>,
-            ) = all_volume_units
-                .into_iter()
-                .partition(|unit| accepted_units.contains(unit));
-
-            let initial_volume_unit = match included_volume_units.first() {
-                Some(unit) => unit,
-                None => return Err("No volume unit despite containing volume"),
-            };
-
-            for unit in unincluded_volume_units {
-                let initial_conversion_factor: f64 =
-                    match self.unit_conversions.get(initial_volume_unit) {
-                        Some(factor) => *factor,
-                        None => return Err("factor not found"),
-                    };
-
-                let factor = match unit.si_factor().zip(initial_volume_unit.si_factor()).map(
-                    |(unit, initial)| (unit / initial) * initial_conversion_factor * new_factor,
-                ) {
-                    Some(factor) => factor,
-                    None => return Err("factor not found"),
-                };
-                self.unit_conversions.insert(unit, factor);
-            }
-        }
-
-        if !energy_units.is_empty() {
-            let all_energy_units = EnergyUnit::get_enumerations()
-                .iter()
-                .map(|energy_enum| NutrientUnit::Energy(*energy_enum))
-                .collect::<BTreeSet<NutrientUnit>>();
-
-            let (included_energy_units, unincluded_mass_units): (
-                Vec<NutrientUnit>,
-                Vec<NutrientUnit>,
-            ) = all_energy_units
-                .into_iter()
-                .partition(|unit| accepted_units.contains(unit));
-
-            let initial_energy_unit = match included_energy_units.first() {
-                Some(unit) => unit,
-                None => return Err("No mass unit despite containing mass"),
-            };
-
-            for unit in unincluded_mass_units {
-                let initial_conversion_factor: f64 =
-                    match self.unit_conversions.get(initial_energy_unit) {
-                        Some(factor) => *factor,
-                        None => return Err("factor not found"),
-                    };
-
-                let factor = match unit.si_factor().zip(initial_energy_unit.si_factor()).map(
-                    |(unit, initial)| (unit / initial) * initial_conversion_factor * new_factor,
-                ) {
-                    Some(factor) => factor,
-                    None => return Err("factor not found"),
-                };
-                self.unit_conversions.insert(unit, factor);
-            }
-        }
-
-        for unit in accepted_units.clone() {
-            if self.main_unit != new_main_unit {
-                let conversion_factor: f64 = match self.unit_conversions.get(&unit) {
-                    Some(factor) => *factor,
-                    None => return Err("factor not found"),
-                };
-                let new_conversion_factor = conversion_factor * new_factor;
-                self.unit_conversions.insert(unit, new_conversion_factor);
-            }
-        }
-
-        return Ok(());
-    }
-
-    pub fn get_conversions(&self) -> BTreeMap<NutrientUnit, f64> {
+    pub fn get_unit_conversions(&self) -> BTreeMap<NutrientUnit, f64> {
         self.unit_conversions.clone()
     }
 
-    pub fn convert(&self, from: NutrientUnit, to: NutrientUnit) -> Result<f64, &'static str> {
-        if from == to {
-            return Ok(1f64);
-        }
+    pub fn set_unit_conversions(&mut self, unit_conversions: BTreeMap<NutrientUnit, f64>) {
+        self.unit_conversions = unit_conversions;
+    }
 
-        match from {
-            NutrientUnit::Mass(from_mass) => {
-                if let NutrientUnit::Mass(to_mass) = to {
-                    println!("{}", from_mass.si_factor() / to_mass.si_factor());
-                    return Ok(from_mass.si_factor() / to_mass.si_factor());
-                }
+    pub fn insert_unit_conversion(&mut self, unit: NutrientUnit, value: f64) {
+        match unit {
+            NutrientUnit::Mass(input_mass) => {
+                let all_masses = MassUnit::get_enumerations();
+                all_masses.iter().for_each(|mass_unit| {
+                    self.unit_conversions.insert(
+                        NutrientUnit::Mass(*mass_unit),
+                        value * input_mass.si_factor() / mass_unit.si_factor(),
+                    );
+                });
             }
-            NutrientUnit::Volume(from_volume) => {
-                if let NutrientUnit::Volume(to_volume) = to {
-                    return Ok(from_volume.si_factor() / to_volume.si_factor());
-                }
+            NutrientUnit::Volume(input_volume) => {
+                let all_volumes = VolumeUnit::get_enumerations();
+                all_volumes.iter().for_each(|volume_unit| {
+                    self.unit_conversions.insert(
+                        NutrientUnit::Volume(*volume_unit),
+                        value * input_volume.si_factor() / volume_unit.si_factor(),
+                    );
+                });
             }
-            NutrientUnit::Energy(from_energy) => {
-                if let NutrientUnit::Energy(to_energy) = to {
-                    return Ok(from_energy.si_factor() / to_energy.si_factor());
-                }
+            NutrientUnit::Energy(input_energy) => {
+                let all_energies = EnergyUnit::get_enumerations();
+                all_energies.iter().for_each(|energy_unit| {
+                    self.unit_conversions.insert(
+                        NutrientUnit::Energy(*energy_unit),
+                        value * input_energy.si_factor() / energy_unit.si_factor(),
+                    );
+                });
             }
-            _ => {}
-        }
-
-        let accepted_units = self.get_accepted_units();
-        if accepted_units.contains(&to) && accepted_units.contains(&from) {
-            let to_factor = match self.unit_conversions.get(&to) {
-                Some(factor) => *factor,
-                None => return Err("To conversion factor not found"),
-            };
-            let from_factor = match self.unit_conversions.get(&from) {
-                Some(factor) => *factor,
-                None => return Err("From conversion factor not found"),
-            };
-            let factor = to_factor * from_factor;
-            return Ok(factor);
-        } else {
-            return Err("Conversion must use values accepted by nutrient");
+            _ => {
+                self.unit_conversions.insert(unit, value);
+            }
         }
     }
 
@@ -453,167 +313,125 @@ impl Nutrient {
         return Ok(());
     }
 
-    pub fn add_conversion(
-        &mut self,
+    pub fn get_conversion_factor(
+        &self,
         from_unit: NutrientUnit,
         to_unit: NutrientUnit,
-        factor: f64,
-    ) -> Result<(), &'static str> {
-        let accepted_units = self.get_accepted_units();
-
-        if !accepted_units.contains(&to_unit) && !accepted_units.contains(&from_unit) {
-            return Err("At least one unit must be an accepted unit");
-        }
-
-        if accepted_units.contains(&to_unit) && accepted_units.contains(&from_unit) {
-            return Err("At least one unit must be a new unit");
-        }
-
-        let new_unit = if !accepted_units.contains(&to_unit) {
-            to_unit
-        } else {
-            from_unit
+    ) -> Result<f64, &'static str> {
+        let unit_conversions = self.get_unit_conversions();
+        let to_factor = match unit_conversions.get(&to_unit) {
+            Some(factor) => *factor,
+            None => return Err("To conversion factor not found"),
         };
-
-        let to_conversion_factor = match self.convert(to_unit, self.main_unit) {
-            Ok(factor) => Some(factor),
-            Err(_) => None,
+        let from_factor = match unit_conversions.get(&from_unit) {
+            Some(factor) => *factor,
+            None => return Err("From conversion factor not found"),
         };
-
-        let from_conversion_factor = match self.convert(self.main_unit, from_unit) {
-            Ok(factor) => Some(factor),
-            Err(_) => None,
-        };
-
-        if to_conversion_factor.is_none() && from_conversion_factor.is_none() {
-            return Err("Both conversions are none");
-        }
-
-        let conversion_factor =
-            to_conversion_factor.unwrap_or(1f64) * from_conversion_factor.unwrap_or(1f64);
-
-        self.unit_conversions
-            .insert(new_unit, factor * conversion_factor);
-
-        self.update_accepted_units(self.main_unit)?;
-
-        Ok(())
+        return Ok(from_factor / to_factor);
     }
 
-    pub fn get_parents(&self) -> Vec<Weak<RefCell<Nutrient>>> {
-        self.parents.clone()
+    pub fn get_accepted_units(&self) -> BTreeSet<NutrientUnit> {
+        self.unit_conversions.keys().cloned().collect()
+    }
+
+    pub fn get_main_unit(&self) -> NutrientUnit {
+        self.main_unit
+    }
+
+    pub fn set_main_unit(&mut self, new_main_unit: NutrientUnit) -> Result<(), &'static str> {
+        let unit_conversions = self.get_unit_conversions();
+        let conversion_factor = match unit_conversions.get(&new_main_unit) {
+            Some(factor) => *factor,
+            None => return Err("Conversion factor for new main unit was not found"),
+        };
+
+        for value in self.unit_conversions.values_mut() {
+            *value /= conversion_factor;
+        }
+
+        self.main_unit = new_main_unit;
+        Ok(())
     }
 
     pub fn get_ancestors(&self) -> Vec<Rc<RefCell<Nutrient>>> {
         let mut result = Vec::new();
+        let mut visited = HashSet::new();
 
         for parent_weak in self.get_parents() {
             if let Some(parent) = parent_weak.upgrade() {
-                result.push(parent.clone());
-                Self::collect_ancestors(&parent, &mut result);
+                Self::dfs_up(&parent, &mut result, &mut visited);
             }
         }
 
         result
-    }
-
-    pub fn collect_ancestors(node: &Rc<RefCell<Self>>, out: &mut Vec<Rc<RefCell<Self>>>) {
-        let parents = {
-            let n = node.borrow();
-            n.parents.clone()
-        };
-
-        for parent_weak in parents {
-            if let Some(parent) = parent_weak.upgrade() {
-                out.push(parent.clone());
-                Self::collect_ancestors(&parent, out);
-            }
-        }
-    }
-
-    pub fn set_parents(&mut self, parents: Vec<Weak<RefCell<Nutrient>>>) {
-        self.parents = parents;
-    }
-
-    pub fn add_parent(&mut self, parent: Rc<RefCell<Nutrient>>) {
-        let parent_weak = Rc::downgrade(&parent);
-        self.parents.push(parent_weak);
-    }
-
-    pub fn add_parent_weak(&mut self, parent: Weak<RefCell<Nutrient>>) {
-        self.parents.push(parent);
-    }
-
-    pub fn remove_parent(&mut self, target: Weak<RefCell<Nutrient>>) {
-        let Some(target_rc) = target.upgrade() else {
-            return;
-        };
-
-        self.parents.retain(|parent| {
-            parent
-                .upgrade()
-                .map(|p| !Rc::ptr_eq(&p, &target_rc))
-                .unwrap_or(false) // remove dead parents
-        });
-    }
-
-    pub fn get_children(&self) -> Vec<Rc<RefCell<Nutrient>>> {
-        self.children.clone()
     }
 
     pub fn get_descendants(&self) -> Vec<Rc<RefCell<Nutrient>>> {
         let mut result = Vec::new();
+        let mut visited = HashSet::new();
 
         for child in self.get_children() {
-            result.push(child.clone());
-            Self::collect_descendants(&child, &mut result);
+            Self::dfs_down(&child, &mut result, &mut visited);
         }
 
         result
     }
+}
 
-    pub fn collect_descendants(node: &Rc<RefCell<Self>>, out: &mut Vec<Rc<RefCell<Self>>>) {
-        let children = {
-            let n = node.borrow();
-            n.children.clone()
-        };
 
-        for child in children {
-            out.push(child.clone());
-            Self::collect_descendants(&child, out);
+pub fn link_parent_child(
+    parent: &Rc<RefCell<Nutrient>>,
+    child: &Rc<RefCell<Nutrient>>,
+) -> Result<(), &'static str> {
+    // Prevent self-linkage
+    if Rc::ptr_eq(parent, child) {
+        return Err("Cannot link node to itself");
+    }
+
+    // Prevent circular links
+    if parent.borrow().get_ancestors().contains(&child) {
+        return Err("Child is an ancestor of the parent");
+    }
+
+    {
+        // Add child to parent's children (strong reference)
+        if !parent
+            .borrow()
+            .children
+            .iter()
+            .any(|c| Rc::ptr_eq(c, child))
+        {
+            parent.borrow_mut().children.push(Rc::clone(child));
         }
     }
 
-    pub fn set_children(&mut self, children: Vec<Rc<RefCell<Nutrient>>>) {
-        self.children = children;
+    {
+        // Add parent to child's parents (weak reference)
+        let mut child_mut = child.borrow_mut();
+        if !child_mut.parents.iter().any(|p| {
+            p.upgrade()
+                .map(|p_rc| Rc::ptr_eq(&p_rc, parent))
+                .unwrap_or(false)
+        }) {
+            child_mut.parents.push(Rc::downgrade(parent));
+        }
     }
 
-    pub fn add_child(&mut self, child: Rc<RefCell<Nutrient>>) {
-        self.children.push(child);
-    }
-
-    pub fn remove_child(&mut self, target: Rc<RefCell<Nutrient>>) {
-        self.children.retain(|child| !Rc::ptr_eq(child, &target));
-    }
+    Ok(())
 }
 
-pub fn link_parent_child(parent: &Rc<RefCell<Nutrient>>, child: &Rc<RefCell<Nutrient>>) {
-    // Add child to parent's children (strong reference)
-    if !parent
-        .borrow()
+pub fn unlink_parent_child(parent: &Rc<RefCell<Nutrient>>, child: &Rc<RefCell<Nutrient>>) {
+    parent
+        .borrow_mut()
         .children
-        .iter()
-        .any(|c| Rc::ptr_eq(c, child))
-    {
-        parent.borrow_mut().children.push(Rc::clone(child));
-    }
+        .retain(|c| !Rc::ptr_eq(c, child));
 
-    // Add parent to child's parents (weak reference)
-    if !child.borrow().parents.iter().any(|p| {
-        p.upgrade()
-            .map(|p_rc| Rc::ptr_eq(&p_rc, parent))
-            .unwrap_or(false)
-    }) {
-        child.borrow_mut().parents.push(Rc::downgrade(parent));
-    }
+    child.borrow_mut().parents.retain(|p| {
+        if let Some(p_rc) = p.upgrade() {
+            !Rc::ptr_eq(&p_rc, parent)
+        } else {
+            // Remove dropped weak references
+            false
+        }
+    })
 }

@@ -5,4 +5,5 @@ edition = "2021"
 
 [dependencies]
 units = { path = "../units" }
+utils = { path = "../utils" }
 uuid = { version = "1.8.0", features = ["v4", "fast-rng", "macro-diagnostics", "serde"] }

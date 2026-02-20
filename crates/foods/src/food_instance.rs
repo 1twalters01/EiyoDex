@@ -104,21 +104,17 @@ impl FoodInstance {
         match food_data {
             Some(data) => {
                 for nutrient_amount in data.get_nutrient_amount_list().get_nutrient_amounts() {
-                    match nutrient_amount.get_nutrient() {
-                        Some(nutrient) => {
-                            if nutrient.borrow().get_name() == "Calories" {
-                                let unit = nutrient.borrow().get_main_unit();
-                                match unit {
-                                    NutrientUnit::Energy(energy_unit) => {
-                                        energy =
-                                            Energy::new(nutrient_amount.get_value(), energy_unit);
-                                        break;
-                                    }
-                                    _ => {}
-                                };
+                    let nutrient = nutrient_amount.get_nutrient(); 
+                    if nutrient.borrow().get_name() == "Calories" {
+                        let unit = nutrient.borrow().get_main_unit();
+                        match unit {
+                            NutrientUnit::Energy(energy_unit) => {
+                                energy =
+                                    Energy::new(nutrient_amount.get_value(), energy_unit);
+                                break;
                             }
-                        }
-                        None => {}
+                            _ => {}
+                        };
                     }
                 }
             }
