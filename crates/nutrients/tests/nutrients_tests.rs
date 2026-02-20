@@ -1,6 +1,9 @@
 use nutrients::{
     nutrient::{link_parent_child, Nutrient},
-    schema::nutrients::NutrientType,
+    schema::{
+        nutrient_classes::{ChemicalType, EssentialityType, QuantityType},
+        nutrient_type::NutrientType,
+    },
     units::NutrientUnit,
 };
 use std::{
@@ -16,9 +19,14 @@ fn test_nutrient_new_nutrient_unit() {
     let id = None;
     let name = String::from("Potassium");
     let description = "Test description".to_string();
+    let nutrient_type = NutrientType {
+        chemical_type: ChemicalType::Mineral,
+        quantity_type: QuantityType::Micronutrient,
+        essentiality_type: Some(EssentialityType::Essential),
+    };
     let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
 
-    let mut nutrient = Nutrient::new(id, name, main_unit);
+    let mut nutrient = Nutrient::new(id, name, nutrient_type, main_unit);
     let mut nutrient_2 = nutrient.clone();
     assert_eq!(nutrient, nutrient_2);
 
@@ -34,9 +42,14 @@ fn test_nutrient_new_rc_refcell_nutrient_unit() {
     let id = None;
     let name = String::from("Potassium");
     let description = "Test description".to_string();
+    let nutrient_type = NutrientType {
+        chemical_type: ChemicalType::Mineral,
+        quantity_type: QuantityType::Micronutrient,
+        essentiality_type: Some(EssentialityType::Essential),
+    };
     let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
 
-    let nutrient = Nutrient::new_rc_refcell(id, name, main_unit);
+    let nutrient = Nutrient::new_rc_refcell(id, name, nutrient_type, main_unit);
     let nutrient_2 = nutrient.clone();
     assert_eq!(nutrient, nutrient_2);
 
@@ -49,9 +62,14 @@ fn test_nutrient_unit_id() {
     let id: Uuid = Uuid::from_u128(0xa1a2a3a4b1b2c1c2d1d2d3d4d5d6d7d8u128);
     let id2: Uuid = Uuid::from_u128(0xa1a2a3a4b1b2c1c2c3c4d1d2d3d4e1e2u128);
     let name = String::from("Potassium");
+    let nutrient_type = NutrientType {
+        chemical_type: ChemicalType::Mineral,
+        quantity_type: QuantityType::Micronutrient,
+        essentiality_type: Some(EssentialityType::Essential),
+    };
     let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
 
-    let mut nutrient = Nutrient::new(Some(id), name, main_unit);
+    let mut nutrient = Nutrient::new(Some(id), name, nutrient_type, main_unit);
 
     assert_eq!(nutrient.get_id(), id);
     nutrient.set_id(id2);
@@ -63,9 +81,14 @@ fn test_nutrient_unit_name() {
     let id: Uuid = Uuid::from_u128(0xa1a2a3a4b1b2c1c2d1d2d3d4d5d6d7d8u128);
     let name = String::from("Potassium");
     let name2 = String::from("Calcium");
+    let nutrient_type = NutrientType {
+        chemical_type: ChemicalType::Mineral,
+        quantity_type: QuantityType::Micronutrient,
+        essentiality_type: Some(EssentialityType::Essential),
+    };
     let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
 
-    let mut nutrient = Nutrient::new(Some(id), name.clone(), main_unit);
+    let mut nutrient = Nutrient::new(Some(id), name.clone(), nutrient_type, main_unit);
 
     assert_eq!(nutrient.get_name(), name);
     nutrient.set_name(name2.clone());
@@ -77,9 +100,14 @@ fn test_nutrient_unit_description() {
     let id = None;
     let name = String::from("Potassium");
     let description = "Test description".to_string();
+    let nutrient_type = NutrientType {
+        chemical_type: ChemicalType::Mineral,
+        quantity_type: QuantityType::Micronutrient,
+        essentiality_type: Some(EssentialityType::Essential),
+    };
     let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
 
-    let mut nutrient = Nutrient::new(id, name, main_unit);
+    let mut nutrient = Nutrient::new(id, name, nutrient_type, main_unit);
 
     assert_eq!(nutrient.get_description(), String::new());
     nutrient.set_description(description.clone());
@@ -90,31 +118,37 @@ fn test_nutrient_unit_description() {
 fn test_nutrient_unit_categories() {
     let id = None;
     let name = String::from("Potassium");
+    let nutrient_type = NutrientType {
+        chemical_type: ChemicalType::Mineral,
+        quantity_type: QuantityType::Micronutrient,
+        essentiality_type: Some(EssentialityType::Essential),
+    };
     let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
 
-    let nutrient = Nutrient::new_rc_refcell(id, name, main_unit);
+    let nutrient = Nutrient::new_rc_refcell(id, name, nutrient_type, main_unit);
 
-    assert_eq!(nutrient.borrow().get_categories(), HashSet::new());
-
-    let mineral_category = NutrientType::Mineral;
-    nutrient
-        .borrow_mut()
-        .insert_category(mineral_category.clone());
     assert_eq!(
-        nutrient.borrow().get_categories(),
-        HashSet::from([mineral_category])
+        nutrient.borrow().get_nutrient_type(),
+        NutrientType {
+            chemical_type: ChemicalType::Mineral,
+            quantity_type: QuantityType::Micronutrient,
+            essentiality_type: Some(EssentialityType::Essential)
+        }
     );
 
-    nutrient.borrow_mut().remove_category(mineral_category);
-    assert_eq!(nutrient.borrow().get_categories(), HashSet::new());
+    nutrient.borrow_mut().set_nutrient_type(NutrientType {
+        chemical_type: ChemicalType::Other,
+        quantity_type: QuantityType::Micronutrient,
+        essentiality_type: None,
+    });
 
-    let other_category = NutrientType::Other;
-    nutrient
-        .borrow_mut()
-        .extend_category(Vec::from([mineral_category, other_category]));
     assert_eq!(
-        nutrient.borrow().get_categories(),
-        HashSet::from([other_category, mineral_category])
+        nutrient.borrow().get_nutrient_type(),
+        NutrientType {
+            chemical_type: ChemicalType::Other,
+            quantity_type: QuantityType::Micronutrient,
+            essentiality_type: None
+        }
     );
 }
 
@@ -122,6 +156,11 @@ fn test_nutrient_unit_categories() {
 fn test_accepted_units() {
     let id = None;
     let name = String::from("Potassium");
+    let nutrient_type = NutrientType {
+        chemical_type: ChemicalType::Mineral,
+        quantity_type: QuantityType::Micronutrient,
+        essentiality_type: Some(EssentialityType::Essential),
+    };
     let milligram_unit = NutrientUnit::Mass(MassUnit::Milligram);
     let mass_accepted_units: BTreeSet<NutrientUnit> = MassUnit::get_enumerations()
         .iter()
@@ -129,7 +168,7 @@ fn test_accepted_units() {
         .collect();
 
     let main_unit = milligram_unit;
-    let nutrient = Nutrient::new_rc_refcell(id, name.clone(), main_unit);
+    let nutrient = Nutrient::new_rc_refcell(id, name.clone(), nutrient_type, main_unit);
 
     assert_eq!(nutrient.borrow().get_accepted_units(), mass_accepted_units);
 
@@ -162,6 +201,11 @@ fn test_accepted_units() {
 fn test_convert() {
     let id = None;
     let name = String::from("Potassium");
+    let nutrient_type = NutrientType {
+        chemical_type: ChemicalType::Mineral,
+        quantity_type: QuantityType::Micronutrient,
+        essentiality_type: Some(EssentialityType::Essential),
+    };
     let microgram_unit = NutrientUnit::Mass(MassUnit::Microgram);
     let milligram_unit = NutrientUnit::Mass(MassUnit::Milligram);
     let kilogram_unit = NutrientUnit::Mass(MassUnit::Kilogram);
@@ -171,7 +215,7 @@ fn test_convert() {
 
     // First set of tests
     let main_unit = milligram_unit;
-    let nutrient = Nutrient::new_rc_refcell(id, name.clone(), main_unit);
+    let nutrient = Nutrient::new_rc_refcell(id, name.clone(), nutrient_type, main_unit);
     assert_eq!(nutrient.borrow().get_main_unit(), milligram_unit);
 
     let mut res = nutrient.borrow().convert(kilogram_unit, ounce_unit);
@@ -268,11 +312,16 @@ fn test_convert() {
 fn test_nutrient_unit_main_unit() {
     let id = None;
     let name = String::from("Potassium");
+    let nutrient_type = NutrientType {
+        chemical_type: ChemicalType::Mineral,
+        quantity_type: QuantityType::Micronutrient,
+        essentiality_type: Some(EssentialityType::Essential),
+    };
     let milligram_unit = NutrientUnit::Mass(MassUnit::Milligram);
     let microgram_unit = NutrientUnit::Mass(MassUnit::Microgram);
     let milliliter_unit = NutrientUnit::Volume(VolumeUnit::Milliliter);
 
-    let nutrient = Nutrient::new_rc_refcell(id, name.clone(), milligram_unit);
+    let nutrient = Nutrient::new_rc_refcell(id, name.clone(), nutrient_type, milligram_unit);
     assert_eq!(nutrient.borrow().get_main_unit(), milligram_unit);
 
     // Test setting a value that is in the conversions
@@ -317,11 +366,16 @@ fn test_parents() {
     let name_2 = String::from("Heme Iron");
     let name_3 = String::from("Non-heme Iron");
     let name_4 = String::from("Elemental Iron");
+    let nutrient_type = NutrientType {
+        chemical_type: ChemicalType::Mineral,
+        quantity_type: QuantityType::Micronutrient,
+        essentiality_type: Some(EssentialityType::Essential),
+    };
     let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
-    let iron = Nutrient::new_rc_refcell(id, name, main_unit);
-    let heme_iron = Nutrient::new_rc_refcell(id, name_2, main_unit);
-    let non_heme_iron = Nutrient::new_rc_refcell(id, name_3, main_unit);
-    let elemental_iron = Nutrient::new_rc_refcell(id, name_4, main_unit);
+    let iron = Nutrient::new_rc_refcell(id, name, nutrient_type.clone(), main_unit);
+    let heme_iron = Nutrient::new_rc_refcell(id, name_2, nutrient_type.clone(), main_unit);
+    let non_heme_iron = Nutrient::new_rc_refcell(id, name_3, nutrient_type.clone(), main_unit);
+    let elemental_iron = Nutrient::new_rc_refcell(id, name_4, nutrient_type.clone(), main_unit);
 
     heme_iron.borrow_mut().add_parent(iron.clone());
     assert_eq!(
@@ -368,10 +422,15 @@ fn test_children() {
     let name = String::from("Iron");
     let name_2 = String::from("Heme Iron");
     let name_3 = String::from("Non-heme Iron");
+    let nutrient_type = NutrientType {
+        chemical_type: ChemicalType::Mineral,
+        quantity_type: QuantityType::Micronutrient,
+        essentiality_type: Some(EssentialityType::Essential),
+    };
     let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
-    let iron = Nutrient::new_rc_refcell(id, name, main_unit);
-    let heme_iron = Nutrient::new_rc_refcell(id, name_2, main_unit);
-    let non_heme_iron = Nutrient::new_rc_refcell(id, name_3, main_unit);
+    let iron = Nutrient::new_rc_refcell(id, name, nutrient_type.clone(), main_unit);
+    let heme_iron = Nutrient::new_rc_refcell(id, name_2, nutrient_type.clone(), main_unit);
+    let non_heme_iron = Nutrient::new_rc_refcell(id, name_3, nutrient_type.clone(), main_unit);
 
     iron.borrow_mut().add_child(heme_iron.clone());
     assert_eq!(iron.borrow().get_children(), Vec::from([heme_iron.clone()]));

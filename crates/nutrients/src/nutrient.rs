@@ -1,28 +1,22 @@
 use std::{
     cell::RefCell,
-    collections::{BTreeMap, BTreeSet, HashSet},
+    collections::{BTreeMap, BTreeSet},
     rc::{Rc, Weak},
 };
 use uuid::Uuid;
 
 use units::{energy_unit::EnergyUnit, mass_unit::MassUnit, volume_unit::VolumeUnit};
 
-use crate::{schema::nutrients::NutrientType, units::NutrientUnit};
-
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct UnitConversion {
-    unit: NutrientUnit,
-    main_unit: NutrientUnit,
-}
+use crate::{schema::nutrient_type::NutrientType, units::NutrientUnit};
 
 #[derive(Debug, Clone)]
 pub struct Nutrient {
     id: Uuid,
     name: String,
     description: String,
-    categories: HashSet<NutrientType>,
+    nutrient_type: NutrientType,
     main_unit: NutrientUnit,
-    unit_conversions: BTreeMap<UnitConversion, f64>, // f64 = unit_to_main_unit_factor
+    unit_conversions: BTreeMap<NutrientUnit, f64>, // 1 unit = factor * main_unit
     parents: Vec<Weak<RefCell<Nutrient>>>,
     children: Vec<Rc<RefCell<Nutrient>>>,
 }
@@ -32,26 +26,28 @@ impl PartialEq for Nutrient {
         self.id == other.id
             && self.name == other.name
             && self.description == other.description
-            && self.categories == other.categories
+            && self.nutrient_type == other.nutrient_type
             && self.main_unit == other.main_unit
             && self.unit_conversions == other.unit_conversions
     }
 }
 
 impl Nutrient {
-    pub fn new(id: Option<Uuid>, name: String, main_unit: NutrientUnit) -> Self {
+    pub fn new(
+        id: Option<Uuid>,
+        name: String,
+        nutrient_type: NutrientType,
+        main_unit: NutrientUnit,
+    ) -> Self {
         let id = id.unwrap_or_else(Uuid::new_v4);
-        let unit_conversions: BTreeMap<UnitConversion, f64> = match main_unit {
+        let unit_conversions: BTreeMap<NutrientUnit, f64> = match main_unit {
             NutrientUnit::Mass(mass_unit) => {
                 let mass_enums = MassUnit::get_enumerations();
-                let unit_conversions: BTreeMap<UnitConversion, f64> = mass_enums
+                let unit_conversions: BTreeMap<NutrientUnit, f64> = mass_enums
                     .iter()
                     .map(|mass_enum| {
                         (
-                            UnitConversion {
-                                unit: NutrientUnit::Mass(*mass_enum),
-                                main_unit: main_unit,
-                            },
+                            NutrientUnit::Mass(*mass_enum),
                             mass_enum.si_factor() / mass_unit.si_factor(),
                         )
                     })
@@ -60,14 +56,11 @@ impl Nutrient {
             }
             NutrientUnit::Volume(volume_unit) => {
                 let volume_enums = VolumeUnit::get_enumerations();
-                let unit_conversions: BTreeMap<UnitConversion, f64> = volume_enums
+                let unit_conversions: BTreeMap<NutrientUnit, f64> = volume_enums
                     .iter()
                     .map(|volume_enum| {
                         (
-                            UnitConversion {
-                                unit: NutrientUnit::Volume(*volume_enum),
-                                main_unit: main_unit,
-                            },
+                            NutrientUnit::Volume(*volume_enum),
                             volume_enum.si_factor() / volume_unit.si_factor(),
                         )
                     })
@@ -76,14 +69,11 @@ impl Nutrient {
             }
             NutrientUnit::Energy(energy_unit) => {
                 let energy_enums = EnergyUnit::get_enumerations();
-                let unit_conversions: BTreeMap<UnitConversion, f64> = energy_enums
+                let unit_conversions: BTreeMap<NutrientUnit, f64> = energy_enums
                     .iter()
                     .map(|energy_enum| {
                         (
-                            UnitConversion {
-                                unit: NutrientUnit::Energy(*energy_enum),
-                                main_unit: main_unit,
-                            },
+                            NutrientUnit::Energy(*energy_enum),
                             energy_enum.si_factor() / energy_unit.si_factor(),
                         )
                     })
@@ -91,13 +81,7 @@ impl Nutrient {
                 unit_conversions
             }
             _ => {
-                let unit_conversions = BTreeMap::from([(
-                    UnitConversion {
-                        unit: main_unit,
-                        main_unit: main_unit,
-                    },
-                    1f64,
-                )]);
+                let unit_conversions = BTreeMap::from([(main_unit, 1f64)]);
                 unit_conversions
             }
         };
@@ -106,7 +90,7 @@ impl Nutrient {
             id,
             name,
             description: String::new(),
-            categories: HashSet::new(),
+            nutrient_type: nutrient_type,
             main_unit,
             unit_conversions: unit_conversions,
             parents: Vec::new(),
@@ -117,20 +101,18 @@ impl Nutrient {
     pub fn new_rc_refcell(
         id: Option<Uuid>,
         name: String,
+        nutrient_type: NutrientType,
         main_unit: NutrientUnit,
     ) -> Rc<RefCell<Self>> {
         let id = id.unwrap_or_else(Uuid::new_v4);
-        let unit_conversions: BTreeMap<UnitConversion, f64> = match main_unit {
+        let unit_conversions: BTreeMap<NutrientUnit, f64> = match main_unit {
             NutrientUnit::Mass(mass_unit) => {
                 let mass_enums = MassUnit::get_enumerations();
-                let unit_conversions: BTreeMap<UnitConversion, f64> = mass_enums
+                let unit_conversions: BTreeMap<NutrientUnit, f64> = mass_enums
                     .iter()
                     .map(|mass_enum| {
                         (
-                            UnitConversion {
-                                unit: NutrientUnit::Mass(*mass_enum),
-                                main_unit: main_unit,
-                            },
+                            NutrientUnit::Mass(*mass_enum),
                             mass_enum.si_factor() / mass_unit.si_factor(),
                         )
                     })
@@ -139,14 +121,11 @@ impl Nutrient {
             }
             NutrientUnit::Volume(volume_unit) => {
                 let volume_enums = VolumeUnit::get_enumerations();
-                let unit_conversions: BTreeMap<UnitConversion, f64> = volume_enums
+                let unit_conversions: BTreeMap<NutrientUnit, f64> = volume_enums
                     .iter()
                     .map(|volume_enum| {
                         (
-                            UnitConversion {
-                                unit: NutrientUnit::Volume(*volume_enum),
-                                main_unit: main_unit,
-                            },
+                            NutrientUnit::Volume(*volume_enum),
                             volume_enum.si_factor() / volume_unit.si_factor(),
                         )
                     })
@@ -155,14 +134,11 @@ impl Nutrient {
             }
             NutrientUnit::Energy(energy_unit) => {
                 let energy_enums = EnergyUnit::get_enumerations();
-                let unit_conversions: BTreeMap<UnitConversion, f64> = energy_enums
+                let unit_conversions: BTreeMap<NutrientUnit, f64> = energy_enums
                     .iter()
                     .map(|energy_enum| {
                         (
-                            UnitConversion {
-                                unit: NutrientUnit::Energy(*energy_enum),
-                                main_unit: main_unit,
-                            },
+                            NutrientUnit::Energy(*energy_enum),
                             energy_enum.si_factor() / energy_unit.si_factor(),
                         )
                     })
@@ -170,13 +146,7 @@ impl Nutrient {
                 unit_conversions
             }
             _ => {
-                let unit_conversions = BTreeMap::from([(
-                    UnitConversion {
-                        unit: main_unit,
-                        main_unit: main_unit,
-                    },
-                    1f64,
-                )]);
+                let unit_conversions = BTreeMap::from([(main_unit, 1f64)]);
                 unit_conversions
             }
         };
@@ -185,7 +155,7 @@ impl Nutrient {
             id,
             name,
             description: String::new(),
-            categories: HashSet::new(),
+            nutrient_type: nutrient_type,
             main_unit,
             unit_conversions: unit_conversions,
             parents: Vec::new(),
@@ -217,20 +187,12 @@ impl Nutrient {
         self.description = description;
     }
 
-    pub fn get_categories(&self) -> HashSet<NutrientType> {
-        self.categories.clone()
+    pub fn get_nutrient_type(&self) -> NutrientType {
+        self.nutrient_type.clone()
     }
 
-    pub fn insert_category(&mut self, category: NutrientType) {
-        self.categories.insert(category);
-    }
-
-    pub fn remove_category(&mut self, category: NutrientType) {
-        self.categories.remove(&category);
-    }
-
-    pub fn extend_category(&mut self, categories: Vec<NutrientType>) {
-        self.categories.extend(categories);
+    pub fn set_nutrient_type(&mut self, nutrient_type: NutrientType) {
+        self.nutrient_type = nutrient_type;
     }
 
     pub fn get_main_unit(&self) -> NutrientUnit {
@@ -254,10 +216,7 @@ impl Nutrient {
 
     pub fn get_accepted_units(&self) -> BTreeSet<NutrientUnit> {
         // self.update_accepted_units(self.main_unit);
-        self.unit_conversions
-            .iter()
-            .map(|conversion| conversion.0.unit)
-            .collect()
+        self.unit_conversions.keys().cloned().collect()
     }
 
     pub fn update_accepted_units(
@@ -267,11 +226,7 @@ impl Nutrient {
         let new_factor = if self.main_unit == new_main_unit {
             1f64
         } else {
-            let conversion = UnitConversion {
-                unit: new_main_unit,
-                main_unit: self.main_unit,
-            };
-            match self.unit_conversions.get(&conversion) {
+            match self.unit_conversions.get(&new_main_unit) {
                 Some(factor) => 1f64 / *factor,
                 None => return Err("factor not found"),
             }
@@ -315,16 +270,8 @@ impl Nutrient {
             };
 
             for unit in unincluded_mass_units {
-                let conversion = UnitConversion {
-                    unit: unit,
-                    main_unit: self.main_unit,
-                };
-
                 let initial_conversion_factor: f64 =
-                    match self.unit_conversions.get(&UnitConversion {
-                        unit: *initial_mass_unit,
-                        main_unit: self.main_unit,
-                    }) {
+                    match self.unit_conversions.get(initial_mass_unit) {
                         Some(factor) => *factor,
                         None => panic!("factor not found"),
                     };
@@ -335,7 +282,7 @@ impl Nutrient {
                     Some(factor) => factor,
                     None => return Err("factor not found"),
                 };
-                self.unit_conversions.insert(conversion, factor);
+                self.unit_conversions.insert(unit, factor);
             }
         }
 
@@ -358,16 +305,8 @@ impl Nutrient {
             };
 
             for unit in unincluded_volume_units {
-                let conversion = UnitConversion {
-                    unit: unit,
-                    main_unit: self.main_unit,
-                };
-
                 let initial_conversion_factor: f64 =
-                    match self.unit_conversions.get(&UnitConversion {
-                        unit: *initial_volume_unit,
-                        main_unit: self.main_unit,
-                    }) {
+                    match self.unit_conversions.get(initial_volume_unit) {
                         Some(factor) => *factor,
                         None => return Err("factor not found"),
                     };
@@ -378,7 +317,7 @@ impl Nutrient {
                     Some(factor) => factor,
                     None => return Err("factor not found"),
                 };
-                self.unit_conversions.insert(conversion, factor);
+                self.unit_conversions.insert(unit, factor);
             }
         }
 
@@ -401,16 +340,8 @@ impl Nutrient {
             };
 
             for unit in unincluded_mass_units {
-                let conversion = UnitConversion {
-                    unit: unit,
-                    main_unit: self.main_unit,
-                };
-
                 let initial_conversion_factor: f64 =
-                    match self.unit_conversions.get(&UnitConversion {
-                        unit: *initial_energy_unit,
-                        main_unit: self.main_unit,
-                    }) {
+                    match self.unit_conversions.get(initial_energy_unit) {
                         Some(factor) => *factor,
                         None => return Err("factor not found"),
                     };
@@ -421,35 +352,25 @@ impl Nutrient {
                     Some(factor) => factor,
                     None => return Err("factor not found"),
                 };
-                self.unit_conversions.insert(conversion, factor);
+                self.unit_conversions.insert(unit, factor);
             }
         }
 
         for unit in accepted_units.clone() {
             if self.main_unit != new_main_unit {
-                let old_conversion = UnitConversion {
-                    unit,
-                    main_unit: self.main_unit,
-                };
-                let new_conversion = UnitConversion {
-                    unit,
-                    main_unit: new_main_unit,
-                };
-                let conversion_factor: f64 = match self.unit_conversions.get(&old_conversion) {
+                let conversion_factor: f64 = match self.unit_conversions.get(&unit) {
                     Some(factor) => *factor,
                     None => return Err("factor not found"),
                 };
                 let new_conversion_factor = conversion_factor * new_factor;
-                self.unit_conversions
-                    .insert(new_conversion, new_conversion_factor);
-                self.unit_conversions.remove(&old_conversion);
+                self.unit_conversions.insert(unit, new_conversion_factor);
             }
         }
 
         return Ok(());
     }
 
-    pub fn get_conversions(&self) -> BTreeMap<UnitConversion, f64> {
+    pub fn get_conversions(&self) -> BTreeMap<NutrientUnit, f64> {
         self.unit_conversions.clone()
     }
 
@@ -480,20 +401,11 @@ impl Nutrient {
 
         let accepted_units = self.get_accepted_units();
         if accepted_units.contains(&to) && accepted_units.contains(&from) {
-            let to_conversion = UnitConversion {
-                unit: to,
-                main_unit: self.main_unit,
-            };
-            let from_conversion = UnitConversion {
-                unit: from,
-                main_unit: self.main_unit,
-            };
-
-            let to_factor = match self.unit_conversions.get(&to_conversion) {
+            let to_factor = match self.unit_conversions.get(&to) {
                 Some(factor) => *factor,
                 None => return Err("To conversion factor not found"),
             };
-            let from_factor = match self.unit_conversions.get(&from_conversion) {
+            let from_factor = match self.unit_conversions.get(&from) {
                 Some(factor) => *factor,
                 None => return Err("From conversion factor not found"),
             };
@@ -509,44 +421,32 @@ impl Nutrient {
             return Err("Cannot remove a conversion if it is the main unit");
         }
 
-        self.unit_conversions.remove(&UnitConversion {
-            unit,
-            main_unit: self.main_unit,
-        });
+        self.unit_conversions.remove(&unit);
 
         match unit {
             NutrientUnit::Mass(_) => {
                 let all_masses = MassUnit::get_enumerations();
                 all_masses.iter().for_each(|mass_unit| {
-                    self.unit_conversions.remove(&UnitConversion {
-                        unit: NutrientUnit::Mass(*mass_unit),
-                        main_unit: self.main_unit,
-                    });
+                    self.unit_conversions
+                        .remove(&NutrientUnit::Mass(*mass_unit));
                 });
             }
             NutrientUnit::Volume(_) => {
                 let all_volumes = VolumeUnit::get_enumerations();
                 all_volumes.iter().for_each(|volume_unit| {
-                    self.unit_conversions.remove(&UnitConversion {
-                        unit: NutrientUnit::Volume(*volume_unit),
-                        main_unit: self.main_unit,
-                    });
+                    self.unit_conversions
+                        .remove(&NutrientUnit::Volume(*volume_unit));
                 });
             }
             NutrientUnit::Energy(_) => {
                 let all_energies = EnergyUnit::get_enumerations();
                 all_energies.iter().for_each(|energy_unit| {
-                    self.unit_conversions.remove(&UnitConversion {
-                        unit: NutrientUnit::Energy(*energy_unit),
-                        main_unit: self.main_unit,
-                    });
+                    self.unit_conversions
+                        .remove(&NutrientUnit::Energy(*energy_unit));
                 });
             }
             other_unit => {
-                self.unit_conversions.remove(&UnitConversion {
-                    unit: other_unit,
-                    main_unit: self.main_unit,
-                });
+                self.unit_conversions.remove(&other_unit);
             }
         }
 
@@ -592,12 +492,8 @@ impl Nutrient {
         let conversion_factor =
             to_conversion_factor.unwrap_or(1f64) * from_conversion_factor.unwrap_or(1f64);
 
-        let conversion = UnitConversion {
-            unit: new_unit,
-            main_unit: self.main_unit,
-        };
         self.unit_conversions
-            .insert(conversion, factor * conversion_factor);
+            .insert(new_unit, factor * conversion_factor);
 
         self.update_accepted_units(self.main_unit)?;
 

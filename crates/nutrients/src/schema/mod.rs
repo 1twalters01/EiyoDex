@@ -1,7 +1,6 @@
-pub mod nutrient_type;
-pub mod nutrient_classes;
-pub mod nutrients;
-pub mod energy;
 pub mod carbohydrate;
+pub mod energy;
 pub mod lipid;
+pub mod nutrient_classes;
+pub mod nutrient_type;
 pub mod protein;
