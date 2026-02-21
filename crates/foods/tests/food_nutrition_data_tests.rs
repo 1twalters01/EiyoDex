@@ -26,24 +26,24 @@ pub fn test_id() {
 
     let iron: NutrientAmount = NutrientAmount::from_rc_refcell(
         iron_value,
-        Some(Nutrient::new_rc_refcell(
+        Nutrient::new_rc_refcell(
             iron_id,
             String::from("Iron"),
             nutrient_type.clone(),
             NutrientUnit::Mass(MassUnit::Milligram),
-        )),
+        ),
         NutrientUnit::Mass(MassUnit::Milligram),
     )
     .unwrap();
 
     let potassium: NutrientAmount = NutrientAmount::from_rc_refcell(
         potassium_value,
-        Some(Nutrient::new_rc_refcell(
+        Nutrient::new_rc_refcell(
             potassium_id,
             String::from("Potassium"),
             nutrient_type,
             NutrientUnit::Mass(MassUnit::Milligram),
-        )),
+        ),
         NutrientUnit::Mass(MassUnit::Milligram),
     )
     .unwrap();
@@ -76,24 +76,24 @@ pub fn test_data_source() {
 
     let iron: NutrientAmount = NutrientAmount::from_rc_refcell(
         iron_value,
-        Some(Nutrient::new_rc_refcell(
+        Nutrient::new_rc_refcell(
             iron_id,
             String::from("Iron"),
             nutrient_type.clone(),
             NutrientUnit::Mass(MassUnit::Milligram),
-        )),
+        ),
         NutrientUnit::Mass(MassUnit::Milligram),
     )
     .unwrap();
 
     let potassium: NutrientAmount = NutrientAmount::from_rc_refcell(
         potassium_value,
-        Some(Nutrient::new_rc_refcell(
+        Nutrient::new_rc_refcell(
             potassium_id,
             String::from("Potassium"),
             nutrient_type.clone(),
             NutrientUnit::Mass(MassUnit::Milligram),
-        )),
+        ),
         NutrientUnit::Mass(MassUnit::Milligram),
     )
     .unwrap();
@@ -130,24 +130,24 @@ pub fn test_nutrient_amount_list() {
 
     let iron: NutrientAmount = NutrientAmount::from_rc_refcell(
         iron_value,
-        Some(Nutrient::new_rc_refcell(
+        Nutrient::new_rc_refcell(
             iron_id,
             String::from("Iron"),
             nutrient_type.clone(),
             NutrientUnit::Mass(MassUnit::Milligram),
-        )),
+        ),
         NutrientUnit::Mass(MassUnit::Milligram),
     )
     .unwrap();
 
     let potassium: NutrientAmount = NutrientAmount::from_rc_refcell(
         potassium_value,
-        Some(Nutrient::new_rc_refcell(
+        Nutrient::new_rc_refcell(
             potassium_id,
             String::from("Potassium"),
             nutrient_type,
             NutrientUnit::Mass(MassUnit::Milligram),
-        )),
+        ),
         NutrientUnit::Mass(MassUnit::Milligram),
     )
     .unwrap();

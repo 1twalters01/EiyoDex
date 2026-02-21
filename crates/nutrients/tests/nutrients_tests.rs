@@ -1,5 +1,5 @@
 use nutrients::{
-    nutrient::{link_parent_child, Nutrient},
+    nutrient::{link_parent_child, unlink_parent_child, Nutrient},
     schema::{
         nutrient_classes::{ChemicalType, EssentialityType, QuantityType},
         nutrient_type::NutrientType,
@@ -259,7 +259,7 @@ fn test_convert() {
     assert!(res.is_err());
 
     // Add a different conversion, change to it and test conversions
-    // 1mg = 5ml in this example
+    // 1kg = 5ml in this example
     let new_unit = milliliter_unit;
     let factor = 5f64;
     nutrient
@@ -287,10 +287,11 @@ fn test_convert() {
     res = nutrient.borrow().get_conversion_factor(milligram_unit, liter_unit);
     assert!(res.is_ok());
 
+    println!("current {:#?}", nutrient.borrow().get_main_unit());
     res = nutrient.borrow().get_conversion_factor(kilogram_unit, milliliter_unit);
     assert_eq!(
         res,
-        Ok(5f64 * MassUnit::Kilogram.si_factor() / MassUnit::Milligram.si_factor())
+        Ok(MassUnit::Kilogram.si_factor() / (factor * MassUnit::Kilogram.si_factor()))
     );
 
     res = nutrient.borrow().get_conversion_factor(milliliter_unit, liter_unit);
@@ -316,6 +317,13 @@ fn test_nutrient_unit_main_unit() {
     let nutrient = Nutrient::new_rc_refcell(id, name.clone(), nutrient_type, milligram_unit);
     assert_eq!(nutrient.borrow().get_main_unit(), milligram_unit);
 
+    let mut from_unit = milligram_unit;
+    let mut to_unit = microgram_unit;
+    assert_eq!(
+        nutrient.borrow().get_conversion_factor(from_unit, to_unit),
+        Ok(1_000f64)
+    );
+
     // Test setting a value that is in the conversions
     let mut res = nutrient.borrow_mut().set_main_unit(microgram_unit);
     assert!(res.is_ok());
@@ -333,79 +341,33 @@ fn test_nutrient_unit_main_unit() {
         .get_accepted_units()
         .contains(&milliliter_unit));
 
+    assert_eq!(
+        nutrient.borrow().get_conversion_factor(from_unit, to_unit),
+        Ok(1_000f64)
+    );
+
     // Test setting a value that is not in the conversions
     res = nutrient.borrow_mut().set_main_unit(milliliter_unit);
     assert!(res.is_err());
 
     // Add to conversions
     // 1mg = 5ml in this example
-    let from_unit = milligram_unit;
-    let to_unit = milliliter_unit;
+    let _ = nutrient.borrow_mut().set_main_unit(milligram_unit);
+    from_unit = milligram_unit;
+    to_unit = milliliter_unit;
     let factor = 5f64;
     nutrient
         .borrow_mut()
         .insert_unit_conversion(to_unit, factor);
 
+    // let _ = nutrient.borrow_mut().set_main_unit(milliliter_unit);
+    println!("{:#?}", nutrient.borrow().get_main_unit());
     println!("{:#?}", nutrient.borrow().get_unit_conversions());
-    assert_eq!(nutrient.borrow().get_conversion_factor(from_unit, to_unit).unwrap(), 5f64);
+    assert_eq!(nutrient.borrow().get_conversion_factor(from_unit, to_unit).unwrap(), 1f64/factor);
 }
 
 #[test]
-fn test_parents() {
-    let id = None;
-    let name = String::from("Iron");
-    let name_2 = String::from("Heme Iron");
-    let name_3 = String::from("Non-heme Iron");
-    let name_4 = String::from("Elemental Iron");
-    let nutrient_type = NutrientType {
-        chemical_type: ChemicalType::Mineral,
-        quantity_type: QuantityType::Micronutrient,
-        essentiality_type: Some(EssentialityType::Essential),
-    };
-    let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
-    let iron = Nutrient::new_rc_refcell(id, name, nutrient_type.clone(), main_unit);
-    let heme_iron = Nutrient::new_rc_refcell(id, name_2, nutrient_type.clone(), main_unit);
-    let non_heme_iron = Nutrient::new_rc_refcell(id, name_3, nutrient_type.clone(), main_unit);
-    let elemental_iron = Nutrient::new_rc_refcell(id, name_4, nutrient_type.clone(), main_unit);
-
-    link_parent_child(&iron, &heme_iron);
-    link_parent_child(&iron, &non_heme_iron);
-    assert_eq!(
-        heme_iron
-            .borrow()
-            .get_parents()
-            .iter()
-            .filter_map(|p| p.upgrade())
-            .collect::<Vec<Rc<RefCell<Nutrient>>>>(),
-        Vec::from([iron.clone()])
-    );
-
-    assert_eq!(
-        non_heme_iron
-            .borrow()
-            .get_parents()
-            .iter()
-            .filter_map(|p| p.upgrade())
-            .collect::<Vec<Rc<RefCell<Nutrient>>>>(),
-        Vec::from([iron.clone()])
-    );
-
-    link_parent_child(&iron, &elemental_iron);
-    assert_eq!(
-        elemental_iron
-            .borrow()
-            .get_parents()
-            .iter()
-            .filter_map(|p| p.upgrade())
-            .collect::<Vec<Rc<RefCell<Nutrient>>>>(),
-        Vec::from([iron.clone()])
-    );
-
-    assert_eq!(iron.borrow().get_children(), Vec::from([elemental_iron]));
-}
-
-#[test]
-fn test_children() {
+fn test_link() {
     let id = None;
     let name = String::from("Iron");
     let name_2 = String::from("Heme Iron");
@@ -420,9 +382,11 @@ fn test_children() {
     let heme_iron = Nutrient::new_rc_refcell(id, name_2, nutrient_type.clone(), main_unit);
     let non_heme_iron = Nutrient::new_rc_refcell(id, name_3, nutrient_type.clone(), main_unit);
 
-    link_parent_child(&iron, &heme_iron);
+    let res = link_parent_child(&iron, &heme_iron);
+    assert!(res.is_ok());
+
     assert_eq!(iron.borrow().get_children(), Vec::from([heme_iron.clone()]));
-    assert_ne!(
+    assert_eq!(
         heme_iron
             .borrow()
             .get_parents()
@@ -432,7 +396,7 @@ fn test_children() {
         Vec::from([iron.clone()])
     );
 
-    link_parent_child(&iron.clone(), &non_heme_iron);
+    let _ = link_parent_child(&iron.clone(), &non_heme_iron);
     assert_eq!(
         non_heme_iron
             .borrow()
@@ -455,5 +419,71 @@ fn test_children() {
             .filter_map(|p| p.upgrade())
             .collect::<Vec<Rc<RefCell<Nutrient>>>>(),
         Vec::from([iron.clone()])
+    );
+}
+
+#[test]
+fn test_unlink() {
+    let id = None;
+    let name = String::from("Iron");
+    let name_2 = String::from("Heme Iron");
+    let name_3 = String::from("Non-heme Iron");
+    let nutrient_type = NutrientType {
+        chemical_type: ChemicalType::Mineral,
+        quantity_type: QuantityType::Micronutrient,
+        essentiality_type: Some(EssentialityType::Essential),
+    };
+    let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
+    let iron = Nutrient::new_rc_refcell(id, name, nutrient_type.clone(), main_unit);
+    let heme_iron = Nutrient::new_rc_refcell(id, name_2, nutrient_type.clone(), main_unit);
+    let non_heme_iron = Nutrient::new_rc_refcell(id, name_3, nutrient_type.clone(), main_unit);
+
+    let _ = link_parent_child(&iron, &heme_iron);
+    let _ = link_parent_child(&iron, &non_heme_iron);
+    assert_eq!(
+        iron.borrow().get_children(),
+        Vec::from([heme_iron.clone(), non_heme_iron.clone()])
+    );
+    assert_eq!(
+        heme_iron
+            .borrow()
+            .get_parents()
+            .iter()
+            .filter_map(|p| p.upgrade())
+            .collect::<Vec<Rc<RefCell<Nutrient>>>>(),
+        Vec::from([iron.clone()])
+    );
+    assert_eq!(
+        non_heme_iron
+            .borrow()
+            .get_parents()
+            .iter()
+            .filter_map(|p| p.upgrade())
+            .collect::<Vec<Rc<RefCell<Nutrient>>>>(),
+        Vec::from([iron.clone()])
+    );
+
+    unlink_parent_child(&iron, &heme_iron);
+    assert_eq!(
+        iron.borrow().get_children(),
+        Vec::from([non_heme_iron.clone()])
+    );
+    assert_eq!(
+        non_heme_iron
+            .borrow()
+            .get_parents()
+            .iter()
+            .filter_map(|p| p.upgrade())
+            .collect::<Vec<Rc<RefCell<Nutrient>>>>(),
+        Vec::from([iron.clone()])
+    );
+    assert_eq!(
+        heme_iron
+            .borrow()
+            .get_parents()
+            .iter()
+            .filter_map(|p| p.upgrade())
+            .collect::<Vec<Rc<RefCell<Nutrient>>>>(),
+        Vec::new()
     );
 }

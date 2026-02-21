@@ -242,22 +242,25 @@ impl Nutrient {
     }
 
     pub fn insert_unit_conversion(&mut self, unit: NutrientUnit, value: f64) {
+        // let value = 1f64 / value;
+        println!("value {:?}", value);
         match unit {
             NutrientUnit::Mass(input_mass) => {
                 let all_masses = MassUnit::get_enumerations();
                 all_masses.iter().for_each(|mass_unit| {
                     self.unit_conversions.insert(
                         NutrientUnit::Mass(*mass_unit),
-                        value * input_mass.si_factor() / mass_unit.si_factor(),
+                        value * mass_unit.si_factor() / input_mass.si_factor(),
                     );
                 });
             }
             NutrientUnit::Volume(input_volume) => {
                 let all_volumes = VolumeUnit::get_enumerations();
                 all_volumes.iter().for_each(|volume_unit| {
+                    println!("v: {:#?} {:#?}", value * input_volume.si_factor() / volume_unit.si_factor(), volume_unit);
                     self.unit_conversions.insert(
                         NutrientUnit::Volume(*volume_unit),
-                        value * input_volume.si_factor() / volume_unit.si_factor(),
+                        value * volume_unit.si_factor() / input_volume.si_factor(),
                     );
                 });
             }
@@ -266,7 +269,7 @@ impl Nutrient {
                 all_energies.iter().for_each(|energy_unit| {
                     self.unit_conversions.insert(
                         NutrientUnit::Energy(*energy_unit),
-                        value * input_energy.si_factor() / energy_unit.si_factor(),
+                        value * energy_unit.si_factor() / input_energy.si_factor(),
                     );
                 });
             }
