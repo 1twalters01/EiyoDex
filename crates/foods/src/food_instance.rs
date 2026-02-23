@@ -1,6 +1,6 @@
 use crate::{data_sources::DataSource, food_nutrition_data::FoodNutritionData, food_tag::FoodTag};
 use nutrients::{
-    nutrient::Nutrient, nutrient_amount::NutrientAmount, nutrient_list::NutrientAmountList,
+    nutrient::Nutrient, nutrient_amount::NutrientAmount, nutrient_amount_list::NutrientAmountList,
     units::NutrientUnit,
 };
 use std::{

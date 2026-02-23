@@ -83,6 +83,7 @@ macro_rules! define_specific_currency_units {
             measurement_system::MeasurementSystem,
             mass::unit::MassUnit,
             volume::unit::VolumeUnit,
+            specific_currency::error::SpecificCurrencyUnitParseError,
         };
 
         #[derive(Debug, PartialEq)]
@@ -187,7 +188,7 @@ macro_rules! define_specific_currency_units {
         }
 
         impl FromStr for SpecificCurrencyUnit {
-            type Err = &'static str;
+            type Err = SpecificCurrencyUnitParseError;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 let formatted_string = s.trim().to_lowercase();
@@ -197,16 +198,16 @@ macro_rules! define_specific_currency_units {
                         match formatted_string.as_str() {
                             $($all_identifier_lc | $all_unit_type_plural_lc=> Ok(SpecificCurrencyUnit::$all_variant),)+
                             _ => {
-                                let (currency_str, denominator_str) = formatted_string.split_once("/").ok_or("InvalidFormat")?;
+                                let (currency_str, denominator_str) = formatted_string.split_once("/").ok_or(SpecificCurrencyUnitParseError::InvalidFormat { input: formatted_string.to_string() })?;
                                 let currency_unit = CurrencyUnit::from_str(currency_str);
                                 let mass_unit = MassUnit::from_str(denominator_str);
                                 let volume_unit = VolumeUnit::from_str(denominator_str);
 
-                                if currency_unit.is_err() {
-                                    return Err("Unknown currency unit")
+                                if let Some(err) = currency_unit.err() {
+                                    return Err(SpecificCurrencyUnitParseError::UnknownCurrencyUnit { input: err.to_string() })
                                 }
                                 if mass_unit.is_err() && volume_unit.is_err() {
-                                    return Err("Unknown denominator")
+                                    return Err(SpecificCurrencyUnitParseError::UnknownDenominatorUnit { input: denominator_str.to_string() })
                                 }
                                 if mass_unit.is_ok() {
                                     let denominator = Denominator::MassDenominator(mass_unit.unwrap());
@@ -217,7 +218,7 @@ macro_rules! define_specific_currency_units {
                                     return Ok(SpecificCurrencyUnit::from_variants(currency_unit.unwrap(), denominator))
                                 }
 
-                                return Err("Unknown specific currency unit");
+                                return Err(SpecificCurrencyUnitParseError::UnknownUnit { input: formatted_string.to_string() })
                             }
                         }
                     }

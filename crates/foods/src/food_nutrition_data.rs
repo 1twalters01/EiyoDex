@@ -1,4 +1,4 @@
-use nutrients::{nutrient_amount::NutrientAmount, nutrient_list::NutrientAmountList};
+use nutrients::{nutrient_amount::NutrientAmount, nutrient_amount_list::NutrientAmountList};
 use uuid::Uuid;
 
 use crate::data_sources::DataSource;

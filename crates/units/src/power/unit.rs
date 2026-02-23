@@ -42,7 +42,10 @@ macro_rules! define_power_units {
             measurement_system::MeasurementSystem,
             energy::unit::EnergyUnit,
             duration::unit::DurationUnit,
-            power::measurement_system::PowerMeasurementSystem,
+            power::{
+                error::PowerUnitParseError,
+                measurement_system::PowerMeasurementSystem,
+            },
         };
         use std::str::FromStr;
 
@@ -117,7 +120,7 @@ macro_rules! define_power_units {
         }
 
         impl FromStr for PowerUnit {
-            type Err = &'static str;
+            type Err = PowerUnitParseError;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 let formatted_string = s.trim().to_lowercase();
@@ -126,7 +129,7 @@ macro_rules! define_power_units {
                     _ => {
                         match formatted_string.as_str() {
                             $($all_identifier_lc => Ok(PowerUnit::$all_variant),)+
-                            _ => Err("Unknown density unit"),
+                            err => Err(PowerUnitParseError::UnknownUnit { input: err.to_string() }),
                         }
                     }
                 }

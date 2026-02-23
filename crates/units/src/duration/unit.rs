@@ -16,7 +16,10 @@ macro_rules! define_duration_units {
             }
         ),+ $(,)?
     ) => {
-        use crate::measurement_system::MeasurementSystem;
+        use crate::{
+            duration::error::DurationUnitParseError,
+            measurement_system::MeasurementSystem,
+        };
         use std::str::FromStr;
         use serde::{Deserialize, Serialize};
 
@@ -62,7 +65,7 @@ macro_rules! define_duration_units {
         }
 
         impl FromStr for DurationUnit {
-            type Err = &'static str;
+            type Err = DurationUnitParseError;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 let formatted_string = s.trim().to_lowercase();
@@ -74,7 +77,7 @@ macro_rules! define_duration_units {
                             _ => {
                                 match formatted_string.as_str() {
                                     $($identifier_lc => Ok(DurationUnit::$variant),)+
-                                    _ => Err("Unknown duration unit"),
+                                    err => Err(DurationUnitParseError::UnknownUnit { input: err.to_string() }),
                                 }
                             }
                         }

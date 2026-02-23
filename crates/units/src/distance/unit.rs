@@ -15,7 +15,10 @@ macro_rules! define_distance_units {
             }
         ),+ $(,)?
     ) => {
-        use crate::measurement_system::MeasurementSystem;
+        use crate::{
+            distance::error::DistanceUnitParseError,
+            measurement_system::MeasurementSystem,
+        };
         use std::{
             str::FromStr,
         };
@@ -63,7 +66,7 @@ macro_rules! define_distance_units {
         }
 
         impl FromStr for DistanceUnit {
-            type Err = &'static str;
+            type Err = DistanceUnitParseError;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 let formatted_string = s.trim().to_lowercase();
@@ -72,7 +75,7 @@ macro_rules! define_distance_units {
                     _ => {
                         match formatted_string.as_str() {
                             $($identifier_lc => Ok(DistanceUnit::$variant),)+
-                            _ => Err("Unknown mass unit"),
+                            err => Err(DistanceUnitParseError::UnknownUnit { input: err.to_string() }),
                         }
                     }
                 }

@@ -1,7 +1,7 @@
 use nutrients::{
     nutrient::{link_parent_child, Nutrient},
     nutrient_amount::NutrientAmount,
-    nutrient_list::NutrientAmountList,
+    nutrient_amount_list::NutrientAmountList,
     schema::{
         nutrient_classes::{ChemicalType, EssentialityType, QuantityType},
         nutrient_type::NutrientType,

@@ -15,7 +15,10 @@ macro_rules! define_energy_units {
             }
         ),+ $(,)?
     ) => {
-        use crate::measurement_system::MeasurementSystem;
+        use crate::{
+            energy::error::EnergyUnitParseError,
+            measurement_system::MeasurementSystem,
+        };
         use std::str::FromStr;
         use serde::{Deserialize, Serialize};
 
@@ -61,7 +64,7 @@ macro_rules! define_energy_units {
         }
 
         impl FromStr for EnergyUnit {
-            type Err = &'static str;
+            type Err = EnergyUnitParseError;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 let formatted_string = s.trim().to_lowercase();
@@ -70,7 +73,7 @@ macro_rules! define_energy_units {
                     _ => {
                         match formatted_string.as_str() {
                             $($identifier_lc => Ok(EnergyUnit::$variant),)+
-                            _ => Err("Unknown mass unit"),
+                            err => Err(EnergyUnitParseError::UnknownUnit { input: err.to_string() }),
                         }
                     }
                 }

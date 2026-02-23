@@ -15,7 +15,10 @@ macro_rules! define_mass_units {
             }
         ),+ $(,)?
     ) => {
-        use crate::measurement_system::MeasurementSystem;
+        use crate::{
+            mass::error::MassUnitParseError,
+            measurement_system::MeasurementSystem,
+        };
         use std::{
             str::FromStr,
         };
@@ -63,16 +66,16 @@ macro_rules! define_mass_units {
         }
 
         impl FromStr for MassUnit {
-            type Err = &'static str;
+            type Err = MassUnitParseError;
 
-            fn from_str(s: &str) -> Result<Self, Self::Err> {
+            fn from_str(s: &str) -> Result<Self, MassUnitParseError> {
                 let formatted_string = s.trim().to_lowercase();
                 match formatted_string.as_str() {
                     $($symbol_lc | $unit_type_lc | $unit_type_plural_lc => return Ok(MassUnit::$variant),)+
                     _ => {
                         match formatted_string.as_str() {
                             $($identifier_lc => Ok(MassUnit::$variant),)+
-                            _ => Err("Unknown mass unit"),
+                            err => Err(MassUnitParseError::UnknownUnit { input: err.to_string() }),
                         }
                     }
                 }
