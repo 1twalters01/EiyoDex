@@ -11,7 +11,7 @@ macro_rules! define_distances {
         ),+ $(,)?
     ) => {
         use crate::{
-            distance_unit::DistanceUnit,
+            distance::unit::DistanceUnit,
             measurement_system::MeasurementSystem,
         };
         use std::{
@@ -23,12 +23,12 @@ macro_rules! define_distances {
         use serde::{Deserialize, Serialize};
 
         #[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq)]
-        pub struct Distance {
+        pub struct DistanceQuantity {
             value: f64,
             unit: DistanceUnit,
         }
 
-        impl Distance {
+        impl DistanceQuantity {
             pub fn new(value: f64, unit: DistanceUnit) -> Self {
                 Self { value, unit }
             }
@@ -112,13 +112,13 @@ macro_rules! define_distances {
     };
 }
 
-impl fmt::Display for Distance {
+impl fmt::Display for DistanceQuantity {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", self.value, self.get_symbol())
     }
 }
 
-impl Add for Distance {
+impl Add for DistanceQuantity {
     type Output = Self;
     fn add(self, rhs: Self) -> Self {
         Self::new(
@@ -128,7 +128,7 @@ impl Add for Distance {
     }
 }
 
-impl Sub for Distance {
+impl Sub for DistanceQuantity {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self {
         Self::new(
@@ -138,7 +138,7 @@ impl Sub for Distance {
     }
 }
 
-impl<T> Mul<T> for Distance
+impl<T> Mul<T> for DistanceQuantity
 where
     T: Into<f64> + Copy,
 {
@@ -149,7 +149,7 @@ where
     }
 }
 
-impl<T> Div<T> for Distance
+impl<T> Div<T> for DistanceQuantity
 where
     T: Into<f64> + Copy,
 {
@@ -160,13 +160,13 @@ where
     }
 }
 
-impl Sum for Distance {
+impl Sum for DistanceQuantity {
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
-        iter.fold(Distance::new(0f64, DistanceUnit::Meter), |a, b| b + a)
+        iter.fold(DistanceQuantity::new(0f64, DistanceUnit::Meter), |a, b| b + a)
     }
 }
 
-impl PartialOrd for Distance {
+impl PartialOrd for DistanceQuantity {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.get_value()
             .partial_cmp(&other.to_unit(self.unit).get_value())

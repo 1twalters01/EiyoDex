@@ -1,4 +1,4 @@
-use crate::{nutrient::Nutrient, nutrient_amount::NutrientAmount, units::NutrientUnit};
+use crate::{nutrient::Nutrient, nutrient_amount::NutrientAmount};
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
 use uuid::Uuid;
 
@@ -6,21 +6,6 @@ use uuid::Uuid;
 pub struct NutrientAmountList {
     id: Uuid,
     nutrient_amounts: BTreeSet<NutrientAmount>,
-}
-
-#[derive(Debug)]
-pub struct SumResult {
-    value: f64,
-    unit: NutrientUnit,
-}
-
-impl SumResult {
-    pub fn get_value(&self) -> f64 {
-        self.value
-    }
-    pub fn get_unit(&self) -> NutrientUnit {
-        self.unit
-    }
 }
 
 impl NutrientAmountList {
@@ -55,7 +40,7 @@ impl NutrientAmountList {
         self.nutrient_amounts = nutrient_amounts;
     }
 
-    pub fn get_names(&self) -> Vec<String> {
+    pub fn get_nutrient_names(&self) -> Vec<String> {
         self.nutrient_amounts
             .iter()
             .map(|nutrient_amount| nutrient_amount.get_nutrient().borrow().get_name())
@@ -82,11 +67,20 @@ impl NutrientAmountList {
         let nutrient_amounts: Vec<NutrientAmount> = self
             .nutrient_amounts
             .iter()
-            .filter(|nutrient_amount| nutrients.iter().any(|n| Rc::ptr_eq(n, &nutrient_amount.get_nutrient())))
+            .filter(|nutrient_amount| {
+                nutrients
+                    .iter()
+                    .any(|n| Rc::ptr_eq(n, &nutrient_amount.get_nutrient()))
+            })
             // .filter(|nutrient_amount| nutrients.contains(&nutrient_amount.get_nutrient()))
             .cloned()
             .collect();
-        println!("nutrient_amounts: {:#?}", nutrient_amounts.iter().map(|n| n.get_nutrient().borrow().get_name()));
+        println!(
+            "nutrient_amounts: {:#?}",
+            nutrient_amounts
+                .iter()
+                .map(|n| n.get_nutrient().borrow().get_name())
+        );
 
         let sum = nutrient_amounts.into_iter().sum::<NutrientAmount>();
         return sum;
@@ -107,24 +101,21 @@ impl NutrientAmountList {
     pub fn sum_amounts_from_descendants_rc_refcell(
         &self,
         nutrient: Rc<RefCell<Nutrient>>,
-    ) -> SumResult {
+    ) -> NutrientAmount {
         let nutrients: Vec<Rc<RefCell<Nutrient>>> = nutrient.borrow().get_descendants();
         let nutrient_amounts: Vec<NutrientAmount> = self
             .nutrient_amounts
             .iter()
-            .filter(|nutrient_amount| nutrients.iter().any(|n| Rc::ptr_eq(n, &nutrient_amount.get_nutrient())))
-            // .filter(|nutrient_amount| nutrients.contains(&nutrient_amount.get_nutrient()))
+            .filter(|nutrient_amount| {
+                nutrients
+                    .iter()
+                    .any(|n| Rc::ptr_eq(n, &nutrient_amount.get_nutrient()))
+            })
             .cloned()
             .collect();
-        let names: Vec<String> = nutrient_amounts.iter().map(|n| n.get_nutrient().borrow().get_name()).collect();
-        println!("nutrient_amountssss: {:#?}", names);
 
         let sum = nutrient_amounts.into_iter().sum::<NutrientAmount>();
-        let sum_result = SumResult {
-            value: sum.get_value(),
-            unit: sum.get_output_unit(),
-        };
-        return sum_result;
+        return sum;
     }
 
     pub fn sum_amounts_from_descendants(&self, nutrient: Nutrient) -> NutrientAmount {

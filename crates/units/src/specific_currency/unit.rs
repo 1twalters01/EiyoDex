@@ -79,10 +79,10 @@ macro_rules! define_specific_currency_units {
         };
         use serde::{Deserialize, Serialize};
         use crate::{
-            currency_unit::CurrencyUnit::self,
+            currency::unit::CurrencyUnit::self,
             measurement_system::MeasurementSystem,
-            mass_unit::MassUnit,
-            volume_unit::VolumeUnit,
+            mass::unit::MassUnit,
+            volume::unit::VolumeUnit,
         };
 
         #[derive(Debug, PartialEq)]

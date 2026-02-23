@@ -9,7 +9,7 @@ use nutrients::{
     },
     units::NutrientUnit,
 };
-use units::mass_unit::MassUnit;
+use units::mass::unit::MassUnit;
 use uuid::Uuid;
 
 #[test]

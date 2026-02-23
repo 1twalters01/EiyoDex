@@ -1,13 +1,14 @@
-use std::{cell::RefCell, collections::HashSet, fmt::Debug, rc::Rc};
 use crate::dsa::node::GraphNode;
+use std::{cell::RefCell, collections::HashSet, fmt::Debug, rc::Rc};
 
 pub trait DFSTrait: GraphNode {
     fn dfs_down(
         node: &Rc<RefCell<Self>>,
         out: &mut Vec<Rc<RefCell<Self>>>,
         visited: &mut HashSet<*const RefCell<Self>>,
-    ) 
-where Self: DFSTrait, Self: Debug
+    ) where
+        Self: DFSTrait,
+        Self: Debug,
     {
         let ptr = Rc::as_ptr(node);
         if !visited.insert(ptr) {
@@ -27,8 +28,8 @@ where Self: DFSTrait, Self: Debug
         node: &Rc<RefCell<Self>>,
         out: &mut Vec<Rc<RefCell<Self>>>,
         visited: &mut HashSet<*const RefCell<Self>>,
-    )
-where Self: DFSTrait,
+    ) where
+        Self: DFSTrait,
     {
         let ptr = Rc::as_ptr(node);
         if !visited.insert(ptr) {
@@ -45,4 +46,3 @@ where Self: DFSTrait,
         }
     }
 }
-

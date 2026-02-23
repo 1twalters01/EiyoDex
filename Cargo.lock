@@ -2965,6 +2965,7 @@ dependencies = [
  "chrono",
  "reqwest",
  "serde",
+ "thiserror",
  "tokio",
  "units_macro",
  "utils",

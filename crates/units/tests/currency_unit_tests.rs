@@ -1,6 +1,6 @@
 // use chrono::NaiveDate;
 use std::{collections::BTreeSet, str::FromStr};
-use units::currency_unit::CurrencyUnit;
+use units::currency::unit::CurrencyUnit;
 
 #[test]
 fn test_get_mass_unit_enumerations() {

@@ -1,8 +1,7 @@
 use exercise::exercise::ExerciseAmount;
 use foods::food_amount::FoodAmount;
 use nutrients::{nutrient::Nutrient, nutrient_amount::NutrientAmount};
-use units::energy::Energy;
-use uuid::Uuid;
+use units::energy::quantity::EnergyQuantity;
 
 #[derive(Clone, PartialEq)]
 pub enum EntryItem {
@@ -11,7 +10,7 @@ pub enum EntryItem {
 }
 
 impl EntryItem {
-    pub fn get_calories(&self) -> Energy {
+    pub fn get_calories(&self) -> EnergyQuantity {
         match self {
             Self::FoodAmount(food_amount) => food_amount.get_calories(),
             Self::ExerciseAmount(exercise_amount) => exercise_amount.get_calories(),

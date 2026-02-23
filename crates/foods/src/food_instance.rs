@@ -8,7 +8,7 @@ use std::{
     collections::BTreeSet,
     rc::{Rc, Weak},
 };
-use units::{energy::Energy, energy_unit::EnergyUnit};
+use units::energy::{quantity::EnergyQuantity, unit::EnergyUnit};
 use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -92,7 +92,7 @@ impl FoodInstance {
         self.food_data.remove(&food_data);
     }
 
-    pub fn get_calories(&self, data_source_uuid: Uuid) -> Energy {
+    pub fn get_calories(&self, data_source_uuid: Uuid) -> EnergyQuantity {
         let mut food_data: Option<FoodNutritionData> = None;
         for data in self.food_data.clone() {
             if data.get_data_source().get_id() == data_source_uuid {
@@ -100,17 +100,17 @@ impl FoodInstance {
             }
         }
 
-        let mut energy: Energy = Energy::new(0f64, EnergyUnit::Kilocalorie);
+        let mut energy: EnergyQuantity = EnergyQuantity::new(0f64, EnergyUnit::Kilocalorie);
         match food_data {
             Some(data) => {
                 for nutrient_amount in data.get_nutrient_amount_list().get_nutrient_amounts() {
-                    let nutrient = nutrient_amount.get_nutrient(); 
+                    let nutrient = nutrient_amount.get_nutrient();
                     if nutrient.borrow().get_name() == "Calories" {
                         let unit = nutrient.borrow().get_main_unit();
                         match unit {
                             NutrientUnit::Energy(energy_unit) => {
                                 energy =
-                                    Energy::new(nutrient_amount.get_value(), energy_unit);
+                                    EnergyQuantity::new(nutrient_amount.get_value(), energy_unit);
                                 break;
                             }
                             _ => {}
@@ -118,7 +118,7 @@ impl FoodInstance {
                     }
                 }
             }
-            None => energy = Energy::new(0f64, EnergyUnit::Kilocalorie),
+            None => energy = EnergyQuantity::new(0f64, EnergyUnit::Kilocalorie),
         };
         return energy;
     }

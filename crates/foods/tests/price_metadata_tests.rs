@@ -1,7 +1,8 @@
 use foods::{merchant::Merchant, price_metadata::PriceMetadata};
-use units::specific_currency::SpecificCurrency;
-use units::specific_currency_unit::SpecificCurrencyUnit;
-use uuid::Uuid;
+use units::specific_currency::{
+    quantity::SpecificCurrencyQuantity,
+    unit::SpecificCurrencyUnit,
+};
 
 #[test]
 pub fn test_price_metadata() {
@@ -9,7 +10,7 @@ pub fn test_price_metadata() {
     let id = None;
     let merchant = Merchant::new(name, id);
 
-    let mut specific_currency: Option<SpecificCurrency> = None;
+    let mut specific_currency: Option<SpecificCurrencyQuantity> = None;
     let mut price_metadata = PriceMetadata::new(merchant.clone(), specific_currency);
 
     assert_eq!(price_metadata.get_merchant().borrow().clone(), merchant);
@@ -22,7 +23,7 @@ pub fn test_price_metadata() {
     assert_eq!(price_metadata.get_specific_currency(), None);
     let value = 3f64;
     let unit = SpecificCurrencyUnit::GBPPerGram;
-    specific_currency = Some(SpecificCurrency::new(value, unit));
+    specific_currency = Some(SpecificCurrencyQuantity::new(value, unit));
     price_metadata.set_specific_currency(specific_currency);
     assert_eq!(price_metadata.get_specific_currency(), specific_currency);
 }

@@ -18,10 +18,12 @@ pub struct NutrientAmount {
 }
 
 impl NutrientAmount {
-    pub fn new(value: f64, nutrient: Nutrient, output_unit: NutrientUnit) -> Result<Self, &'static str> {
-        match nutrient
-            .get_conversion_factor(output_unit, nutrient.get_main_unit())
-        {
+    pub fn new(
+        value: f64,
+        nutrient: Nutrient,
+        output_unit: NutrientUnit,
+    ) -> Result<Self, &'static str> {
+        match nutrient.get_conversion_factor(output_unit, nutrient.get_main_unit()) {
             Ok(_) => Ok(Self {
                 value,
                 nutrient: Rc::new(RefCell::new(nutrient)),
@@ -178,10 +180,7 @@ impl Div<f64> for NutrientAmount {
 impl Sum<NutrientAmount> for NutrientAmount {
     fn sum<I: Iterator<Item = Self>>(mut iter: I) -> Self {
         if let Some(first) = iter.next() {
-            iter.fold(
-                first,
-                |acc, n| acc + n,
-            )
+            iter.fold(first, |acc, n| acc + n)
         } else {
             NutrientAmount::new(0f64, Nutrient::default(), NutrientUnit::None).unwrap()
         }

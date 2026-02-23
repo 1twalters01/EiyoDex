@@ -16,15 +16,8 @@ macro_rules! define_energy_units {
         ),+ $(,)?
     ) => {
         use crate::measurement_system::MeasurementSystem;
-        use std::{
-            cmp::Ordering,
-            fmt,
-            ops::{Add, Div, Mul, Sub},
-            iter::Sum,
-            str::FromStr,
-        };
+        use std::str::FromStr;
         use serde::{Deserialize, Serialize};
-        use crate::into_f64::IntoF64Safe;
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
         pub enum EnergyUnit {

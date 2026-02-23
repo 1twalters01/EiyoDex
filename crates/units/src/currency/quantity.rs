@@ -1,14 +1,3 @@
-#[derive(Deserialize)]
-struct ExchangeResponse {
-    rates: Rates,
-}
-
-#[derive(Deserialize)]
-struct Rates {
-    #[serde(rename = "USD")]
-    usd: f64,
-}
-
 #[macro_export]
 macro_rules! define_currencies {
     (
@@ -21,7 +10,7 @@ macro_rules! define_currencies {
         ),+ $(,)?
     ) => {
         use chrono::NaiveDate;
-        use crate::currency_unit::CurrencyUnit;
+        use crate::currency::unit::CurrencyUnit;
         use std::{
             cmp::Ordering,
             fmt,
@@ -30,12 +19,12 @@ macro_rules! define_currencies {
         use serde::{Deserialize, Serialize};
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
-        pub struct Currency {
+        pub struct CurrencyQuantity {
             value: f64,
             unit: CurrencyUnit,
         }
 
-        impl Currency {
+        impl CurrencyQuantity {
             pub fn new(value: f64, unit: CurrencyUnit) -> Self {
                 Self { value, unit }
             }
@@ -92,45 +81,45 @@ macro_rules! define_currencies {
                 self.unit.as_code()
             }
 
-            pub async fn convert_to_async(&self, target_unit: CurrencyUnit) -> Result<Currency, String> {
+            pub async fn convert_to_async(&self, target_unit: CurrencyUnit) -> Result<CurrencyQuantity, String> {
                 if self.unit == target_unit {
                     Ok(*self)
                 } else {
                     match self.unit.get_current_exchange_rate_async(&target_unit).await {
-                        Ok(rate) => Ok(Currency::new(self.value * rate, target_unit)),
+                        Ok(rate) => Ok(CurrencyQuantity::new(self.value * rate, target_unit)),
                         Err(err) => Err(err),
                     }
                 }
             }
 
-            pub fn convert_to_sync(&self, target_unit: CurrencyUnit) -> Result<Currency, String> {
+            pub fn convert_to_sync(&self, target_unit: CurrencyUnit) -> Result<CurrencyQuantity, String> {
                 if self.unit == target_unit {
                     Ok(*self)
                 } else {
                     match self.unit.get_current_exchange_rate_sync(&target_unit) {
-                        Ok(rate) => Ok(Currency::new(self.value * rate, target_unit)),
+                        Ok(rate) => Ok(CurrencyQuantity::new(self.value * rate, target_unit)),
                         Err(err) => Err(err),
                     }
                 }
             }
 
-            pub async fn convert_to_historic_async(&self, target_unit: CurrencyUnit, date: NaiveDate) -> Result<Currency, String> {
+            pub async fn convert_to_historic_async(&self, target_unit: CurrencyUnit, date: NaiveDate) -> Result<CurrencyQuantity, String> {
                 if self.unit == target_unit {
                     Ok(*self)
                 } else {
                     match self.unit.get_past_exchange_rate_async(&target_unit, date).await {
-                        Ok(rate) => Ok(Currency::new(self.value * rate, target_unit)),
+                        Ok(rate) => Ok(CurrencyQuantity::new(self.value * rate, target_unit)),
                         Err(err) => Err(err),
                     }
                 }
             }
 
-            pub fn convert_to_historic_sync(&self, target_unit: CurrencyUnit, date: NaiveDate) -> Result<Currency, String> {
+            pub fn convert_to_historic_sync(&self, target_unit: CurrencyUnit, date: NaiveDate) -> Result<CurrencyQuantity, String> {
                 if self.unit == target_unit {
                     Ok(*self)
                 } else {
                     match self.unit.get_past_exchange_rate_sync(&target_unit, date) {
-                        Ok(rate) => Ok(Currency::new(self.value * rate, target_unit)),
+                        Ok(rate) => Ok(CurrencyQuantity::new(self.value * rate, target_unit)),
                         Err(err) => Err(err),
                     }
                 }
@@ -143,40 +132,40 @@ macro_rules! define_currencies {
             )+
 
             $(
-                pub fn $to_fn_name(&self) -> Result<Currency, String> {
+                pub fn $to_fn_name(&self) -> Result<CurrencyQuantity, String> {
                     self.convert_to_sync(CurrencyUnit::$variant)
                 }
             )+
         }
 
-        impl fmt::Display for Currency {
+        impl fmt::Display for CurrencyQuantity {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 write!(f, "{}{}", self.get_symbol(), self.value)
             }
         }
 
-        impl Add for Currency {
+        impl Add for CurrencyQuantity {
             type Output = Self;
             fn add(self, rhs: Self) -> Self::Output {
                 match rhs.convert_to_sync(self.unit) {
                     Ok(converted_rhs) => Self::new(self.value + converted_rhs.value, self.unit),
-                    Err(_) => panic!("Currency conversion failed in addition"),
+                    Err(_) => panic!("CurrencyQuantity conversion failed in addition"),
                 }
             }
         }
 
-        impl Sub for Currency {
+        impl Sub for CurrencyQuantity {
             type Output = Self;
 
             fn sub(self, rhs: Self) -> Self::Output {
                 match rhs.convert_to_sync(self.unit) {
                     Ok(converted_rhs) => Self::new(self.value - converted_rhs.value, self.unit),
-                    Err(_) => panic!("Currency conversion failed in subtraction"),
+                    Err(_) => panic!("CurrencyQuantity conversion failed in subtraction"),
                 }
             }
         }
 
-        impl Mul<f64> for Currency {
+        impl Mul<f64> for CurrencyQuantity {
             type Output = Self;
 
             fn mul(self, rhs: f64) -> Self::Output {
@@ -184,7 +173,7 @@ macro_rules! define_currencies {
             }
         }
 
-        impl Div<f64> for Currency {
+        impl Div<f64> for CurrencyQuantity {
             type Output = Self;
 
             fn div(self, rhs: f64) -> Self::Output {
@@ -192,7 +181,7 @@ macro_rules! define_currencies {
             }
         }
 
-        impl PartialOrd for Currency {
+        impl PartialOrd for CurrencyQuantity {
             fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
                 match other.convert_to_sync(self.unit) {
                     Ok(converted_other) => self.value.partial_cmp(&converted_other.value),

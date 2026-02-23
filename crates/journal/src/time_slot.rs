@@ -1,6 +1,6 @@
 use chrono::NaiveDateTime;
 use nutrients::{nutrient::Nutrient, nutrient_amount::NutrientAmount};
-use units::energy::Energy;
+use units::energy::quantity::EnergyQuantity;
 use uuid::Uuid;
 
 use crate::entry::Entry;
@@ -71,7 +71,7 @@ impl TimeSlot {
         }
     }
 
-    pub fn get_calories(&self) -> Energy {
+    pub fn get_calories(&self) -> EnergyQuantity {
         self.entries.iter().map(|entry| entry.get_calories()).sum()
     }
 

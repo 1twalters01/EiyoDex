@@ -8,7 +8,7 @@ use std::{collections::HashMap, env, fs, path::Path};
 use syn::{LitStr, parse::Parser};
 
 #[derive(Debug, Deserialize)]
-pub struct MassJson {
+struct MassJson {
     identifier: String,
     symbol: String,
     unit_type: String,
@@ -17,7 +17,7 @@ pub struct MassJson {
     si_factor: f64,
 }
 
-pub fn populate_masses(input: TokenStream) -> HashMap<String, MassJson> {
+fn populate_masses(input: TokenStream) -> HashMap<String, MassJson> {
     let mut masses: HashMap<String, MassJson> = HashMap::new();
 
     let parser = syn::punctuated::Punctuated::<LitStr, syn::Token![,]>::parse_terminated;

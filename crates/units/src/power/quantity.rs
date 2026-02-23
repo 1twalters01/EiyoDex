@@ -1,5 +1,5 @@
 #[macro_export]
-macro_rules! define_densities {
+macro_rules! define_powers {
     (
         all: {
             $(
@@ -23,12 +23,19 @@ macro_rules! define_densities {
         },
     ) => {
         use crate::{
-            density_unit::DensityUnit,
-            density_measurement_system::DensityMeasurementSystem,
-            mass::Mass,
-            mass_unit::MassUnit,
-            volume::Volume,
-            volume_unit::VolumeUnit,
+            energy::{
+                quantity::EnergyQuantity,
+                unit::EnergyUnit,
+            },
+            duration::{
+                quantity::DurationQuantity,
+                unit::DurationUnit,
+            },
+            into_f64::IntoF64Safe,
+            power::{
+                unit::PowerUnit,
+                measurement_system::PowerMeasurementSystem,
+            },
         };
         use std::{
             cmp::Ordering,
@@ -36,29 +43,30 @@ macro_rules! define_densities {
             ops::{Add, Div, Mul, Sub},
             iter::Sum,
         };
+
         use serde::{Deserialize, Serialize};
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
-        pub struct Density {
+        pub struct PowerQuantity {
             value: f64,
-            unit: DensityUnit,
+            unit: PowerUnit,
         }
 
-        impl Density {
-            pub fn from_variants(value: f64, mass_unit: MassUnit, volume_unit: VolumeUnit) -> Self {
-                Self {
-                    value,
-                    unit: DensityUnit::from_variants(mass_unit, volume_unit),
-                }
+        impl PowerQuantity {
+            pub fn new(value: f64, unit: PowerUnit) -> Self {
+                Self { value, unit }
             }
 
-            pub fn new(value: f64, unit: DensityUnit) -> Self {
-                Self { value, unit }
+            pub fn from_variants(value: f64, energy_unit: EnergyUnit, duration_unit: DurationUnit) -> Self {
+                Self {
+                    value,
+                    unit: PowerUnit::from_variants(energy_unit, duration_unit),
+                }
             }
 
             $(
                 pub fn $all_from_fn_name(value: f64) -> Self {
-                    Self::new(value, DensityUnit::$all_variant)
+                    Self::new(value, PowerUnit::$all_variant)
                 }
             )+
 
@@ -74,16 +82,16 @@ macro_rules! define_densities {
                 }
             )+
 
-            pub fn to_unit(&self, unit: DensityUnit) -> Self {
+            pub fn to_unit(&self, unit: PowerUnit) -> Self {
                 let value = match unit {
-                    $(DensityUnit::$all_variant => self.$all_as_fn_name()),+
+                    $(PowerUnit::$all_variant => self.$all_as_fn_name()),+
                 };
                 Self { value, unit }
             }
 
             $(
                 pub fn $all_to_fn_name(&self) -> Self {
-                    self.to_unit(DensityUnit::$all_variant)
+                    self.to_unit(PowerUnit::$all_variant)
                 }
             )+
 
@@ -103,11 +111,11 @@ macro_rules! define_densities {
                 self.value = value;
             }
 
-            pub fn get_unit(&self) -> DensityUnit {
+            pub fn get_unit(&self) -> PowerUnit {
                 self.unit
             }
 
-            pub fn set_unit(&mut self, unit: DensityUnit) {
+            pub fn set_unit(&mut self, unit: PowerUnit) {
                 self.unit = unit;
             }
 
@@ -115,7 +123,7 @@ macro_rules! define_densities {
                 self.unit.as_symbol()
             }
 
-            pub fn get_measurement_system(&self) -> DensityMeasurementSystem {
+            pub fn get_measurement_system(&self) -> PowerMeasurementSystem {
                 self.unit.get_measurement_system()
             }
 
@@ -128,20 +136,21 @@ macro_rules! define_densities {
             }
 
             pub fn to_string(&self) -> String {
-                format!("{}{}", self.value.to_string().trim(), self.get_symbol().trim())
+                format!("{}{}", self.value, self.get_symbol())
             }
         }
-    };
+    }
 }
 
-impl fmt::Display for Density {
+impl fmt::Display for PowerQuantity {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", self.value, self.get_symbol())
     }
 }
 
-impl Add for Density {
+impl Add for PowerQuantity {
     type Output = Self;
+
     fn add(self, rhs: Self) -> Self {
         Self::new(
             self.get_value() + rhs.to_unit(self.unit).get_value(),
@@ -150,8 +159,9 @@ impl Add for Density {
     }
 }
 
-impl Sub for Density {
+impl Sub for PowerQuantity {
     type Output = Self;
+
     fn sub(self, rhs: Self) -> Self {
         Self::new(
             self.get_value() - rhs.to_unit(self.unit).get_value(),
@@ -160,44 +170,9 @@ impl Sub for Density {
     }
 }
 
-impl<T> Mul<T> for Density
+impl<T> Div<T> for PowerQuantity
 where
-    T: Into<f64> + Copy,
-{
-    type Output = Self;
-
-    fn mul(self, rhs: T) -> Self {
-        Self::new(self.get_value() * rhs.into(), self.unit)
-    }
-}
-
-impl Mul<Volume> for Density {
-    type Output = Mass;
-
-    fn mul(self, rhs: Volume) -> Mass {
-        let density_volume_variant = self.get_unit().get_volume_variant();
-        let density_mass_variant = self.get_unit().get_mass_variant();
-        let volume = rhs.to_unit(density_volume_variant).get_value();
-        let density = self.get_value();
-        Mass::new(density * volume, density_mass_variant)
-    }
-}
-
-impl Mul<Density> for Volume {
-    type Output = Mass;
-
-    fn mul(self, rhs: Density) -> Mass {
-        let density_volume_variant = rhs.get_unit().get_volume_variant();
-        let density_mass_variant = rhs.get_unit().get_mass_variant();
-        let volume = self.to_unit(density_volume_variant).get_value();
-        let density = rhs.get_value();
-        Mass::new(density * volume, density_mass_variant)
-    }
-}
-
-impl<T> Div<T> for Density
-where
-    T: Into<f64> + Copy,
+    T: Into<f64> + IntoF64Safe + Copy,
 {
     type Output = Self;
 
@@ -206,35 +181,71 @@ where
     }
 }
 
-impl Div<Volume> for Mass {
-    type Output = Density;
+impl Div<DurationQuantity> for EnergyQuantity {
+    type Output = PowerQuantity;
 
-    fn div(self, rhs: Volume) -> Density {
-        let value = self.get_value() / rhs.get_value();
-        let mass_unit = self.get_unit();
-        let volume_unit = rhs.get_unit();
-        Density::from_variants(value, mass_unit, volume_unit)
+    fn div(self, rhs: DurationQuantity) -> PowerQuantity {
+        let value = self.get_value() / rhs.get_duration();
+        let energy_unit = self.get_unit();
+        let duration_unit = rhs.get_unit();
+        PowerQuantity::from_variants(value, energy_unit, duration_unit)
     }
 }
 
-impl Sum for Density {
+impl<T> Mul<T> for PowerQuantity
+where
+    T: Into<f64> + IntoF64Safe + Copy,
+{
+    type Output = Self;
+
+    fn mul(self, rhs: T) -> Self {
+        Self::new(self.get_value() * rhs.into(), self.unit)
+    }
+}
+
+impl Mul<DurationQuantity> for PowerQuantity {
+    type Output = EnergyQuantity;
+
+    fn mul(self, rhs: DurationQuantity) -> EnergyQuantity {
+        let power_energy_variant = self.get_unit().get_energy_variant();
+        let power_duration_variant = self.get_unit().get_duration_variant();
+        let duration = rhs.to_unit(power_duration_variant).get_duration();
+        let power = self.get_value();
+        EnergyQuantity::new(power * duration, power_energy_variant)
+    }
+}
+
+impl Mul<PowerQuantity> for DurationQuantity {
+    type Output = EnergyQuantity;
+
+    fn mul(self, rhs: PowerQuantity) -> EnergyQuantity {
+        let power_energy_variant = rhs.get_unit().get_energy_variant();
+        let power_duration_variant = rhs.get_unit().get_duration_variant();
+        let duration: f64 = self.to_unit(power_duration_variant).get_duration();
+        let power = rhs.get_value();
+        EnergyQuantity::new(power * duration, power_energy_variant)
+    }
+}
+
+impl Sum for PowerQuantity {
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
-        iter.fold(Density::new(0f64, DensityUnit::KilogramPerLiter), |a, b| {
-            b + a
-        })
+        iter.fold(
+            PowerQuantity::new(0f64, PowerUnit::KilojoulePerSecond),
+            |a, b| b + a,
+        )
     }
 }
 
-impl PartialOrd for Density {
+impl PartialOrd for PowerQuantity {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.get_value()
             .partial_cmp(&other.to_unit(self.unit).get_value())
     }
 }
 
-use units_macro::include_densities_from_json;
-include_densities_from_json!(
-    DensityUnit => "data/units/density",
-    MassUnit => "data/units/mass",
-    VolumeUnit => "data/units/volume"
+use units_macro::include_powers_from_json;
+include_powers_from_json!(
+    EnergyUnit => "data/units/energy",
+    PowerUnit => "data/units/power",
+    DurationUnit => "data/units/duration",
 );

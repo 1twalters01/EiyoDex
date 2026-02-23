@@ -1,7 +1,7 @@
 use chrono::NaiveDate;
 use nutrients::{nutrient::Nutrient, nutrient_amount::NutrientAmount};
 use profiles::profile::Profile;
-use units::energy::Energy;
+use units::energy::quantity::EnergyQuantity;
 use uuid::Uuid;
 
 use crate::{entry::Entry, time_slot::TimeSlot};
@@ -90,19 +90,19 @@ impl JournalEntry {
         }
     }
 
-    pub fn get_calories(&self) -> Energy {
-        let uncategorised_calories: Energy = self
+    pub fn get_calories(&self) -> EnergyQuantity {
+        let uncategorised_calories: EnergyQuantity = self
             .uncategorised_time_slots
             .iter()
             .map(|entry| entry.get_calories())
             .sum();
-        let time_slot_calories: Energy = self
+        let time_slot_calories: EnergyQuantity = self
             .time_slots
             .iter()
             .map(|time_slot| time_slot.get_calories())
             .sum();
 
-        let total_calories: Energy = uncategorised_calories + time_slot_calories;
+        let total_calories: EnergyQuantity = uncategorised_calories + time_slot_calories;
         return total_calories;
     }
 

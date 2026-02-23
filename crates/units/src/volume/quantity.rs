@@ -1,5 +1,5 @@
 #[macro_export]
-macro_rules! define_masses {
+macro_rules! define_volumes {
     (
         $(
             $variant:ident => {
@@ -11,8 +11,8 @@ macro_rules! define_masses {
         ),+ $(,)?
     ) => {
         use crate::{
-            mass_unit::MassUnit,
             measurement_system::MeasurementSystem,
+            volume::unit::VolumeUnit,
         };
         use std::{
             cmp::Ordering,
@@ -23,19 +23,19 @@ macro_rules! define_masses {
         use serde::{Deserialize, Serialize};
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
-        pub struct Mass {
+        pub struct VolumeQuantity {
             value: f64,
-            unit: MassUnit,
+            unit: VolumeUnit,
         }
 
-        impl Mass {
-            pub fn new(value: f64, unit: MassUnit) -> Self {
+        impl VolumeQuantity {
+            pub fn new(value: f64, unit: VolumeUnit) -> Self {
                 Self { value, unit }
             }
 
             $(
                 pub fn $from_fn_name(value: f64) -> Self {
-                    Self::new(value, MassUnit::$variant)
+                    Self::new(value, VolumeUnit::$variant)
                 }
             )+
 
@@ -51,16 +51,16 @@ macro_rules! define_masses {
                 }
             )+
 
-            pub fn to_unit(&self, unit: MassUnit) -> Self {
+            pub fn to_unit(&self, unit: VolumeUnit) -> Self {
                 let value = match unit {
-                    $(MassUnit::$variant => self.$as_fn_name()),+
+                    $(VolumeUnit::$variant => self.$as_fn_name()),+
                 };
                 Self { value, unit }
             }
 
             $(
                 pub fn $to_fn_name(&self) -> Self {
-                    self.to_unit(MassUnit::$variant)
+                    self.to_unit(VolumeUnit::$variant)
                 }
             )+
 
@@ -80,11 +80,11 @@ macro_rules! define_masses {
                 self.value = value;
             }
 
-            pub fn get_unit(&self) -> MassUnit {
+            pub fn get_unit(&self) -> VolumeUnit {
                 self.unit
             }
 
-            pub fn set_unit(&mut self, unit: MassUnit) {
+            pub fn set_unit(&mut self, unit: VolumeUnit) {
                 self.unit = unit;
             }
 
@@ -107,17 +107,18 @@ macro_rules! define_masses {
             pub fn to_string(&self) -> String {
                 format!("{}{}", self.value.to_string().trim(), self.get_symbol().trim())
             }
+
         }
     };
 }
 
-impl fmt::Display for Mass {
+impl fmt::Display for VolumeQuantity {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", self.value, self.get_symbol())
     }
 }
 
-impl Add for Mass {
+impl Add for VolumeQuantity {
     type Output = Self;
     fn add(self, rhs: Self) -> Self {
         Self::new(
@@ -127,7 +128,7 @@ impl Add for Mass {
     }
 }
 
-impl Sub for Mass {
+impl Sub for VolumeQuantity {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self {
         Self::new(
@@ -137,7 +138,7 @@ impl Sub for Mass {
     }
 }
 
-impl<T> Mul<T> for Mass
+impl<T> Mul<T> for VolumeQuantity
 where
     T: Into<f64> + Copy,
 {
@@ -148,7 +149,7 @@ where
     }
 }
 
-impl<T> Div<T> for Mass
+impl<T> Div<T> for VolumeQuantity
 where
     T: Into<f64> + Copy,
 {
@@ -159,18 +160,18 @@ where
     }
 }
 
-impl Sum for Mass {
+impl Sum for VolumeQuantity {
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
-        iter.fold(Mass::new(0f64, MassUnit::Kilogram), |a, b| b + a)
+        iter.fold(VolumeQuantity::new(0f64, VolumeUnit::Liter), |a, b| b + a)
     }
 }
 
-impl PartialOrd for Mass {
+impl PartialOrd for VolumeQuantity {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.get_value()
             .partial_cmp(&other.to_unit(self.unit).get_value())
     }
 }
 
-use units_macro::include_masses_from_json;
-include_masses_from_json!("data/units/mass");
+use units_macro::include_volumes_from_json;
+include_volumes_from_json!("data/units/volume",);

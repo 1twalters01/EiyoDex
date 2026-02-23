@@ -8,7 +8,7 @@ use std::{collections::HashMap, env, fs, path::Path};
 use syn::{LitStr, parse::Parser};
 
 #[derive(Debug, Deserialize)]
-pub struct DistanceJson {
+struct DistanceJson {
     identifier: String,
     symbol: String,
     unit_type: String,
@@ -17,7 +17,7 @@ pub struct DistanceJson {
     si_factor: f64,
 }
 
-pub fn populate_distances(input: TokenStream) -> HashMap<String, DistanceJson> {
+fn populate_distances(input: TokenStream) -> HashMap<String, DistanceJson> {
     let mut distances: HashMap<String, DistanceJson> = HashMap::new();
 
     let parser = syn::punctuated::Punctuated::<LitStr, syn::Token![,]>::parse_terminated;

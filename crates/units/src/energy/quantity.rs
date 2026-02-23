@@ -13,7 +13,7 @@ macro_rules! define_energies {
         ),+ $(,)?
     ) => {
         use crate::{
-            energy_unit::EnergyUnit,
+            energy::unit::EnergyUnit,
             measurement_system::MeasurementSystem,
         };
         use std::{
@@ -26,12 +26,12 @@ macro_rules! define_energies {
         use crate::into_f64::IntoF64Safe;
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
-        pub struct Energy {
+        pub struct EnergyQuantity {
             value: f64,
             unit: EnergyUnit,
         }
 
-        impl Energy {
+        impl EnergyQuantity {
             pub fn new(value: f64, unit: EnergyUnit) -> Self {
                 Self { value, unit }
             }
@@ -115,13 +115,13 @@ macro_rules! define_energies {
     };
 }
 
-impl fmt::Display for Energy {
+impl fmt::Display for EnergyQuantity {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", self.value, self.get_symbol())
     }
 }
 
-impl Add for Energy {
+impl Add for EnergyQuantity {
     type Output = Self;
     fn add(self, rhs: Self) -> Self {
         Self::new(
@@ -131,7 +131,7 @@ impl Add for Energy {
     }
 }
 
-impl Sub for Energy {
+impl Sub for EnergyQuantity {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self {
         Self::new(
@@ -141,7 +141,7 @@ impl Sub for Energy {
     }
 }
 
-impl<T> Mul<T> for Energy
+impl<T> Mul<T> for EnergyQuantity
 where
     T: Into<f64> + Copy,
 {
@@ -152,7 +152,7 @@ where
     }
 }
 
-impl<T> Div<T> for Energy
+impl<T> Div<T> for EnergyQuantity
 where
     T: Into<f64> + IntoF64Safe + Copy,
 {
@@ -164,13 +164,16 @@ where
     }
 }
 
-impl Sum for Energy {
+impl Sum for EnergyQuantity {
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
-        iter.fold(Energy::new(0f64, EnergyUnit::Kilocalorie), |a, b| b + a)
+        iter.fold(
+            EnergyQuantity::new(0f64, EnergyUnit::Kilocalorie),
+            |a, b| b + a,
+        )
     }
 }
 
-impl PartialOrd for Energy {
+impl PartialOrd for EnergyQuantity {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.get_value()
             .partial_cmp(&other.to_unit(self.unit).get_value())

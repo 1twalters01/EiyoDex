@@ -1,7 +1,10 @@
 use std::{collections::BTreeSet, str::FromStr};
 use units::{
-    density_measurement_system::DensityMeasurementSystem, density_unit::DensityUnit,
-    mass_unit::MassUnit, measurement_system::MeasurementSystem, volume_unit::VolumeUnit,
+    density::{
+        measurement_system::DensityMeasurementSystem,
+        unit::DensityUnit,
+    },
+    mass::unit::MassUnit, measurement_system::MeasurementSystem, volume::unit::VolumeUnit,
 };
 
 #[test]

@@ -16,13 +16,7 @@ macro_rules! define_volume_units {
         ),+ $(,)?
     ) => {
         use crate::measurement_system::MeasurementSystem;
-        use std::{
-            cmp::Ordering,
-            fmt,
-            ops::{Add, Div, Mul, Sub},
-            iter::Sum,
-            str::FromStr,
-        };
+        use std::str::FromStr;
         use serde::{Deserialize, Serialize};
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]

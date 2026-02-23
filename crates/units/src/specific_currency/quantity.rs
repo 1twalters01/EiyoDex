@@ -61,25 +61,27 @@ macro_rules! define_specific_currencies {
         };
         use serde::{Deserialize, Serialize};
         use crate::{
-            currency::Currency,
-            currency_unit::CurrencyUnit::{self, *},
+            currency::{
+                quantity::CurrencyQuantity,
+                unit::CurrencyUnit::{self, *},
+            },
             measurement_system::MeasurementSystem,
-            mass::Mass,
-            mass_unit::MassUnit,
-            volume::Volume,
-            volume_unit::VolumeUnit,
-            density::Density,
-            density_unit::DensityUnit,
-            specific_currency_unit::{Denominator, DenominatorType, SpecificCurrencyUnit},
+            mass::quantity::MassQuantity,
+            volume::quantity::VolumeQuantity,
+            density::{
+                quantity::DensityQuantity,
+                unit::DensityUnit,
+            },
+            specific_currency::unit::{Denominator, DenominatorType, SpecificCurrencyUnit},
         };
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
-        pub struct SpecificCurrency {
+        pub struct SpecificCurrencyQuantity {
             value: f64,
             unit: SpecificCurrencyUnit,
         }
 
-        impl SpecificCurrency {
+        impl SpecificCurrencyQuantity {
             pub fn from_variants(value: f64, currency_unit: CurrencyUnit, denominator: Denominator) -> Self {
                 Self {
                     value,
@@ -182,13 +184,13 @@ macro_rules! define_specific_currencies {
     };
 }
 
-impl fmt::Display for SpecificCurrency {
+impl fmt::Display for SpecificCurrencyQuantity {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", self.value, self.get_symbol())
     }
 }
 
-impl<T> Mul<T> for SpecificCurrency
+impl<T> Mul<T> for SpecificCurrencyQuantity
 where
     T: Into<f64> + Copy,
 {
@@ -199,86 +201,86 @@ where
     }
 }
 
-impl Mul<Volume> for SpecificCurrency {
-    type Output = Currency;
+impl Mul<VolumeQuantity> for SpecificCurrencyQuantity {
+    type Output = CurrencyQuantity;
 
-    fn mul(self, rhs: Volume) -> Currency {
+    fn mul(self, rhs: VolumeQuantity) -> CurrencyQuantity {
         let currency_unit = self.get_unit().get_currency_unit();
         let volume_unit = match self.get_unit().get_denominator() {
             Denominator::VolumeDenominator(volume_unit) => volume_unit,
             Denominator::MassDenominator(_) => {
-                panic!("Cannot multiply Mass based Specific Currency with Volume")
+                panic!("Cannot multiply MassQuantity based Specific CurrencyQuantity with VolumeQuantity")
             }
         };
 
         let specific_currency_value = self.get_value() * rhs.to_unit(volume_unit).get_value();
 
-        Currency::new(specific_currency_value, currency_unit)
+        CurrencyQuantity::new(specific_currency_value, currency_unit)
     }
 }
 
-impl Mul<SpecificCurrency> for Volume {
-    type Output = Currency;
+impl Mul<SpecificCurrencyQuantity> for VolumeQuantity {
+    type Output = CurrencyQuantity;
 
-    fn mul(self, rhs: SpecificCurrency) -> Currency {
+    fn mul(self, rhs: SpecificCurrencyQuantity) -> CurrencyQuantity {
         let currency_unit = rhs.get_unit().get_currency_unit();
         let volume_unit = match rhs.get_unit().get_denominator() {
             Denominator::VolumeDenominator(volume_unit) => volume_unit,
             Denominator::MassDenominator(_) => {
-                panic!("Cannot multiply Mass based Specific Currency with Volume")
+                panic!("Cannot multiply MassQuantity based Specific CurrencyQuantity with VolumeQuantity")
             }
         };
 
         let specific_currency_value = rhs.get_value() * self.to_unit(volume_unit).get_value();
 
-        Currency::new(specific_currency_value, currency_unit)
+        CurrencyQuantity::new(specific_currency_value, currency_unit)
     }
 }
 
-impl Mul<Mass> for SpecificCurrency {
-    type Output = Currency;
+impl Mul<MassQuantity> for SpecificCurrencyQuantity {
+    type Output = CurrencyQuantity;
 
-    fn mul(self, rhs: Mass) -> Currency {
+    fn mul(self, rhs: MassQuantity) -> CurrencyQuantity {
         let currency_unit = self.get_unit().get_currency_unit();
         let mass_unit = match self.get_unit().get_denominator() {
             Denominator::MassDenominator(mass_unit) => mass_unit,
             Denominator::VolumeDenominator(_) => {
-                panic!("Cannot multiply Volume based Specific Currency with Mass")
+                panic!("Cannot multiply VolumeQuantity based Specific CurrencyQuantity with MassQuantity")
             }
         };
 
         let specific_currency_value = self.get_value() * rhs.to_unit(mass_unit).get_value();
 
-        Currency::new(specific_currency_value, currency_unit)
+        CurrencyQuantity::new(specific_currency_value, currency_unit)
     }
 }
 
-impl Mul<SpecificCurrency> for Mass {
-    type Output = Currency;
+impl Mul<SpecificCurrencyQuantity> for MassQuantity {
+    type Output = CurrencyQuantity;
 
-    fn mul(self, rhs: SpecificCurrency) -> Currency {
+    fn mul(self, rhs: SpecificCurrencyQuantity) -> CurrencyQuantity {
         let currency_unit = rhs.get_unit().get_currency_unit();
         let mass_unit = match rhs.get_unit().get_denominator() {
             Denominator::MassDenominator(mass_unit) => mass_unit,
             Denominator::VolumeDenominator(_) => {
-                panic!("Cannot multiply Volume based Specific Currency with Mass")
+                panic!("Cannot multiply VolumeQuantity based Specific CurrencyQuantity with MassQuantity")
             }
         };
 
         let specific_currency_value = rhs.get_value() * self.to_unit(mass_unit).get_value();
-        Currency::new(specific_currency_value, currency_unit)
+        CurrencyQuantity::new(specific_currency_value, currency_unit)
     }
 }
 
-impl Mul<Density> for SpecificCurrency {
-    type Output = SpecificCurrency;
+impl Mul<DensityQuantity> for SpecificCurrencyQuantity {
+    type Output = SpecificCurrencyQuantity;
 
-    fn mul(self, rhs: Density) -> SpecificCurrency {
+    fn mul(self, rhs: DensityQuantity) -> SpecificCurrencyQuantity {
         let sc_currency_unit = self.get_unit().get_currency_unit();
         let sc_mass_unit = match self.get_unit().get_denominator() {
             Denominator::MassDenominator(mass_unit) => mass_unit,
             Denominator::VolumeDenominator(_) => {
-                panic!("Cannot multiply Volume based Specific Currency with Density")
+                panic!("Cannot multiply VolumeQuantity based Specific CurrencyQuantity with DensityQuantity")
             }
         };
 
@@ -291,19 +293,19 @@ impl Mul<Density> for SpecificCurrency {
 
         let density = rhs.to_unit(d_density_unit).get_value();
         let specific_currency = self.get_value();
-        SpecificCurrency::new(density * specific_currency, new_specific_currency_unit)
+        SpecificCurrencyQuantity::new(density * specific_currency, new_specific_currency_unit)
     }
 }
 
-impl Mul<SpecificCurrency> for Density {
-    type Output = SpecificCurrency;
+impl Mul<SpecificCurrencyQuantity> for DensityQuantity {
+    type Output = SpecificCurrencyQuantity;
 
-    fn mul(self, rhs: SpecificCurrency) -> SpecificCurrency {
+    fn mul(self, rhs: SpecificCurrencyQuantity) -> SpecificCurrencyQuantity {
         let sc_currency_unit = rhs.get_unit().get_currency_unit();
         let sc_mass_unit = match rhs.get_unit().get_denominator() {
             Denominator::MassDenominator(mass_unit) => mass_unit,
             Denominator::VolumeDenominator(_) => {
-                panic!("Cannot multiply Volume based Specific Currency with Density")
+                panic!("Cannot multiply VolumeQuantity based Specific CurrencyQuantity with DensityQuantity")
             }
         };
 
@@ -316,11 +318,11 @@ impl Mul<SpecificCurrency> for Density {
 
         let density = self.to_unit(d_density_unit).get_value();
         let specific_currency = rhs.get_value();
-        SpecificCurrency::new(density * specific_currency, new_specific_currency_unit)
+        SpecificCurrencyQuantity::new(density * specific_currency, new_specific_currency_unit)
     }
 }
 
-impl<T> Div<T> for SpecificCurrency
+impl<T> Div<T> for SpecificCurrencyQuantity
 where
     T: Into<f64> + Copy,
 {
@@ -331,10 +333,10 @@ where
     }
 }
 
-impl Div<Volume> for Currency {
-    type Output = SpecificCurrency;
+impl Div<VolumeQuantity> for CurrencyQuantity {
+    type Output = SpecificCurrencyQuantity;
 
-    fn div(self, rhs: Volume) -> SpecificCurrency {
+    fn div(self, rhs: VolumeQuantity) -> SpecificCurrencyQuantity {
         let currency_unit = self.get_unit();
         let volume_unit = rhs.get_unit();
         let denominator = Denominator::VolumeDenominator(volume_unit);
@@ -343,14 +345,14 @@ impl Div<Volume> for Currency {
         let specific_currency_unit =
             SpecificCurrencyUnit::from_variants(currency_unit, denominator);
 
-        SpecificCurrency::new(specific_currency_value, specific_currency_unit)
+        SpecificCurrencyQuantity::new(specific_currency_value, specific_currency_unit)
     }
 }
 
-impl Div<Mass> for Currency {
-    type Output = SpecificCurrency;
+impl Div<MassQuantity> for CurrencyQuantity {
+    type Output = SpecificCurrencyQuantity;
 
-    fn div(self, rhs: Mass) -> SpecificCurrency {
+    fn div(self, rhs: MassQuantity) -> SpecificCurrencyQuantity {
         let currency_unit = self.get_unit();
         let mass_unit = rhs.get_unit();
         let denominator = Denominator::MassDenominator(mass_unit);
@@ -359,19 +361,19 @@ impl Div<Mass> for Currency {
         let specific_currency_unit =
             SpecificCurrencyUnit::from_variants(currency_unit, denominator);
 
-        SpecificCurrency::new(specific_currency_value, specific_currency_unit)
+        SpecificCurrencyQuantity::new(specific_currency_value, specific_currency_unit)
     }
 }
 
-impl Div<Density> for SpecificCurrency {
-    type Output = SpecificCurrency;
+impl Div<DensityQuantity> for SpecificCurrencyQuantity {
+    type Output = SpecificCurrencyQuantity;
 
-    fn div(self, rhs: Density) -> SpecificCurrency {
+    fn div(self, rhs: DensityQuantity) -> SpecificCurrencyQuantity {
         let sc_currency_unit = self.get_unit().get_currency_unit();
         let sc_volume_unit = match self.get_unit().get_denominator() {
             Denominator::VolumeDenominator(volume_unit) => volume_unit,
             Denominator::MassDenominator(_) => {
-                panic!("Cannot divide Mass based Specific Currency with Density")
+                panic!("Cannot divide MassQuantity based Specific CurrencyQuantity with DensityQuantity")
             }
         };
 
@@ -384,11 +386,11 @@ impl Div<Density> for SpecificCurrency {
 
         let density = rhs.to_unit(d_density_unit).get_value();
         let specific_currency = self.get_value();
-        SpecificCurrency::new(specific_currency / density, new_specific_currency_unit)
+        SpecificCurrencyQuantity::new(specific_currency / density, new_specific_currency_unit)
     }
 }
 
-impl PartialOrd for SpecificCurrency {
+impl PartialOrd for SpecificCurrencyQuantity {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.get_value().partial_cmp(
             &other

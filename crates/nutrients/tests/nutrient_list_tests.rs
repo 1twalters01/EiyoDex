@@ -8,7 +8,7 @@ use nutrients::{
     },
     units::NutrientUnit,
 };
-use units::mass_unit::MassUnit;
+use units::mass::unit::MassUnit;
 use uuid::Uuid;
 
 #[test]
@@ -236,7 +236,7 @@ fn test_sum_descendants_vec() {
         potassium_amount,
     ]);
     let minerals = NutrientAmountList::from_vec(mineral_vec);
-    println!("{:#?}", minerals.get_names());
+    println!("{:#?}", minerals.get_nutrient_names());
 
     let iron_sum = minerals.sum_amounts_from_descendants_rc_refcell(iron);
     println!("iron_sum: {:#?}", iron_sum);

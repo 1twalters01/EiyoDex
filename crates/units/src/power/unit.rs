@@ -40,20 +40,11 @@ macro_rules! define_power_units {
     ) => {
         use crate::{
             measurement_system::MeasurementSystem,
-            energy::Energy,
-            energy_unit::EnergyUnit,
-            duration::DurationWrapper,
-            duration_unit::DurationUnit,
-            into_f64::IntoF64Safe,
-            power_measurement_system::PowerMeasurementSystem,
+            energy::unit::EnergyUnit,
+            duration::unit::DurationUnit,
+            power::measurement_system::PowerMeasurementSystem,
         };
-        use std::{
-            cmp::Ordering,
-            fmt,
-            ops::{Add, Div, Mul, Sub},
-            iter::Sum,
-            str::FromStr,
-        };
+        use std::str::FromStr;
 
         use serde::{Deserialize, Serialize};
 

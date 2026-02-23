@@ -1,4 +1,4 @@
-use units::{energy_unit::EnergyUnit, mass_unit::MassUnit, volume_unit::VolumeUnit};
+use units::{energy::unit::EnergyUnit, mass::unit::MassUnit, volume::unit::VolumeUnit};
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub enum NutrientUnit {

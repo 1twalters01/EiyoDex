@@ -7,7 +7,7 @@ use nutrients::{
     },
     units::NutrientUnit,
 };
-use units::mass_unit::MassUnit;
+use units::mass::unit::MassUnit;
 
 #[test]
 fn test_nutrient() {
@@ -64,14 +64,12 @@ fn test_rounding() {
         value_1,
         potassium.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),
-    ).unwrap();
+    )
+    .unwrap();
 
     let value_2 = 5.21;
-    let nutrient_2: NutrientAmount = NutrientAmount::new(
-        value_2,
-        potassium,
-        NutrientUnit::Mass(MassUnit::Milligram),
-    ).unwrap();
+    let nutrient_2: NutrientAmount =
+        NutrientAmount::new(value_2, potassium, NutrientUnit::Mass(MassUnit::Milligram)).unwrap();
 
     assert_eq!(nutrient_1.round(2), nutrient_2)
 }
@@ -92,11 +90,8 @@ fn test_multiply() {
     );
 
     let value = 5.2;
-    let mut nutrient: NutrientAmount = NutrientAmount::new(
-        value,
-        potassium,
-        NutrientUnit::Mass(MassUnit::Milligram),
-    ).unwrap();
+    let mut nutrient: NutrientAmount =
+        NutrientAmount::new(value, potassium, NutrientUnit::Mass(MassUnit::Milligram)).unwrap();
 
     nutrient = nutrient * 2f64;
     assert!(nutrient.get_value() == 10.4);
@@ -118,11 +113,9 @@ fn test_division() {
     );
 
     let value = 4.2;
-    let mut nutrient: NutrientAmount = NutrientAmount::from_rc_refcell(
-        value,
-        potassium,
-        NutrientUnit::Mass(MassUnit::Milligram),
-    ).unwrap();
+    let mut nutrient: NutrientAmount =
+        NutrientAmount::from_rc_refcell(value, potassium, NutrientUnit::Mass(MassUnit::Milligram))
+            .unwrap();
 
     nutrient = nutrient / 2f64;
     assert!(nutrient.get_value() == 2.1);

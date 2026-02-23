@@ -13,7 +13,7 @@ macro_rules! define_durations {
         ),+ $(,)?
     ) => {
         use crate::{
-            duration_unit::DurationUnit,
+            duration::unit::DurationUnit,
             measurement_system::MeasurementSystem,
         };
         use std::{
@@ -21,18 +21,17 @@ macro_rules! define_durations {
             fmt,
             ops::{Add, Div, Mul, Sub},
             iter::Sum,
-            str::FromStr,
         };
         use serde::{Deserialize, Serialize};
         use chrono::Duration;
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
-        pub struct DurationWrapper {
+        pub struct DurationQuantity {
             value: Duration,
             unit: DurationUnit,
         }
 
-        impl DurationWrapper {
+        impl DurationQuantity {
             pub fn new(value: f64, unit: DurationUnit) -> Self {
                 match unit {
                     $(DurationUnit::$variant => {
@@ -129,28 +128,28 @@ macro_rules! define_durations {
     };
 }
 
-impl fmt::Display for DurationWrapper {
+impl fmt::Display for DurationQuantity {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let precision = Some(2);
         write!(f, "{}", self.to_string(precision))
     }
 }
 
-impl Add for DurationWrapper {
+impl Add for DurationQuantity {
     type Output = Self;
     fn add(self, rhs: Self) -> Self {
         Self::from_duration(self.get_value() + rhs.get_value(), self.unit)
     }
 }
 
-impl Sub for DurationWrapper {
+impl Sub for DurationQuantity {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self {
         Self::from_duration(self.get_value() - rhs.get_value(), self.unit)
     }
 }
 
-impl<T> Mul<T> for DurationWrapper
+impl<T> Mul<T> for DurationQuantity
 where
     T: Into<f64> + Copy,
 {
@@ -161,7 +160,7 @@ where
     }
 }
 
-impl<T> Div<T> for DurationWrapper
+impl<T> Div<T> for DurationQuantity
 where
     T: Into<f64> + Copy,
 {
@@ -172,15 +171,15 @@ where
     }
 }
 
-impl Sum for DurationWrapper {
+impl Sum for DurationQuantity {
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
-        iter.fold(DurationWrapper::new(0f64, DurationUnit::Second), |a, b| {
+        iter.fold(DurationQuantity::new(0f64, DurationUnit::Second), |a, b| {
             b + a
         })
     }
 }
 
-impl PartialOrd for DurationWrapper {
+impl PartialOrd for DurationQuantity {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.get_value()
             .partial_cmp(&other.to_unit(self.unit).get_value())

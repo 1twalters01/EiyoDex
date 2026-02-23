@@ -1,29 +1,30 @@
 use units::{
-    duration::DurationWrapper, duration_unit::DurationUnit, measurement_system::MeasurementSystem,
+    duration::{quantity::DurationQuantity, unit::DurationUnit},
+    measurement_system::MeasurementSystem,
 };
 
 #[test]
 fn test_new_distance() {
     let value = 10 as f64;
 
-    let duration_new_week = DurationWrapper::new(value, DurationUnit::Week);
-    let duration_from_week = DurationWrapper::from_week(value);
+    let duration_new_week = DurationQuantity::new(value, DurationUnit::Week);
+    let duration_from_week = DurationQuantity::from_week(value);
     assert_eq!(duration_new_week, duration_from_week);
 
-    let duration_new_day = DurationWrapper::new(value, DurationUnit::Day);
-    let duration_from_day = DurationWrapper::from_day(value);
+    let duration_new_day = DurationQuantity::new(value, DurationUnit::Day);
+    let duration_from_day = DurationQuantity::from_day(value);
     assert_eq!(duration_new_day, duration_from_day);
 
-    let duration_new_hr = DurationWrapper::new(value, DurationUnit::Hour);
-    let distance_from_cm = DurationWrapper::from_hr(value);
+    let duration_new_hr = DurationQuantity::new(value, DurationUnit::Hour);
+    let distance_from_cm = DurationQuantity::from_hr(value);
     assert_eq!(duration_new_hr, distance_from_cm);
 
-    let duration_new_min = DurationWrapper::new(value, DurationUnit::Minute);
-    let duration_from_min = DurationWrapper::from_min(value);
+    let duration_new_min = DurationQuantity::new(value, DurationUnit::Minute);
+    let duration_from_min = DurationQuantity::from_min(value);
     assert_eq!(duration_new_min, duration_from_min);
 
-    let duration_new_s = DurationWrapper::new(value, DurationUnit::Second);
-    let duration_from_s = DurationWrapper::from_s(value);
+    let duration_new_s = DurationQuantity::new(value, DurationUnit::Second);
+    let duration_from_s = DurationQuantity::from_s(value);
     assert_eq!(duration_new_s, duration_from_s);
 }
 
@@ -32,11 +33,11 @@ fn test_distance_as_fn() {
     let value = 5.6;
     let percentage_err = 0.5;
 
-    let duration_week = DurationWrapper::from_week(value);
-    let duration_day = DurationWrapper::from_day(value);
-    let duration_hr = DurationWrapper::from_hr(value);
-    let duration_min = DurationWrapper::from_min(value);
-    let duration_s = DurationWrapper::from_s(value);
+    let duration_week = DurationQuantity::from_week(value);
+    let duration_day = DurationQuantity::from_day(value);
+    let duration_hr = DurationQuantity::from_hr(value);
+    let duration_min = DurationQuantity::from_min(value);
+    let duration_s = DurationQuantity::from_s(value);
 
     // percentage error calculations
     assert!(
@@ -95,9 +96,9 @@ fn test_distance_to_unit() {
     let new_value = value * 24f64;
     let new_value_2 = value / 7f64;
 
-    let duration_day = DurationWrapper::from_day(value);
-    let duration_hr = DurationWrapper::from_hr(new_value);
-    let duration_week = DurationWrapper::from_week(new_value_2);
+    let duration_day = DurationQuantity::from_day(value);
+    let duration_hr = DurationQuantity::from_hr(new_value);
+    let duration_week = DurationQuantity::from_week(new_value_2);
     let distance_day_to_hr = duration_day.to_unit(DurationUnit::Hour);
     let distance_day_to_week = duration_day.to_unit(DurationUnit::Week);
 
@@ -112,9 +113,9 @@ fn test_distance_to_fn() {
     let new_value = value * 24f64;
     let new_value_2 = value / 7f64;
 
-    let duration_day = DurationWrapper::from_day(value);
-    let duration_hr = DurationWrapper::from_hr(new_value);
-    let duration_week = DurationWrapper::from_week(new_value_2);
+    let duration_day = DurationQuantity::from_day(value);
+    let duration_hr = DurationQuantity::from_hr(new_value);
+    let duration_week = DurationQuantity::from_week(new_value_2);
     let distance_day_to_hr = duration_day.to_hr();
     let distance_day_to_week = duration_day.to_week();
 
@@ -124,8 +125,8 @@ fn test_distance_to_fn() {
 
 #[test]
 fn test_distance_is_zero() {
-    let zero_duration = DurationWrapper::from_day(0f64);
-    let duration = DurationWrapper::from_day(5.5);
+    let zero_duration = DurationQuantity::from_day(0f64);
+    let duration = DurationQuantity::from_day(5.5);
 
     assert!(zero_duration.is_zero());
     assert!(!duration.is_zero());
@@ -134,7 +135,7 @@ fn test_distance_is_zero() {
 #[test]
 fn test_get_duration() {
     let days = 6.882;
-    let duration = DurationWrapper::new(days, DurationUnit::Day);
+    let duration = DurationQuantity::new(days, DurationUnit::Day);
     let percentage_err = 0.5;
 
     assert!((duration.get_duration() - days) / days < percentage_err);
@@ -144,14 +145,14 @@ use chrono::Duration;
 #[test]
 fn test_distance_get_value() {
     let days = 6.882;
-    let duration = DurationWrapper::new(days, DurationUnit::Day);
+    let duration = DurationQuantity::new(days, DurationUnit::Day);
     let nanoseconds = (days * 24f64 * 60f64 * 60f64 * 1e9).round() as i64;
     assert_eq!(duration.get_value(), Duration::nanoseconds(nanoseconds));
 }
 
 #[test]
 fn test_distance_set_value() {
-    let mut duration = DurationWrapper::new(6.882, DurationUnit::Hour);
+    let mut duration = DurationQuantity::new(6.882, DurationUnit::Hour);
 
     let days = 3;
     let new_duration = Duration::days(days);
@@ -161,13 +162,13 @@ fn test_distance_set_value() {
 
 #[test]
 fn test_distance_get_unit() {
-    let duration = DurationWrapper::new(6.882, DurationUnit::Day);
+    let duration = DurationQuantity::new(6.882, DurationUnit::Day);
     assert_eq!(duration.get_unit(), DurationUnit::Day);
 }
 
 #[test]
 fn test_distance_set_unit() {
-    let mut duration = DurationWrapper::new(6.882, DurationUnit::Day);
+    let mut duration = DurationQuantity::new(6.882, DurationUnit::Day);
     duration.set_unit(DurationUnit::Week);
     assert_eq!(duration.get_unit(), DurationUnit::Week);
 }
@@ -175,11 +176,11 @@ fn test_distance_set_unit() {
 #[test]
 fn test_distance_get_symbol() {
     let value = 4.2;
-    let duration_week = DurationWrapper::from_week(value);
-    let duration_day = DurationWrapper::from_day(value);
-    let duration_hr = DurationWrapper::from_hr(value);
-    let duration_min = DurationWrapper::from_min(value);
-    let duration_s = DurationWrapper::from_s(value);
+    let duration_week = DurationQuantity::from_week(value);
+    let duration_day = DurationQuantity::from_day(value);
+    let duration_hr = DurationQuantity::from_hr(value);
+    let duration_min = DurationQuantity::from_min(value);
+    let duration_s = DurationQuantity::from_s(value);
 
     assert_eq!(duration_week.get_symbol(), "week");
     assert_eq!(duration_day.get_symbol(), "day");
@@ -192,11 +193,11 @@ fn test_distance_get_symbol() {
 fn test_distance_get_measurement_system() {
     let value = 4.2;
 
-    let duration_week = DurationWrapper::from_week(value);
-    let duration_day = DurationWrapper::from_day(value);
-    let duration_hr = DurationWrapper::from_hr(value);
-    let duration_min = DurationWrapper::from_min(value);
-    let duration_s = DurationWrapper::from_s(value);
+    let duration_week = DurationQuantity::from_week(value);
+    let duration_day = DurationQuantity::from_day(value);
+    let duration_hr = DurationQuantity::from_hr(value);
+    let duration_min = DurationQuantity::from_min(value);
+    let duration_s = DurationQuantity::from_s(value);
 
     assert_eq!(
         duration_week.get_measurement_system(),
@@ -211,11 +212,11 @@ fn test_distance_get_measurement_system() {
 #[test]
 fn test_mass_get_unit_type() {
     let value = 4.2;
-    let duration_week = DurationWrapper::from_week(value);
-    let duration_day = DurationWrapper::from_day(value);
-    let duration_hr = DurationWrapper::from_hr(value);
-    let duration_min = DurationWrapper::from_min(value);
-    let duration_s = DurationWrapper::from_s(value);
+    let duration_week = DurationQuantity::from_week(value);
+    let duration_day = DurationQuantity::from_day(value);
+    let duration_hr = DurationQuantity::from_hr(value);
+    let duration_min = DurationQuantity::from_min(value);
+    let duration_s = DurationQuantity::from_s(value);
 
     assert_eq!(duration_week.get_unit_type(), "week");
     assert_eq!(duration_day.get_unit_type(), "day");
@@ -227,11 +228,11 @@ fn test_mass_get_unit_type() {
 #[test]
 fn test_mass_get_unit_type_plural() {
     let value = 8.52;
-    let duration_week = DurationWrapper::from_week(value);
-    let duration_day = DurationWrapper::from_day(value);
-    let duration_hr = DurationWrapper::from_hr(value);
-    let duration_min = DurationWrapper::from_min(value);
-    let duration_s = DurationWrapper::from_s(value);
+    let duration_week = DurationQuantity::from_week(value);
+    let duration_day = DurationQuantity::from_day(value);
+    let duration_hr = DurationQuantity::from_hr(value);
+    let duration_min = DurationQuantity::from_min(value);
+    let duration_s = DurationQuantity::from_s(value);
 
     assert_eq!(duration_week.get_unit_type_plural(), "weeks");
     assert_eq!(duration_day.get_unit_type_plural(), "days");
@@ -246,39 +247,39 @@ fn test_mass_to_string() {
     let value_2 = 1.624;
 
     let precision_1 = None;
-    let distance_week_1 = DurationWrapper::from_week(value_1);
+    let distance_week_1 = DurationQuantity::from_week(value_1);
     assert_eq!(distance_week_1.to_string(precision_1), "5 weeks");
-    let duration_day_1 = DurationWrapper::from_day(value_1);
+    let duration_day_1 = DurationQuantity::from_day(value_1);
     assert_eq!(duration_day_1.to_string(precision_1), "5 days");
-    let distance_hour_1 = DurationWrapper::from_hr(value_1);
+    let distance_hour_1 = DurationQuantity::from_hr(value_1);
     assert_eq!(distance_hour_1.to_string(precision_1), "5 hours");
-    let distance_minute_1 = DurationWrapper::from_min(value_1);
+    let distance_minute_1 = DurationQuantity::from_min(value_1);
     assert_eq!(distance_minute_1.to_string(precision_1), "5 minutes");
-    let distance_second_1 = DurationWrapper::from_s(value_1);
+    let distance_second_1 = DurationQuantity::from_s(value_1);
     assert_eq!(distance_second_1.to_string(precision_1), "5 seconds");
 
     let precision_2 = Some(3);
-    let distance_week_2 = DurationWrapper::from_week(value_2);
+    let distance_week_2 = DurationQuantity::from_week(value_2);
     assert_eq!(distance_week_2.to_string(precision_2), "1.624 weeks");
-    let duration_day_2 = DurationWrapper::from_day(value_2);
+    let duration_day_2 = DurationQuantity::from_day(value_2);
     assert_eq!(duration_day_2.to_string(precision_2), "1.624 days");
-    let distance_hour_2 = DurationWrapper::from_hr(value_2);
+    let distance_hour_2 = DurationQuantity::from_hr(value_2);
     assert_eq!(distance_hour_2.to_string(precision_2), "1.624 hours");
-    let distance_minute_2 = DurationWrapper::from_min(value_2);
+    let distance_minute_2 = DurationQuantity::from_min(value_2);
     assert_eq!(distance_minute_2.to_string(precision_2), "1.624 minutes");
-    let distance_second_2 = DurationWrapper::from_s(value_2);
+    let distance_second_2 = DurationQuantity::from_s(value_2);
     assert_eq!(distance_second_2.to_string(precision_2), "1.624 seconds");
 }
 
 #[test]
 fn test_mass_add() {
-    let duration_day_1 = DurationWrapper::from_day(1f64);
-    let duration_day_2 = DurationWrapper::from_day(5f64);
-    let duration_hr = DurationWrapper::from_hr(6f64);
+    let duration_day_1 = DurationQuantity::from_day(1f64);
+    let duration_day_2 = DurationQuantity::from_day(5f64);
+    let duration_hr = DurationQuantity::from_hr(6f64);
 
-    let duration_day_1_plus_day_2 = DurationWrapper::from_day(6f64);
-    let duration_hr_plus_day_1 = DurationWrapper::from_hr(30f64);
-    let duration_day_2_plus_hr = DurationWrapper::from_day(5.25f64);
+    let duration_day_1_plus_day_2 = DurationQuantity::from_day(6f64);
+    let duration_hr_plus_day_1 = DurationQuantity::from_hr(30f64);
+    let duration_day_2_plus_hr = DurationQuantity::from_day(5.25f64);
 
     assert_eq!(duration_day_1 + duration_day_2, duration_day_1_plus_day_2);
     assert_eq!(duration_hr + duration_day_1, duration_hr_plus_day_1);
@@ -287,13 +288,13 @@ fn test_mass_add() {
 
 #[test]
 fn test_mass_subtract() {
-    let duration_day_1 = DurationWrapper::from_day(2f64);
-    let duration_day_2 = DurationWrapper::from_day(1f64);
-    let duration_hr = DurationWrapper::from_hr(12f64);
+    let duration_day_1 = DurationQuantity::from_day(2f64);
+    let duration_day_2 = DurationQuantity::from_day(1f64);
+    let duration_hr = DurationQuantity::from_hr(12f64);
 
-    let duration_day_1_minus_day_2 = DurationWrapper::from_day(1f64);
-    let duration_hour_minus_day_1 = DurationWrapper::from_hr(-36f64);
-    let duration_day_2_minus_hour = DurationWrapper::from_day(0.5f64);
+    let duration_day_1_minus_day_2 = DurationQuantity::from_day(1f64);
+    let duration_hour_minus_day_1 = DurationQuantity::from_hr(-36f64);
+    let duration_day_2_minus_hour = DurationQuantity::from_day(0.5f64);
 
     assert_eq!(duration_day_1 - duration_day_2, duration_day_1_minus_day_2);
     assert_eq!(duration_hr - duration_day_1, duration_hour_minus_day_1);
@@ -302,9 +303,9 @@ fn test_mass_subtract() {
 
 #[test]
 fn test_mass_multiply() {
-    let duration_day_1 = DurationWrapper::from_day(70f64);
-    let duration_day_2 = DurationWrapper::from_day(350f64);
-    let duration_day_3 = DurationWrapper::from_day(267.4f64);
+    let duration_day_1 = DurationQuantity::from_day(70f64);
+    let duration_day_2 = DurationQuantity::from_day(350f64);
+    let duration_day_3 = DurationQuantity::from_day(267.4f64);
 
     assert_eq!(duration_day_1 * 5, duration_day_2);
     assert_eq!(duration_day_1 * 3.82, duration_day_3);
@@ -312,32 +313,32 @@ fn test_mass_multiply() {
 
 #[test]
 fn test_distance_divide() {
-    let duration_day_1 = DurationWrapper::from_day(350f64);
-    let duration_day_2 = DurationWrapper::from_day(70f64);
+    let duration_day_1 = DurationQuantity::from_day(350f64);
+    let duration_day_2 = DurationQuantity::from_day(70f64);
     assert_eq!(duration_day_1 / 5, duration_day_2);
 }
 
 #[test]
 fn test_energy_sum() {
-    let duration_1 = DurationWrapper::from_day(30f64);
-    let duration_2 = DurationWrapper::from_day(20f64);
-    let duration_3 = DurationWrapper::from_day(50f64).to_hr();
-    let duration_4 = DurationWrapper::from_hr(480f64);
-    let duration_5 = DurationWrapper::from_day(130f64).to_week();
-    let duration_total = DurationWrapper::from_day(250f64);
+    let duration_1 = DurationQuantity::from_day(30f64);
+    let duration_2 = DurationQuantity::from_day(20f64);
+    let duration_3 = DurationQuantity::from_day(50f64).to_hr();
+    let duration_4 = DurationQuantity::from_hr(480f64);
+    let duration_5 = DurationQuantity::from_day(130f64).to_week();
+    let duration_total = DurationQuantity::from_day(250f64);
 
     let distances = vec![duration_1, duration_2, duration_3, duration_4, duration_5];
 
-    let sum: DurationWrapper = distances.iter().map(|duration| *duration * 2).sum();
+    let sum: DurationQuantity = distances.iter().map(|duration| *duration * 2).sum();
     assert_eq!(sum.get_unit(), duration_5.get_unit());
     assert_eq!(sum, (duration_total * 2).to_unit(duration_5.get_unit()));
 }
 
 #[test]
 fn test_mass_partial_order() {
-    let duration_day_1 = DurationWrapper::from_day(6f64);
-    let duration_day_2 = DurationWrapper::from_day(4f64);
-    let duration_hr = DurationWrapper::from_hr(120f64);
+    let duration_day_1 = DurationQuantity::from_day(6f64);
+    let duration_day_2 = DurationQuantity::from_day(4f64);
+    let duration_hr = DurationQuantity::from_hr(120f64);
     assert!(duration_day_1 > duration_day_2);
     assert!(duration_day_1 > duration_hr);
     assert!(duration_hr > duration_day_2);

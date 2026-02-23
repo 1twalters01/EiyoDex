@@ -62,13 +62,13 @@ struct DensityMeasurementSystem {
 }
 
 #[derive(Debug, Deserialize, Clone, PartialEq, Eq, Hash)]
-pub struct DensityJson {
+struct DensityJson {
     mass_unit: String,
     volume_unit: String,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct MassJson {
+struct MassJson {
     identifier: String,
     symbol: String,
     unit_type: String,
@@ -78,7 +78,7 @@ pub struct MassJson {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct VolumeJson {
+struct VolumeJson {
     identifier: String,
     symbol: String,
     unit_type: String,
@@ -86,13 +86,13 @@ pub struct VolumeJson {
     si_factor: f64,
 }
 
-pub struct JsonHashes {
+struct JsonHashes {
     density_data: HashSet<DensityJson>,
     mass_data: HashMap<String, MassJson>,
     volume_data: HashMap<String, VolumeJson>,
 }
 
-pub struct DensityHashMaps {
+struct DensityHashMaps {
     density: HashMap<String, Density>,
     density_all: HashMap<String, Density>,
 }
@@ -154,7 +154,7 @@ fn populate_densities_masses_and_volumes(parsed_input: EnumSourceGroup) -> JsonH
     };
 }
 
-pub fn fill_density_hashmaps(
+fn fill_density_hashmaps(
     mass_data: HashMap<String, MassJson>,
     volume_data: HashMap<String, VolumeJson>,
     density_data: HashSet<DensityJson>,

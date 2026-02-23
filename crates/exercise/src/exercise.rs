@@ -1,14 +1,17 @@
-use units::{duration::DurationWrapper, energy::Energy, power::Power};
+use units::{
+    duration::quantity::DurationQuantity, energy::quantity::EnergyQuantity,
+    power::quantity::PowerQuantity,
+};
 use uuid::Uuid;
 
 #[derive(Clone, PartialEq)]
 pub struct ExerciseAmount {
-    duration: DurationWrapper,
+    duration: DurationQuantity,
     exercise: Exercise,
 }
 
 impl ExerciseAmount {
-    pub fn get_calories(&self) -> Energy {
+    pub fn get_calories(&self) -> EnergyQuantity {
         self.exercise.power.clone() * self.duration
     }
 }
@@ -18,7 +21,7 @@ pub struct Exercise {
     id: Uuid,
     name: String,
     description: String,
-    power: Power, // Energy burned per time unit
+    power: PowerQuantity, // EnergyQuantity burned per time unit
 }
 
 impl Exercise {
@@ -46,11 +49,11 @@ impl Exercise {
         self.description = description;
     }
 
-    pub fn get_power(&self) -> Power {
+    pub fn get_power(&self) -> PowerQuantity {
         self.power.clone()
     }
 
-    pub fn set_power(&mut self, power: Power) {
+    pub fn set_power(&mut self, power: PowerQuantity) {
         self.power = power;
     }
 }

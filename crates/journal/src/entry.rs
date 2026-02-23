@@ -1,6 +1,6 @@
 use chrono::NaiveDateTime;
 use nutrients::{nutrient::Nutrient, nutrient_amount::NutrientAmount};
-use units::energy::Energy;
+use units::energy::quantity::EnergyQuantity;
 use uuid::Uuid;
 
 use crate::entry_item::EntryItem;
@@ -62,7 +62,7 @@ impl Entry {
         self.datetime_last_modified = datetime;
     }
 
-    pub fn get_calories(&self) -> Energy {
+    pub fn get_calories(&self) -> EnergyQuantity {
         self.entry_item.get_calories()
     }
 
@@ -80,7 +80,8 @@ impl Entry {
         match nutrient_amount_option {
             Some(nutrient_amount) => return nutrient_amount,
             None => {
-                return NutrientAmount::new(0f64, nutrient.clone(), nutrient.get_main_unit()).unwrap()
+                return NutrientAmount::new(0f64, nutrient.clone(), nutrient.get_main_unit())
+                    .unwrap()
             }
         }
     }

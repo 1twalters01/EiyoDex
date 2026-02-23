@@ -1,33 +1,33 @@
 use units::{
-    distance::Distance, distance_unit::DistanceUnit, measurement_system::MeasurementSystem,
+    distance::{quantity::DistanceQuantity, unit::DistanceUnit}, measurement_system::MeasurementSystem,
 };
 
 #[test]
 fn test_new_distance() {
     let value = 10 as f64;
 
-    let distance_new_km = Distance::new(value, DistanceUnit::Kilometer);
-    let distance_from_km = Distance::from_km(value);
+    let distance_new_km = DistanceQuantity::new(value, DistanceUnit::Kilometer);
+    let distance_from_km = DistanceQuantity::from_km(value);
     assert_eq!(distance_new_km, distance_from_km);
 
-    let distance_new_m = Distance::new(value, DistanceUnit::Meter);
-    let distance_from_m = Distance::from_m(value);
+    let distance_new_m = DistanceQuantity::new(value, DistanceUnit::Meter);
+    let distance_from_m = DistanceQuantity::from_m(value);
     assert_eq!(distance_new_m, distance_from_m);
 
-    let distance_new_cm = Distance::new(value, DistanceUnit::Centimeter);
-    let distance_from_cm = Distance::from_cm(value);
+    let distance_new_cm = DistanceQuantity::new(value, DistanceUnit::Centimeter);
+    let distance_from_cm = DistanceQuantity::from_cm(value);
     assert_eq!(distance_new_cm, distance_from_cm);
 
-    let distance_new_mm = Distance::new(value, DistanceUnit::Millimeter);
-    let distance_from_mm = Distance::from_mm(value);
+    let distance_new_mm = DistanceQuantity::new(value, DistanceUnit::Millimeter);
+    let distance_from_mm = DistanceQuantity::from_mm(value);
     assert_eq!(distance_new_mm, distance_from_mm);
 
-    let distance_new_ft = Distance::new(value, DistanceUnit::Foot);
-    let distance_from_ft = Distance::from_ft(value);
+    let distance_new_ft = DistanceQuantity::new(value, DistanceUnit::Foot);
+    let distance_from_ft = DistanceQuantity::from_ft(value);
     assert_eq!(distance_new_ft, distance_from_ft);
 
-    let distance_new_in = Distance::new(value, DistanceUnit::Inch);
-    let distance_from_in = Distance::from_in(value);
+    let distance_new_in = DistanceQuantity::new(value, DistanceUnit::Inch);
+    let distance_from_in = DistanceQuantity::from_in(value);
     assert_eq!(distance_new_in, distance_from_in);
 }
 
@@ -36,14 +36,14 @@ fn test_distance_rounding() {
     let value = 5.6803294822;
     let value_2 = 147.20473186;
 
-    let mut distance_new = Distance::new(value, DistanceUnit::Meter);
+    let mut distance_new = DistanceQuantity::new(value, DistanceUnit::Meter);
     let distance_rounded = distance_new.round(5);
-    let distance_coded = Distance::new(5.68033, DistanceUnit::Meter);
+    let distance_coded = DistanceQuantity::new(5.68033, DistanceUnit::Meter);
     assert_eq!(distance_rounded, distance_coded);
 
-    let mut distance_new_2 = Distance::new(value_2, DistanceUnit::Meter);
+    let mut distance_new_2 = DistanceQuantity::new(value_2, DistanceUnit::Meter);
     let distance_rounded_2 = distance_new_2.round(5);
-    let distance_coded_2 = Distance::new(147.20473, DistanceUnit::Meter);
+    let distance_coded_2 = DistanceQuantity::new(147.20473, DistanceUnit::Meter);
     assert_eq!(distance_rounded_2, distance_coded_2);
 }
 
@@ -52,12 +52,12 @@ fn test_distance_as_fn() {
     let value = 5.6;
     let percentage_err = 0.5;
 
-    let distance_km = Distance::from_km(value);
-    let distance_m = Distance::from_m(value);
-    let distance_cm = Distance::from_cm(value);
-    let distance_mm = Distance::from_mm(value);
-    let distance_ft = Distance::from_ft(value);
-    let distance_in = Distance::from_in(value);
+    let distance_km = DistanceQuantity::from_km(value);
+    let distance_m = DistanceQuantity::from_m(value);
+    let distance_cm = DistanceQuantity::from_cm(value);
+    let distance_mm = DistanceQuantity::from_mm(value);
+    let distance_ft = DistanceQuantity::from_ft(value);
+    let distance_in = DistanceQuantity::from_in(value);
 
     // percentage error calculations
     assert!((distance_km.as_m() - value * 1000f64).abs() / distance_km.as_m() < percentage_err);
@@ -112,8 +112,8 @@ fn test_distance_to_unit() {
     let value = 5.6;
     let new_value = value * 100f64;
 
-    let distance_m = Distance::from_m(value);
-    let distance_cm = Distance::from_cm(new_value);
+    let distance_m = DistanceQuantity::from_m(value);
+    let distance_cm = DistanceQuantity::from_cm(new_value);
     let distance_m_to_cm = distance_m.to_unit(DistanceUnit::Centimeter);
 
     print!(
@@ -128,16 +128,16 @@ fn test_distance_to_fn() {
     let value = 6.9;
     let new_value = value * 100f64;
 
-    let distance_m = Distance::from_m(value);
-    let distance_cm = Distance::from_cm(new_value);
+    let distance_m = DistanceQuantity::from_m(value);
+    let distance_cm = DistanceQuantity::from_cm(new_value);
     let distance_m_to_cm = distance_m.to_cm();
     assert_eq!(distance_cm, distance_m_to_cm);
 }
 
 #[test]
 fn test_distance_is_zero() {
-    let zero_distance = Distance::from_m(0f64);
-    let distance = Distance::from_m(5.5);
+    let zero_distance = DistanceQuantity::from_m(0f64);
+    let distance = DistanceQuantity::from_m(5.5);
 
     assert!(zero_distance.is_zero());
     assert!(!distance.is_zero());
@@ -145,8 +145,8 @@ fn test_distance_is_zero() {
 
 #[test]
 fn test_distance_is_negative() {
-    let negative_distance = Distance::from_m(-5.5);
-    let distance = Distance::from_m(5.5);
+    let negative_distance = DistanceQuantity::from_m(-5.5);
+    let distance = DistanceQuantity::from_m(5.5);
 
     assert!(negative_distance.is_negative());
     assert!(!distance.is_negative());
@@ -154,26 +154,26 @@ fn test_distance_is_negative() {
 
 #[test]
 fn test_distance_get_value() {
-    let distance = Distance::new(6.882, DistanceUnit::Meter);
+    let distance = DistanceQuantity::new(6.882, DistanceUnit::Meter);
     assert_eq!(distance.get_value(), 6.882);
 }
 
 #[test]
 fn test_distance_set_value() {
-    let mut distance = Distance::new(6.882, DistanceUnit::Meter);
+    let mut distance = DistanceQuantity::new(6.882, DistanceUnit::Meter);
     distance.set_value(8.92);
     assert_eq!(distance.get_value(), 8.92);
 }
 
 #[test]
 fn test_distance_get_unit() {
-    let distance = Distance::new(6.882, DistanceUnit::Meter);
+    let distance = DistanceQuantity::new(6.882, DistanceUnit::Meter);
     assert_eq!(distance.get_unit(), DistanceUnit::Meter);
 }
 
 #[test]
 fn test_distance_set_unit() {
-    let mut distance = Distance::new(6.882, DistanceUnit::Meter);
+    let mut distance = DistanceQuantity::new(6.882, DistanceUnit::Meter);
     distance.set_unit(DistanceUnit::Foot);
     assert_eq!(distance.get_unit(), DistanceUnit::Foot);
 }
@@ -181,12 +181,12 @@ fn test_distance_set_unit() {
 #[test]
 fn test_distance_get_symbol() {
     let value = 4.2;
-    let distance_km = Distance::from_km(value);
-    let distance_m = Distance::from_m(value);
-    let distance_cm = Distance::from_cm(value);
-    let distance_mm = Distance::from_mm(value);
-    let distance_ft = Distance::from_ft(value);
-    let distance_in = Distance::from_in(value);
+    let distance_km = DistanceQuantity::from_km(value);
+    let distance_m = DistanceQuantity::from_m(value);
+    let distance_cm = DistanceQuantity::from_cm(value);
+    let distance_mm = DistanceQuantity::from_mm(value);
+    let distance_ft = DistanceQuantity::from_ft(value);
+    let distance_in = DistanceQuantity::from_in(value);
 
     assert_eq!(distance_km.get_symbol(), "km");
     assert_eq!(distance_m.get_symbol(), "m");
@@ -200,12 +200,12 @@ fn test_distance_get_symbol() {
 fn test_distance_get_measurement_system() {
     let value = 4.2;
 
-    let distance_km = Distance::from_km(value);
-    let distance_m = Distance::from_m(value);
-    let distance_cm = Distance::from_cm(value);
-    let distance_mm = Distance::from_mm(value);
-    let distance_ft = Distance::from_ft(value);
-    let distance_in = Distance::from_in(value);
+    let distance_km = DistanceQuantity::from_km(value);
+    let distance_m = DistanceQuantity::from_m(value);
+    let distance_cm = DistanceQuantity::from_cm(value);
+    let distance_mm = DistanceQuantity::from_mm(value);
+    let distance_ft = DistanceQuantity::from_ft(value);
+    let distance_in = DistanceQuantity::from_in(value);
 
     assert_eq!(
         distance_km.get_measurement_system(),
@@ -236,12 +236,12 @@ fn test_distance_get_measurement_system() {
 #[test]
 fn test_distance_get_unit_type() {
     let value = 4.2;
-    let distance_km = Distance::from_km(value);
-    let distance_m = Distance::from_m(value);
-    let distance_cm = Distance::from_cm(value);
-    let distance_mm = Distance::from_mm(value);
-    let distance_ft = Distance::from_ft(value);
-    let distance_in = Distance::from_in(value);
+    let distance_km = DistanceQuantity::from_km(value);
+    let distance_m = DistanceQuantity::from_m(value);
+    let distance_cm = DistanceQuantity::from_cm(value);
+    let distance_mm = DistanceQuantity::from_mm(value);
+    let distance_ft = DistanceQuantity::from_ft(value);
+    let distance_in = DistanceQuantity::from_in(value);
 
     assert_eq!(distance_km.get_unit_type(), "kilometer");
     assert_eq!(distance_m.get_unit_type(), "meter");
@@ -254,12 +254,12 @@ fn test_distance_get_unit_type() {
 #[test]
 fn test_distance_get_unit_type_plural() {
     let value = 8.52;
-    let distance_km = Distance::from_km(value);
-    let distance_m = Distance::from_m(value);
-    let distance_cm = Distance::from_cm(value);
-    let distance_mm = Distance::from_mm(value);
-    let distance_ft = Distance::from_ft(value);
-    let distance_in = Distance::from_in(value);
+    let distance_km = DistanceQuantity::from_km(value);
+    let distance_m = DistanceQuantity::from_m(value);
+    let distance_cm = DistanceQuantity::from_cm(value);
+    let distance_mm = DistanceQuantity::from_mm(value);
+    let distance_ft = DistanceQuantity::from_ft(value);
+    let distance_in = DistanceQuantity::from_in(value);
 
     assert_eq!(distance_km.get_unit_type_plural(), "kilometers");
     assert_eq!(distance_m.get_unit_type_plural(), "meters");
@@ -274,42 +274,42 @@ fn test_distance_to_string() {
     let value_1 = 5f64;
     let value_2 = 8.642;
 
-    let distance_km_1 = Distance::from_km(value_1);
+    let distance_km_1 = DistanceQuantity::from_km(value_1);
     assert_eq!(distance_km_1.to_string(), "5km");
-    let distance_m_1 = Distance::from_m(value_1);
+    let distance_m_1 = DistanceQuantity::from_m(value_1);
     assert_eq!(distance_m_1.to_string(), "5m");
-    let distance_cm_1 = Distance::from_cm(value_1);
+    let distance_cm_1 = DistanceQuantity::from_cm(value_1);
     assert_eq!(distance_cm_1.to_string(), "5cm");
-    let distance_mm_1 = Distance::from_mm(value_1);
+    let distance_mm_1 = DistanceQuantity::from_mm(value_1);
     assert_eq!(distance_mm_1.to_string(), "5mm");
-    let distance_ft_1 = Distance::from_ft(value_1);
+    let distance_ft_1 = DistanceQuantity::from_ft(value_1);
     assert_eq!(distance_ft_1.to_string(), "5ft");
-    let distance_in_1 = Distance::from_in(value_1);
+    let distance_in_1 = DistanceQuantity::from_in(value_1);
     assert_eq!(distance_in_1.to_string(), "5in");
 
-    let distance_km_2 = Distance::from_km(value_2);
+    let distance_km_2 = DistanceQuantity::from_km(value_2);
     assert_eq!(distance_km_2.to_string(), "8.642km");
-    let distance_m_2 = Distance::from_m(value_2);
+    let distance_m_2 = DistanceQuantity::from_m(value_2);
     assert_eq!(distance_m_2.to_string(), "8.642m");
-    let distance_cm_2 = Distance::from_cm(value_2);
+    let distance_cm_2 = DistanceQuantity::from_cm(value_2);
     assert_eq!(distance_cm_2.to_string(), "8.642cm");
-    let distance_mm_2 = Distance::from_mm(value_2);
+    let distance_mm_2 = DistanceQuantity::from_mm(value_2);
     assert_eq!(distance_mm_2.to_string(), "8.642mm");
-    let distance_ft_2 = Distance::from_ft(value_2);
+    let distance_ft_2 = DistanceQuantity::from_ft(value_2);
     assert_eq!(distance_ft_2.to_string(), "8.642ft");
-    let distance_in_2 = Distance::from_in(value_2);
+    let distance_in_2 = DistanceQuantity::from_in(value_2);
     assert_eq!(distance_in_2.to_string(), "8.642in");
 }
 
 #[test]
 fn test_distance_add() {
-    let distance_m_1 = Distance::from_m(1f64);
-    let distance_m_2 = Distance::from_m(5f64);
-    let distance_cm = Distance::from_cm(200f64);
+    let distance_m_1 = DistanceQuantity::from_m(1f64);
+    let distance_m_2 = DistanceQuantity::from_m(5f64);
+    let distance_cm = DistanceQuantity::from_cm(200f64);
 
-    let distance_m_1_plus_m_2 = Distance::from_m(6f64);
-    let distance_cm_plus_m_1 = Distance::from_cm(300f64);
-    let distance_m_2_plus_cm = Distance::from_m(7f64);
+    let distance_m_1_plus_m_2 = DistanceQuantity::from_m(6f64);
+    let distance_cm_plus_m_1 = DistanceQuantity::from_cm(300f64);
+    let distance_m_2_plus_cm = DistanceQuantity::from_m(7f64);
 
     assert_eq!(distance_m_1 + distance_m_2, distance_m_1_plus_m_2);
     assert_eq!(distance_cm + distance_m_1, distance_cm_plus_m_1);
@@ -318,13 +318,13 @@ fn test_distance_add() {
 
 #[test]
 fn test_distance_subtract() {
-    let distance_m_1 = Distance::from_m(67f64);
-    let distance_m_2 = Distance::from_m(47f64);
-    let distance_cm = Distance::from_cm(1000f64);
+    let distance_m_1 = DistanceQuantity::from_m(67f64);
+    let distance_m_2 = DistanceQuantity::from_m(47f64);
+    let distance_cm = DistanceQuantity::from_cm(1000f64);
 
-    let distance_m_1_minus_m_2 = Distance::from_m(20f64);
-    let distance_cm_minus_m_1 = Distance::from_cm(-5700f64);
-    let distance_m_2_minus_cm = Distance::from_m(37f64);
+    let distance_m_1_minus_m_2 = DistanceQuantity::from_m(20f64);
+    let distance_cm_minus_m_1 = DistanceQuantity::from_cm(-5700f64);
+    let distance_m_2_minus_cm = DistanceQuantity::from_m(37f64);
 
     assert_eq!(distance_m_1 - distance_m_2, distance_m_1_minus_m_2);
     assert_eq!(distance_cm - distance_m_1, distance_cm_minus_m_1);
@@ -333,9 +333,9 @@ fn test_distance_subtract() {
 
 #[test]
 fn test_distance_multiply() {
-    let distance_m_1 = Distance::from_m(70f64);
-    let distance_m_2 = Distance::from_m(350f64);
-    let mass_g_3 = Distance::from_m(267.4f64);
+    let distance_m_1 = DistanceQuantity::from_m(70f64);
+    let distance_m_2 = DistanceQuantity::from_m(350f64);
+    let mass_g_3 = DistanceQuantity::from_m(267.4f64);
 
     assert_eq!(distance_m_1 * 5, distance_m_2);
     assert_eq!(distance_m_1 * 3.82, mass_g_3);
@@ -343,32 +343,32 @@ fn test_distance_multiply() {
 
 #[test]
 fn test_distance_divide() {
-    let distance_m_1 = Distance::from_m(350f64);
-    let distance_m_2 = Distance::from_m(70f64);
+    let distance_m_1 = DistanceQuantity::from_m(350f64);
+    let distance_m_2 = DistanceQuantity::from_m(70f64);
     assert_eq!(distance_m_1 / 5, distance_m_2);
 }
 
 #[test]
 fn test_distance_sum() {
-    let distance_1 = Distance::from_m(30f64);
-    let distance_2 = Distance::from_m(20f64);
-    let distance_3 = Distance::from_m(50f64).to_ft();
-    let distance_4 = Distance::from_m(20f64).to_ft();
-    let distance_5 = Distance::from_m(130f64).to_ft();
-    let distance_total = Distance::from_m(250f64);
+    let distance_1 = DistanceQuantity::from_m(30f64);
+    let distance_2 = DistanceQuantity::from_m(20f64);
+    let distance_3 = DistanceQuantity::from_m(50f64).to_ft();
+    let distance_4 = DistanceQuantity::from_m(20f64).to_ft();
+    let distance_5 = DistanceQuantity::from_m(130f64).to_ft();
+    let distance_total = DistanceQuantity::from_m(250f64);
 
     let distances = vec![distance_1, distance_2, distance_3, distance_4, distance_5];
 
-    let sum: Distance = distances.iter().map(|distance| *distance * 2).sum();
+    let sum: DistanceQuantity = distances.iter().map(|distance| *distance * 2).sum();
     assert_eq!(sum.get_unit(), distance_5.get_unit());
     assert_eq!(sum, (distance_total * 2).to_unit(distance_5.get_unit()));
 }
 
 #[test]
 fn test_distance_partial_order() {
-    let distance_m_1 = Distance::from_m(6f64);
-    let distance_m_2 = Distance::from_m(4f64);
-    let distance_cm = Distance::from_cm(520f64);
+    let distance_m_1 = DistanceQuantity::from_m(6f64);
+    let distance_m_2 = DistanceQuantity::from_m(4f64);
+    let distance_cm = DistanceQuantity::from_cm(520f64);
     assert!(distance_m_1 > distance_m_2);
     assert!(distance_m_1 > distance_cm);
     assert!(distance_cm > distance_m_2);

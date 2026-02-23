@@ -17,7 +17,7 @@ struct VolumeJson {
     si_factor: f64,
 }
 
-pub fn populate_volumes(input: TokenStream) -> HashMap<String, VolumeJson> {
+fn populate_volumes(input: TokenStream) -> HashMap<String, VolumeJson> {
     let mut volumes: HashMap<String, VolumeJson> = HashMap::new();
 
     let parser = syn::punctuated::Punctuated::<LitStr, syn::Token![,]>::parse_terminated;

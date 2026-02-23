@@ -5,7 +5,7 @@ use std::{
 };
 use uuid::Uuid;
 
-use units::{energy_unit::EnergyUnit, mass_unit::MassUnit, volume_unit::VolumeUnit};
+use units::{energy::unit::EnergyUnit, mass::unit::MassUnit, volume::unit::VolumeUnit};
 use utils::dsa::{dfs::DFSTrait, node::GraphNode};
 
 use crate::{
@@ -257,7 +257,11 @@ impl Nutrient {
             NutrientUnit::Volume(input_volume) => {
                 let all_volumes = VolumeUnit::get_enumerations();
                 all_volumes.iter().for_each(|volume_unit| {
-                    println!("v: {:#?} {:#?}", value * input_volume.si_factor() / volume_unit.si_factor(), volume_unit);
+                    println!(
+                        "v: {:#?} {:#?}",
+                        value * input_volume.si_factor() / volume_unit.si_factor(),
+                        volume_unit
+                    );
                     self.unit_conversions.insert(
                         NutrientUnit::Volume(*volume_unit),
                         value * volume_unit.si_factor() / input_volume.si_factor(),
@@ -380,7 +384,6 @@ impl Nutrient {
         result
     }
 }
-
 
 pub fn link_parent_child(
     parent: &Rc<RefCell<Nutrient>>,

@@ -1,7 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use nutrients::{nutrient::Nutrient, nutrient_amount::NutrientAmount};
-use units::energy::Energy;
+use units::energy::quantity::EnergyQuantity;
 use uuid::Uuid;
 
 use crate::{data_sources::DataSource, food::Food};
@@ -29,7 +29,7 @@ impl FoodAmount {
         &self.food
     }
 
-    pub fn get_calories(&self) -> Energy {
+    pub fn get_calories(&self) -> EnergyQuantity {
         self.food
             .get_calories(self.food_data_uuid, self.data_source.borrow().get_id())
             * self.value

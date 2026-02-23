@@ -1,5 +1,5 @@
 use std::{collections::BTreeSet, str::FromStr};
-use units::{duration_unit::DurationUnit, measurement_system::MeasurementSystem};
+use units::{duration::unit::DurationUnit, measurement_system::MeasurementSystem};
 
 #[test]
 fn test_get_distance_unit_enumerations() {

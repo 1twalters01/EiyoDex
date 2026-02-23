@@ -8,7 +8,7 @@ use std::{collections::HashMap, env, fs, path::Path};
 use syn::{LitStr, parse::Parser};
 
 #[derive(Debug, Deserialize)]
-pub struct EnergyJson {
+struct EnergyJson {
     identifier: String,
     symbol: String,
     unit_type: String,
@@ -17,7 +17,7 @@ pub struct EnergyJson {
     si_factor: f64,
 }
 
-pub fn populate_energies(input: TokenStream) -> HashMap<String, EnergyJson> {
+fn populate_energies(input: TokenStream) -> HashMap<String, EnergyJson> {
     let mut energies: HashMap<String, EnergyJson> = HashMap::new();
 
     let parser = syn::punctuated::Punctuated::<LitStr, syn::Token![,]>::parse_terminated;

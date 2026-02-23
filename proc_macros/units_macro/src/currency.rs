@@ -8,14 +8,14 @@ use std::{collections::HashMap, env, fs, path::Path};
 use syn::{LitStr, parse::Parser};
 
 #[derive(Debug, Deserialize)]
-pub struct CurrencyJson {
+struct CurrencyJson {
     symbol: String,
     code: String,
     unit_type: String,
     unit_type_plural: String,
 }
 
-pub fn populate_currencies(input: TokenStream) -> HashMap<String, CurrencyJson> {
+fn populate_currencies(input: TokenStream) -> HashMap<String, CurrencyJson> {
     let mut currencies: HashMap<String, CurrencyJson> = HashMap::new();
 
     let parser = syn::punctuated::Punctuated::<LitStr, syn::Token![,]>::parse_terminated;

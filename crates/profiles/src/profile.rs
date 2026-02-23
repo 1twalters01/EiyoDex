@@ -1,7 +1,8 @@
 use chrono::{Datelike, Local, NaiveDate};
 use units::{
-    distance::Distance, distance_unit::DistanceUnit, mass::Mass, mass_unit::MassUnit,
-    volume_unit::VolumeUnit,
+    distance::{quantity::DistanceQuantity, unit::DistanceUnit},
+    mass::{quantity::MassQuantity, unit::MassUnit},
+    volume::unit::VolumeUnit,
 };
 use utils::base_types::percentage::Percentage;
 use uuid::Uuid;
@@ -15,12 +16,12 @@ pub struct Profile {
     gender: Gender,
     ethnicity: Option<Ethnicity>,
     preferred_units: PreferredUnits,
-    height: Distance,
-    weight: Mass,
-    target_weight: Mass,
+    height: DistanceQuantity,
+    weight: MassQuantity,
+    target_weight: MassQuantity,
     target_weight_deadline: Option<NaiveDate>,
-    waist_circumference: Distance,
-    hip_circumference: Distance,
+    waist_circumference: DistanceQuantity,
+    hip_circumference: DistanceQuantity,
     body_fat_percentage: Percentage,
 }
 
@@ -92,27 +93,27 @@ impl Profile {
         self.preferred_units = preferred_units;
     }
 
-    pub fn get_height(&self) -> Distance {
+    pub fn get_height(&self) -> DistanceQuantity {
         self.height
     }
 
-    pub fn set_height(&mut self, height: Distance) {
+    pub fn set_height(&mut self, height: DistanceQuantity) {
         self.height = height;
     }
 
-    pub fn get_weight(&self) -> Mass {
+    pub fn get_weight(&self) -> MassQuantity {
         self.weight
     }
 
-    pub fn set_weight(&mut self, weight: Mass) {
+    pub fn set_weight(&mut self, weight: MassQuantity) {
         self.weight = weight;
     }
 
-    pub fn get_target_weight(&self) -> Mass {
+    pub fn get_target_weight(&self) -> MassQuantity {
         self.target_weight
     }
 
-    pub fn set_target_weight(&mut self, target_weight: Mass) {
+    pub fn set_target_weight(&mut self, target_weight: MassQuantity) {
         self.target_weight = target_weight;
     }
 
@@ -124,19 +125,19 @@ impl Profile {
         self.target_weight_deadline = target_weight_deadline;
     }
 
-    pub fn get_waist_circumference(&self) -> Distance {
+    pub fn get_waist_circumference(&self) -> DistanceQuantity {
         self.waist_circumference
     }
 
-    pub fn set_waist_circumference(&mut self, waist_circumference: Distance) {
+    pub fn set_waist_circumference(&mut self, waist_circumference: DistanceQuantity) {
         self.waist_circumference = waist_circumference;
     }
 
-    pub fn get_hip_circumference(&self) -> Distance {
+    pub fn get_hip_circumference(&self) -> DistanceQuantity {
         self.hip_circumference
     }
 
-    pub fn set_hip_circumference(&mut self, hip_circumference: Distance) {
+    pub fn set_hip_circumference(&mut self, hip_circumference: DistanceQuantity) {
         self.hip_circumference = hip_circumference;
     }
 

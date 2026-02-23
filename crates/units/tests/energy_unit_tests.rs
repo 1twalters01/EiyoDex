@@ -1,5 +1,5 @@
 use std::{collections::BTreeSet, str::FromStr};
-use units::{energy_unit::EnergyUnit, measurement_system::MeasurementSystem};
+use units::{energy::unit::EnergyUnit, measurement_system::MeasurementSystem};
 
 #[test]
 fn test_get_energy_unit_enumerations() {

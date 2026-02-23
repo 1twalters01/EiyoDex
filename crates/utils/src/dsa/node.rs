@@ -1,4 +1,7 @@
-use std::{cell::RefCell, rc::{Rc, Weak}};
+use std::{
+    cell::RefCell,
+    rc::{Rc, Weak},
+};
 
 pub trait GraphNode {
     fn get_children(&self) -> Vec<Rc<RefCell<Self>>>;

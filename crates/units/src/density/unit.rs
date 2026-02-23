@@ -39,10 +39,10 @@ macro_rules! define_density_units {
         },
     ) => {
         use crate::{
-            density_measurement_system::DensityMeasurementSystem,
-            mass_unit::MassUnit,
+            density::measurement_system::DensityMeasurementSystem,
+            mass::unit::MassUnit,
             measurement_system::MeasurementSystem,
-            volume_unit::VolumeUnit,
+            volume::unit::VolumeUnit,
         };
         use std::{
             str::FromStr,
