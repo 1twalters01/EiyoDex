@@ -14,7 +14,7 @@ struct FoodCategory {
     id: Uuid,
     name: String,
     description: String,
-    parent: Weak<RefCell<FoodCategory>,
+    parent: Weak<RefCell<FoodCategory>>,
     children: Vec<Rc<RefCell<FoodCategoryChild>>>,
 }
 
@@ -22,9 +22,9 @@ struct FoodTaxonomy {
     id: Uuid,
     name: String,
     description: String,
-    price_metadata: Vec<PriceMetadata>
+    price_metadata: Vec<PriceMetadata>,
     parent: Weak<RefCell<FoodCategory>>,
-
+    children: Vec<Rc<RefCell<FoodVariants>>>,
 }
 ```
 
@@ -110,6 +110,7 @@ struct FoodVariant {
     preparation_method: Rc<RefCell<PreparationMethod>>,
     food_attribute: HashSet<Rc<RefCell<FoodAttribute>>>,
     food_tags: Vec<Rc<RefCell<FoodTags>>>,
+    parent: Weak<RefCell<FoodTaxonomy>>,
 }
 ```
 
