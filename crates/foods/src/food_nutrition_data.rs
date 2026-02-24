@@ -1,4 +1,4 @@
-use nutrients::{nutrient_amount::NutrientAmount, nutrient_amount_list::NutrientAmountList};
+use nutrients::{nutrient_quantity::NutrientQuantity, nutrient_quantity_list::NutrientQuantityList};
 use uuid::Uuid;
 
 use crate::data_sources::DataSource;
@@ -7,15 +7,15 @@ use crate::data_sources::DataSource;
 pub struct FoodNutritionData {
     id: Uuid,
     data_source: DataSource,
-    nutrient_amount_list: NutrientAmountList,
+    nutrient_quantity_list: NutrientQuantityList,
 }
 
 impl FoodNutritionData {
-    pub fn new(data_source: DataSource, nutrient_amount_list: NutrientAmountList) -> Self {
+    pub fn new(data_source: DataSource, nutrient_quantity_list: NutrientQuantityList) -> Self {
         Self {
             id: Uuid::new_v4(),
             data_source,
-            nutrient_amount_list,
+            nutrient_quantity_list,
         }
     }
 
@@ -35,23 +35,23 @@ impl FoodNutritionData {
         self.data_source = data_source;
     }
 
-    pub fn get_nutrient_amount_list(&self) -> NutrientAmountList {
-        self.nutrient_amount_list.clone()
+    pub fn get_nutrient_amount_list(&self) -> NutrientQuantityList {
+        self.nutrient_quantity_list.clone()
     }
 
-    pub fn set_nutrient_amount_list(&mut self, nutrient_amount_list: NutrientAmountList) {
-        self.nutrient_amount_list = nutrient_amount_list;
+    pub fn set_nutrient_amount_list(&mut self, nutrient_quantity_list: NutrientQuantityList) {
+        self.nutrient_quantity_list = nutrient_quantity_list;
     }
 
-    pub fn add_nutrient_amount(&mut self, nutrient_amount: NutrientAmount) -> bool {
-        self.nutrient_amount_list.push(nutrient_amount)
+    pub fn add_nutrient_amount(&mut self, nutrient_amount: NutrientQuantity) -> bool {
+        self.nutrient_quantity_list.push(nutrient_amount)
     }
 
-    pub fn extend_nutrient_amounts(&mut self, nutrient_amount_vec: Vec<NutrientAmount>) {
-        self.nutrient_amount_list.extend(nutrient_amount_vec)
+    pub fn extend_nutrient_amounts(&mut self, nutrient_amount_vec: Vec<NutrientQuantity>) {
+        self.nutrient_quantity_list.extend(nutrient_amount_vec)
     }
 
-    pub fn remove_nutrient(&mut self, nutrient_amount: &NutrientAmount) {
-        self.nutrient_amount_list.remove(nutrient_amount);
+    pub fn remove_nutrient(&mut self, nutrient_amount: &NutrientQuantity) {
+        self.nutrient_quantity_list.remove(nutrient_amount);
     }
 }

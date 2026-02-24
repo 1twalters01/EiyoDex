@@ -8,16 +8,16 @@ use std::{
 
 use uuid::Uuid;
 
-use crate::{nutrient::Nutrient, units::NutrientUnit};
+use crate::{nutrient::Nutrient, nutrient_units::NutrientUnit};
 
 #[derive(Debug, Clone)]
-pub struct NutrientAmount {
+pub struct NutrientQuantity {
     value: f64,
     nutrient: Rc<RefCell<Nutrient>>,
     output_unit: NutrientUnit,
 }
 
-impl NutrientAmount {
+impl NutrientQuantity {
     pub fn new(
         value: f64,
         nutrient: Nutrient,
@@ -105,27 +105,27 @@ impl NutrientAmount {
     }
 }
 
-impl PartialEq for NutrientAmount {
+impl PartialEq for NutrientQuantity {
     fn eq(&self, other: &Self) -> bool {
         self.get_nutrient_id() == other.get_nutrient_id()
     }
 }
 
-impl Eq for NutrientAmount {}
+impl Eq for NutrientQuantity {}
 
-impl Ord for NutrientAmount {
+impl Ord for NutrientQuantity {
     fn cmp(&self, other: &Self) -> Ordering {
         self.get_nutrient_id().cmp(&other.get_nutrient_id())
     }
 }
 
-impl PartialOrd for NutrientAmount {
+impl PartialOrd for NutrientQuantity {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Add for NutrientAmount {
+impl Add for NutrientQuantity {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
@@ -142,7 +142,7 @@ impl Add for NutrientAmount {
     }
 }
 
-impl Sub for NutrientAmount {
+impl Sub for NutrientQuantity {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
@@ -159,7 +159,7 @@ impl Sub for NutrientAmount {
     }
 }
 
-impl Mul<f64> for NutrientAmount {
+impl Mul<f64> for NutrientQuantity {
     type Output = Self;
     fn mul(self, rhs: f64) -> Self {
         let nutrient_borrowed = self.nutrient.borrow();
@@ -168,7 +168,7 @@ impl Mul<f64> for NutrientAmount {
     }
 }
 
-impl Div<f64> for NutrientAmount {
+impl Div<f64> for NutrientQuantity {
     type Output = Self;
     fn div(self, rhs: f64) -> Self {
         let nutrient_borrowed = self.nutrient.borrow();
@@ -177,12 +177,12 @@ impl Div<f64> for NutrientAmount {
     }
 }
 
-impl Sum<NutrientAmount> for NutrientAmount {
+impl Sum<NutrientQuantity> for NutrientQuantity {
     fn sum<I: Iterator<Item = Self>>(mut iter: I) -> Self {
         if let Some(first) = iter.next() {
             iter.fold(first, |acc, n| acc + n)
         } else {
-            NutrientAmount::new(0f64, Nutrient::default(), NutrientUnit::None).unwrap()
+            NutrientQuantity::new(0f64, Nutrient::default(), NutrientUnit::None).unwrap()
         }
     }
 }

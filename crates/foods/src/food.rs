@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use nutrients::{nutrient::Nutrient, nutrient_amount::NutrientAmount};
+use nutrients::{nutrient::Nutrient, nutrient_quantity::NutrientQuantity};
 use units::energy::{quantity::EnergyQuantity, unit::EnergyUnit};
 use uuid::Uuid;
 
@@ -16,8 +16,6 @@ pub struct Food {
     food_instance_uuid: Uuid,
     data_source_uuid: Uuid,
     price_metadata: Option<PriceMetadata>,
-    // Move price metadata to be inside food instances?
-    // Or create a container type with food instances and price metadata inside?
 }
 
 impl Food {
@@ -66,7 +64,7 @@ impl Food {
         nutrient: Nutrient,
         food_instance_uuid: Uuid,
         data_source_uuid: Uuid,
-    ) -> Option<NutrientAmount> {
+    ) -> Option<NutrientQuantity> {
         let food_instance = self
             .food_instances
             .iter()

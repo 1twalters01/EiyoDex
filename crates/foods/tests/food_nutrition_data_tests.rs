@@ -1,13 +1,13 @@
 use foods::{data_sources::DataSource, food_nutrition_data::FoodNutritionData};
 use nutrients::{
     nutrient::Nutrient,
-    nutrient_amount::NutrientAmount,
-    nutrient_amount_list::NutrientAmountList,
+    nutrient_quantity::NutrientQuantity,
+    nutrient_quantity_list::NutrientQuantityList,
     schema::{
         nutrient_classes::{ChemicalType, EssentialityType, QuantityType},
         nutrient_type::NutrientType,
     },
-    units::NutrientUnit,
+    nutrient_units::NutrientUnit,
 };
 use units::mass::unit::MassUnit;
 use uuid::Uuid;
@@ -24,7 +24,7 @@ pub fn test_id() {
         essentiality_type: Some(EssentialityType::Essential),
     };
 
-    let iron: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let iron: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         iron_value,
         Nutrient::new_rc_refcell(
             iron_id,
@@ -36,7 +36,7 @@ pub fn test_id() {
     )
     .unwrap();
 
-    let potassium: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let potassium: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         potassium_value,
         Nutrient::new_rc_refcell(
             potassium_id,
@@ -48,7 +48,7 @@ pub fn test_id() {
     )
     .unwrap();
 
-    let nutrient_amount_list = NutrientAmountList::from_vec(Vec::from([iron, potassium]));
+    let nutrient_amount_list = NutrientQuantityList::from_vec(Vec::from([iron, potassium]));
 
     let data_source_id = None;
     let data_source_name = String::from("NCCDB");
@@ -74,7 +74,7 @@ pub fn test_data_source() {
         essentiality_type: Some(EssentialityType::Essential),
     };
 
-    let iron: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let iron: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         iron_value,
         Nutrient::new_rc_refcell(
             iron_id,
@@ -86,7 +86,7 @@ pub fn test_data_source() {
     )
     .unwrap();
 
-    let potassium: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let potassium: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         potassium_value,
         Nutrient::new_rc_refcell(
             potassium_id,
@@ -98,7 +98,7 @@ pub fn test_data_source() {
     )
     .unwrap();
 
-    let nutrient_amount_list = NutrientAmountList::from_vec(Vec::from([iron, potassium]));
+    let nutrient_amount_list = NutrientQuantityList::from_vec(Vec::from([iron, potassium]));
 
     let data_source_id = None;
     let data_source_name_1 = String::from("NCCDB");
@@ -128,7 +128,7 @@ pub fn test_nutrient_amount_list() {
         essentiality_type: Some(EssentialityType::Essential),
     };
 
-    let iron: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let iron: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         iron_value,
         Nutrient::new_rc_refcell(
             iron_id,
@@ -140,7 +140,7 @@ pub fn test_nutrient_amount_list() {
     )
     .unwrap();
 
-    let potassium: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let potassium: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         potassium_value,
         Nutrient::new_rc_refcell(
             potassium_id,
@@ -153,10 +153,10 @@ pub fn test_nutrient_amount_list() {
     .unwrap();
 
     let nutrient_amount_list_id = Uuid::from_u128(0u128);
-    let mut nutrient_amount_list_1 = NutrientAmountList::from_vec(Vec::from([iron.clone()]));
-    let mut nutrient_amount_list_2 = NutrientAmountList::from_vec(Vec::from([potassium.clone()]));
+    let mut nutrient_amount_list_1 = NutrientQuantityList::from_vec(Vec::from([iron.clone()]));
+    let mut nutrient_amount_list_2 = NutrientQuantityList::from_vec(Vec::from([potassium.clone()]));
     let mut nutrient_amount_list_3 =
-        NutrientAmountList::from_vec(Vec::from([iron.clone(), potassium.clone()]));
+        NutrientQuantityList::from_vec(Vec::from([iron.clone(), potassium.clone()]));
     nutrient_amount_list_1.set_id(nutrient_amount_list_id);
     nutrient_amount_list_2.set_id(nutrient_amount_list_id);
     nutrient_amount_list_3.set_id(nutrient_amount_list_id);

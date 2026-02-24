@@ -6,6 +6,7 @@ use crate::merchant::Merchant;
 #[derive(Clone, PartialEq)]
 pub struct PriceMetadata {
     merchant: Rc<RefCell<Merchant>>,
+    // Create a quantity enum that is either a {Currency, Number} or SpecificCurrencyQuantity and use instead
     specific_currency: Option<SpecificCurrencyQuantity>,
 }
 

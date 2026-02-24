@@ -4,7 +4,7 @@ use nutrients::{
         nutrient_classes::{ChemicalType, EssentialityType, QuantityType},
         nutrient_type::NutrientType,
     },
-    units::NutrientUnit,
+    nutrient_units::NutrientUnit,
 };
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
 use units::{mass::unit::MassUnit, volume::unit::VolumeUnit};

@@ -1,5 +1,5 @@
 use chrono::NaiveDate;
-use nutrients::{nutrient::Nutrient, nutrient_amount::NutrientAmount};
+use nutrients::{nutrient::Nutrient, nutrient_quantity::NutrientQuantity};
 use profiles::profile::Profile;
 use units::energy::quantity::EnergyQuantity;
 use uuid::Uuid;
@@ -110,19 +110,19 @@ impl JournalEntry {
     pub fn get_carbs(&self) {}
     pub fn get_fats(&self) {}
     pub fn get_water(&self) {}
-    pub fn get_nutrient_amount(&self, nutrient: Nutrient) -> NutrientAmount {
-        let uncategorised_nutrient_amount: NutrientAmount = self
+    pub fn get_nutrient_amount(&self, nutrient: Nutrient) -> NutrientQuantity {
+        let uncategorised_nutrient_amount: NutrientQuantity = self
             .uncategorised_time_slots
             .iter()
             .map(|entry| entry.get_flat_nutrient_amount(nutrient.clone()))
             .sum();
-        let time_slot_nutrient_amount: NutrientAmount = self
+        let time_slot_nutrient_amount: NutrientQuantity = self
             .time_slots
             .iter()
             .map(|time_slot| time_slot.get_flat_nutrient_amount(nutrient.clone()))
             .sum();
 
-        let total_nutrient_amount: NutrientAmount =
+        let total_nutrient_amount: NutrientQuantity =
             uncategorised_nutrient_amount + time_slot_nutrient_amount;
         return total_nutrient_amount;
     }

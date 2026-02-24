@@ -1,11 +1,11 @@
 use nutrients::{
     nutrient::Nutrient,
-    nutrient_amount::NutrientAmount,
+    nutrient_quantity::NutrientQuantity,
     schema::{
         nutrient_classes::{ChemicalType, EssentialityType, QuantityType},
         nutrient_type::NutrientType,
     },
-    units::NutrientUnit,
+    nutrient_units::NutrientUnit,
 };
 use units::mass::unit::MassUnit;
 
@@ -31,7 +31,7 @@ fn test_nutrient() {
     );
 
     let value = 5.2134;
-    let mut nutrient: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let mut nutrient: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value,
         potassium.clone(),
         NutrientUnit::Mass(MassUnit::Kilogram),
@@ -60,7 +60,7 @@ fn test_rounding() {
     );
 
     let value_1 = 5.2134;
-    let mut nutrient_1: NutrientAmount = NutrientAmount::new(
+    let mut nutrient_1: NutrientQuantity = NutrientQuantity::new(
         value_1,
         potassium.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -68,8 +68,8 @@ fn test_rounding() {
     .unwrap();
 
     let value_2 = 5.21;
-    let nutrient_2: NutrientAmount =
-        NutrientAmount::new(value_2, potassium, NutrientUnit::Mass(MassUnit::Milligram)).unwrap();
+    let nutrient_2: NutrientQuantity =
+        NutrientQuantity::new(value_2, potassium, NutrientUnit::Mass(MassUnit::Milligram)).unwrap();
 
     assert_eq!(nutrient_1.round(2), nutrient_2)
 }
@@ -90,8 +90,8 @@ fn test_multiply() {
     );
 
     let value = 5.2;
-    let mut nutrient: NutrientAmount =
-        NutrientAmount::new(value, potassium, NutrientUnit::Mass(MassUnit::Milligram)).unwrap();
+    let mut nutrient: NutrientQuantity =
+        NutrientQuantity::new(value, potassium, NutrientUnit::Mass(MassUnit::Milligram)).unwrap();
 
     nutrient = nutrient * 2f64;
     assert!(nutrient.get_value() == 10.4);
@@ -113,8 +113,8 @@ fn test_division() {
     );
 
     let value = 4.2;
-    let mut nutrient: NutrientAmount =
-        NutrientAmount::from_rc_refcell(value, potassium, NutrientUnit::Mass(MassUnit::Milligram))
+    let mut nutrient: NutrientQuantity =
+        NutrientQuantity::from_rc_refcell(value, potassium, NutrientUnit::Mass(MassUnit::Milligram))
             .unwrap();
 
     nutrient = nutrient / 2f64;
@@ -137,7 +137,7 @@ fn test_add() {
     );
 
     let value_1 = 5f64;
-    let nutrient_1: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let nutrient_1: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value_1,
         potassium.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -145,7 +145,7 @@ fn test_add() {
     .unwrap();
 
     let value_2 = 2.3;
-    let nutrient_2: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let nutrient_2: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value_2,
         potassium.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -156,7 +156,7 @@ fn test_add() {
         .borrow_mut()
         .set_description("Some description".to_string());
     let value_3 = 7.3;
-    let nutrient_3: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let nutrient_3: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value_3,
         potassium,
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -182,7 +182,7 @@ fn test_subtract() {
     );
 
     let value_1 = 5.2f64;
-    let nutrient_1: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let nutrient_1: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value_1,
         potassium.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -190,7 +190,7 @@ fn test_subtract() {
     .unwrap();
 
     let value_2 = 2.2;
-    let nutrient_2: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let nutrient_2: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value_2,
         potassium.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -201,7 +201,7 @@ fn test_subtract() {
         .borrow_mut()
         .set_description("Some description".to_string());
     let value_3 = 3f64;
-    let nutrient_3: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let nutrient_3: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value_3,
         potassium,
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -227,7 +227,7 @@ fn test_ordering() {
     );
 
     let value_1 = 5f64;
-    let nutrient_1: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let nutrient_1: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value_1,
         potassium.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -235,7 +235,7 @@ fn test_ordering() {
     .unwrap();
 
     let value_2 = 3600f64;
-    let nutrient_2: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let nutrient_2: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value_2,
         potassium.clone(),
         NutrientUnit::Mass(MassUnit::Microgram),
@@ -243,7 +243,7 @@ fn test_ordering() {
     .unwrap();
 
     let value_3 = 2.3;
-    let nutrient_3: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let nutrient_3: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value_3,
         potassium.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),

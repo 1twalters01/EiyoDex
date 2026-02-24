@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use utils::dsa::node::GraphNode;
 use uuid::Uuid;
 
-use crate::{nutrient::Nutrient, schema::nutrient_type::NutrientType, units::NutrientUnit};
+use crate::{nutrient::Nutrient, schema::nutrient_type::NutrientType, nutrient_units::NutrientUnit};
 
 pub struct NutrientRecord {
     id: Uuid,

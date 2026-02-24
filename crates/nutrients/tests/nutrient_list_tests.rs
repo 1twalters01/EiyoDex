@@ -1,12 +1,12 @@
 use nutrients::{
     nutrient::{link_parent_child, Nutrient},
-    nutrient_amount::NutrientAmount,
-    nutrient_amount_list::NutrientAmountList,
+    nutrient_quantity::NutrientQuantity,
+    nutrient_quantity_list::NutrientQuantityList,
     schema::{
         nutrient_classes::{ChemicalType, EssentialityType, QuantityType},
         nutrient_type::NutrientType,
     },
-    units::NutrientUnit,
+    nutrient_units::NutrientUnit,
 };
 use units::mass::unit::MassUnit;
 use uuid::Uuid;
@@ -24,7 +24,7 @@ fn test_id_funcs() {
 
     let value = 15f64;
 
-    let iron: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let iron: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value,
         Nutrient::new_rc_refcell(
             iron_id,
@@ -36,7 +36,7 @@ fn test_id_funcs() {
     )
     .unwrap();
 
-    let potassium: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let potassium: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value,
         Nutrient::new_rc_refcell(
             potassium_id,
@@ -48,7 +48,7 @@ fn test_id_funcs() {
     )
     .unwrap();
 
-    let mut nutrient_amount_list = NutrientAmountList::from_vec(Vec::from([iron, potassium]));
+    let mut nutrient_amount_list = NutrientQuantityList::from_vec(Vec::from([iron, potassium]));
 
     assert_ne!(nutrient_amount_list.get_id(), nutrient_list_id);
     nutrient_amount_list.set_id(nutrient_list_id);
@@ -68,7 +68,7 @@ fn test_push_and_remove_from_nutrient_list() {
 
     let value = 15f64;
 
-    let iron: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let iron: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value,
         Nutrient::new_rc_refcell(
             iron_id,
@@ -80,7 +80,7 @@ fn test_push_and_remove_from_nutrient_list() {
     )
     .unwrap();
 
-    let potassium: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let potassium: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value,
         Nutrient::new_rc_refcell(
             potassium_id,
@@ -92,19 +92,19 @@ fn test_push_and_remove_from_nutrient_list() {
     )
     .unwrap();
 
-    let mut nutrient_amount_list_iron = NutrientAmountList::from_vec(Vec::from([iron.clone()]));
+    let mut nutrient_amount_list_iron = NutrientQuantityList::from_vec(Vec::from([iron.clone()]));
     nutrient_amount_list_iron.set_id(nutrient_list_id);
     let mut nutrient_amount_list_potassium =
-        NutrientAmountList::from_vec(Vec::from([potassium.clone()]));
+        NutrientQuantityList::from_vec(Vec::from([potassium.clone()]));
     nutrient_amount_list_potassium.set_id(nutrient_list_id);
     let mut nutrient_amount_list_iron_and_potassium =
-        NutrientAmountList::from_vec(Vec::from([iron.clone(), potassium.clone()]));
+        NutrientQuantityList::from_vec(Vec::from([iron.clone(), potassium.clone()]));
     nutrient_amount_list_iron_and_potassium.set_id(nutrient_list_id);
     let mut nutrient_amount_list_potassium_and_iron =
-        NutrientAmountList::from_vec(Vec::from([potassium.clone(), iron.clone()]));
+        NutrientQuantityList::from_vec(Vec::from([potassium.clone(), iron.clone()]));
     nutrient_amount_list_potassium_and_iron.set_id(nutrient_list_id);
 
-    let mut nutrient_amount_list = NutrientAmountList::from_vec(Vec::from([iron.clone()]));
+    let mut nutrient_amount_list = NutrientQuantityList::from_vec(Vec::from([iron.clone()]));
     nutrient_amount_list.set_id(nutrient_list_id);
 
     nutrient_amount_list.push(iron.clone());
@@ -144,7 +144,7 @@ fn test_sum_descendants_vec() {
         nutrient_type.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),
     );
-    let iron_amount: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let iron_amount: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value_1,
         iron.clone(),
         NutrientUnit::Mass(MassUnit::Kilogram),
@@ -158,7 +158,7 @@ fn test_sum_descendants_vec() {
         nutrient_type.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),
     );
-    let heme_iron_amount: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let heme_iron_amount: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value_2,
         heme_iron.clone(),
         NutrientUnit::Mass(MassUnit::Kilogram),
@@ -172,7 +172,7 @@ fn test_sum_descendants_vec() {
         nutrient_type.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),
     );
-    let non_heme_iron_amount: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let non_heme_iron_amount: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value_3,
         non_heme_iron.clone(),
         NutrientUnit::Mass(MassUnit::Kilogram),
@@ -186,7 +186,7 @@ fn test_sum_descendants_vec() {
         nutrient_type.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),
     );
-    let non_heme_iron_amount_a: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let non_heme_iron_amount_a: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value_4,
         non_heme_iron_a.clone(),
         NutrientUnit::Mass(MassUnit::Kilogram),
@@ -200,7 +200,7 @@ fn test_sum_descendants_vec() {
         nutrient_type.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),
     );
-    let non_heme_iron_amount_b: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let non_heme_iron_amount_b: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value_5,
         non_heme_iron_b.clone(),
         NutrientUnit::Mass(MassUnit::Kilogram),
@@ -214,7 +214,7 @@ fn test_sum_descendants_vec() {
         nutrient_type,
         NutrientUnit::Mass(MassUnit::Milligram),
     );
-    let potassium_amount: NutrientAmount = NutrientAmount::from_rc_refcell(
+    let potassium_amount: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value_6,
         potassium.clone(),
         NutrientUnit::Mass(MassUnit::Kilogram),
@@ -235,7 +235,7 @@ fn test_sum_descendants_vec() {
         non_heme_iron_amount_b,
         potassium_amount,
     ]);
-    let minerals = NutrientAmountList::from_vec(mineral_vec);
+    let minerals = NutrientQuantityList::from_vec(mineral_vec);
     println!("{:#?}", minerals.get_nutrient_names());
 
     let iron_sum = minerals.sum_amounts_from_descendants_rc_refcell(iron);

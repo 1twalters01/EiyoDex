@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use nutrients::{nutrient::Nutrient, nutrient_amount::NutrientAmount};
+use nutrients::{nutrient::Nutrient, nutrient_quantity::NutrientQuantity};
 use units::energy::quantity::EnergyQuantity;
 use uuid::Uuid;
 
@@ -79,13 +79,13 @@ impl TimeSlot {
     pub fn get_carbs(&self) {}
     pub fn get_fats(&self) {}
     pub fn get_water(&self) {}
-    pub fn get_nutrient_amount(&self, nutrient: Nutrient) -> Option<NutrientAmount> {
+    pub fn get_nutrient_amount(&self, nutrient: Nutrient) -> Option<NutrientQuantity> {
         self.entries
             .iter()
             .map(|entry| entry.get_nutrient_amount(nutrient.clone()))
             .sum()
     }
-    pub fn get_flat_nutrient_amount(&self, nutrient: Nutrient) -> NutrientAmount {
+    pub fn get_flat_nutrient_amount(&self, nutrient: Nutrient) -> NutrientQuantity {
         self.entries
             .iter()
             .map(|entry| entry.get_flat_nutrient_amount(nutrient.clone()))

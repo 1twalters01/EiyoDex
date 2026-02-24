@@ -13,7 +13,7 @@ use crate::{
         nutrient_classes::{ChemicalType, QuantityType},
         nutrient_type::NutrientType,
     },
-    units::NutrientUnit,
+    nutrient_units::NutrientUnit,
 };
 
 #[derive(Debug, Clone)]

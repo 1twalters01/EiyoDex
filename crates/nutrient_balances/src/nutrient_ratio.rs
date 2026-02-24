@@ -1,12 +1,12 @@
-use nutrients::nutrient_amount::NutrientAmount;
+use nutrients::nutrient_quantity::NutrientQuantity;
 use utils::base_types::percentage::Percentage;
 
 pub struct NutrientRatio {
-    parts: Vec<NutrientAmount>,
+    parts: Vec<NutrientQuantity>,
 }
 
 impl NutrientRatio {
-    pub fn new(parts: Vec<NutrientAmount>) -> Result<Self, String> {
+    pub fn new(parts: Vec<NutrientQuantity>) -> Result<Self, String> {
         if parts.is_empty() {
             return Err(String::from("Ratio must have at least one part"));
         }
@@ -20,11 +20,11 @@ impl NutrientRatio {
         Ok(NutrientRatio { parts })
     }
 
-    pub fn get_parts(&self) -> &[NutrientAmount] {
+    pub fn get_parts(&self) -> &[NutrientQuantity] {
         &self.parts
     }
 
-    pub fn get_normalization(&self) -> Vec<NutrientAmount> {
+    pub fn get_normalization(&self) -> Vec<NutrientQuantity> {
         let sum: f64 = self
             .parts
             .iter()
@@ -45,8 +45,8 @@ impl NutrientRatio {
         Ok(Percentage::new(value_float))
     }
 
-    pub fn approximate_to_n_dp(&self, precision: u8) -> Vec<NutrientAmount> {
-        let scaled_nutrient_amounts: Vec<NutrientAmount> = self
+    pub fn approximate_to_n_dp(&self, precision: u8) -> Vec<NutrientQuantity> {
+        let scaled_nutrient_amounts: Vec<NutrientQuantity> = self
             .parts
             .iter()
             .map(|nutrient_amount| nutrient_amount.clone().round(precision))

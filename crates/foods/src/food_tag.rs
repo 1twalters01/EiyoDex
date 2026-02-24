@@ -2,7 +2,7 @@ use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
 
 use uuid::Uuid;
 
-use crate::food_category::FoodCategory;
+use crate::food_tag_category::FoodTagCategory;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FoodTag {
@@ -11,8 +11,8 @@ pub struct FoodTag {
     description: String,
     // applicable_category_ids: BTreeSet<Uuid>, // Will want to save Uuids into db
     // #[serde(skip)]
-    // applicable_categories: Vec<Rc<RefCell<FoodCategory>>>,
-    applicable_categories: BTreeSet<Rc<RefCell<FoodCategory>>>,
+    // applicable_categories: Vec<Rc<RefCell<FoodTagCategory>>>,
+    applicable_categories: BTreeSet<Rc<RefCell<FoodTagCategory>>>,
 }
 
 impl FoodTag {
@@ -54,29 +54,29 @@ impl FoodTag {
         self.description = description;
     }
 
-    pub fn get_applicable_categories(&self) -> BTreeSet<Rc<RefCell<FoodCategory>>> {
+    pub fn get_applicable_categories(&self) -> BTreeSet<Rc<RefCell<FoodTagCategory>>> {
         self.applicable_categories.clone()
     }
 
     pub fn set_applicable_categories(
         &mut self,
-        food_categories: BTreeSet<Rc<RefCell<FoodCategory>>>,
+        food_categories: BTreeSet<Rc<RefCell<FoodTagCategory>>>,
     ) {
         self.applicable_categories = food_categories;
     }
 
-    pub fn add_applicable_category(&mut self, food_category: Rc<RefCell<FoodCategory>>) {
+    pub fn add_applicable_category(&mut self, food_category: Rc<RefCell<FoodTagCategory>>) {
         self.applicable_categories.insert(food_category);
     }
 
     pub fn extend_applicable_categories(
         &mut self,
-        food_categories: Vec<Rc<RefCell<FoodCategory>>>,
+        food_categories: Vec<Rc<RefCell<FoodTagCategory>>>,
     ) {
         self.applicable_categories.extend(food_categories);
     }
 
-    pub fn remove_applicable_category(&mut self, food_category: Rc<RefCell<FoodCategory>>) {
+    pub fn remove_applicable_category(&mut self, food_category: Rc<RefCell<FoodTagCategory>>) {
         self.applicable_categories
             .retain(|category| !Rc::ptr_eq(category, &food_category));
     }

@@ -5,6 +5,7 @@ pub struct DataSource {
     id: Uuid,
     name: String,
     description: String,
+    version: Option<String>,
 }
 
 impl DataSource {
@@ -18,6 +19,7 @@ impl DataSource {
             id,
             name,
             description: String::new(),
+            version: None,
         }
     }
 
@@ -43,5 +45,13 @@ impl DataSource {
 
     pub fn set_description(&mut self, description: String) {
         self.description = description;
+    }
+
+    pub fn get_version(&self) -> Option<String> {
+        self.version.clone()
+    }
+
+    pub fn set_version(&mut self, version: Option<String>) {
+        self.version = version;
     }
 }

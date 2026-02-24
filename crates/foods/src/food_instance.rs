@@ -1,7 +1,7 @@
 use crate::{data_sources::DataSource, food_nutrition_data::FoodNutritionData, food_tag::FoodTag};
 use nutrients::{
-    nutrient::Nutrient, nutrient_amount::NutrientAmount, nutrient_amount_list::NutrientAmountList,
-    units::NutrientUnit,
+    nutrient::Nutrient, nutrient_quantity::NutrientQuantity, nutrient_quantity_list::NutrientQuantityList,
+    nutrient_units::NutrientUnit,
 };
 use std::{
     cell::RefCell,
@@ -127,7 +127,7 @@ impl FoodInstance {
         &self,
         nutrient: Nutrient,
         data_source_uuid: Uuid,
-    ) -> Option<NutrientAmount> {
+    ) -> Option<NutrientQuantity> {
         None
     }
 }
