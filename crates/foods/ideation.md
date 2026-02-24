@@ -15,7 +15,7 @@ struct FoodCategory {
     name: String,
     description: String,
     parent: Weak<RefCell<FoodCategory>,
-    children: HashSet<Rc<RefCell<FoodCategoryChild>>>,
+    children: Vec<Rc<RefCell<FoodCategoryChild>>>,
 }
 
 struct FoodTaxonomy {
@@ -67,7 +67,7 @@ pub struct DataSource {
 pub struct DataSourceInstance {
     data_source: Rc<RefCell<DataSource>>,
     version: String, // Could create a Version type
-    food_nutrition_data: HashSet<FoodNutritionData>,
+    food_nutrition_data: HashSet<Rc<RefCell<FoodNutritionData>>>,
 }
 
 pub struct FoodNutritionData {
@@ -128,7 +128,7 @@ struct FoodQuantity {
     value: f64,
     food_variant: Rc<RefCell<FoodVariant>,
     data_source_instance: Rc<RefCell<DataSourceInstance>>,
-    consumed_at: DateTime,
+    consumed_at: DateTime<Utc>,
 }
 ```
 

@@ -1,4 +1,5 @@
 use std::{cell::RefCell, rc::Rc};
+use chrono::{DateTime, Utc};
 use units::specific_currency::quantity::SpecificCurrencyQuantity;
 
 use crate::merchant::Merchant;
@@ -8,6 +9,7 @@ pub struct PriceMetadata {
     merchant: Rc<RefCell<Merchant>>,
     // Create a quantity enum that is either a {Currency, Number} or SpecificCurrencyQuantity and use instead
     specific_currency: Option<SpecificCurrencyQuantity>,
+    timestamp: DateTime<Utc>
 }
 
 impl PriceMetadata {
@@ -15,6 +17,7 @@ impl PriceMetadata {
         PriceMetadata {
             merchant: Rc::new(RefCell::new(merchant)),
             specific_currency: specific_currency,
+            timestamp: Utc::now(),
         }
     }
 
@@ -32,5 +35,13 @@ impl PriceMetadata {
 
     pub fn set_specific_currency(&mut self, specific_currency: Option<SpecificCurrencyQuantity>) {
         self.specific_currency = specific_currency;
+    }
+
+    pub fn get_timestamp(&self) -> DateTime<Utc> {
+        self.timestamp
+    }
+
+    pub fn set_timestamp(&mut self, timestamp: DateTime<Utc>) {
+        self.timestamp = timestamp;
     }
 }
