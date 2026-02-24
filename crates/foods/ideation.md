@@ -37,7 +37,7 @@ enum ItemQuantity {
 }
 
 struct PricePerCount {
-    price: Currency
+    price: Currency,
     count: f64 // Use decimal instead?
 }
 
@@ -127,7 +127,7 @@ FoodQuantity - The amount of food
 ```rust
 struct FoodQuantity {
     value: f64,
-    food_variant: Rc<RefCell<FoodVariant>,
+    food_variant: Rc<RefCell<FoodVariant>>,
     data_source_instance: Rc<RefCell<DataSourceInstance>>,
     consumed_at: DateTime<Utc>,
 }
