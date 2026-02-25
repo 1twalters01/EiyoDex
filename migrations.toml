@@ -3,3 +3,8 @@
 file = "migrations/nutrients/0001_create_essentiality_types.sql"
 description = "Create essentiality_types lookup table"
 environments = ["dev", "prod"]
+
+[[migration]]
+file = "migrations/nutrients/0002_create_quantity_types.sql"
+description = "Create quantity_types lookup table"
+environments = ["dev", "prod"]
