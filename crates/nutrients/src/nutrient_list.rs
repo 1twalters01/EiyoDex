@@ -1,4 +1,4 @@
-use crate::{nutrient::Nutrient, nutrient_record::{NutrientLinkRecord, NutrientRecord}};
+use crate::{nutrient::Nutrient, records::nutrient_record::{NutrientLinkRecord, NutrientRecord}};
 
 #[derive(Debug, Clone)]
 pub struct NutrientList {

@@ -1,0 +1,5 @@
+# nutrients
+[[migration]]
+file = "migrations/nutrients/0001_create_essentiality_types.sql"
+description = "Create essentiality_types lookup table"
+environments = ["dev", "prod"]

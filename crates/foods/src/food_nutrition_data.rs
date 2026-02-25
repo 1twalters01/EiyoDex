@@ -1,20 +1,24 @@
+use std::{cell::RefCell, rc::Rc};
+
 use nutrients::{nutrient_quantity::NutrientQuantity, nutrient_quantity_list::NutrientQuantityList};
 use uuid::Uuid;
 
-use crate::data_sources::DataSource;
+use crate::data_source::DataSourceInstance;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FoodNutritionData {
     id: Uuid,
-    data_source: DataSource,
+    data_source_instance: Rc<RefCell<DataSourceInstance>>,
+    description: String,
     nutrient_quantity_list: NutrientQuantityList,
 }
 
 impl FoodNutritionData {
-    pub fn new(data_source: DataSource, nutrient_quantity_list: NutrientQuantityList) -> Self {
+    pub fn new(data_source_instance: Rc<RefCell<DataSourceInstance>>, nutrient_quantity_list: NutrientQuantityList) -> Self {
         Self {
             id: Uuid::new_v4(),
-            data_source,
+            data_source_instance,
+            description: String::new(),
             nutrient_quantity_list,
         }
     }
@@ -27,12 +31,20 @@ impl FoodNutritionData {
         self.id = id;
     }
 
-    pub fn get_data_source(&self) -> DataSource {
-        self.data_source.clone()
+    pub fn get_data_source(&self) -> Rc<RefCell<DataSourceInstance>> {
+        self.data_source_instance.clone()
     }
 
-    pub fn set_data_source(&mut self, data_source: DataSource) {
-        self.data_source = data_source;
+    pub fn set_data_source(&mut self, data_source_instance: Rc<RefCell<DataSourceInstance>>) {
+        self.data_source_instance = data_source_instance;
+    }
+
+    pub fn get_description(&self) -> String {
+        self.description.clone()
+    }
+
+    pub fn set_description(&mut self, description: String) {
+        self.description = description;
     }
 
     pub fn get_nutrient_amount_list(&self) -> NutrientQuantityList {

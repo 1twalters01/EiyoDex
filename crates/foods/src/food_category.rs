@@ -1,11 +1,15 @@
+use std::{cell::RefCell, rc::{Rc, Weak}};
+
 use uuid::Uuid;
+
+use crate::food_taxonomy::FoodTaxonomy;
 
 enum FoodCategoryChild {
     FoodCategory(Rc<RefCell<FoodCategory>>),
     FoodTaxonomy(Rc<RefCell<FoodTaxonomy>>),
 }
 
-struct FoodCategory {
+pub struct FoodCategory {
     id: Uuid,
     name: String,
     description: String,
@@ -24,12 +28,12 @@ impl FoodCategory {
         }
     }
 
-    pub fn get_id(&self) -> {
-        Self.id.clone()
+    pub fn get_id(&self) -> Uuid {
+        self.id.clone()
     }
 
     pub fn set_id(&mut self, id: Uuid) {
-        Self.id = id;
+        self.id = id;
     }
 
     pub fn get_name(&self) -> String {
@@ -48,7 +52,7 @@ impl FoodCategory {
         self.description = description;
     }
 
-    pub fn get_parent(&self) -> {
+    pub fn get_parent(&self) -> Weak<RefCell<FoodCategory>> {
         self.parent.clone()
     }
 
@@ -56,19 +60,19 @@ impl FoodCategory {
         self.parent = food_category;
     }
 
-    pub fn get_children(&mut self) -> Vec<FoodCategoryChild> {
+    pub fn get_children(&mut self) -> Vec<Rc<RefCell<FoodCategoryChild>>> {
         self.children.clone()
     }
 
-    pub fn set_children(&mut self, children: Vec<FoodCategoryChild>) {
+    pub fn set_children(&mut self, children: Vec<Rc<RefCell<FoodCategoryChild>>>) {
         self.children = children;
     }
 
-    pub fn push_child(&mut self, child: FoodCategoryChild) {
+    pub fn push_child(&mut self, child: Rc<RefCell<FoodCategoryChild>>) {
         self.children.push(child)
     }
 
-    pub fn remove_child(&mut self, child: FoodCategoryChild) {
-        self.children.iter().retain(|c| c != child)
+    pub fn remove_child(&mut self, child: Rc<RefCell<FoodCategoryChild>>) {
+        self.children.retain(|c| !Rc::ptr_eq(c, &child))
     }
 }

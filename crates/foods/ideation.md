@@ -38,13 +38,13 @@ enum ItemQuantity {
 
 struct PricePerCount {
     price: Currency,
-    count: f64 // Use decimal instead?
+    count: f64, // Use decimal instead?
 }
 
 struct PriceMetadata {
     merchant: Rc<RefCell<Merchant>>,
-    specific_currency: Option<ItemQuantity>, 
-    timestamp: DateTime
+    item_quantity: Option<ItemQuantity>, 
+    timestamp: DateTime,
 }
 
 pub struct Merchant {
@@ -56,7 +56,7 @@ pub struct Merchant {
 ```
 
 DataSource - The food nutrition data provider e.g. USDA or NCCDB
-FoodNutritionData - The food nutrition data in question
+DataSourceVersion - the version of the data source
 ```rust
 pub struct DataSource {
     id: Uuid,
@@ -64,12 +64,19 @@ pub struct DataSource {
     description: String,
 }
 
-pub struct DataSourceInstance {
-    data_source: Rc<RefCell<DataSource>>,
-    version: String, // Could create a Version type
-    food_nutrition_data: HashSet<Rc<RefCell<FoodNutritionData>>>,
+pub struct DataSourceVersion {
+    data_source: DataSource,
+    version: String, // Could create a version type
 }
 
+pub struct DataSourceInstance {
+    data_source_version: Rc<RefCell<DataSourceVersion>>,
+    food_nutrition_data: HashSet<Rc<RefCell<FoodNutritionData>>>,
+}
+```
+
+FoodNutritionData - The food nutrition data in question
+```rust
 pub struct FoodNutritionData {
     id: Uuid,
     data_source_instance: Rc<RefCell<DataSourceInstance>>,
@@ -118,7 +125,7 @@ FoodInstance - A specific instance of a food
 ```rust
 struct FoodInstance {
     id: Uuid,
-    food_variant: FoodVariant,
+    food_variant: Weak<RefCell<FoodVariant>>,
     data_source_instance: DataSourceInstance,
 }
 ```
@@ -133,9 +140,9 @@ struct FoodQuantity {
 }
 ```
 
-FoodQuantityList - A list of food quantities e.g. in a recipe
+Recipe - A list of food quantities
 ```rust
-struct FoodQuantityList {
+struct Recipe {
     food_quantities: Vec<FoodQuantity>
 }
 ```

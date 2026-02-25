@@ -1,4 +1,5 @@
 use crate::schema::energy::EnergyYieldingNutrients;
+use sqlx::Type;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ChemicalType {
@@ -110,7 +111,9 @@ impl QuantityType {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, Type)]
+#[sqlx(type_name = "TEXT")]
+#[sqlx(rename_all = "snake_case")]
 pub enum EssentialityType {
     Essential,
     ConditionallyEssential,
