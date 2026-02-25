@@ -15,7 +15,7 @@ async fn test_run_migrations_temporary() {
     let current_env = "dev";
     database_service.run_migrations(current_env).await.expect("Unable to run migrations");
 
-    let rows: Vec<(i64, String)> = sqlx::query_as("SELECT id, name FROM essentiality_types")
+    let rows: Vec<(i64, String)> = sqlx::query_as("SELECT id, name FROM nutrients_essentiality_types")
         .fetch_all(&database_service.pool)
         .await.expect("Unable to run select query");
 
@@ -30,10 +30,10 @@ async fn test_run_migrations() {
     let current_env = "dev";
     database_service.run_migrations(current_env).await.expect("Unable to run migrations");
 
-    let rows: Vec<(i64, String)> = sqlx::query_as("SELECT id, name FROM essentiality_types")
+    let rows: Vec<(i64, String)> = sqlx::query_as("SELECT id, name FROM nutrients_quantity_types")
         .fetch_all(&database_service.pool)
         .await.expect("Unable to run select query");
 
     assert_eq!(rows.len(), 3); // we expect 3 enum values
-    assert!(rows.iter().any(|(_, name)| name == "essential"));
+    assert!(rows.iter().any(|(_, name)| name == "macronutrient"));
 }
