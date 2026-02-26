@@ -100,5 +100,5 @@ impl NutrientTypeRow {
     }
 
     pub fn load_from_database() -> Self {}
-    pub fn save_to_database(&self) {}
+    pub fn save_to_database(&self) -> Result<(), sqlx::Error> {}
 }
