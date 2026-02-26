@@ -11,8 +11,8 @@ pub fn test_nutrients_carbohydrate_net_calculation() {
     let fiber = NutrientType::new(
         ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Carbohydrate(
             CarbohydrateNutrient {
-                carb_type: Carbohydrate::Fiber,
-                is_added: false,
+                carbohydrate_type: Carbohydrate::Fiber,
+                is_added_sugar: false,
                 glycemic_index: None,
             },
         )),
@@ -24,8 +24,8 @@ pub fn test_nutrients_carbohydrate_net_calculation() {
     let starch = NutrientType::new(
         ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Carbohydrate(
             CarbohydrateNutrient {
-                carb_type: Carbohydrate::Starch,
-                is_added: false,
+                carbohydrate_type: Carbohydrate::Starch,
+                is_added_sugar: false,
                 glycemic_index: None,
             },
         )),
@@ -37,8 +37,8 @@ pub fn test_nutrients_carbohydrate_net_calculation() {
     let sugar = NutrientType::new(
         ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Carbohydrate(
             CarbohydrateNutrient {
-                carb_type: Carbohydrate::Sugar,
-                is_added: true,
+                carbohydrate_type: Carbohydrate::Sugar,
+                is_added_sugar: true,
                 glycemic_index: None,
             },
         )),
@@ -50,8 +50,8 @@ pub fn test_nutrients_carbohydrate_net_calculation() {
     let sugar_alcohol = NutrientType::new(
         ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Carbohydrate(
             CarbohydrateNutrient {
-                carb_type: Carbohydrate::SugarAlcohol,
-                is_added: false,
+                carbohydrate_type: Carbohydrate::SugarAlcohol,
+                is_added_sugar: false,
                 glycemic_index: None,
             },
         )),

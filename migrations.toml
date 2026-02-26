@@ -8,3 +8,34 @@ environments = ["dev", "prod"]
 file = "migrations/nutrients/0002_create_quantity_types.sql"
 description = "Create quantity_types lookup table"
 environments = ["dev", "prod"]
+
+[[migration]]
+file = "migrations/nutrients/0003_create_chemical_types.sql"
+description = "Create chemical_types lookup table"
+environments = ["dev", "prod"]
+
+[[migration]]
+file = "migrations/nutrients/0004_create_energy_yielding_nutrient_table.sql"
+description = "Create energy yielding nutrient table"
+environments = ["dev", "prod"]
+
+[[migration]]
+file = "migrations/nutrients/0005_create_carbohydrate_types.sql"
+description = "Create carbohydrate_types lookup table"
+environments = ["dev", "prod"]
+
+[[migration]]
+file = "migrations/nutrients/0006_create_lipid_types.sql"
+description = "Create lipid_types lookup table"
+environments = ["dev", "prod"]
+
+[[migration]]
+file = "migrations/nutrients/0007_create_energy_tables.sql"
+description = "Create carbohydrate, protein and fat tables"
+environments = ["dev", "prod"]
+
+[[migration]]
+file = "migrations/nutrients/0008_create_nutrient_table.sql"
+description = "Create nutrient table"
+environments = ["dev", "prod"]
+

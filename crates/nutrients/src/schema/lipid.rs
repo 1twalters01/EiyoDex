@@ -1,6 +1,6 @@
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub struct LipidNutrient {
-    lipid_type: Lipid,
+    pub lipid_type: Lipid,
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]

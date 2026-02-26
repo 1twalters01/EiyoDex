@@ -1,13 +1,13 @@
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub struct CarbohydrateNutrient {
-    pub carb_type: Carbohydrate,
-    pub is_added: bool,
+    pub carbohydrate_type: Carbohydrate,
+    pub is_added_sugar: bool,
     pub glycemic_index: Option<u8>,
 }
 
 impl CarbohydrateNutrient {
     pub fn use_in_net_carbs(&self) -> bool {
-        self.carb_type.use_in_net_carbs()
+        self.carbohydrate_type.use_in_net_carbs()
     }
 }
 
