@@ -1,7 +1,7 @@
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-    pub enum SpecificCurrencyUnitParseError {
+pub enum SpecificCurrencyUnitParseError {
     #[error("Specific currency unit has an invalid Format: '{input}'")]
     InvalidFormat { input: String },
 

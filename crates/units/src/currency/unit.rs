@@ -27,7 +27,10 @@ macro_rules! define_currency_units {
             str::FromStr,
         };
         use serde::{Deserialize, Serialize};
-        use utils::cache::CacheService;
+        use utils::{
+            cache::CacheService,
+            database::DatabaseService,
+        };
 
         pub struct CurrencyMetadata {
             pub symbol: &'static str,
@@ -333,6 +336,40 @@ macro_rules! define_currency_units {
                 };
 
                 Ok(current_value / target_value)
+            }
+
+            pub async fn save_to_database() -> Result<(), sqlx::Error> {
+                let database_service = DatabaseService::new().await?;
+                let currency_enumerations = CurrencyUnit::get_enumerations();
+                for currency in currency_enumerations {
+                    let unit_type = currency.as_unit_type();
+                    sqlx::query!(
+                        r#"
+                            INSERT OR IGNORE INTO units_currency_types (unit_type)
+                            VALUES (?)
+                        "#,
+                        unit_type,
+                    )
+                    .execute(&database_service.pool)
+                    .await?;
+                }
+                return Ok(())
+            }
+
+            pub async fn get_database_id(&self) -> Result<i64, sqlx::Error> {
+                let database_service = DatabaseService::new().await?;
+                let unit_type = self.as_unit_type();
+                let row = sqlx::query!(
+                    r#"
+                        SELECT id 
+                        FROM units_currency_types
+                        WHERE unit_type = ?
+                    "#,
+                    unit_type
+                )
+                .fetch_one(&database_service.pool)
+                .await?;
+                Ok(row.id)
             }
         }
 

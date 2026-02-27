@@ -1,5 +1,6 @@
 use std::{collections::BTreeSet, str::FromStr};
 use units::{mass::unit::MassUnit, measurement_system::MeasurementSystem};
+use utils::database::DatabaseService;
 
 #[test]
 fn test_get_mass_unit_enumerations() {
@@ -114,3 +115,37 @@ fn test_from_str() {
     assert_eq!(MassUnit::from_str("ounce").unwrap(), MassUnit::Ounce);
     assert_eq!(MassUnit::from_str("ounces").unwrap(), MassUnit::Ounce);
 }
+
+#[tokio::test]
+async fn test_save_to_database() {
+    let database_service = DatabaseService::new().await.unwrap();
+    let res = MassUnit::save_to_database().await;
+    assert!(res.is_ok());
+
+    let mass = MassUnit::Gram.as_unit_type();
+    let rows = sqlx::query!(
+        r#"
+            SELECT id, unit_type
+            FROM units_mass_types
+            WHERE unit_type = ?
+        "#,
+        mass
+    )
+    .fetch_one(&database_service.pool)
+    .await
+    .unwrap();
+    let unit_type = rows.unit_type;
+
+    assert_eq!(unit_type, "gram");
+}
+
+#[tokio::test]
+async fn test_get_database_id() {
+    let res = MassUnit::save_to_database().await;
+    assert!(res.is_ok());
+
+    let gram = MassUnit::Gram;
+    let id = gram.get_database_id().await;
+    assert!(id.is_ok());
+}
+

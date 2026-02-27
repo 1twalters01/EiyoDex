@@ -22,6 +22,7 @@ macro_rules! define_duration_units {
         };
         use std::str::FromStr;
         use serde::{Deserialize, Serialize};
+        use utils::database::DatabaseService;
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
         pub enum DurationUnit {
@@ -61,6 +62,40 @@ macro_rules! define_duration_units {
                 match self {
                     $(DurationUnit::$variant => $si_factor),+
                 }
+            }
+
+            pub async fn save_to_database() -> Result<(), sqlx::Error> {
+                let database_service = DatabaseService::new().await?;
+                let duration_enumerations = DurationUnit::get_enumerations();
+                for duration in duration_enumerations {
+                    let unit_type = duration.as_unit_type();
+                    sqlx::query!(
+                        r#"
+                            INSERT OR IGNORE INTO units_duration_types (unit_type)
+                            VALUES (?)
+                        "#,
+                        unit_type,
+                    )
+                    .execute(&database_service.pool)
+                    .await?;
+                }
+                return Ok(())
+            }
+
+            pub async fn get_database_id(&self) -> Result<i64, sqlx::Error> {
+                let database_service = DatabaseService::new().await?;
+                let unit_type = self.as_unit_type();
+                let row = sqlx::query!(
+                    r#"
+                        SELECT id 
+                        FROM units_duration_types
+                        WHERE unit_type = ?
+                    "#,
+                    unit_type
+                )
+                .fetch_one(&database_service.pool)
+                .await?;
+                Ok(row.id)
             }
         }
 

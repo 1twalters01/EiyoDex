@@ -1,5 +1,6 @@
 use std::{collections::BTreeSet, str::FromStr};
 use units::{duration::unit::DurationUnit, measurement_system::MeasurementSystem};
+use utils::database::DatabaseService;
 
 #[test]
 fn test_get_distance_unit_enumerations() {
@@ -111,3 +112,37 @@ fn test_from_str() {
         DurationUnit::Second
     );
 }
+
+#[tokio::test]
+async fn test_save_to_database() {
+    let database_service = DatabaseService::new().await.unwrap();
+    let res = DurationUnit::save_to_database().await;
+    assert!(res.is_ok());
+
+    let duration = DurationUnit::Second.as_unit_type();
+    let rows = sqlx::query!(
+        r#"
+            SELECT id, unit_type
+            FROM units_duration_types
+            WHERE unit_type = ?
+        "#,
+        duration
+    )
+    .fetch_one(&database_service.pool)
+    .await
+    .unwrap();
+    let unit_type = rows.unit_type;
+
+    assert_eq!(unit_type, "second");
+}
+
+#[tokio::test]
+async fn test_get_database_id() {
+    let res = DurationUnit::save_to_database().await;
+    assert!(res.is_ok());
+
+    let pint = DurationUnit::Minute;
+    let id = pint.get_database_id().await;
+    assert!(id.is_ok());
+}
+

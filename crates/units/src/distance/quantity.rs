@@ -162,7 +162,9 @@ where
 
 impl Sum for DistanceQuantity {
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
-        iter.fold(DistanceQuantity::new(0f64, DistanceUnit::Meter), |a, b| b + a)
+        iter.fold(DistanceQuantity::new(0f64, DistanceUnit::Meter), |a, b| {
+            b + a
+        })
     }
 }
 

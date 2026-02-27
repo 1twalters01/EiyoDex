@@ -3007,6 +3007,7 @@ dependencies = [
  "chrono",
  "reqwest",
  "serde",
+ "sqlx",
  "thiserror",
  "tokio",
  "units_macro",

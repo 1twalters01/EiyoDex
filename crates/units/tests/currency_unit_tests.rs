@@ -1,6 +1,7 @@
 // use chrono::NaiveDate;
 use std::{collections::BTreeSet, str::FromStr};
 use units::currency::unit::CurrencyUnit;
+use utils::database::DatabaseService;
 
 #[test]
 fn test_get_mass_unit_enumerations() {
@@ -118,3 +119,37 @@ fn test_from_str() {
     assert_eq!(CurrencyUnit::from_str("EUR").unwrap(), CurrencyUnit::EUR);
     assert_eq!(CurrencyUnit::from_str("JPY").unwrap(), CurrencyUnit::JPY);
 }
+
+#[tokio::test]
+async fn test_save_to_database() {
+    let database_service = DatabaseService::new().await.unwrap();
+    let res = CurrencyUnit::save_to_database().await;
+    assert!(res.is_ok());
+
+    let currency = CurrencyUnit::EUR.as_unit_type();
+    let rows = sqlx::query!(
+        r#"
+            SELECT id, unit_type
+            FROM units_currency_types
+            WHERE unit_type = ?
+        "#,
+        currency
+    )
+    .fetch_one(&database_service.pool)
+    .await
+    .unwrap();
+    let unit_type = rows.unit_type;
+
+    assert_eq!(unit_type, "euro");
+}
+
+#[tokio::test]
+async fn test_get_database_id() {
+    let res = CurrencyUnit::save_to_database().await;
+    assert!(res.is_ok());
+
+    let pint = CurrencyUnit::USD;
+    let id = pint.get_database_id().await;
+    assert!(id.is_ok());
+}
+

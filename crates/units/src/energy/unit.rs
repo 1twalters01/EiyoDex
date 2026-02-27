@@ -21,6 +21,7 @@ macro_rules! define_energy_units {
         };
         use std::str::FromStr;
         use serde::{Deserialize, Serialize};
+        use utils::database::DatabaseService;
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
         pub enum EnergyUnit {
@@ -60,6 +61,40 @@ macro_rules! define_energy_units {
                 match self {
                     $(EnergyUnit::$variant => $si_factor),+
                 }
+            }
+
+            pub async fn save_to_database() -> Result<(), sqlx::Error> {
+                let database_service = DatabaseService::new().await?;
+                let energy_enumerations = EnergyUnit::get_enumerations();
+                for energy in energy_enumerations {
+                    let unit_type = energy.as_unit_type();
+                    sqlx::query!(
+                        r#"
+                            INSERT OR IGNORE INTO units_energy_types (unit_type)
+                            VALUES (?)
+                        "#,
+                        unit_type,
+                    )
+                    .execute(&database_service.pool)
+                    .await?;
+                }
+                return Ok(())
+            }
+
+            pub async fn get_database_id(&self) -> Result<i64, sqlx::Error> {
+                let database_service = DatabaseService::new().await?;
+                let unit_type = self.as_unit_type();
+                let row = sqlx::query!(
+                    r#"
+                        SELECT id 
+                        FROM units_energy_types
+                        WHERE unit_type = ?
+                    "#,
+                    unit_type
+                )
+                .fetch_one(&database_service.pool)
+                .await?;
+                Ok(row.id)
             }
         }
 

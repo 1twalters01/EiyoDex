@@ -1,5 +1,6 @@
 use std::{collections::BTreeSet, str::FromStr};
 use units::{distance::unit::DistanceUnit, measurement_system::MeasurementSystem};
+use utils::database::DatabaseService;
 
 #[test]
 fn test_get_distance_unit_enumerations() {
@@ -163,3 +164,37 @@ fn test_from_str() {
         DistanceUnit::Inch
     );
 }
+
+#[tokio::test]
+async fn test_save_to_database() {
+    let database_service = DatabaseService::new().await.unwrap();
+    let res = DistanceUnit::save_to_database().await;
+    assert!(res.is_ok());
+
+    let distance = DistanceUnit::Kilometer.as_unit_type();
+    let rows = sqlx::query!(
+        r#"
+            SELECT id, unit_type
+            FROM units_distance_types
+            WHERE unit_type = ?
+        "#,
+        distance
+    )
+    .fetch_one(&database_service.pool)
+    .await
+    .unwrap();
+    let unit_type = rows.unit_type;
+
+    assert_eq!(unit_type, "kilometer");
+}
+
+#[tokio::test]
+async fn test_get_database_id() {
+    let res = DistanceUnit::save_to_database().await;
+    assert!(res.is_ok());
+
+    let pint = DistanceUnit::Millimeter;
+    let id = pint.get_database_id().await;
+    assert!(id.is_ok());
+}
+

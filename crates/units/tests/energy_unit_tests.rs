@@ -1,5 +1,6 @@
 use std::{collections::BTreeSet, str::FromStr};
 use units::{energy::unit::EnergyUnit, measurement_system::MeasurementSystem};
+use utils::database::DatabaseService;
 
 #[test]
 fn test_get_energy_unit_enumerations() {
@@ -83,4 +84,37 @@ fn test_from_str() {
         EnergyUnit::from_str("kilocalories").unwrap(),
         EnergyUnit::Kilocalorie
     );
+}
+
+#[tokio::test]
+async fn test_save_to_database() {
+    let database_service = DatabaseService::new().await.unwrap();
+    let res = EnergyUnit::save_to_database().await;
+    assert!(res.is_ok());
+
+    let energy = EnergyUnit::Kilocalorie.as_unit_type();
+    let rows = sqlx::query!(
+        r#"
+            SELECT id, unit_type
+            FROM units_energy_types
+            WHERE unit_type = ?
+        "#,
+        energy
+    )
+    .fetch_one(&database_service.pool)
+    .await
+    .unwrap();
+    let unit_type = rows.unit_type;
+
+    assert_eq!(unit_type, "kilocalorie");
+}
+
+#[tokio::test]
+async fn test_get_database_id() {
+    let res = EnergyUnit::save_to_database().await;
+    assert!(res.is_ok());
+
+    let pint = EnergyUnit::Kilojoule;
+    let id = pint.get_database_id().await;
+    assert!(id.is_ok());
 }

@@ -1,36 +1,36 @@
 # units
 [[migration]]
-file = "migrations/nutrients/0001_measurement_systems.sql"
+file = "migrations/units/0001_create_measurement_systems.sql"
 description = "Create essentiality_types lookup table"
 environments = ["dev", "prod"]
 
 [[migration]]
-file = "migrations/nutrients/0002_create_mass_tables.sql"
+file = "migrations/units/0002_create_mass_tables.sql"
 description = "Create essentiality_types lookup table"
 environments = ["dev", "prod"]
 
 [[migration]]
-file = "migrations/nutrients/0003_create_volume_tables.sql"
+file = "migrations/units/0003_create_volume_tables.sql"
 description = "Create essentiality_types lookup table"
 environments = ["dev", "prod"]
 
 [[migration]]
-file = "migrations/nutrients/0004_create_energy_tables.sql"
+file = "migrations/units/0004_create_energy_tables.sql"
 description = "Create essentiality_types lookup table"
 environments = ["dev", "prod"]
 
 [[migration]]
-file = "migrations/nutrients/0005_create_distance_tables.sql"
+file = "migrations/units/0005_create_distance_tables.sql"
 description = "Create essentiality_types lookup table"
 environments = ["dev", "prod"]
 
 [[migration]]
-file = "migrations/nutrients/0006_create_duration_tables.sql"
+file = "migrations/units/0006_create_duration_tables.sql"
 description = "Create essentiality_types lookup table"
 environments = ["dev", "prod"]
 
 [[migration]]
-file = "migrations/nutrients/0007_create_currency_tablesypes.sql"
+file = "migrations/units/0007_create_currency_tables.sql"
 description = "Create essentiality_types lookup table"
 environments = ["dev", "prod"]
 

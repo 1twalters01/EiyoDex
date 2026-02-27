@@ -1,5 +1,6 @@
 use std::{collections::BTreeSet, str::FromStr};
 use units::{measurement_system::MeasurementSystem, volume::unit::VolumeUnit};
+use utils::database::DatabaseService;
 
 #[test]
 fn test_get_volume_unit_enumerations() {
@@ -162,4 +163,37 @@ fn test_from_str() {
         VolumeUnit::from_str("teaspoons").unwrap(),
         VolumeUnit::Teaspoon
     );
+}
+
+#[tokio::test]
+async fn test_save_to_database() {
+    let database_service = DatabaseService::new().await.unwrap();
+    let res = VolumeUnit::save_to_database().await;
+    assert!(res.is_ok());
+
+    let volume = VolumeUnit::Pint.as_unit_type();
+    let rows = sqlx::query!(
+        r#"
+            SELECT id, unit_type
+            FROM units_volume_types
+            WHERE unit_type = ?
+        "#,
+        volume
+    )
+    .fetch_one(&database_service.pool)
+    .await
+    .unwrap();
+    let unit_type = rows.unit_type;
+
+    assert_eq!(unit_type, "pint");
+}
+
+#[tokio::test]
+async fn test_get_database_id() {
+    let res = VolumeUnit::save_to_database().await;
+    assert!(res.is_ok());
+
+    let pint = VolumeUnit::Pint;
+    let id = pint.get_database_id().await;
+    assert!(id.is_ok());
 }
