@@ -15,6 +15,6 @@ CREATE TABLE IF NOT EXISTS nutrients_energy_yielding_nutrients (
         REFERENCES nutrients_chemical_types(id)
         ON DELETE CASCADE,
     FOREIGN KEY (kind_id)
-        REFERENCES nutrients_energy_yielding_nutrients_kinds(id)
+        REFERENCES nutrients_energy_yielding_nutrient_types(id)
         ON DELETE CASCADE
 );

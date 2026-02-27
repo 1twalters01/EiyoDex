@@ -54,11 +54,11 @@ impl PartialEq for Nutrient {
 
 impl Nutrient {
     pub fn default() -> Self {
-        let nutrient_type = NutrientType {
-            chemical_type: ChemicalType::Other,
-            quantity_type: QuantityType::NonNutrient,
-            essentiality_type: None,
-        };
+        let chemical_type = ChemicalType::Other;
+        let quantity_type = QuantityType::NonNutrient;
+        let essentiality_type = None;
+
+        let nutrient_type = NutrientType::new(chemical_type, quantity_type, essentiality_type);
         Nutrient {
             id: Uuid::nil(),
             name: String::new(),

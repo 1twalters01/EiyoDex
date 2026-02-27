@@ -23,11 +23,19 @@ CREATE TABLE IF NOT EXISTS nutrients_protein_nutrients (
 
 CREATE TABLE IF NOT EXISTS nutrients_lipid_nutrients (
     energy_id INTEGER PRIMARY KEY,
-    lipid_id INTEGER NOT NULL,
+    sterol_id INTEGER,
+    fat_id INTEGER,
+    transfat_id INTEGER,
     FOREIGN KEY (energy_id)
         REFERENCES nutrients_energy_yielding_nutrients(chemical_id)
         ON DELETE CASCADE,
-    FOREIGN KEY(lipid_id)
-        REFERENCES nutrients_lipid_types (id)
+    FOREIGN KEY (sterol_id)
+        REFERENCES nutrients_sterol_types(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (fat_id)
+        REFERENCES nutrients_fat_types(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (transfat_id)
+        REFERENCES nutrients_transfat_types(id)
         ON DELETE CASCADE
 );

@@ -1,7 +1,10 @@
+use uuid::Uuid;
+
 use crate::schema::nutrient_classes::{ChemicalType, EssentialityType, QuantityType};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct NutrientType {
+    pub id: Uuid,
     pub chemical_type: ChemicalType,
     pub quantity_type: QuantityType,
     pub essentiality_type: Option<EssentialityType>,
@@ -14,10 +17,33 @@ impl NutrientType {
         essentiality_type: Option<EssentialityType>,
     ) -> Self {
         Self {
+            id: Uuid::new_v4(),
             chemical_type,
             quantity_type,
             essentiality_type,
         }
+    }
+
+   pub fn new_with_id(
+        id: Uuid,
+        chemical_type: ChemicalType,
+        quantity_type: QuantityType,
+        essentiality_type: Option<EssentialityType>,
+    ) -> Self {
+        Self {
+            id,
+            chemical_type,
+            quantity_type,
+            essentiality_type,
+        }
+    } 
+
+    pub fn get_id(&self) -> Uuid {
+        self.id
+    }
+
+    pub fn set_id(&mut self, id: Uuid) {
+        self.id = id;
     }
 
     pub fn is_nutrient_type(&self, nutrient_type: &NutrientType) -> bool {

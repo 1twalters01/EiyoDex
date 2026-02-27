@@ -1,15 +1,20 @@
+use utils::database::DatabaseService;
+use uuid::Uuid;
+
 use crate::schema::{carbohydrate::{Carbohydrate, CarbohydrateNutrient}, energy::EnergyYieldingNutrients, lipid::{Fat, Lipid, LipidNutrient, Sterols, TransFat}, nutrient_classes::{ChemicalType, EssentialityType, QuantityType}, nutrient_type::NutrientType, protein::ProteinNutrient};
 
+// Revisit the sql tables and this data
 pub struct NutrientTypeRow {
+    nutrient_id: Vec<u8>,
     quantity_id: i64,
     essentiality_id: Option<i64>,
-    chemical_id: i64,
+    chemical_kind_id: i64,
 
     energy_id: Option<i64>,
 
     carbohydrate_id: Option<i64>,
     is_added_sugar: Option<bool>,
-    glycemic_index: Option<u8>,
+    glycemic_index: Option<i64>,
 
     is_bcaa: bool,
 
@@ -20,7 +25,7 @@ pub struct NutrientTypeRow {
 
 impl NutrientTypeRow {
     pub fn to_nutrient_type(&self) -> NutrientType {
-        let chemical_type = match self.chemical_id {
+        let chemical_type = match self.chemical_kind_id {
             1 => {
                 match self.energy_id.unwrap() {
                     1 => {
@@ -32,7 +37,7 @@ impl NutrientTypeRow {
                             _ => panic!("Unknown carbohydrate_id"),
                         };
                         let is_added_sugar = self.is_added_sugar.expect("is_added_sugar was not found");
-                        let glycemic_index = self.glycemic_index;
+                        let glycemic_index = self.glycemic_index.map(|gi| gi as u8);
                         ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Carbohydrate(CarbohydrateNutrient { carbohydrate_type, is_added_sugar, glycemic_index }))
                     }
                     2 => ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Protein(ProteinNutrient { is_bcaa: self.is_bcaa })),
@@ -96,9 +101,169 @@ impl NutrientTypeRow {
             Some(_) => panic!("Unknown essentiality_id"),
         };
 
-        NutrientType::new(chemical_type, quantity_type, essentiality_type)
+        let id = Uuid::from_slice(&self.nutrient_id).expect("Invalid nutrient_id");
+
+        NutrientType::new_with_id(id, chemical_type, quantity_type, essentiality_type)
     }
 
-    pub fn load_from_database() -> Self {}
-    pub fn save_to_database(&self) -> Result<(), sqlx::Error> {}
+    pub async fn save_to_database(&self, chemical_id_option: Option<i64>) -> Result<(), sqlx::Error> {
+        let database_service = DatabaseService::new().await.unwrap();
+
+        // Save Chemical type
+        let chemical_id: i64 = match chemical_id_option {
+            Some(id) => {
+                let row = sqlx::query!(
+                r#"
+                    INSERT INTO nutrients_chemical_types (id, kind_id)
+                    VALUES (?, ?)
+                    ON CONFLICT(id) DO UPDATE SET
+                        id = excluded.id,
+                        kind_id = excluded.kind_id
+                    RETURNING id
+                "#,
+                id,
+                self.chemical_kind_id
+                )
+                .fetch_one(&database_service.pool)
+                .await?;
+
+                row.id.unwrap()
+            },
+            None => {
+                let row = sqlx::query!(
+                r#"
+                    INSERT INTO nutrients_chemical_types (kind_id)
+                    VALUES (?)
+                    RETURNING id
+                "#,
+                self.chemical_kind_id
+                )
+                .fetch_one(&database_service.pool)
+                .await?;
+
+                row.id.unwrap()
+            },
+        };
+
+        sqlx::query!(
+            r#"
+                INSERT INTO nutrients_nutrients (id, chemical_id, quantity_id, essentiality_id)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET
+                    chemical_id = excluded.chemical_id,
+                    quantity_id = excluded.quantity_id,
+                    essentiality_id = excluded.essentiality_id
+            "#,
+            self.nutrient_id,
+            self.chemical_kind_id,
+            self.quantity_id,
+            self.essentiality_id
+        )
+        .execute(&database_service.pool)
+        .await?;
+
+        sqlx::query!(
+            r#"
+                INSERT INTO nutrients_energy_yielding_nutrients (chemical_id, kind_id)
+                VALUES (?, ?)
+                ON CONFLICT(chemical_id) DO UPDATE SET
+                    chemical_id = excluded.chemical_id,
+                    kind_id = excluded.kind_id
+            "#,
+            chemical_id,
+            self.chemical_kind_id,
+        )
+        .execute(&database_service.pool)
+        .await?;
+
+        sqlx::query!(
+            r#"
+                INSERT INTO nutrients_carbohydrate_nutrients (energy_id, carbohydrate_id, is_added_sugar, glycemic_index)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(energy_id) DO UPDATE SET
+                    energy_id = excluded.energy_id,
+                    carbohydrate_id = excluded.carbohydrate_id,
+                    is_added_sugar = excluded.is_added_sugar,
+                    glycemic_index = excluded.glycemic_index
+            "#,
+            self.energy_id,
+            self.carbohydrate_id,
+            self.is_added_sugar,
+            self.glycemic_index
+        )
+        .execute(&database_service.pool)
+        .await?;
+
+        sqlx::query!(
+            r#"
+                INSERT INTO nutrients_protein_nutrients (energy_id, is_bcaa)
+                VALUES (?, ?)
+                ON CONFLICT(energy_id) DO UPDATE SET
+                    energy_id = excluded.energy_id,
+                    is_bcaa = is_bcaa
+            "#,
+            self.energy_id,
+            self.is_bcaa
+        )
+        .execute(&database_service.pool)
+        .await?;
+
+        sqlx::query!(
+            r#"
+                INSERT INTO nutrients_lipid_nutrients (energy_id, sterol_id, fat_id, transfat_id)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(energy_id) DO UPDATE SET
+                    energy_id = excluded.energy_id,
+                    sterol_id = excluded.sterol_id,
+                    fat_id = excluded.fat_id,
+                    transfat_id = excluded.transfat_id
+            "#,
+            self.energy_id,
+            self.sterol_id,
+            self.fat_id,
+            self.transfat_id
+        )
+        .execute(&database_service.pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn load_from_database_from_nutrient_id(nutrient_id: Uuid) -> Result<Self, sqlx::Error> {
+        let database_service = DatabaseService::new().await.unwrap();
+        let n_id: &[u8] = &nutrient_id.as_bytes()[..];
+        sqlx::query_as!(
+                NutrientTypeRow,
+                r#"
+                SELECT
+                    n.id as nutrient_id,
+                    n.quantity_id,
+                    n.essentiality_id,
+                    ch_t.kind_id as chemical_kind_id,
+                    e.kind_id as energy_id,
+                    c.carbohydrate_id,
+                    c.is_added_sugar,
+                    c.glycemic_index,
+                    p.is_bcaa,
+                    l.sterol_id,
+                    l.fat_id,
+                    l.transfat_id
+                FROM nutrients_nutrients n 
+                INNER JOIN nutrients_chemical_types ch_t
+                    ON n.chemical_id = ch_t.id
+                INNER JOIN nutrients_energy_yielding_nutrients e
+                    ON ch_t.id = e.chemical_id
+                INNER JOIN nutrients_carbohydrate_nutrients c 
+                    ON e.chemical_id = c.energy_id
+                INNER JOIN nutrients_protein_nutrients p
+                    ON e.chemical_id = p.energy_id
+                INNER JOIN nutrients_lipid_nutrients l
+                    ON e.chemical_id = l.energy_id
+                WHERE n.id = ?"#,
+            n_id
+        )
+            .fetch_one(&database_service.pool)
+            .await
+    }
 }
+
