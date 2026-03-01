@@ -16,7 +16,7 @@ pub struct NutrientTypeRow {
     is_added_sugar: Option<bool>,
     glycemic_index: Option<i64>,
 
-    is_bcaa: bool,
+    is_bcaa: Option<bool>,
 
     sterol_id: Option<i64>,
     fat_id: Option<i64>,
@@ -24,6 +24,88 @@ pub struct NutrientTypeRow {
 }
 
 impl NutrientTypeRow {
+    pub fn from_nutrient_type(nutrient_type: NutrientType) -> Self {
+        let nutrient_id = nutrient_type.id;
+        
+        let chemical_type_id = match nutrient_type.chemical_type {
+            ChemicalType::EnergyYieldingNutrients => 1,
+            ChemicalType::Water => 2,
+            ChemicalType::Vitamin => 3,
+            ChemicalType::Mineral => 4,
+            ChemicalType::Phytonutrient => 5,
+            ChemicalType::Antinutrient => 6,
+            ChemicalType::Other => 7,
+        };
+
+        let quantity_type_id = match self.quantity_id {
+            QuantityType::Macronutrient => 1,
+            QuantityType::Micronutrient => 2,
+            QuantityType::NonNutrient => 3,
+        };
+
+        let essentiality_type_id = match self.essentiality_id {
+            Some(EssentialityType::Essential) => Some(1),
+            Some(EssentialityType::ConditionallyEssential) => Some(2),
+            Some(EssentialityType::NonEssential) => Some(3),
+            None => None,
+        };
+
+        let energy_id = None;
+        let carbohydrate_id = None;
+        let is_added_sugar = None;
+        let glycemic_index = None;
+        let is_bcaa = None;
+        let sterol_id = None;
+        let fat_id = None;
+        let transfat_id = None;
+        if chemical_type_id == 1 {
+            if let ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Carbohydrate(carbohydrate) = nutrient_type.chemical_id {
+                carbohydrate_id = match carbohydrate {
+                    Carbohydrate::Fiber => Some(1),
+                    Carbohydrate::Starch => Some(2),
+                    Carbohydrate::Sugar => Some(3),
+                    Carbohydrate::SugarAlcohol => Some(4),
+                };
+                is_added_sugar = Some(carbohydrate.is_sugar);
+                glycemic_index = Some(carbohydrate.glycemic_index);
+            }
+            if let ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Protein(protein) = nutrient_type.chemical_id {
+                is_bcaa = Some(protein.is_bcaa);
+            }
+            if let ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Lipid(lipid) = nutrient_type.chemical_id {
+                match lipid {
+                    Lipid::Sterol(sterol) => match sterol {
+                        Sterol::Cholesterol => Some(1),
+                        Sterol::Phytosterol => Some(2),
+                    }
+                    Lipid::Fat(fat) => match fat {
+                        Fat::Monounsaturated => fat_id = Some(1),
+                        Fat::Polyunsaturated => fat_id = Some(2),
+                        Fat::Saturated => fat_id = Some(3),
+                    }
+                    Lipid::TransFat => match transfat {
+                        Transfat::Natural => transfat_id = Some(1),
+                        Transfat::Artificial => transfat_id = Some(2),
+                    }
+                }
+            }
+        }
+        
+        Self {
+            nutrient_id,
+            quantity_id,
+            essentiality_id,
+            chemical_kind_id,
+            energy_id,
+            carbohydrate_id,
+            is_added_sugar,
+            glycemic_index,
+            is_bcaa,
+            sterol_id,
+            fat_id,
+            transfat_id,
+        }
+    }
     pub fn to_nutrient_type(&self) -> NutrientType {
         let chemical_type = match self.chemical_kind_id {
             1 => {
@@ -38,7 +120,7 @@ impl NutrientTypeRow {
                         };
                         let is_added_sugar = self.is_added_sugar.expect("is_added_sugar was not found");
                         let glycemic_index = self.glycemic_index.map(|gi| gi as u8);
-                        ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Carbohydrate(CarbohydrateNutrient { carbohydrate_type, is_added_sugar, glycemic_index }))
+                        ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Carbohydrate(CarbohydrateNutrient { carbohydrate_type, is_added_sugar, glyce_glycemic_index index }))
                     }
                     2 => ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Protein(ProteinNutrient { is_bcaa: self.is_bcaa })),
                     3 => {
@@ -162,6 +244,7 @@ impl NutrientTypeRow {
         .execute(&database_service.pool)
         .await?;
 
+        if chemical_kind_id == 1 {
         sqlx::query!(
             r#"
                 INSERT INTO nutrients_energy_yielding_nutrients (chemical_id, kind_id)
@@ -176,6 +259,7 @@ impl NutrientTypeRow {
         .execute(&database_service.pool)
         .await?;
 
+            if energy_id == Some(1) {
         sqlx::query!(
             r#"
                 INSERT INTO nutrients_carbohydrate_nutrients (energy_id, carbohydrate_id, is_added_sugar, glycemic_index)
@@ -193,7 +277,9 @@ impl NutrientTypeRow {
         )
         .execute(&database_service.pool)
         .await?;
+            }
 
+            if energy_id == Some(2) {
         sqlx::query!(
             r#"
                 INSERT INTO nutrients_protein_nutrients (energy_id, is_bcaa)
@@ -207,7 +293,9 @@ impl NutrientTypeRow {
         )
         .execute(&database_service.pool)
         .await?;
+            }
 
+            if energy_id == Some(3) {
         sqlx::query!(
             r#"
                 INSERT INTO nutrients_lipid_nutrients (energy_id, sterol_id, fat_id, transfat_id)
@@ -225,7 +313,8 @@ impl NutrientTypeRow {
         )
         .execute(&database_service.pool)
         .await?;
-
+        }
+        }
         Ok(())
     }
 
