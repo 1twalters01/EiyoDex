@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS nutrients_unit_types (
     name TEXT NOT NULL UNIQUE
 );
 
-INSERT OR IGNORE INTO nutrients_sterol_types (id, name) VALUES
+INSERT OR IGNORE INTO nutrients_unit_types (id, name) VALUES
 (1, 'mass'),
 (2, 'volume'),
 (3, 'energy'),
@@ -19,25 +19,25 @@ INSERT OR IGNORE INTO nutrients_sterol_types (id, name) VALUES
 CREATE TABLE IF NOT EXISTS nutrients_unit_table (
   id INTEGER PRIMARY KEY,
   unit_type_id INTEGER NOT NULL,
-  mass_id INTEGER,
-  volume_id INTEGER,
-  energy_id INTEGER,
+  mass_type_id INTEGER,
+  volume_type_id INTEGER,
+  energy_type_id INTEGER,
   FOREIGN KEY (unit_type_id)
         REFERENCES nutrients_unit_types(id)
         ON DELETE CASCADE,
-  FOREIGN KEY (mass_id)
+  FOREIGN KEY (mass_type_id)
         REFERENCES units_mass_types(id)
         ON DELETE CASCADE,
-  FOREIGN KEY (volume_id)
+  FOREIGN KEY (volume_type_id)
         REFERENCES units_volume_types(id)
         ON DELETE CASCADE,
-  FOREIGN KEY (energy_id)
+  FOREIGN KEY (energy_type_id)
         REFERENCES units_energy_types(id)
         ON DELETE CASCADE,
   CHECK (
-        (mass_id IS NOT NULL) +
-        (volume_id IS NOT NULL) +
-        (energy_id IS NOT NULL)
-        = 1
+        (mass_type_id IS NOT NULL) +
+        (volume_type_id IS NOT NULL) +
+        (energy_type_id IS NOT NULL)
+        <= 1
   )
 )
