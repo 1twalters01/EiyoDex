@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS nutrients_nutrient_quantity (
     id INTEGER PRIMARY KEY,
     quantity REAL NOT NULL,
-    nutrient_id INTEGER NOT NULL UNIQUE,
-    output_unit_id INTEGER NOT NULL UNIQUE,
+    nutrient_id INTEGER NOT NULL,
+    output_unit_id INTEGER NOT NULL,
     FOREIGN KEY (nutrient_id)
         REFERENCES nutrients_nutrient_table(id)
         ON DELETE CASCADE,
