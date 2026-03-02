@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS nutrients_nutrient_lists (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY
 );
 
 CREATE TABLE IF NOT EXISTS nutrients_nutrient_list_items (
