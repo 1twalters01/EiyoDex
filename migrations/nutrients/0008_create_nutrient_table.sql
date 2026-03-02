@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS nutrients_nutrients (
+CREATE TABLE IF NOT EXISTS nutrients_nutrient_types (
     id BLOB PRIMARY KEY NOT NULL,
     chemical_id INTEGER NOT NULL,
     quantity_id INTEGER NOT NULL,
