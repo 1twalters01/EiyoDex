@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS journal_exercise_table (
-    id INTEGER PRIMary key,
+    id INTEGER PRIMARY KEY,
     food_quantity_id INTEGER,
     exercise_quantity_id INTEGER,
     FOREIGN KEY (food_quantity_id)
