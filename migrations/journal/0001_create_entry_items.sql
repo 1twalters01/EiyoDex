@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS exercises_exercise_table (
+CREATE TABLE IF NOT EXISTS journal_exercise_table (
     id INTEGER PRIMary key,
     food_quantity_id INTEGER,
     exercise_quantity_id INTEGER,
