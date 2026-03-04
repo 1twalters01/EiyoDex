@@ -72,7 +72,7 @@ description = "Create carbohydrate, protein and fat tables"
 environments = ["dev", "prod"]
 
 [[migration]]
-file = "migrations/nutrients/0008_create_nutrient_table.sql"
+file = "migrations/nutrients/0008_create_nutrient_types.sql"
 description = "Create nutrient table"
 environments = ["dev", "prod"]
 

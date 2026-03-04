@@ -1,8 +1,6 @@
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub struct CarbohydrateNutrient {
     pub carbohydrate_type: Carbohydrate,
-    pub is_added_sugar: bool,
-    pub glycemic_index: Option<u8>,
 }
 
 impl CarbohydrateNutrient {

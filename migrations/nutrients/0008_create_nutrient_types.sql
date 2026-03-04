@@ -1,16 +1,16 @@
 CREATE TABLE IF NOT EXISTS nutrients_nutrient_types (
-    id BLOB PRIMARY KEY NOT NULL,
-    chemical_id INTEGER NOT NULL,
-    quantity_id INTEGER NOT NULL,
-    essentiality_id INTEGER,
-    FOREIGN KEY (chemical_id)
-        REFERENCES nutrients_chemical_types(id)
-        ON DELETE CASCADE
-    FOREIGN KEY (quantity_id)
+    quantity_type_id INTEGER NOT NULL,
+    essentiality_type_id INTEGER,
+    chemical_id INTEGER UNIQUE NOT NULL,
+    PRIMARY KEY(quantity_type_id, essentiality_type_id, chemical_id),
+    FOREIGN KEY (quantity_type_id)
         REFERENCES nutrients_quantity_types(id)
-        ON DELETE CASCADE
-    FOREIGN KEY (essentiality_id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (essentiality_type_id)
         REFERENCES nutrients_essentiality_types(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (chemical_id)
+        REFERENCES nutrients_chemical_type_table(id)
         ON DELETE CASCADE
 );
 

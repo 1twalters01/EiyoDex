@@ -9,12 +9,27 @@ INSERT OR IGNORE INTO nutrients_energy_yielding_nutrient_types (id, name) VALUES
 (4, 'alcohol');
 
 CREATE TABLE IF NOT EXISTS nutrients_energy_yielding_nutrients (
-    chemical_id INTEGER PRIMARY KEY,
-    kind_id INTEGER NOT NULL,
-    FOREIGN KEY (chemical_id)
-        REFERENCES nutrients_chemical_types(id)
-        ON DELETE CASCADE,
-    FOREIGN KEY (kind_id)
+    id INTEGER PRIMARY KEY,
+    energy_yielding_nutrient_type_id INTEGER NOT NULL,
+    carbohydrate_nutrient_id INTEGER,
+    protein_nutrient_id INTEGER,
+    lipid_nutrient_id INTEGER,
+    FOREIGN KEY (energy_yielding_nutrient_type_id)
         REFERENCES nutrients_energy_yielding_nutrient_types(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (carbohydrate_nutrient_id)
+        REFERENCES nutrients_carbohydrate_nutrients(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (protein_nutrient_id)
+        REFERENCES nutrients_protein_nutrients(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (lipid_nutrient_id)
+        REFERENCES nutrients_lipid_nutrients(id)
         ON DELETE CASCADE
+    CHECK (
+        (carbohydrate_nutrient_id IS NOT NULL) +
+        (protein_nutrient_id IS NOT NULL) +
+        (lipid_nutrient_id IS NOT NULL)
+        <= 1
+    )
 );
