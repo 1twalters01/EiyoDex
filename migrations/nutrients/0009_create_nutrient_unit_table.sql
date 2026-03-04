@@ -18,7 +18,7 @@ INSERT OR IGNORE INTO nutrients_unit_types (id, name) VALUES
 
 CREATE TABLE IF NOT EXISTS nutrients_unit_table (
   id INTEGER PRIMARY KEY,
-  unit_type_id INTEGER NOT NULL,
+  unit_type_id INTEGER,
   mass_type_id INTEGER,
   volume_type_id INTEGER,
   energy_type_id INTEGER,

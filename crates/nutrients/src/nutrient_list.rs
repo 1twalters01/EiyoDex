@@ -41,12 +41,4 @@ impl NutrientList {
     pub fn generate_nutrient_link_record_vec(&self) -> Result<Vec<NutrientLinkRecord>, &'static str> {
         self.nutrients.iter().map(|nutrient| NutrientLinkRecord::from_nutrient(nutrient.clone())).collect()
     }
-
-    pub fn save_to_sqlite(&self) {
-        let nutrient_record_vec = self.generate_nutrient_record_vec();
-        let nutrient_link_record_vec = self.generate_nutrient_link_record_vec();
-
-        // Upsert nutrient record
-        // Upsert nutrient link record
-    }
 }

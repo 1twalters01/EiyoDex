@@ -10,8 +10,8 @@ pub struct NutrientRecord {
     name: String,
     description: String,
     nutrient_type: NutrientType,
-    unit_conversions: BTreeMap<NutrientUnit, f64>, // 1 unit = factor * main_unit
     main_unit: NutrientUnit,
+    unit_conversions: BTreeMap<NutrientUnit, f64>, // 1 unit = factor * main_unit
 }
 
 impl NutrientRecord {

@@ -2,7 +2,7 @@ use utils::database::DatabaseService;
 
 use crate::schema::{carbohydrate::{Carbohydrate, CarbohydrateNutrient}, energy::EnergyYieldingNutrients, lipid::{Fat, Lipid, LipidNutrient, Sterols, TransFat}, nutrient_classes::{ChemicalType, EssentialityType, QuantityType}, nutrient_type::NutrientType, protein::ProteinNutrient};
 
-pub struct NutrientTypeRow {
+pub struct NutrientTypeRecord {
     essentiality_type_id: Option<i64>,
     quantity_type_id: i64,
     chemical_type_id: i64,
@@ -19,7 +19,7 @@ pub struct NutrientTypeRow {
     transfat_type_id: Option<i64>,
 }
 
-impl NutrientTypeRow {
+impl NutrientTypeRecord {
     pub fn from_nutrient_type(nutrient_type: NutrientType) -> Self {
         let quantity_type_id = match nutrient_type.quantity_type {
             QuantityType::Macronutrient => 1,
@@ -339,7 +339,7 @@ impl NutrientTypeRow {
             self.quantity_type_id,
             self.essentiality_type_id,
             chemical_id
-        ).fetch_one(&database_service.pool).await?;
+        ).execute(&database_service.pool).await?;
 
 
         Ok(())
@@ -349,7 +349,7 @@ impl NutrientTypeRow {
         let database_service = DatabaseService::new().await.unwrap();
 
         let row = sqlx::query_as!(
-            NutrientTypeRow,
+            NutrientTypeRecord,
             r#"
                 SELECT
                     n.quantity_type_id,

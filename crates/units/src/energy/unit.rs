@@ -96,6 +96,23 @@ macro_rules! define_energy_units {
                 .await?;
                 Ok(row.id)
             }
+
+            pub async fn from_database_id(id: i64) -> Result<Self, sqlx::Error> {
+                let database_service = DatabaseService::new().await?;
+                let row = sqlx::query!(
+                r#"
+                    SELECT unit_type
+                    FROM units_energy_types
+                    WHERE id = ?
+                "#,
+                id
+                )
+                .fetch_one(&database_service.pool)
+                .await?;
+
+                // FIX THIS
+                Ok(Self::from_str(&row.unit_type).unwrap())
+            }
         }
 
         impl FromStr for EnergyUnit {
