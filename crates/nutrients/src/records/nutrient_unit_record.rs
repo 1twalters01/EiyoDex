@@ -92,4 +92,31 @@ impl NutrientUnitRecord {
 
         Ok(())
     }
+
+    pub fn get_unit_type_id(&self) -> Option<i64> {
+        self.unit_type_id
+    }
+
+    pub async fn load_from_database(id: i64) -> Result<Self, sqlx::Error> {
+        let database_service = DatabaseService::new().await.unwrap();
+
+        Ok(
+            sqlx::query_as!(
+                NutrientUnitRecord,
+                r#"
+                    SELECT
+                        id as unit_type_id,
+                        mass_type_id,
+                        volume_type_id,
+                        energy_type_id
+                    FROM nutrients_unit_table
+                    WHERE
+                        id = ?
+                "#,
+                id
+            )
+            .fetch_one(&database_service.pool)
+            .await?
+        )
+    }
 }

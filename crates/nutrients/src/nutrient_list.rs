@@ -1,4 +1,4 @@
-use crate::{nutrient::Nutrient, records::nutrient_record::{NutrientLinkRecord, NutrientRecord}};
+use crate::nutrient::Nutrient;
 
 #[derive(Debug, Clone)]
 pub struct NutrientList {
@@ -32,13 +32,5 @@ impl NutrientList {
 
     pub fn remove(&mut self, nutrient: &Nutrient) {
         self.nutrients.retain(|n| n != nutrient)
-    }
-
-    pub fn generate_nutrient_record_vec(&self) -> Vec<NutrientRecord> {
-        self.nutrients.iter().map(|nutrient| NutrientRecord::from_nutrient(nutrient.clone())).collect()
-    }
-
-    pub fn generate_nutrient_link_record_vec(&self) -> Result<Vec<NutrientLinkRecord>, &'static str> {
-        self.nutrients.iter().map(|nutrient| NutrientLinkRecord::from_nutrient(nutrient.clone())).collect()
     }
 }

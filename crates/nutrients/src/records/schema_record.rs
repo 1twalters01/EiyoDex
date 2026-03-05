@@ -345,7 +345,7 @@ impl NutrientTypeRecord {
         Ok(())
     }
 
-    pub async fn load_from_database_from_nutrient_type_composite_key(quantity_type_id: i64, essentiality_type_id: i64, chemical_id: i64) -> Result<Self, sqlx::Error> {
+    pub async fn load_from_database_from_nutrient_type_composite_key(quantity_type_id: i64, essentiality_type_id: Option<i64>, chemical_id: i64) -> Result<Self, sqlx::Error> {
         let database_service = DatabaseService::new().await.unwrap();
 
         let row = sqlx::query_as!(
@@ -388,6 +388,38 @@ impl NutrientTypeRecord {
             .await?;
 
         return Ok(row)
+    }
+
+    pub fn get_essentiality_type_id(&self) -> Option<i64> {
+        self.essentiality_type_id
+    }
+
+    pub fn get_quantity_type_id(&self) -> i64 {
+        self.quantity_type_id
+    }
+
+    pub async fn get_chemical_id(&self) -> Result<i64, sqlx::Error> {
+        let database_service = DatabaseService::new().await.unwrap();
+
+        let row = sqlx::query!(
+            r#"
+                SELECT ch_t.id 
+                FROM nutrients_chemical_type_table ch_t
+                INNER JOIN nutrients_nutrient_types n
+                    ON n.chemical_id = ch_t.id
+                WHERE
+                    n.quantity_type_id = ?
+                    AND n.essentiality_type_id = ?
+                    AND n.chemical_id = ?
+            "#,
+            self.quantity_type_id,
+            self.essentiality_type_id,
+            self.chemical_type_id
+        )
+        .fetch_one(&database_service.pool)
+        .await?;
+
+        Ok(row.id.expect("Invalid record"))
     }
 }
 

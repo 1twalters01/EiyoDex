@@ -1,106 +1,381 @@
 use std::collections::BTreeMap;
 
-use utils::dsa::node::GraphNode;
+use utils::{database::DatabaseService, dsa::node::GraphNode};
 use uuid::Uuid;
 
-use crate::{nutrient::Nutrient, schema::nutrient_type::NutrientType, nutrient_units::NutrientUnit};
+use crate::{nutrient::Nutrient, nutrient_units::NutrientUnit, records::{nutrient_unit_record::NutrientUnitRecord, schema_record::NutrientTypeRecord}};
 
 pub struct NutrientRecord {
-    id: Uuid,
+    nutrient_id: Vec<u8>,
     name: String,
     description: String,
-    nutrient_type: NutrientType,
-    main_unit: NutrientUnit,
-    unit_conversions: BTreeMap<NutrientUnit, f64>, // 1 unit = factor * main_unit
+    main_unit_id: i64,
+    essentiality_type_id: Option<i64>,
+    quantity_type_id: i64,
+    chemical_id: i64,
 }
 
 impl NutrientRecord {
-    pub fn from_nutrient(nutrient: Nutrient) -> Self {
-        Self {
-            id: nutrient.get_id(),
-            name: nutrient.get_name(),
-            description: nutrient.get_description(),
-            nutrient_type: nutrient.get_nutrient_type(),
-            unit_conversions: nutrient.get_unit_conversions(),
-            main_unit: nutrient.get_main_unit(),
-        }
-    }
+    pub async fn from_nutrient(nutrient: Nutrient) -> Result<Self, &'static str> {
+        let nutrient_id = nutrient.get_id().as_bytes().to_vec();
+        let name = nutrient.get_name();
+        let description = nutrient.get_description();
+        let nutrient_type = NutrientTypeRecord::from_nutrient_type(nutrient.get_nutrient_type());
+        let main_unit_id = NutrientUnitRecord::from_nutrient_unit(nutrient.get_main_unit()).await.get_unit_type_id().unwrap();
 
-    pub fn from_nutrient_vec(nutrient_vec: Vec<Nutrient>) -> Vec<Self> {
-        nutrient_vec
-            .iter()
-            .map(|nutrient| Self {
-                id: nutrient.get_id(),
-                name: nutrient.get_name(),
-                description: nutrient.get_description(),
-                nutrient_type: nutrient.get_nutrient_type(),
-                unit_conversions: nutrient.get_unit_conversions(),
-                main_unit: nutrient.get_main_unit(),
-            })
-            .collect()
-    }
+        let essentiality_type_id = nutrient_type.get_essentiality_type_id();
+        let quantity_type_id = nutrient_type.get_quantity_type_id();
+        let chemical_id = nutrient_type.get_chemical_id().await.unwrap();
 
-    // pub fn load_from_sqlite() -> Vec<Self> {}
-    // pub fn save_to_sqlite() {}
-}
 
-pub struct NutrientLinkRecord {
-    parent_ids: Vec<Uuid>,
-    child_ids: Vec<Uuid>,
-}
-
-impl NutrientLinkRecord {
-    pub fn from_nutrient(nutrient: Nutrient) -> Result<Self, &'static str> {
-        let parent_ids: Vec<Uuid> = nutrient
-            .get_parents()
-            .iter()
-            .map(|parent| {
-                let parent_rc = parent
-                    .upgrade()
-                    .ok_or("Failed to upgrade weak reference to parent")?;
-                let parent_id = parent_rc.borrow().get_id();
-                Ok(parent_id)
-            })
-            .collect::<Result<Vec<Uuid>, &'static str>>()?;
-        let child_ids = nutrient
-            .get_children()
-            .iter()
-            .map(|child| child.borrow().get_id())
-            .collect();
         Ok(Self {
-            parent_ids,
-            child_ids,
+            nutrient_id,
+            name,
+            description,
+            essentiality_type_id,
+            quantity_type_id,
+            chemical_id,
+            main_unit_id,
         })
     }
 
-    pub fn from_nutrient_vec(nutrient_vec: Vec<Nutrient>) -> Result<Vec<Self>, &'static str> {
-        nutrient_vec
-            .iter()
-            .map(|nutrient| {
-                let parent_ids: Vec<Uuid> = nutrient
-                    .get_parents()
-                    .iter()
-                    .map(|parent| {
-                        let parent_rc = parent
-                            .upgrade()
-                            .ok_or("Failed to upgrade weak reference to parent")?;
-                        let parent_id = parent_rc.borrow().get_id();
-                        Ok(parent_id)
-                    })
-                    .collect::<Result<Vec<Uuid>, &'static str>>()?;
-                let child_ids = nutrient
-                    .get_children()
-                    .iter()
-                    .map(|child| child.borrow().get_id())
-                    .collect();
-                Ok(Self {
-                    parent_ids,
-                    child_ids,
-                })
-            })
-            .collect()
+    pub async fn to_nutrient(&self) -> Nutrient {
+        let id = Some(Uuid::from_slice(&self.nutrient_id).unwrap());
+        let name = self.name.clone();
+        let description = self.description.clone();
+        let nutrient_type_record = NutrientTypeRecord::load_from_database_from_nutrient_type_composite_key(self.quantity_type_id, self.essentiality_type_id, self.chemical_id).await.unwrap();
+        let nutrient_type = nutrient_type_record.to_nutrient_type();
+        let main_unit_id = NutrientUnitRecord::load_from_database(self.main_unit_id).await.unwrap().to_nutrient_unit().await;
+
+        let mut nutrient = Nutrient::new(id, name, nutrient_type, main_unit_id);
+        nutrient.set_description(description);
+
+        return nutrient
     }
 
-    // pub fn load_from_sqlite() -> Vec<Self> {}
-    // pub fn save_to_sqlite() {}
+    pub async fn load_from_sqlite(id: Uuid) -> Result<Self, sqlx::Error> {
+        let database_service = DatabaseService::new().await.unwrap();
+
+        Ok(
+            sqlx::query_as!(
+                NutrientRecord,
+                r#"
+                    SELECT
+                        id as nutrient_id,
+                        name,
+                        description,
+                        main_unit_id,
+                        quantity_type_id,
+                        essentiality_type_id,
+                        chemical_id
+                    FROM nutrients_nutrient_table
+                    WHERE
+                        id = ?
+                "#,
+                id
+            )
+            .fetch_one(&database_service.pool)
+            .await?
+        )
+    }
+
+    pub async fn save_to_database(&self) -> Result<(), sqlx::Error> {
+        let database_service = DatabaseService::new().await.unwrap();
+
+        sqlx::query!(
+            r#"
+                INSERT INTO nutrients_nutrient_table (id, name, description, main_unit_id, quantity_type_id, essentiality_type_id, chemical_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT (id)
+                DO UPDATE SET
+                    id = excluded.id,
+                    name = excluded.name,
+                    description = excluded.description,
+                    main_unit_id = excluded.main_unit_id,
+                    quantity_type_id = excluded.quantity_type_id,
+                    essentiality_type_id = excluded.essentiality_type_id,
+                    chemical_id = excluded.chemical_id
+            "#,
+            self.nutrient_id,
+            self.name,
+            self.description,
+            self.main_unit_id,
+            self.quantity_type_id,
+            self.essentiality_type_id,
+            self.chemical_id,
+        )
+            .execute(&database_service.pool)
+            .await?;
+        Ok(())
+    }
+
+    pub async fn delete_nutrient(&self) -> Result<(), sqlx::Error> {
+        let database_service = DatabaseService::new().await.unwrap();
+
+        sqlx::query!(
+            "DELETE FROM nutrients_nutrient_table WHERE id = ?",
+            self.nutrient_id
+        )
+        .execute(&database_service.pool)
+        .await?;
+
+        Ok(())
+    }
+}
+
+pub struct NutrientConversionsRecord {
+    nutrient_id: Vec<u8>,
+    unit_id: i64,
+    factor: f64,
+}
+
+impl NutrientConversionsRecord {
+    pub async fn from_nutrient(nutrient: Nutrient) -> Result<Vec<Self>, &'static str> {
+        let nutrient_id = nutrient.get_id().as_bytes().to_vec().clone();
+        let mut conversion_vec = Vec::new();
+
+        for (unit, factor) in nutrient.get_unit_conversions().iter() {
+            let unit_id = NutrientUnitRecord::from_nutrient_unit(*unit).await.get_unit_type_id().expect("invalid nutrient");
+            let factor = *factor;
+            let conversion = Self { nutrient_id: nutrient_id.clone(), unit_id, factor };
+            conversion_vec.push(conversion);
+        }
+
+        Ok(conversion_vec)
+    }
+
+    pub async fn to_btree_map_from_vec(items: Vec<&Self>) -> BTreeMap<NutrientUnit, f64> {
+        let mut map: BTreeMap<NutrientUnit, f64> = BTreeMap::new();
+        for conversion in items.iter() {
+            let unit = NutrientUnitRecord::load_from_database(conversion.unit_id).await.unwrap().to_nutrient_unit().await;
+            let factor = conversion.factor;
+            map.insert(unit, factor);
+        }
+
+        return map
+    }
+
+    pub async fn load_from_sqlite(nutrient_id: Uuid) -> Result<Vec<Self>, sqlx::Error> {
+        let database_service = DatabaseService::new().await.unwrap();
+
+        Ok(
+            sqlx::query_as!(
+                NutrientConversionsRecord,
+                r#"
+                    SELECT
+                        nutrient_id,
+                        unit_id,
+                        factor
+                    FROM nutrients_unit_conversions
+                    WHERE
+                        nutrient_id = ?
+                "#,
+                nutrient_id
+            )
+            .fetch_all(&database_service.pool)
+            .await?
+        )
+    }
+
+    pub async fn save_to_database(&self) -> Result<(), sqlx::Error> {
+        let database_service = DatabaseService::new().await.unwrap();
+
+        sqlx::query!(
+            r#"
+                INSERT INTO nutrients_unit_conversions (nutrient_id, unit_id, factor)
+                VALUES (?, ?, ?)
+                ON CONFLICT (nutrient_id, unit_id)
+                DO UPDATE SET
+                    nutrient_id = excluded.nutrient_id,
+                    unit_id = excluded.unit_id,
+                    factor = excluded.factor
+            "#,
+            self.nutrient_id,
+            self.unit_id,
+            self.factor
+        )
+            .execute(&database_service.pool)
+            .await?;
+        Ok(())
+    }
+
+    pub async fn delete_conversion(&self) -> Result<(), sqlx::Error> {
+        let database_service = DatabaseService::new().await.unwrap();
+
+        sqlx::query!(
+            r#"
+                DELETE FROM nutrients_unit_conversions 
+                WHERE
+                    nutrient_id = ?
+                    AND unit_id = ?
+            "#,
+            self.nutrient_id,
+            self.unit_id,
+        )
+        .execute(&database_service.pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn delete_conversion_vec(items: Vec<&Self>) -> Result<(), sqlx::Error> {
+        let database_service = DatabaseService::new().await.unwrap();
+
+        for item in items {
+            sqlx::query!(
+                r#"
+                    DELETE FROM nutrients_unit_conversions 
+                    WHERE
+                        nutrient_id = ?
+                        AND unit_id = ?
+            "#,
+                item.nutrient_id,
+                item.unit_id,
+            )
+            .execute(&database_service.pool)
+            .await?;
+        }
+
+        Ok(())
+    }
+}
+
+pub struct NutrientLinkRecord {
+    nutrient_id: Vec<u8>,
+    parent_ids: Vec<Vec<u8>>,
+    child_ids: Vec<Vec<u8>>,
+}
+
+impl NutrientLinkRecord {
+    pub async fn from_nutrient(nutrient: Nutrient) -> Result<Self, &'static str> {
+        let nutrient_id = nutrient.get_id().as_bytes().to_vec().clone();
+        let mut child_ids: Vec<Vec<u8>> = Vec::new();
+        for child in nutrient.get_children() {
+            child_ids.push(NutrientRecord::from_nutrient(child.borrow().clone()).await.unwrap().nutrient_id)
+        }
+
+        let mut parent_ids: Vec<Vec<u8>> = Vec::new();
+        for parent_weak in nutrient.get_parents() {
+            if let Some(parent) = parent_weak.upgrade() {
+                parent_ids.push(NutrientRecord::from_nutrient(parent.borrow().clone()).await.unwrap().nutrient_id)
+            } else {
+                return Err("Weak parent")
+            }
+        }
+
+        Ok(
+            NutrientLinkRecord {
+                nutrient_id,
+                parent_ids,
+                child_ids,
+            }
+        )
+    }
+
+    pub async fn save_to_database(&self) -> Result<(), sqlx::Error> {
+        let database_service = DatabaseService::new().await.unwrap();
+        let mut tx = database_service.pool.begin().await?;
+
+        for child_id in &self.child_ids {
+            sqlx::query!(
+                r#"
+                    INSERT INTO nutrients_nutrient_relationships (parent_id, child_id)
+                    VALUES (?, ?)
+                    ON CONFLICT (parent_id, child_id)
+                    DO NOTHING
+                "#,
+                self.nutrient_id,
+                child_id,
+            )
+            .execute(&mut *tx)
+            .await?;
+        }
+
+        for parent_id in &self.parent_ids {
+            sqlx::query!(
+                r#"
+                    INSERT INTO nutrients_nutrient_relationships (parent_id, child_id)
+                    VALUES (?, ?)
+                    ON CONFLICT (parent_id, child_id)
+                    DO NOTHING
+                "#,
+                parent_id,
+                self.nutrient_id,
+            )
+            .execute(&mut *tx)
+            .await?;
+        }
+        tx.commit().await;
+
+        Ok(())
+    }
+
+    pub async fn load_from_sqlite(nutrient_id: Uuid) -> Result<Self, sqlx::Error> {
+        let database_service = DatabaseService::new().await.unwrap();
+        
+        let parent_rows = sqlx::query!(
+            r#"
+                SELECT
+                    parent_id
+                FROM nutrients_nutrient_relationships
+                WHERE
+                    child_id = ?
+            "#,
+            nutrient_id
+        )
+        .fetch_all(&database_service.pool)
+        .await?;
+        let parent_ids: Vec<Vec<u8>> = parent_rows.iter().map(|row| row.parent_id.clone()).collect();
+
+        let child_rows = sqlx::query!(
+            r#"
+                SELECT
+                    child_id
+                FROM nutrients_nutrient_relationships
+                WHERE
+                    parent_id = ?
+            "#,
+            nutrient_id
+        )
+        .fetch_all(&database_service.pool)
+        .await?;
+        let child_ids: Vec<Vec<u8>> = child_rows.iter().map(|row| row.child_id.clone()).collect();
+
+        let nutrient_link_record = Self {
+            nutrient_id: nutrient_id.as_bytes().to_vec(),
+            parent_ids,
+            child_ids,
+        };
+        Ok(nutrient_link_record)
+    }
+
+
+    pub async fn delete_nutrient_link(&self) -> Result<(), sqlx::Error> {
+        let database_service = DatabaseService::new().await.unwrap();
+        let mut tx = database_service.pool.begin().await?;
+
+        sqlx::query!(
+            r#"
+                DELETE FROM nutrients_nutrient_relationships
+                WHERE
+                    parent_id = ?
+            "#,
+            self.nutrient_id,
+        )
+        .execute(&mut *tx)
+        .await?;
+
+        sqlx::query!(
+            r#"
+                DELETE FROM nutrients_nutrient_relationships
+                WHERE
+                    child_id = ?
+            "#,
+            self.nutrient_id,
+        )
+        .execute(&mut *tx)
+        .await?;
+
+        Ok(())
+    }
 }
