@@ -1,15 +1,15 @@
-CREATE TABLE IF NOT EXISTS nutrients_nutrient_lists (
-    id INTEGER PRIMARY KEY
+CREATE TABLE IF NOT EXISTS nutrients_nutrient_list_table (
+    id BLOB PRIMARY KEY NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS nutrients_nutrient_list_items (
-    id INTEGER PRIMARY KEY,
-    nutrient_list_id NOT NULL,
-    nutrient_id INTEGER NOT NULL,
+    nutrient_list_id BLOB NOT NULL,
+    nutrient_id BLOB NOT NULL,
+    PRIMARY KEY (nutrient_list_id, nutrient_id),
     FOREIGN KEY (nutrient_list_id)
-        REFERENCES nutrients_nutrient_lists(id)
+        REFERENCES nutrients_nutrient_list_table(id)
         ON DELETE CASCADE,
-    FOREIGN KEY (output_id)
+    FOREIGN KEY (nutrient_id)
         REFERENCES nutrients_nutrient_table(id)
         ON DELETE CASCADE
 );

@@ -199,6 +199,31 @@ impl NutrientConversionsRecord {
         Ok(())
     }
 
+    pub async fn save_vec_to_database(items: Vec<&Self>) -> Result<(), sqlx::Error> {
+        let database_service = DatabaseService::new().await.unwrap();
+        let mut tx = database_service.pool.begin().await?;
+
+        for item in items {
+            sqlx::query!(
+                r#"
+                    INSERT INTO nutrients_unit_conversions (nutrient_id, unit_id, factor)
+                    VALUES (?, ?, ?)
+                    ON CONFLICT (nutrient_id, unit_id)
+                    DO UPDATE SET
+                        nutrient_id = excluded.nutrient_id,
+                        unit_id = excluded.unit_id,
+                        factor = excluded.factor
+                "#,
+                item.nutrient_id,
+                item.unit_id,
+                item.factor
+            )
+                .execute(&mut *tx)
+                .await?;
+        }
+        Ok(())
+    }
+
     pub async fn delete_conversion(&self) -> Result<(), sqlx::Error> {
         let database_service = DatabaseService::new().await.unwrap();
 
@@ -220,21 +245,23 @@ impl NutrientConversionsRecord {
 
     pub async fn delete_conversion_vec(items: Vec<&Self>) -> Result<(), sqlx::Error> {
         let database_service = DatabaseService::new().await.unwrap();
+        let mut tx = database_service.pool.begin().await?;
 
         for item in items {
             sqlx::query!(
                 r#"
-                    DELETE FROM nutrients_unit_conversions 
-                    WHERE
-                        nutrient_id = ?
-                        AND unit_id = ?
-            "#,
+                DELETE FROM nutrients_unit_conversions 
+                WHERE
+                nutrient_id = ?
+                    AND unit_id = ?
+                    "#,
                 item.nutrient_id,
                 item.unit_id,
             )
-            .execute(&database_service.pool)
+                .execute(&mut *tx)
             .await?;
         }
+        tx.commit().await?;
 
         Ok(())
     }
@@ -376,6 +403,7 @@ impl NutrientLinkRecord {
         .execute(&mut *tx)
         .await?;
 
+        tx.commit().await?;
         Ok(())
     }
 }
