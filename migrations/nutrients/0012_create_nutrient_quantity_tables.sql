@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS nutrients_nutrient_quantity_table (
-    id INTEGER PRIMARY KEY,
+    id BLOB PRIMARY KEY NOT NULL,
     quantity REAL NOT NULL,
-    nutrient_id INTEGER NOT NULL,
+    nutrient_id BLOB NOT NULL,
     output_unit_id INTEGER NOT NULL,
     FOREIGN KEY (nutrient_id)
         REFERENCES nutrients_nutrient_table(id)

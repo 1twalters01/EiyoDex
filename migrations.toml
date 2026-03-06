@@ -86,3 +86,8 @@ file = "migrations/nutrients/0010_create_nutrients_tables.sql"
 description = "Create nutrient tables"
 environments = ["dev", "prod"]
 
+[[migration]]
+file = "migrations/nutrients/0012_create_nutrient_quantity_tables.sql"
+description = "Create nutrient tables"
+environments = ["dev", "prod"]
+

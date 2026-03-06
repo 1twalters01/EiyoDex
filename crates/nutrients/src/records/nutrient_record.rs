@@ -305,7 +305,7 @@ impl NutrientLinkRecord {
             .execute(&mut *tx)
             .await?;
         }
-        tx.commit().await;
+        let _ = tx.commit().await;
 
         Ok(())
     }
