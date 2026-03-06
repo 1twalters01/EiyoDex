@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::{
     nutrient::Nutrient,
     nutrient_units::NutrientUnit,
-    records::{nutrient_unit_record::NutrientUnitRecord, schema_record::NutrientTypeRecord},
+    records::{nutrient_unit_record::NutrientUnitRecord, nutrient_type_record::NutrientTypeRecord},
 };
 
 pub struct NutrientRecord {
@@ -70,7 +70,7 @@ impl NutrientRecord {
         return nutrient;
     }
 
-    pub async fn load_from_sqlite(id: Uuid) -> Result<Self, sqlx::Error> {
+    pub async fn load_from_database(id: Uuid) -> Result<Self, sqlx::Error> {
         let database_service = DatabaseService::new().await.unwrap();
 
         Ok(sqlx::query_as!(

@@ -41,7 +41,7 @@ impl NutrientQuantityRecord {
         let id = Uuid::from_slice(&self.id).unwrap();
         let quantity = self.quantity;
         let nutrient =
-            NutrientRecord::load_from_sqlite(Uuid::from_slice(&self.nutrient_id).unwrap())
+            NutrientRecord::load_from_database(Uuid::from_slice(&self.nutrient_id).unwrap())
                 .await
                 .unwrap()
                 .to_nutrient()

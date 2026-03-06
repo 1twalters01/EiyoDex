@@ -12,8 +12,6 @@ pub fn test_nutrients_carbohydrate_net_calculation() {
         ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Carbohydrate(
             CarbohydrateNutrient {
                 carbohydrate_type: Carbohydrate::Fiber,
-                is_added_sugar: false,
-                glycemic_index: None,
             },
         )),
         QuantityType::Macronutrient,
@@ -25,8 +23,6 @@ pub fn test_nutrients_carbohydrate_net_calculation() {
         ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Carbohydrate(
             CarbohydrateNutrient {
                 carbohydrate_type: Carbohydrate::Starch,
-                is_added_sugar: false,
-                glycemic_index: None,
             },
         )),
         QuantityType::Macronutrient,
@@ -38,8 +34,6 @@ pub fn test_nutrients_carbohydrate_net_calculation() {
         ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Carbohydrate(
             CarbohydrateNutrient {
                 carbohydrate_type: Carbohydrate::Sugar,
-                is_added_sugar: true,
-                glycemic_index: None,
             },
         )),
         QuantityType::Macronutrient,
@@ -51,8 +45,6 @@ pub fn test_nutrients_carbohydrate_net_calculation() {
         ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Carbohydrate(
             CarbohydrateNutrient {
                 carbohydrate_type: Carbohydrate::SugarAlcohol,
-                is_added_sugar: false,
-                glycemic_index: None,
             },
         )),
         QuantityType::Macronutrient,
