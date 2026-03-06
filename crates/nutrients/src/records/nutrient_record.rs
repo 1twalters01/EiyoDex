@@ -6,13 +6,13 @@ use uuid::Uuid;
 use crate::{nutrient::Nutrient, nutrient_units::NutrientUnit, records::{nutrient_unit_record::NutrientUnitRecord, schema_record::NutrientTypeRecord}};
 
 pub struct NutrientRecord {
-    nutrient_id: Vec<u8>,
-    name: String,
-    description: String,
-    main_unit_id: i64,
-    essentiality_type_id: Option<i64>,
-    quantity_type_id: i64,
-    chemical_id: i64,
+    pub nutrient_id: Vec<u8>,
+    pub name: String,
+    pub description: String,
+    pub main_unit_id: i64,
+    pub essentiality_type_id: Option<i64>,
+    pub quantity_type_id: i64,
+    pub chemical_id: i64,
 }
 
 impl NutrientRecord {
@@ -124,9 +124,9 @@ impl NutrientRecord {
 }
 
 pub struct NutrientConversionsRecord {
-    nutrient_id: Vec<u8>,
-    unit_id: i64,
-    factor: f64,
+    pub(crate) nutrient_id: Vec<u8>,
+    pub(crate) unit_id: i64,
+    pub(crate) factor: f64,
 }
 
 impl NutrientConversionsRecord {
@@ -144,7 +144,7 @@ impl NutrientConversionsRecord {
         Ok(conversion_vec)
     }
 
-    pub async fn to_btree_map_from_vec(items: Vec<&Self>) -> BTreeMap<NutrientUnit, f64> {
+    pub async fn to_btree_map_from_vec(items: Vec<Self>) -> BTreeMap<NutrientUnit, f64> {
         let mut map: BTreeMap<NutrientUnit, f64> = BTreeMap::new();
         for conversion in items.iter() {
             let unit = NutrientUnitRecord::load_from_database(conversion.unit_id).await.unwrap().to_nutrient_unit().await;
@@ -268,9 +268,9 @@ impl NutrientConversionsRecord {
 }
 
 pub struct NutrientLinkRecord {
-    nutrient_id: Vec<u8>,
-    parent_ids: Vec<Vec<u8>>,
-    child_ids: Vec<Vec<u8>>,
+    pub nutrient_id: Vec<u8>,
+    pub parent_ids: Vec<Vec<u8>>,
+    pub child_ids: Vec<Vec<u8>>,
 }
 
 impl NutrientLinkRecord {
@@ -407,3 +407,10 @@ impl NutrientLinkRecord {
         Ok(())
     }
 }
+
+pub struct NutrientLinkRecordUuid {
+    pub nutrient_id: Uuid,
+    pub parent_id_vec: Vec<Uuid>,
+    pub child_id_vec: Vec<Uuid>,
+}
+

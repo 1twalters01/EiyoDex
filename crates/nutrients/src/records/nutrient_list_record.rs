@@ -1,9 +1,7 @@
-use std::collections::BTreeSet;
-
 use utils::database::DatabaseService;
 use uuid::Uuid;
 
-use crate::{nutrient::Nutrient, nutrient_list::NutrientList};
+use crate::{nutrient::Nutrient, nutrient_list::NutrientList, records::nutrient_record::{NutrientConversionsRecord, NutrientLinkRecordUuid, NutrientRecord}};
 
 pub struct NutrientListRecord {
     id: Vec<u8>,
@@ -62,11 +60,98 @@ pub struct NutrientListItemRecord {
 
 
 impl NutrientListItemRecord {
-    // pub async fn from_nutrient_list(nutrient_list: NutrientList) -> Vec<Self> {
-    // }
-    // 
-    // pub async fn to_btree_map_from_vec(items: Vec<&Self>) -> BTreeSet<Nutrient> {
-    // }
+    pub async fn from_nutrient_list(nutrient_list: NutrientList) -> Vec<Self> {
+        let nutrient_list_id = nutrient_list.get_id().as_bytes().to_vec();
+
+        nutrient_list.get_nutrients().iter().map(|nutrient| Self {
+            nutrient_list_id: nutrient_list_id.clone(),
+            nutrient_id: nutrient.get_id().as_bytes().to_vec()
+        }).collect()
+    }
+
+    pub async fn to_nutrient_vec_from_from_vec(items: Vec<&Self>) -> Result<Vec<(Nutrient, NutrientLinkRecordUuid)>, sqlx::Error> {
+        let database_service = DatabaseService::new().await.unwrap();
+        let mut tx = database_service.pool.begin().await?;
+
+        let mut nutrient_map: Vec<(Nutrient, NutrientLinkRecordUuid)> = Vec::new();
+        for item in items {
+            let nutrient_record = sqlx::query_as!(
+                NutrientRecord,
+                r#"
+                    SELECT
+                        id as nutrient_id,
+                        name,
+                        description,
+                        main_unit_id,
+                        quantity_type_id,
+                        essentiality_type_id,
+                        chemical_id
+                    FROM nutrients_nutrient_table
+                    WHERE
+                        id = ?
+                "#,
+                item.nutrient_id
+            )
+                .fetch_one(&mut *tx)
+                .await?;
+
+            let conversion_vec = sqlx::query_as!(
+                NutrientConversionsRecord,
+                r#"
+                    SELECT
+                        nutrient_id,
+                        unit_id,
+                        factor
+                    FROM nutrients_unit_conversions
+                    WHERE
+                        nutrient_id = ?
+                "#,
+                item.nutrient_id
+            )
+            .fetch_all(&mut *tx)
+            .await?;
+            let unit_conversions = NutrientConversionsRecord::to_btree_map_from_vec(conversion_vec).await;
+
+            let parent_rows = sqlx::query!(
+                r#"
+                SELECT
+                    parent_id
+                FROM nutrients_nutrient_relationships
+                WHERE
+                    child_id = ?
+            "#,
+                item.nutrient_id
+            )
+                .fetch_all(&mut *tx)
+            .await?;
+            let parent_id_vec: Vec<Uuid> = parent_rows.iter().map(|row| Uuid::from_slice(&row.parent_id).unwrap()).collect();
+
+            let child_rows = sqlx::query!(
+                r#"
+                SELECT
+                    child_id
+                FROM nutrients_nutrient_relationships
+                WHERE
+                    parent_id = ?
+            "#,
+                item.nutrient_id
+            )
+                .fetch_all(&mut *tx)
+            .await?;
+            let child_id_vec: Vec<Uuid> = child_rows.iter().map(|row| Uuid::from_slice(&row.child_id).unwrap()).collect();
+
+            let nutrient_id = Uuid::from_slice(&item.nutrient_id).unwrap();
+            let nutrient_link_record_uuid = NutrientLinkRecordUuid { nutrient_id, parent_id_vec, child_id_vec };
+
+            let mut nutrient = nutrient_record.to_nutrient().await;
+            nutrient.set_unit_conversions(unit_conversions);
+            nutrient_map.push((nutrient, nutrient_link_record_uuid));
+        }
+
+        let _ = tx.commit();
+
+        Ok(nutrient_map)
+    }
 
     pub async fn load_from_sqlite(nutrient_list_id: Uuid) -> Result<Vec<Self>, sqlx::Error> {
         let database_service = DatabaseService::new().await.unwrap();

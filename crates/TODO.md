@@ -6,10 +6,10 @@ units/
 nutrients/
 foods/
 journal/
+exercise/
 profiles/
 
 # Minor progress
-exercise/
 nutrient_balances/
 proc_macros/
 

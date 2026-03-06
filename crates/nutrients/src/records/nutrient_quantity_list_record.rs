@@ -172,6 +172,7 @@ impl NutrientQuantityListItemRecord {
             .execute(&mut *tx)
             .await?;
         }
+        tx.commit();
 
         Ok(())
     }
