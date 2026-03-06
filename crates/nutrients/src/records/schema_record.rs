@@ -1,6 +1,13 @@
 use utils::database::DatabaseService;
 
-use crate::schema::{carbohydrate::{Carbohydrate, CarbohydrateNutrient}, energy::EnergyYieldingNutrients, lipid::{Fat, Lipid, LipidNutrient, Sterols, TransFat}, nutrient_classes::{ChemicalType, EssentialityType, QuantityType}, nutrient_type::NutrientType, protein::ProteinNutrient};
+use crate::schema::{
+    carbohydrate::{Carbohydrate, CarbohydrateNutrient},
+    energy::EnergyYieldingNutrients,
+    lipid::{Fat, Lipid, LipidNutrient, Sterols, TransFat},
+    nutrient_classes::{ChemicalType, EssentialityType, QuantityType},
+    nutrient_type::NutrientType,
+    protein::ProteinNutrient,
+};
 
 pub struct NutrientTypeRecord {
     essentiality_type_id: Option<i64>,
@@ -59,7 +66,7 @@ impl NutrientTypeRecord {
                     EnergyYieldingNutrients::Protein(protein) => {
                         energy_type_id = Some(2);
                         is_bcaa = Some(protein.is_bcaa);
-                    },
+                    }
                     EnergyYieldingNutrients::Lipid(lipid) => {
                         energy_type_id = Some(3);
                         match lipid.lipid_type {
@@ -69,7 +76,7 @@ impl NutrientTypeRecord {
                                     Sterols::Cholesterol => sterol_type_id = Some(1),
                                     Sterols::Phytosterol => sterol_type_id = Some(2),
                                 }
-                            },
+                            }
                             Lipid::Fats(fat) => {
                                 lipid_type_id = Some(2);
                                 match fat {
@@ -77,20 +84,20 @@ impl NutrientTypeRecord {
                                     Fat::Polyunsaturated => fat_type_id = Some(2),
                                     Fat::Saturated => fat_type_id = Some(3),
                                 }
-                            },
+                            }
                             Lipid::TransFats(transfat) => {
                                 lipid_type_id = Some(3);
                                 match transfat {
                                     TransFat::Natural => transfat_type_id = Some(1),
                                     TransFat::Artificial => transfat_type_id = Some(2),
                                 }
-                            },
+                            }
                             Lipid::Phospholipid => lipid_type_id = Some(4),
                         }
                     }
                     EnergyYieldingNutrients::Alcohol => energy_type_id = Some(4),
                 }
-            },
+            }
             ChemicalType::Water => chemical_type_id = 2,
             ChemicalType::Vitamin => chemical_type_id = 3,
             ChemicalType::Mineral => chemical_type_id = 4,
@@ -115,54 +122,58 @@ impl NutrientTypeRecord {
 
     pub fn to_nutrient_type(&self) -> NutrientType {
         let chemical_type = match self.chemical_type_id {
-            1 => {
-                match self.energy_type_id.unwrap() {
-                    1 => {
-                        let carbohydrate_type = match self.carbohydrate_type_id.unwrap() {
-                            1 => Carbohydrate::Fiber,
-                            2 => Carbohydrate::Starch,
-                            3 => Carbohydrate::Sugar,
-                            4 => Carbohydrate::SugarAlcohol,
-                            _ => panic!("Unknown carbohydrate_id"),
-                        };
-                        ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Carbohydrate(CarbohydrateNutrient { carbohydrate_type }))
-                    }
-                    2 => ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Protein(ProteinNutrient { is_bcaa: self.is_bcaa.unwrap() })),
-                    3 => {
-                        let sterol = match self.sterol_type_id {
-                            Some(1) => Some(Lipid::Sterols(Sterols::Cholesterol)),
-                            Some(2) => Some(Lipid::Sterols(Sterols::Phytosterol)),
-                            None => None,
-                            _ => panic!("Unknown sterol"),
-                        };
-                        let fat = match self.fat_type_id {
-                            Some(1) => Some(Lipid::Fats(Fat::Monounsaturated)),
-                            Some(2) => Some(Lipid::Fats(Fat::Polyunsaturated)),
-                            Some(3) => Some(Lipid::Fats(Fat::Saturated)),
-                            None => None,
-                            _ => panic!("Unknown fat"),
-                        };
-                        let transfat = match self.transfat_type_id {
-                            Some(1) => Some(Lipid::TransFats(TransFat::Natural)),
-                            Some(2) => Some(Lipid::TransFats(TransFat::Artificial)),
-                            None => None,
-                            _ => panic!("Unknown transfat"),
-                        };
-                        let values: Vec<Lipid> = [sterol, fat, transfat].iter().filter_map(|x| *x).collect();
-
-                        let lipid_type = match values.len() {
-                            0 => panic!("Lipid was not found"),
-                            1 => values[0],
-                            _ => panic!("More than one type of lipid found"),
-                        };
-
-
-                        let lipid = LipidNutrient { lipid_type };
-                        ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Lipid(lipid))
-                    }
-                    4 => ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Alcohol),
-                    _ => panic!("Unknown energy_id"),
+            1 => match self.energy_type_id.unwrap() {
+                1 => {
+                    let carbohydrate_type = match self.carbohydrate_type_id.unwrap() {
+                        1 => Carbohydrate::Fiber,
+                        2 => Carbohydrate::Starch,
+                        3 => Carbohydrate::Sugar,
+                        4 => Carbohydrate::SugarAlcohol,
+                        _ => panic!("Unknown carbohydrate_id"),
+                    };
+                    ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Carbohydrate(
+                        CarbohydrateNutrient { carbohydrate_type },
+                    ))
                 }
+                2 => ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Protein(
+                    ProteinNutrient {
+                        is_bcaa: self.is_bcaa.unwrap(),
+                    },
+                )),
+                3 => {
+                    let sterol = match self.sterol_type_id {
+                        Some(1) => Some(Lipid::Sterols(Sterols::Cholesterol)),
+                        Some(2) => Some(Lipid::Sterols(Sterols::Phytosterol)),
+                        None => None,
+                        _ => panic!("Unknown sterol"),
+                    };
+                    let fat = match self.fat_type_id {
+                        Some(1) => Some(Lipid::Fats(Fat::Monounsaturated)),
+                        Some(2) => Some(Lipid::Fats(Fat::Polyunsaturated)),
+                        Some(3) => Some(Lipid::Fats(Fat::Saturated)),
+                        None => None,
+                        _ => panic!("Unknown fat"),
+                    };
+                    let transfat = match self.transfat_type_id {
+                        Some(1) => Some(Lipid::TransFats(TransFat::Natural)),
+                        Some(2) => Some(Lipid::TransFats(TransFat::Artificial)),
+                        None => None,
+                        _ => panic!("Unknown transfat"),
+                    };
+                    let values: Vec<Lipid> =
+                        [sterol, fat, transfat].iter().filter_map(|x| *x).collect();
+
+                    let lipid_type = match values.len() {
+                        0 => panic!("Lipid was not found"),
+                        1 => values[0],
+                        _ => panic!("More than one type of lipid found"),
+                    };
+
+                    let lipid = LipidNutrient { lipid_type };
+                    ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Lipid(lipid))
+                }
+                4 => ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Alcohol),
+                _ => panic!("Unknown energy_id"),
             },
             2 => ChemicalType::Water,
             3 => ChemicalType::Vitamin,
@@ -203,7 +214,10 @@ impl NutrientTypeRecord {
                         RETURNING id
                     "#,
                     self.carbohydrate_type_id
-                ).fetch_one(&database_service.pool).await?.id;
+                )
+                .fetch_one(&database_service.pool)
+                .await?
+                .id;
 
                 let energy_id = sqlx::query!(
                     r#"
@@ -224,7 +238,7 @@ impl NutrientTypeRecord {
                     self.chemical_type_id,
                     energy_id
                 ).fetch_one(&database_service.pool).await?.id
-            },
+            }
             Some(2) => {
                 let protein_id = sqlx::query!(
                     r#"
@@ -233,7 +247,10 @@ impl NutrientTypeRecord {
                         RETURNING id
                     "#,
                     self.is_bcaa
-                ).fetch_one(&database_service.pool).await?.id;
+                )
+                .fetch_one(&database_service.pool)
+                .await?
+                .id;
 
                 let energy_id = sqlx::query!(
                     r#"
@@ -244,7 +261,7 @@ impl NutrientTypeRecord {
                     self.energy_type_id,
                     protein_id
                 ).fetch_one(&database_service.pool).await?.id;
-     
+
                 sqlx::query!(
                     r#"
                         INSERT INTO nutrients_chemical_type_table (chemical_type_id, energy_yielding_nutrient_id)
@@ -254,7 +271,7 @@ impl NutrientTypeRecord {
                     self.chemical_type_id,
                     energy_id
                 ).fetch_one(&database_service.pool).await?.id
-       },
+            }
             Some(3) => {
                 let lipid_table_id = sqlx::query!(
                     r#"
@@ -267,7 +284,7 @@ impl NutrientTypeRecord {
                     self.fat_type_id,
                     self.transfat_type_id
                 ).fetch_one(&database_service.pool).await?.id;
-      
+
                 let lipid_id = sqlx::query!(
                     r#"
                         INSERT INTO nutrients_lipid_nutrients (lipid_id)
@@ -275,7 +292,10 @@ impl NutrientTypeRecord {
                         RETURNING id
                     "#,
                     lipid_table_id
-                ).fetch_one(&database_service.pool).await?.id;
+                )
+                .fetch_one(&database_service.pool)
+                .await?
+                .id;
 
                 let energy_id = sqlx::query!(
                     r#"
@@ -286,7 +306,7 @@ impl NutrientTypeRecord {
                     self.energy_type_id,
                     lipid_id
                 ).fetch_one(&database_service.pool).await?.id;
-   
+
                 sqlx::query!(
                     r#"
                         INSERT INTO nutrients_chemical_type_table (chemical_type_id, energy_yielding_nutrient_id)
@@ -296,7 +316,7 @@ impl NutrientTypeRecord {
                     self.chemical_type_id,
                     energy_id
                 ).fetch_one(&database_service.pool).await?.id
-         },
+            }
             Some(4) => {
                 let energy_id = sqlx::query!(
                     r#"
@@ -306,7 +326,7 @@ impl NutrientTypeRecord {
                     "#,
                     self.energy_type_id,
                 ).fetch_one(&database_service.pool).await?.id;
-        
+
                 sqlx::query!(
                     r#"
                         INSERT INTO nutrients_chemical_type_table (chemical_type_id, energy_yielding_nutrient_id)
@@ -316,7 +336,7 @@ impl NutrientTypeRecord {
                     self.chemical_type_id,
                     energy_id
                 ).fetch_one(&database_service.pool).await?.id
-            },
+            }
             None => {
                 sqlx::query!(
                     r#"
@@ -325,10 +345,12 @@ impl NutrientTypeRecord {
                         RETURNING id
                     "#,
                     self.chemical_type_id,
-                ).fetch_one(&database_service.pool).await?.id
-            },
-            _ => panic!("Unknown energy type id")
-
+                )
+                .fetch_one(&database_service.pool)
+                .await?
+                .id
+            }
+            _ => panic!("Unknown energy type id"),
         };
 
         sqlx::query!(
@@ -341,11 +363,14 @@ impl NutrientTypeRecord {
             chemical_id
         ).execute(&database_service.pool).await?;
 
-
         Ok(())
     }
 
-    pub async fn load_from_database_from_nutrient_type_composite_key(quantity_type_id: i64, essentiality_type_id: Option<i64>, chemical_id: i64) -> Result<Self, sqlx::Error> {
+    pub async fn load_from_database_from_nutrient_type_composite_key(
+        quantity_type_id: i64,
+        essentiality_type_id: Option<i64>,
+        chemical_id: i64,
+    ) -> Result<Self, sqlx::Error> {
         let database_service = DatabaseService::new().await.unwrap();
 
         let row = sqlx::query_as!(
@@ -384,10 +409,10 @@ impl NutrientTypeRecord {
             essentiality_type_id,
             chemical_id
         )
-            .fetch_one(&database_service.pool)
-            .await?;
+        .fetch_one(&database_service.pool)
+        .await?;
 
-        return Ok(row)
+        return Ok(row);
     }
 
     pub fn get_essentiality_type_id(&self) -> Option<i64> {
@@ -422,4 +447,3 @@ impl NutrientTypeRecord {
         Ok(row.id.expect("Invalid record"))
     }
 }
-

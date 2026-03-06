@@ -3,7 +3,10 @@ use std::collections::BTreeSet;
 use utils::database::DatabaseService;
 use uuid::Uuid;
 
-use crate::{nutrient_quantity::NutrientQuantity, nutrient_quantity_list::{self, NutrientQuantityList}};
+use crate::{
+    nutrient_quantity::NutrientQuantity, nutrient_quantity_list::NutrientQuantityList,
+    records::nutrient_quantity_record::NutrientQuantityRecord,
+};
 
 pub struct NutrientQuantityListRecord {
     id: Vec<u8>,
@@ -18,7 +21,7 @@ impl NutrientQuantityListRecord {
     pub fn to_nutrient_quantity_list(&self) -> NutrientQuantityList {
         let mut nutrient_quantity_list = NutrientQuantityList::new();
         nutrient_quantity_list.set_id(Uuid::from_slice(&self.id).unwrap());
-        return nutrient_quantity_list
+        return nutrient_quantity_list;
     }
 
     pub async fn save_to_database(&self) -> Result<(), sqlx::Error> {
@@ -32,8 +35,8 @@ impl NutrientQuantityListRecord {
             "#,
             self.id,
         )
-            .execute(&database_service.pool)
-            .await?;
+        .execute(&database_service.pool)
+        .await?;
         Ok(())
     }
 
@@ -61,29 +64,74 @@ pub struct NutrientQuantityListItemRecord {
 }
 
 impl NutrientQuantityListItemRecord {
-    // pub async fn from_nutrient_quantity_list(nutrient_quantity_list: NutrientQuantityList) -> Vec<Self> {
-    //     let database_service = DatabaseService::new().await.unwrap();
-    //
-    //     let nutrient_quantity_list_id = NutrientQuantityListRecord::from_nutrient_quantity_list(nutrient_quantity_list).get_id();
-    //     for nutrient_quantity in nutrient_quantity_list.get_nutrient_amounts().iter() {
-    //         // Do a select using nutrient_quantity_list_id and nutrient_quantity.id and quantity with joins?
-    //         // Create list of missing ones
-    //         // Outside of for loop bulk save the missing ones
-    //     }
-    // }
-    //
-    // pub async fn to_btree_map_from_vec(items: Vec<&Self>) -> BTreeSet<NutrientQuantity> {
-    //     // Do a bulk select for the items in the nutrient_quantity_table
-    //     // Make a BTreeSet
-    // }
+    pub async fn from_nutrient_quantity_list(
+        nutrient_quantity_list: NutrientQuantityList,
+    ) -> Vec<Self> {
+        let mut record_vec: Vec<NutrientQuantityListItemRecord> = Vec::new();
+        let nutrient_quantity_list_id =
+            NutrientQuantityListRecord::from_nutrient_quantity_list(nutrient_quantity_list.clone())
+                .get_id();
+        for nutrient_quantity in nutrient_quantity_list.get_nutrient_amounts().iter() {
+            let nutrient_quantity_id = nutrient_quantity.get_id().as_bytes().to_vec();
+            let nutrient_quantity_list_item = NutrientQuantityListItemRecord {
+                nutrient_quantity_list_id: nutrient_quantity_list_id.clone(),
+                nutrient_quantity_id,
+            };
+            record_vec.push(nutrient_quantity_list_item);
+        }
 
-    pub async fn load_from_sqlite(nutrient_quantity_list_id: Uuid) -> Result<Vec<Self>, sqlx::Error> {
+        return record_vec;
+    }
+
+    pub async fn to_btree_map_from_vec(
+        items: Vec<&Self>,
+    ) -> Result<BTreeSet<NutrientQuantity>, sqlx::Error> {
+        if let Some(first) = items.first() {
+            if !items
+                .iter()
+                .all(|item| item.nutrient_quantity_list_id == first.nutrient_quantity_list_id)
+            {
+                panic!("List has elements of a different list")
+            };
+        }
+
+        let database_service = DatabaseService::new().await.unwrap();
+        let mut tx = database_service.pool.begin().await?;
+
+        let mut quantity_tree: BTreeSet<NutrientQuantity> = BTreeSet::new();
+        for item in items {
+            let nutrient_quantity_record = sqlx::query_as!(
+                NutrientQuantityRecord,
+                r#"
+                    SELECT
+                        id,
+                        quantity,
+                        nutrient_id,
+                        output_unit_id
+                    FROM nutrients_nutrient_quantity_table
+                    WHERE
+                        id = ?
+                "#,
+                item.nutrient_quantity_id
+            )
+            .fetch_one(&mut *tx)
+            .await?;
+
+            let nutrient_quantity = nutrient_quantity_record.to_nutrient_quantity().await;
+            quantity_tree.insert(nutrient_quantity);
+        }
+
+        return Ok(quantity_tree);
+    }
+
+    pub async fn load_from_sqlite(
+        nutrient_quantity_list_id: Uuid,
+    ) -> Result<Vec<Self>, sqlx::Error> {
         let database_service = DatabaseService::new().await.unwrap();
 
-        Ok(
-            sqlx::query_as!(
-                NutrientQuantityListItemRecord,
-                r#"
+        Ok(sqlx::query_as!(
+            NutrientQuantityListItemRecord,
+            r#"
                     SELECT
                         nutrient_quantity_list_id,
                         nutrient_quantity_id
@@ -91,11 +139,10 @@ impl NutrientQuantityListItemRecord {
                     WHERE
                         nutrient_quantity_list_id = ?
                 "#,
-                nutrient_quantity_list_id
-            )
-            .fetch_all(&database_service.pool)
-            .await?
+            nutrient_quantity_list_id
         )
+        .fetch_all(&database_service.pool)
+        .await?)
     }
 
     pub async fn save_to_database(&self) -> Result<(), sqlx::Error> {
@@ -172,7 +219,7 @@ impl NutrientQuantityListItemRecord {
             .execute(&mut *tx)
             .await?;
         }
-        tx.commit();
+        tx.commit().await?;
 
         Ok(())
     }

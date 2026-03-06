@@ -12,6 +12,7 @@ use crate::{nutrient::Nutrient, nutrient_units::NutrientUnit};
 
 #[derive(Debug, Clone)]
 pub struct NutrientQuantity {
+    id: Uuid,
     value: f64,
     nutrient: Rc<RefCell<Nutrient>>,
     output_unit: NutrientUnit,
@@ -25,6 +26,7 @@ impl NutrientQuantity {
     ) -> Result<Self, &'static str> {
         match nutrient.get_conversion_factor(output_unit, nutrient.get_main_unit()) {
             Ok(_) => Ok(Self {
+                id: Uuid::new_v4(),
                 value,
                 nutrient: Rc::new(RefCell::new(nutrient)),
                 output_unit,
@@ -43,12 +45,21 @@ impl NutrientQuantity {
             .get_conversion_factor(output_unit, nutrient_borrowed.get_main_unit())
         {
             Ok(_) => Ok(Self {
+                id: Uuid::new_v4(),
                 value,
                 nutrient: nutrient,
                 output_unit,
             }),
             Err(err) => Err(err),
         }
+    }
+
+    pub fn get_id(&self) -> Uuid {
+        self.id
+    }
+
+    pub fn set_id(&mut self, id: Uuid) {
+        self.id = id;
     }
 
     pub fn get_value(&self) -> f64 {
@@ -135,6 +146,7 @@ impl Add for NutrientQuantity {
             .get_conversion_factor(rhs.output_unit, self.output_unit)
             .unwrap();
         Self {
+            id: Uuid::new_v4(),
             value: self.value + rhs.value * conversion_factor,
             nutrient: self.nutrient,
             output_unit: self.output_unit,
@@ -152,6 +164,7 @@ impl Sub for NutrientQuantity {
             .get_conversion_factor(rhs.output_unit, self.output_unit)
             .unwrap();
         Self {
+            id: Uuid::new_v4(),
             value: self.value - rhs.value * conversion_factor,
             nutrient: self.nutrient,
             output_unit: self.output_unit,

@@ -1,10 +1,10 @@
 use nutrients::{
     nutrient::{link_parent_child, unlink_parent_child, Nutrient},
+    nutrient_units::NutrientUnit,
     schema::{
         nutrient_classes::{ChemicalType, EssentialityType, QuantityType},
         nutrient_type::NutrientType,
     },
-    nutrient_units::NutrientUnit,
 };
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
 use units::{mass::unit::MassUnit, volume::unit::VolumeUnit};

@@ -2,11 +2,11 @@ use nutrients::{
     nutrient::{link_parent_child, Nutrient},
     nutrient_quantity::NutrientQuantity,
     nutrient_quantity_list::NutrientQuantityList,
+    nutrient_units::NutrientUnit,
     schema::{
         nutrient_classes::{ChemicalType, EssentialityType, QuantityType},
         nutrient_type::NutrientType,
     },
-    nutrient_units::NutrientUnit,
 };
 use units::mass::unit::MassUnit;
 use uuid::Uuid;

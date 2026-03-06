@@ -17,7 +17,8 @@ impl NutrientQuantityList {
     }
 
     pub fn from_vec(nutrient_amount_vec: Vec<NutrientQuantity>) -> Self {
-        let nutrient_amounts: BTreeSet<NutrientQuantity> = nutrient_amount_vec.into_iter().collect();
+        let nutrient_amounts: BTreeSet<NutrientQuantity> =
+            nutrient_amount_vec.into_iter().collect();
         Self {
             id: Uuid::new_v4(),
             nutrient_amounts,

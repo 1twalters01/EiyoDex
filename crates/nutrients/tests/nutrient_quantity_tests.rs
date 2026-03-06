@@ -1,11 +1,11 @@
 use nutrients::{
     nutrient::Nutrient,
     nutrient_quantity::NutrientQuantity,
+    nutrient_units::NutrientUnit,
     schema::{
         nutrient_classes::{ChemicalType, EssentialityType, QuantityType},
         nutrient_type::NutrientType,
     },
-    nutrient_units::NutrientUnit,
 };
 use units::mass::unit::MassUnit;
 
@@ -113,9 +113,12 @@ fn test_division() {
     );
 
     let value = 4.2;
-    let mut nutrient: NutrientQuantity =
-        NutrientQuantity::from_rc_refcell(value, potassium, NutrientUnit::Mass(MassUnit::Milligram))
-            .unwrap();
+    let mut nutrient: NutrientQuantity = NutrientQuantity::from_rc_refcell(
+        value,
+        potassium,
+        NutrientUnit::Mass(MassUnit::Milligram),
+    )
+    .unwrap();
 
     nutrient = nutrient / 2f64;
     assert!(nutrient.get_value() == 2.1);

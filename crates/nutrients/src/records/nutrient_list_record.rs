@@ -1,7 +1,11 @@
 use utils::database::DatabaseService;
 use uuid::Uuid;
 
-use crate::{nutrient::Nutrient, nutrient_list::NutrientList, records::nutrient_record::{NutrientConversionsRecord, NutrientLinkRecordUuid, NutrientRecord}};
+use crate::{
+    nutrient::Nutrient,
+    nutrient_list::NutrientList,
+    records::nutrient_record::{NutrientConversionsRecord, NutrientLinkRecordUuid, NutrientRecord},
+};
 
 pub struct NutrientListRecord {
     id: Vec<u8>,
@@ -16,7 +20,7 @@ impl NutrientListRecord {
     pub fn to_nutrient_quantity_list(&self) -> NutrientList {
         let mut nutrient_list = NutrientList::new();
         nutrient_list.set_id(Uuid::from_slice(&self.id).unwrap());
-        return nutrient_list
+        return nutrient_list;
     }
 
     pub async fn save_to_database(&self) -> Result<(), sqlx::Error> {
@@ -30,8 +34,8 @@ impl NutrientListRecord {
             "#,
             self.id,
         )
-            .execute(&database_service.pool)
-            .await?;
+        .execute(&database_service.pool)
+        .await?;
         Ok(())
     }
 
@@ -58,18 +62,23 @@ pub struct NutrientListItemRecord {
     nutrient_id: Vec<u8>,
 }
 
-
 impl NutrientListItemRecord {
     pub async fn from_nutrient_list(nutrient_list: NutrientList) -> Vec<Self> {
         let nutrient_list_id = nutrient_list.get_id().as_bytes().to_vec();
 
-        nutrient_list.get_nutrients().iter().map(|nutrient| Self {
-            nutrient_list_id: nutrient_list_id.clone(),
-            nutrient_id: nutrient.get_id().as_bytes().to_vec()
-        }).collect()
+        nutrient_list
+            .get_nutrients()
+            .iter()
+            .map(|nutrient| Self {
+                nutrient_list_id: nutrient_list_id.clone(),
+                nutrient_id: nutrient.get_id().as_bytes().to_vec(),
+            })
+            .collect()
     }
 
-    pub async fn to_nutrient_vec_from_from_vec(items: Vec<&Self>) -> Result<Vec<(Nutrient, NutrientLinkRecordUuid)>, sqlx::Error> {
+    pub async fn to_nutrient_vec_from_from_vec(
+        items: Vec<&Self>,
+    ) -> Result<Vec<(Nutrient, NutrientLinkRecordUuid)>, sqlx::Error> {
         let database_service = DatabaseService::new().await.unwrap();
         let mut tx = database_service.pool.begin().await?;
 
@@ -92,8 +101,8 @@ impl NutrientListItemRecord {
                 "#,
                 item.nutrient_id
             )
-                .fetch_one(&mut *tx)
-                .await?;
+            .fetch_one(&mut *tx)
+            .await?;
 
             let conversion_vec = sqlx::query_as!(
                 NutrientConversionsRecord,
@@ -110,7 +119,8 @@ impl NutrientListItemRecord {
             )
             .fetch_all(&mut *tx)
             .await?;
-            let unit_conversions = NutrientConversionsRecord::to_btree_map_from_vec(conversion_vec).await;
+            let unit_conversions =
+                NutrientConversionsRecord::to_btree_map_from_vec(conversion_vec).await;
 
             let parent_rows = sqlx::query!(
                 r#"
@@ -122,9 +132,12 @@ impl NutrientListItemRecord {
             "#,
                 item.nutrient_id
             )
-                .fetch_all(&mut *tx)
+            .fetch_all(&mut *tx)
             .await?;
-            let parent_id_vec: Vec<Uuid> = parent_rows.iter().map(|row| Uuid::from_slice(&row.parent_id).unwrap()).collect();
+            let parent_id_vec: Vec<Uuid> = parent_rows
+                .iter()
+                .map(|row| Uuid::from_slice(&row.parent_id).unwrap())
+                .collect();
 
             let child_rows = sqlx::query!(
                 r#"
@@ -136,12 +149,19 @@ impl NutrientListItemRecord {
             "#,
                 item.nutrient_id
             )
-                .fetch_all(&mut *tx)
+            .fetch_all(&mut *tx)
             .await?;
-            let child_id_vec: Vec<Uuid> = child_rows.iter().map(|row| Uuid::from_slice(&row.child_id).unwrap()).collect();
+            let child_id_vec: Vec<Uuid> = child_rows
+                .iter()
+                .map(|row| Uuid::from_slice(&row.child_id).unwrap())
+                .collect();
 
             let nutrient_id = Uuid::from_slice(&item.nutrient_id).unwrap();
-            let nutrient_link_record_uuid = NutrientLinkRecordUuid { nutrient_id, parent_id_vec, child_id_vec };
+            let nutrient_link_record_uuid = NutrientLinkRecordUuid {
+                nutrient_id,
+                parent_id_vec,
+                child_id_vec,
+            };
 
             let mut nutrient = nutrient_record.to_nutrient().await;
             nutrient.set_unit_conversions(unit_conversions);
@@ -156,10 +176,9 @@ impl NutrientListItemRecord {
     pub async fn load_from_sqlite(nutrient_list_id: Uuid) -> Result<Vec<Self>, sqlx::Error> {
         let database_service = DatabaseService::new().await.unwrap();
 
-        Ok(
-            sqlx::query_as!(
-                NutrientListItemRecord,
-                r#"
+        Ok(sqlx::query_as!(
+            NutrientListItemRecord,
+            r#"
                     SELECT
                         nutrient_list_id,
                         nutrient_id
@@ -167,11 +186,10 @@ impl NutrientListItemRecord {
                     WHERE
                         nutrient_list_id = ?
                 "#,
-                nutrient_list_id
-            )
-            .fetch_all(&database_service.pool)
-            .await?
+            nutrient_list_id
         )
+        .fetch_all(&database_service.pool)
+        .await?)
     }
 
     pub async fn save_to_database(&self) -> Result<(), sqlx::Error> {
@@ -186,8 +204,8 @@ impl NutrientListItemRecord {
             self.nutrient_list_id,
             self.nutrient_id,
         )
-            .execute(&database_service.pool)
-            .await?;
+        .execute(&database_service.pool)
+        .await?;
         Ok(())
     }
 
@@ -205,8 +223,8 @@ impl NutrientListItemRecord {
                 item.nutrient_list_id,
                 item.nutrient_id,
             )
-                .execute(&mut *tx)
-                .await?;
+            .execute(&mut *tx)
+            .await?;
         }
         Ok(())
     }
@@ -248,6 +266,8 @@ impl NutrientListItemRecord {
             .execute(&mut *tx)
             .await?;
         }
+
+        let _ = tx.commit();
 
         Ok(())
     }

@@ -9,11 +9,11 @@ use units::{energy::unit::EnergyUnit, mass::unit::MassUnit, volume::unit::Volume
 use utils::dsa::{dfs::DFSTrait, node::GraphNode};
 
 use crate::{
+    nutrient_units::NutrientUnit,
     schema::{
         nutrient_classes::{ChemicalType, QuantityType},
         nutrient_type::NutrientType,
     },
-    nutrient_units::NutrientUnit,
 };
 
 #[derive(Debug, Clone)]
