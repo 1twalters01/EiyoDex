@@ -7,9 +7,9 @@ nutrients/
 foods/
 journal/
 exercise/
-profiles/
 
 # Minor progress
+profiles/
 nutrient_balances/
 proc_macros/
 

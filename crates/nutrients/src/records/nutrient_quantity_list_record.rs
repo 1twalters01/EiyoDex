@@ -71,7 +71,7 @@ impl NutrientQuantityListItemRecord {
         let nutrient_quantity_list_id =
             NutrientQuantityListRecord::from_nutrient_quantity_list(nutrient_quantity_list.clone())
                 .get_id();
-        for nutrient_quantity in nutrient_quantity_list.get_nutrient_amounts().iter() {
+        for nutrient_quantity in nutrient_quantity_list.get_nutrient_quantities().iter() {
             let nutrient_quantity_id = nutrient_quantity.get_id().as_bytes().to_vec();
             let nutrient_quantity_list_item = NutrientQuantityListItemRecord {
                 nutrient_quantity_list_id: nutrient_quantity_list_id.clone(),

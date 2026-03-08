@@ -9,7 +9,7 @@ pub struct PriceMetadata {
     merchant: Rc<RefCell<Merchant>>,
     // Create a quantity enum that is either a {Currency, Number} or SpecificCurrencyQuantity and use instead
     specific_currency: Option<SpecificCurrencyQuantity>,
-    timestamp: DateTime<Utc>
+    last_updated: DateTime<Utc>
 }
 
 impl PriceMetadata {
@@ -17,7 +17,7 @@ impl PriceMetadata {
         PriceMetadata {
             merchant: Rc::new(RefCell::new(merchant)),
             specific_currency: specific_currency,
-            timestamp: Utc::now(),
+            last_updated: Utc::now(),
         }
     }
 
@@ -37,11 +37,15 @@ impl PriceMetadata {
         self.specific_currency = specific_currency;
     }
 
-    pub fn get_timestamp(&self) -> DateTime<Utc> {
-        self.timestamp
+    pub fn get_last_updated_time(&self) -> DateTime<Utc> {
+        self.last_updated
     }
 
-    pub fn set_timestamp(&mut self, timestamp: DateTime<Utc>) {
-        self.timestamp = timestamp;
+    pub fn set_last_updated_to_timestamp(&mut self, timestamp: DateTime<Utc>) {
+        self.last_updated = timestamp;
+    }
+
+    pub fn set_last_updated_to_now(&mut self) {
+        self.last_updated = Utc::now();
     }
 }

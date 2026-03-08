@@ -52,7 +52,7 @@ impl Merchant {
     }
 
     pub fn set_website(&mut self, website: String) {
-        // add validation
+        // add validation?
         self.website = website;
     }
 }

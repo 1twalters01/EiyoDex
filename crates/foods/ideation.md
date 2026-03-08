@@ -22,7 +22,7 @@ struct FoodTaxonomy {
     id: Uuid,
     name: String,
     description: String,
-    price_metadata: Vec<PriceMetadata>,
+    price_metadata: Vec<Rc<RefCell<PriceMetadata>>>,
     parent: Weak<RefCell<FoodCategory>>,
     children: Vec<Rc<RefCell<FoodVariants>>>,
 }
@@ -57,20 +57,21 @@ pub struct Merchant {
 
 DataSource - The food nutrition data provider e.g. USDA or NCCDB
 DataSourceVersion - the version of the data source
+DataSourceInstance - reference to the food nutrition data and the data version
 ```rust
-pub struct DataSource {
+pub struct DataSourceProvider {
     id: Uuid,
     name: String,
     description: String,
 }
 
 pub struct DataSourceVersion {
-    data_source: DataSource,
-    version: String, // Could create a version type
+    version: String,
 }
 
 pub struct DataSourceInstance {
-    data_source_version: Rc<RefCell<DataSourceVersion>>,
+    data_source: Rc<RefCell<DataSource>>,
+    version: Version,
     food_nutrition_data: HashSet<Rc<RefCell<FoodNutritionData>>>,
 }
 ```
@@ -117,6 +118,7 @@ struct FoodVariant {
     preparation_method: Rc<RefCell<PreparationMethod>>,
     food_attribute: HashSet<Rc<RefCell<FoodAttribute>>>,
     food_tags: Vec<Rc<RefCell<FoodTags>>>,
+    food_instances: Vec<Rc<RefCell<FoodInstance>>>,
     parent: Weak<RefCell<FoodTaxonomy>>,
 }
 ```
@@ -135,6 +137,8 @@ FoodQuantity - The amount of food
 struct FoodQuantity {
     value: f64,
     food_variant: Rc<RefCell<FoodVariant>>,
+    data_source: Rc<RefCell<DataSourceProvider>>,
+    data_source_version: DataSourceVersion,
     data_source_instance: Rc<RefCell<DataSourceInstance>>,
     consumed_at: DateTime<Utc>,
 }

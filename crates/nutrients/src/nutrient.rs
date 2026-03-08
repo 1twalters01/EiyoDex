@@ -5,14 +5,13 @@ use std::{
 };
 use uuid::Uuid;
 
-use units::{energy::unit::EnergyUnit, mass::unit::MassUnit, volume::unit::VolumeUnit};
+use units::{energy::{quantity::EnergyQuantity, unit::EnergyUnit}, mass::unit::MassUnit, volume::unit::VolumeUnit};
 use utils::dsa::{dfs::DFSTrait, node::GraphNode};
 
 use crate::{
     nutrient_units::NutrientUnit,
     schema::{
-        nutrient_classes::{ChemicalType, QuantityType},
-        nutrient_type::NutrientType,
+        energy::EnergyYieldingNutrients, nutrient_classes::{ChemicalType, QuantityType}, nutrient_type::NutrientType
     },
 };
 
@@ -382,6 +381,18 @@ impl Nutrient {
         }
 
         result
+    }
+
+    pub fn get_calories_per_gram(&self) -> EnergyQuantity {
+        match self.get_nutrient_type().chemical_type {
+            ChemicalType::EnergyYieldingNutrients(energy_yielding_nutrient) => match energy_yielding_nutrient {
+                EnergyYieldingNutrients::Carbohydrate(_) => EnergyQuantity::new(4f64, EnergyUnit::Kilocalorie),
+                EnergyYieldingNutrients::Protein(_) => EnergyQuantity::new(4f64, EnergyUnit::Kilocalorie),
+                EnergyYieldingNutrients::Lipid(_) => EnergyQuantity::new(9f64, EnergyUnit::Kilocalorie),
+                EnergyYieldingNutrients::Alcohol => EnergyQuantity::new(7f64, EnergyUnit::Kilocalorie),
+            },
+            _ => EnergyQuantity::new(0f64, EnergyUnit::Kilocalorie)
+        }
     }
 }
 

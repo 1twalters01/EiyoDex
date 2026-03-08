@@ -32,6 +32,7 @@ impl PreparationMethod {
     }
 }
 
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub struct FoodAttribute {
     id: Uuid,
     name: String,

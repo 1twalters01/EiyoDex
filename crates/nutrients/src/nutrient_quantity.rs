@@ -6,9 +6,10 @@ use std::{
     rc::Rc,
 };
 
+use units::{energy::{quantity::EnergyQuantity, unit::EnergyUnit}, mass::unit::MassUnit};
 use uuid::Uuid;
 
-use crate::{nutrient::Nutrient, nutrient_units::NutrientUnit};
+use crate::{nutrient::Nutrient, nutrient_units::NutrientUnit, schema::{energy::EnergyYieldingNutrients, nutrient_classes::ChemicalType}};
 
 #[derive(Debug, Clone)]
 pub struct NutrientQuantity {
@@ -105,6 +106,21 @@ impl NutrientQuantity {
                 self.output_unit = output_unit;
                 Ok(())
             }
+            Err(err) => Err(err),
+        }
+    }
+
+    pub fn get_calories(&self) -> Result<EnergyQuantity, &'static str> {
+        let nutrient_borrowed = self.nutrient.borrow();
+        let calories_per_gram = nutrient_borrowed.get_calories_per_gram();
+        if calories_per_gram.is_zero() {
+            return Ok(calories_per_gram)
+        }
+
+        match nutrient_borrowed.get_conversion_factor(self.output_unit, NutrientUnit::Mass(MassUnit::Gram)) {
+            Ok(conversion_factor) => {
+                Ok(calories_per_gram * self.value * conversion_factor)
+            },
             Err(err) => Err(err),
         }
     }

@@ -1,3 +1,5 @@
+use std::{cell::RefCell, rc::Rc};
+
 use chrono::NaiveDateTime;
 use nutrients::{nutrient::Nutrient, nutrient_quantity::NutrientQuantity};
 use units::energy::quantity::EnergyQuantity;
@@ -5,11 +7,11 @@ use uuid::Uuid;
 
 use crate::entry_item::EntryItem;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone)]
 pub struct Entry {
     id: Uuid,
     note: String,
-    entry_item: EntryItem,
+    entry_item: Rc<RefCell<EntryItem>>,
     datetime_eaten: Option<NaiveDateTime>,
     datetime_created: NaiveDateTime,
     datetime_last_modified: NaiveDateTime,
@@ -34,11 +36,11 @@ impl Entry {
         self.note = note;
     }
 
-    pub fn get_entry_item(&self) -> EntryItem {
+    pub fn get_entry_item(&self) -> Rc<RefCell<EntryItem>> {
         self.entry_item.clone()
     }
 
-    pub fn set_entry_item(&mut self, entry_item: EntryItem) {
+    pub fn set_entry_item(&mut self, entry_item: Rc<RefCell<EntryItem>>) {
         self.entry_item = entry_item;
     }
 
@@ -62,8 +64,8 @@ impl Entry {
         self.datetime_last_modified = datetime;
     }
 
-    pub fn get_calories(&self) -> EnergyQuantity {
-        self.entry_item.get_calories()
+    pub fn get_calories(&self) -> Result<EnergyQuantity, &'static str> {
+        self.entry_item.borrow().get_calories()
     }
 
     pub fn get_protein(&self) {}
@@ -71,22 +73,22 @@ impl Entry {
     pub fn get_fats(&self) {}
     pub fn get_water(&self) {}
 
-    pub fn get_nutrient_amount(&self, nutrient: Nutrient) -> Option<NutrientQuantity> {
-        self.entry_item.get_nutrient_amount(nutrient)
+    pub fn get_nutrient_quantity(&self, nutrient: Rc<RefCell<Nutrient>>) -> Option<NutrientQuantity> {
+        self.entry_item.borrow().get_nutrient_quantity(nutrient)
     }
 
-    pub fn get_flat_nutrient_amount(&self, nutrient: Nutrient) -> NutrientQuantity {
-        let nutrient_amount_option = self.entry_item.get_nutrient_amount(nutrient.clone());
+    pub fn get_flat_nutrient_quantity(&self, nutrient: Rc<RefCell<Nutrient>>) -> NutrientQuantity {
+        let nutrient_amount_option = self.entry_item.borrow().get_nutrient_quantity(nutrient.clone());
         match nutrient_amount_option {
             Some(nutrient_amount) => return nutrient_amount,
             None => {
-                return NutrientQuantity::new(0f64, nutrient.clone(), nutrient.get_main_unit())
+                return NutrientQuantity::from_rc_refcell(0f64, nutrient.clone(), nutrient.borrow().get_main_unit())
                     .unwrap()
             }
         }
     }
 
-    pub fn contains_nutrient(&self, nutrient: Nutrient) -> bool {
-        self.entry_item.contains_nutrient(nutrient)
+    pub fn contains_nutrient(&self, nutrient: Rc<RefCell<Nutrient>>) -> bool {
+        self.entry_item.borrow().contains_nutrient(nutrient)
     }
 }

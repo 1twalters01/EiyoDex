@@ -1,3 +1,9 @@
+use std::{cell::RefCell, rc::{Rc, Weak}};
+
+use uuid::Uuid;
+
+use crate::{data_sources::DataSourceInstance, food_variant::FoodVariant};
+
 pub struct FoodInstance {
     id: Uuid,
     food_variant: Weak<RefCell<FoodVariant>>,
