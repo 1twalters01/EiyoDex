@@ -721,10 +721,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
 
 [[package]]
-name = "food_suggestions"
-version = "0.1.0"
-
-[[package]]
 name = "foods"
 version = "0.1.0"
 dependencies = [
@@ -1559,15 +1555,6 @@ checksum = "071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841"
 dependencies = [
  "autocfg",
  "libm",
-]
-
-[[package]]
-name = "nutrient_balances"
-version = "0.1.0"
-dependencies = [
- "foods",
- "nutrients",
- "utils",
 ]
 
 [[package]]

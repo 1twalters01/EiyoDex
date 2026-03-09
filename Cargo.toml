@@ -2,13 +2,14 @@
 resolver = "2"
 members = [
     'apps/*',
-    'xtask',
-    'ui/gtk',
     'crates/*',
+    "crates/food_crates/*",
     "proc_macros/*",
+    'ui/gtk',
+    'xtask',
 ]
 exclude = [
-    "crates/proc_macros",
+    "crates/food_crates",
 ]
 
 # Create separate diet and exercise modules in case I want to separate them more clearly

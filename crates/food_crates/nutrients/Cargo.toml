@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-units = { path = "../units" }
-utils = { path = "../utils" }
+units = { path = "../../units" }
+utils = { path = "../../utils" }
 uuid = { version = "1.8.0", features = ["v4", "fast-rng", "macro-diagnostics", "serde"] }
 sqlx = { version = "0.8.6", features = ["sqlite", "runtime-tokio", "uuid", "chrono", "macros"] }
 tokio = { version = "1.47.1", features = ["full"] }

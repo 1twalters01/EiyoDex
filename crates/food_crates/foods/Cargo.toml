@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-units = { path = "../units" }
+units = { path = "../../units" }
 nutrients = { path = "../nutrients" }
 uuid = { version = "1.8.0", features = ["v4", "fast-rng", "macro-diagnostics", "serde"] }
 chrono = { version = "0.4.42", features = ["serde"] }
