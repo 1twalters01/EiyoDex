@@ -87,7 +87,11 @@ impl JournalEntry {
     }
 
     pub fn remove_time_slot(&mut self, time_slot: Rc<RefCell<TimeSlot>>) {
-        if let Some(pos) = self.time_slots.iter().position(|x| Rc::ptr_eq(x, &time_slot)) {
+        if let Some(pos) = self
+            .time_slots
+            .iter()
+            .position(|x| Rc::ptr_eq(x, &time_slot))
+        {
             self.time_slots.remove(pos);
         }
     }
@@ -102,7 +106,7 @@ impl JournalEntry {
             let calories = time_slot.borrow().get_calories()?;
             sum = sum + calories;
         }
-        return Ok(sum)
+        return Ok(sum);
     }
 
     pub fn get_protein(&self) {}
@@ -118,7 +122,11 @@ impl JournalEntry {
         let time_slot_nutrient_amount: NutrientQuantity = self
             .time_slots
             .iter()
-            .map(|time_slot| time_slot.borrow().get_flat_nutrient_quantity(nutrient.clone()))
+            .map(|time_slot| {
+                time_slot
+                    .borrow()
+                    .get_flat_nutrient_quantity(nutrient.clone())
+            })
             .sum();
 
         let total_nutrient_amount: NutrientQuantity =

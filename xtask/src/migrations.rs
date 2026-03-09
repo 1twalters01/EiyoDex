@@ -17,8 +17,9 @@ struct MigrationList {
 
 pub async fn run_database_migrations(current_env: &str) -> Result<(), sqlx::Error> {
     let database_config = DatabaseConfig::default();
-    
-    let content = fs::read_to_string(database_config.get_migrations_path()).expect("Failed to read migrations.toml");
+
+    let content = fs::read_to_string(database_config.get_migrations_path())
+        .expect("Failed to read migrations.toml");
     let migrations: MigrationList = toml::from_str(&content).expect("Failed to parse TOML");
 
     for migration in migrations.migration {
@@ -32,11 +33,8 @@ pub async fn run_database_migrations(current_env: &str) -> Result<(), sqlx::Erro
             .unwrap_or_else(|_| panic!("Failed to read migration file: {}", migration.file));
 
         let pool = DatabaseService::new().await.unwrap().pool;
-        sqlx::query(&sql)
-            .execute(&pool)
-        .await?;
+        sqlx::query(&sql).execute(&pool).await?;
     }
 
     Ok(())
 }
-

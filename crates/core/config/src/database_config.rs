@@ -38,7 +38,7 @@ impl Default for DatabaseConfig {
                 } else {
                     url
                 }
-            },
+            }
             Err(_) => {
                 let sqlite_file_path = workspace_pathbuf.join("eiyodex.sqlite");
                 if !sqlite_file_path.exists() {
@@ -47,12 +47,12 @@ impl Default for DatabaseConfig {
                 format!("sqlite://{}", sqlite_file_path.to_str().unwrap())
             }
         };
-        
+
         let database_pool_size = env::var("DATABASE_POOL_SIZE")
             .unwrap_or_else(|_| String::from("5"))
             .parse::<u32>()
             .expect("Database pool size must be a number");
-    
+
         let database_migrations_path = workspace_pathbuf.join("migrations.toml");
 
         Self {

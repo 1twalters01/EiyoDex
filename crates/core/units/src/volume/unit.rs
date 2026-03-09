@@ -114,7 +114,7 @@ macro_rules! define_volume_units {
                 Ok(Self::from_str(&row.unit_type).unwrap())
             }
         }
-            
+
 
         impl FromStr for VolumeUnit {
             type Err = VolumeUnitParseError;

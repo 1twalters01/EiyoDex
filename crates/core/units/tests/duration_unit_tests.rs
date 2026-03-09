@@ -145,4 +145,3 @@ async fn test_get_database_id() {
     let id = pint.get_database_id().await;
     assert!(id.is_ok());
 }
-

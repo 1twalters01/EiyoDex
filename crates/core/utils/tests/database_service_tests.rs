@@ -6,5 +6,3 @@ async fn test_create_database_session() {
     let res = database_service.ping().await;
     assert!(res.is_ok());
 }
-
-

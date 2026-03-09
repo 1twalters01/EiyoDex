@@ -19,7 +19,10 @@ impl EntryItem {
         }
     }
 
-    pub fn get_nutrient_quantity(&self, nutrient: Rc<RefCell<Nutrient>>) -> Option<NutrientQuantity> {
+    pub fn get_nutrient_quantity(
+        &self,
+        nutrient: Rc<RefCell<Nutrient>>,
+    ) -> Option<NutrientQuantity> {
         match self {
             Self::FoodQuantity(food_amount) => food_amount.get_nutrient_quantity(nutrient),
             Self::ExerciseQuantity(_) => None,

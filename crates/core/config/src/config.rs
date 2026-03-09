@@ -1,11 +1,8 @@
-use std::{
-    env,
-    path::PathBuf
-};
+use std::{env, path::PathBuf};
 
-pub fn get_workspace_root() -> Result<String, std::env::VarError>{
+pub fn get_workspace_root() -> Result<String, std::env::VarError> {
     let workspace_root = std::env::var("WORKSPACE_ROOT")?;
-    return Ok(workspace_root)
+    return Ok(workspace_root);
 }
 
 pub fn init_env() {

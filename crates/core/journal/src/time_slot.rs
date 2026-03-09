@@ -79,14 +79,17 @@ impl TimeSlot {
             let calories = entry.borrow().get_calories()?;
             sum = sum + calories;
         }
-        return Ok(sum)
+        return Ok(sum);
     }
 
     pub fn get_protein(&self) {}
     pub fn get_carbs(&self) {}
     pub fn get_fats(&self) {}
     pub fn get_water(&self) {}
-    pub fn get_nutrient_quantity(&self, nutrient: Rc<RefCell<Nutrient>>) -> Option<NutrientQuantity> {
+    pub fn get_nutrient_quantity(
+        &self,
+        nutrient: Rc<RefCell<Nutrient>>,
+    ) -> Option<NutrientQuantity> {
         self.entries
             .iter()
             .map(|entry| entry.borrow().get_nutrient_quantity(nutrient.clone()))

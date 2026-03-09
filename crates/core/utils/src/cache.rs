@@ -1,9 +1,7 @@
 use config::config::get_workspace_pathbuf;
 use serde::{de::DeserializeOwned, Serialize};
 use sled::Db;
-use std::{
-    time::{SystemTime, UNIX_EPOCH},
-};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 pub struct CacheService {
     db: Db,

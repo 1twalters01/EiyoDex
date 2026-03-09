@@ -73,17 +73,27 @@ impl Entry {
     pub fn get_fats(&self) {}
     pub fn get_water(&self) {}
 
-    pub fn get_nutrient_quantity(&self, nutrient: Rc<RefCell<Nutrient>>) -> Option<NutrientQuantity> {
+    pub fn get_nutrient_quantity(
+        &self,
+        nutrient: Rc<RefCell<Nutrient>>,
+    ) -> Option<NutrientQuantity> {
         self.entry_item.borrow().get_nutrient_quantity(nutrient)
     }
 
     pub fn get_flat_nutrient_quantity(&self, nutrient: Rc<RefCell<Nutrient>>) -> NutrientQuantity {
-        let nutrient_amount_option = self.entry_item.borrow().get_nutrient_quantity(nutrient.clone());
+        let nutrient_amount_option = self
+            .entry_item
+            .borrow()
+            .get_nutrient_quantity(nutrient.clone());
         match nutrient_amount_option {
             Some(nutrient_amount) => return nutrient_amount,
             None => {
-                return NutrientQuantity::from_rc_refcell(0f64, nutrient.clone(), nutrient.borrow().get_main_unit())
-                    .unwrap()
+                return NutrientQuantity::from_rc_refcell(
+                    0f64,
+                    nutrient.clone(),
+                    nutrient.borrow().get_main_unit(),
+                )
+                .unwrap()
             }
         }
     }
