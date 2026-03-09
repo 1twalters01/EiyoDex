@@ -33,3 +33,5 @@ presentation/i18n/
 module/food/food_suggestions/
 infrastructure/external/
 infrastructure/extensions/
+module/sunlight/sunlight/
+module/sleep/sleep/
