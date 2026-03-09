@@ -11,10 +11,27 @@ pub struct FoodInstance {
 }
 
 impl FoodInstance {
-    pub fn get_id() {}
-    pub fn set_id() {}
-    pub fn get_food_variant() {}
-    pub fn set_food_variant() {}
-    pub fn get_data_source() {}
-    pub fn set_data_source() {}
+    pub fn get_id(&self) -> Uuid {
+        self.id
+    }
+
+    pub fn set_id(&mut self, id: Uuid) {
+        self.id = id
+    }
+
+    pub fn get_food_variant(&self) -> Weak<RefCell<FoodVariant>> {
+        self.food_variant.clone()
+    }
+
+    pub fn set_food_variant(&mut self, food_variant: Weak<RefCell<FoodVariant>>) {
+        self.food_variant = food_variant;
+    }
+
+    pub fn get_data_source_instance(&self) -> Rc<RefCell<DataSourceInstance>> {
+        self.data_source_instance.clone()
+    }
+
+    pub fn set_data_source_instance(&mut self, data_source_instance: Rc<RefCell<DataSourceInstance>>) {
+        self.data_source_instance = data_source_instance;
+    }
 }

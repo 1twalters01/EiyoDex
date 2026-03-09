@@ -3,7 +3,6 @@ pub mod food_taxonomy;
 pub mod price_metadata;
 pub mod merchant;
 pub mod data_sources;
-pub mod food_nutrition_data;
 pub mod food_variant_modifiers;
 pub mod food_variant;
 pub mod food_instance;

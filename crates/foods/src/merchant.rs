@@ -5,7 +5,7 @@ pub struct Merchant {
     id: Uuid,
     name: String,
     description: String,
-    website: String,
+    website: Option<String>,
 }
 
 impl Merchant {
@@ -19,7 +19,7 @@ impl Merchant {
             id,
             name,
             description: String::new(),
-            website: String::new(),
+            website: None,
         }
     }
 
@@ -47,11 +47,11 @@ impl Merchant {
         self.description = description;
     }
 
-    pub fn get_website(&self) -> String {
+    pub fn get_website(&self) -> Option<String> {
         self.website.clone()
     }
 
-    pub fn set_website(&mut self, website: String) {
+    pub fn set_website(&mut self, website: Option<String>) {
         // add validation?
         self.website = website;
     }

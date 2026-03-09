@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::food_taxonomy::FoodTaxonomy;
 
-enum FoodCategoryChild {
+pub enum FoodCategoryChild {
     FoodCategory(Rc<RefCell<FoodCategory>>),
     FoodTaxonomy(Rc<RefCell<FoodTaxonomy>>),
 }
@@ -13,12 +13,12 @@ pub struct FoodCategory {
     id: Uuid,
     name: String,
     description: String,
-    parent: Weak<RefCell<FoodCategory>>,
+    parent: Option<Weak<RefCell<FoodCategory>>>,
     children: Vec<Rc<RefCell<FoodCategoryChild>>>,
 }
 
 impl FoodCategory {
-    pub fn new(food_category: Weak<RefCell<FoodCategory>>) -> Self {
+    pub fn new(food_category: Option<Weak<RefCell<FoodCategory>>>) -> Self {
         Self {
             id: Uuid::new_v4(),
             name: String::new(),
@@ -52,11 +52,11 @@ impl FoodCategory {
         self.description = description;
     }
 
-    pub fn get_parent(&self) -> Weak<RefCell<FoodCategory>> {
+    pub fn get_parent(&self) -> Option<Weak<RefCell<FoodCategory>>> {
         self.parent.clone()
     }
 
-    pub fn set_parent(&mut self, food_category: Weak<RefCell<FoodCategory>>) {
+    pub fn set_parent(&mut self, food_category: Option<Weak<RefCell<FoodCategory>>>) {
         self.parent = food_category;
     }
 

@@ -1,20 +1,5 @@
-use units::{
-    duration::quantity::DurationQuantity, energy::quantity::EnergyQuantity,
-    power::quantity::PowerQuantity,
-};
+use units::power::quantity::PowerQuantity;
 use uuid::Uuid;
-
-#[derive(Clone, PartialEq)]
-pub struct ExerciseAmount {
-    duration: DurationQuantity,
-    exercise: Exercise,
-}
-
-impl ExerciseAmount {
-    pub fn get_calories(&self) -> EnergyQuantity {
-        self.exercise.power.clone() * self.duration
-    }
-}
 
 #[derive(Clone, PartialEq)]
 pub struct Exercise {

@@ -14,7 +14,7 @@ struct FoodCategory {
     id: Uuid,
     name: String,
     description: String,
-    parent: Weak<RefCell<FoodCategory>>,
+    parent: Option<Weak<RefCell<FoodCategory>>>,
     children: Vec<Rc<RefCell<FoodCategoryChild>>>,
 }
 
@@ -29,7 +29,6 @@ struct FoodTaxonomy {
 ```
 
 PriceMetadata - Metadata about the price of a FoodTaxonomy item
-Merchant - The seller of the FoodTaxonomy item e.g. tesco
 ```rust
 enum ItemQuantity {
     SpecificCurrency(SpecificCurrencyQuantity), // price/mass or price/volume enum
@@ -46,7 +45,10 @@ struct PriceMetadata {
     item_quantity: Option<ItemQuantity>, 
     timestamp: DateTime,
 }
+```
 
+Merchant - The seller of the FoodTaxonomy item e.g. tesco
+```rust
 pub struct Merchant {
     id: Uuid,
     name: String,
@@ -56,8 +58,8 @@ pub struct Merchant {
 ```
 
 DataSource - The food nutrition data provider e.g. USDA or NCCDB
-DataSourceVersion - the version of the data source
-DataSourceInstance - reference to the food nutrition data and the data version
+DataSourceVersion - The version of the data source
+DataSourceInstance - The food nutrition data in question
 ```rust
 pub struct DataSourceProvider {
     id: Uuid,
@@ -70,19 +72,10 @@ pub struct DataSourceVersion {
 }
 
 pub struct DataSourceInstance {
-    data_source: Rc<RefCell<DataSource>>,
-    version: Version,
-    food_nutrition_data: HashSet<Rc<RefCell<FoodNutritionData>>>,
-}
-```
-
-FoodNutritionData - The food nutrition data in question
-```rust
-pub struct FoodNutritionData {
-    id: Uuid,
-    data_source_instance: Rc<RefCell<DataSourceInstance>>,
+    data_source_provider: Rc<RefCell<DataSourceProvider>>,
+    data_source_version: Rc<RefCell<DataSourceVersion>>,
     description: String,
-    nutrient_quantity_list: NutrientQuantityList,
+    nutrient_quantity_list: Rc<RefCell<NutrientQuantityList>>,
 }
 ```
 
@@ -110,6 +103,8 @@ pub struct FoodTags {
 ```
 
 FoodVariant - The specific item the user is eating e.g. baked chicken leg, no skin
+FoodInstance - A specific instance of a food
+FoodQuantity - The amount of food
 ```rust
 struct FoodVariant {
     id: Uuid,
@@ -121,19 +116,13 @@ struct FoodVariant {
     food_instances: Vec<Rc<RefCell<FoodInstance>>>,
     parent: Weak<RefCell<FoodTaxonomy>>,
 }
-```
 
-FoodInstance - A specific instance of a food
-```rust
 struct FoodInstance {
     id: Uuid,
     food_variant: Weak<RefCell<FoodVariant>>,
     data_source_instance: DataSourceInstance,
 }
-```
 
-FoodQuantity - The amount of food
-```rust
 struct FoodQuantity {
     value: f64,
     food_variant: Rc<RefCell<FoodVariant>>,

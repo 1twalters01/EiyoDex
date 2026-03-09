@@ -65,13 +65,13 @@ impl FoodAttribute {
     }
 }
 
-pub struct FoodTags {
+pub struct FoodTag {
     id: Uuid,
     name: String,
     description: String,
 }
 
-impl FoodTags {
+impl FoodTag {
     pub fn get_id(&self) -> Uuid {
         self.id
     }
