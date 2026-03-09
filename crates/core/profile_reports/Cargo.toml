@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 chrono = "0.4.42"
-foods = { path = "../food_crates/foods" }
-nutrients = { path = "../food_crates/nutrients" }
+foods = { path = "../../modules/food/foods" }
+nutrients = { path = "../../modules/food/nutrients" }
 profiles = { path = "../profiles" }
 

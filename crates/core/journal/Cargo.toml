@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-exercise = { path = "../exercise" }
-foods = { path = "../food_crates/foods" }
-nutrients = { path = "../food_crates/nutrients" }
+exercise = { path = "../../modules/exercise/exercise" }
+foods = { path = "../../modules/food/foods" }
+nutrients = { path = "../../modules/food/nutrients" }
 profiles = { path = "../profiles" }
 units = { path = "../units" }
 chrono = "0.4.42"

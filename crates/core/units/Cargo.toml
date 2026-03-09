@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-units_macro = { path = "../../proc_macros/units_macro" }
+units_macro = { path = "../../../proc_macros/units_macro" }
 utils = { path = "../utils" }
 serde = { version = "1.0", features = ["derive"] }
 reqwest = { version = "0.12.4", features = ["blocking", "json"] }

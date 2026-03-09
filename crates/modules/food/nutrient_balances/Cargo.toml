@@ -6,5 +6,5 @@ edition = "2021"
 [dependencies]
 foods = { path = "../foods" }
 nutrients = { path = "../nutrients" }
-utils = { path = "../../utils" }
+utils = { path = "../../../core/utils" }
 

@@ -1,35 +1,35 @@
 # Done
-utils/
-units/
+core/utils/
+core/units/
 
 # In progress
-nutrients/
-foods/
-journal/
-exercise/
+module/food/nutrients/
+module/food/foods/
+core/journal/
+module/exercise/exercise/
 
 # Minor progress
-profiles/
-nutrient_balances/
+core/profiles/
+module/food/nutrient_balances/
 proc_macros/
 
 # Todo
-profile_reports/
-config/
-cli/
+core/profile_reports/
+core/config/
+interface/cli/
 
 # Future
-markdown/
-notifications/
-data_sync/
-themes/
-gui/
-audio/
-charts/
-auto_update/
+services/markdown/
+services/notifications/
+services/data_sync/
+presentation/themes/
+interface/gui/
+presentation/audio/
+presentation/charts/
+services/auto_update/
 
 # Far future
-i18n/
-food_suggestions/
-external/
-extensions/
+presentation/i18n/
+module/food/food_suggestions/
+infrastructure/external/
+infrastructure/extensions/

@@ -1,15 +1,15 @@
 [workspace]
 resolver = "2"
 members = [
-    'apps/*',
-    'crates/*',
-    "crates/food_crates/*",
+    "apps/*",
+    "crates/*/*",
+    "crates/modules/*/*",
     "proc_macros/*",
-    'ui/gtk',
-    'xtask',
+    "ui/gtk",
+    "xtask",
 ]
 exclude = [
-    "crates/food_crates",
+    "crates/modules",
 ]
 
 # Create separate diet and exercise modules in case I want to separate them more clearly
