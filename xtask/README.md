@@ -4,6 +4,7 @@
 ## Commands
 * View help: cargo run -p xtask -- --help
 * Setup Python: cargo run -p xtask -- setup-python
+* Run migrations: cargo run -p xtask -- run-migrations
 * Run Prettier: cargo run -p xtask -- run-prettier
 * Compile SCSS to CSS (for gtk 4 for linux): cargo run -p xtask -- build-css
 * Parse SCSS to XAML (for WinUI 3 for Windows): cargo run -p xtask --build-xaml

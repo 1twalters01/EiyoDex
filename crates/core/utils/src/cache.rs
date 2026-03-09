@@ -1,7 +1,7 @@
+use config::config::get_workspace_pathbuf;
 use serde::{de::DeserializeOwned, Serialize};
 use sled::Db;
 use std::{
-    path::PathBuf,
     time::{SystemTime, UNIX_EPOCH},
 };
 
@@ -11,8 +11,7 @@ pub struct CacheService {
 
 impl CacheService {
     pub fn new() -> sled::Result<Self> {
-        let workspace_root = std::env::var("WORKSPACE_ROOT").expect("WORKSPACE_ROOT must be set");
-        let workspace_pathbuf = PathBuf::from(workspace_root);
+        let workspace_pathbuf = get_workspace_pathbuf().unwrap();
         let db_location = workspace_pathbuf.join("sled");
         let db = sled::open(db_location)?;
 

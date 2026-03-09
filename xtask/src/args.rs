@@ -11,6 +11,7 @@ pub struct Cli {
 pub enum Commands {
     SetupPython,
     RunPrettier,
+    RunMigrations,
     BuildCSS,
     BuildXaml,
     BuildSwiftuiModifiers,
