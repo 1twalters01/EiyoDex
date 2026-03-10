@@ -97,7 +97,7 @@ macro_rules! define_distance_units {
                 .await?;
                 Ok(row.id)
             }
-         
+
             pub async fn from_database_id(id: i64, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
                 let row = sqlx::query!(
                     r#"

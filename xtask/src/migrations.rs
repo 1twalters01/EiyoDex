@@ -15,7 +15,10 @@ struct MigrationList {
     migration: Vec<Migration>,
 }
 
-pub async fn run_database_migrations(current_env: &str, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+pub async fn run_database_migrations(
+    current_env: &str,
+    pool: &Pool<Sqlite>,
+) -> Result<(), sqlx::Error> {
     let database_config = DatabaseConfig::default();
 
     let content = fs::read_to_string(database_config.get_migrations_path())
