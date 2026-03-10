@@ -119,7 +119,8 @@ fn test_from_str() {
 #[tokio::test]
 async fn test_save_to_database() {
     let database_service = DatabaseService::new().await.unwrap();
-    let res = MassUnit::save_to_database().await;
+    let pool = database_service.get_pool();
+    let res = MassUnit::save_enumerations_to_database(&pool()).await;
     assert!(res.is_ok());
 
     let mass = MassUnit::Gram.as_unit_type();
@@ -131,7 +132,7 @@ async fn test_save_to_database() {
         "#,
         mass
     )
-    .fetch_one(&database_service.pool)
+    .fetch_one(&pool)
     .await
     .unwrap();
     let unit_type = rows.unit_type;
@@ -144,7 +145,10 @@ async fn test_get_database_id() {
     let res = MassUnit::save_to_database().await;
     assert!(res.is_ok());
 
+    let database_service = DatabaseService::new().await.unwrap();
+    let pool = database_service.get_pool();
+
     let gram = MassUnit::Gram;
-    let id = gram.get_database_id().await;
+    let id = gram.get_database_id(&pool).await;
     assert!(id.is_ok());
 }

@@ -15,6 +15,7 @@ macro_rules! define_volume_units {
             }
         ),+ $(,)?
     ) => {
+        use sqlx::{Pool, Sqlite};
         use crate::{
             measurement_system::MeasurementSystem,
             volume::error::VolumeUnitParseError,
@@ -63,8 +64,7 @@ macro_rules! define_volume_units {
                 }
             }
 
-            pub async fn save_to_database() -> Result<(), sqlx::Error> {
-                let database_service = DatabaseService::new().await?;
+            pub async fn save_enumerations_to_database(pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
                 let volume_enumerations = VolumeUnit::get_enumerations();
                 for volume in volume_enumerations {
                     let unit_type = volume.as_unit_type();
@@ -75,14 +75,13 @@ macro_rules! define_volume_units {
                         "#,
                         unit_type,
                     )
-                    .execute(&database_service.pool)
+                    .execute(pool)
                     .await?;
                 }
                 return Ok(())
             }
 
-            pub async fn get_database_id(&self) -> Result<i64, sqlx::Error> {
-                let database_service = DatabaseService::new().await?;
+            pub async fn get_database_id(&self, pool: &Pool<Sqlite>) -> Result<i64, sqlx::Error> {
                 let unit_type = self.as_unit_type();
                 let row = sqlx::query!(
                     r#"
@@ -92,13 +91,12 @@ macro_rules! define_volume_units {
                     "#,
                     unit_type
                 )
-                .fetch_one(&database_service.pool)
+                .fetch_one(pool)
                 .await?;
                 Ok(row.id)
             }
 
-            pub async fn from_database_id(id: i64) -> Result<Self, sqlx::Error> {
-                let database_service = DatabaseService::new().await?;
+            pub async fn from_database_id(id: i64, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
                 let row = sqlx::query!(
                 r#"
                     SELECT unit_type
@@ -107,7 +105,7 @@ macro_rules! define_volume_units {
                 "#,
                 id
                 )
-                .fetch_one(&database_service.pool)
+                .fetch_one(pool)
                 .await?;
 
                 // FIX THIS

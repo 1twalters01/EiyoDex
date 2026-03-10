@@ -38,6 +38,7 @@ macro_rules! define_power_units {
             ),* $(,)?
         },
     ) => {
+        use sqlx::{Pool, Sqlite};
         use crate::{
             measurement_system::MeasurementSystem,
             energy::unit::EnergyUnit,

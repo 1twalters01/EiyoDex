@@ -1,3 +1,4 @@
+use sqlx::{Pool, Sqlite};
 use utils::database::DatabaseService;
 use uuid::Uuid;
 
@@ -14,7 +15,7 @@ pub struct NutrientQuantityRecord {
 }
 
 impl NutrientQuantityRecord {
-    pub async fn from_nutrient_quantity(nutrient_quantity: NutrientQuantity) -> Self {
+    pub async fn from_nutrient_quantity(nutrient_quantity: NutrientQuantity, pool: &Pool<Sqlite>) -> Self {
         let id: Vec<u8> = nutrient_quantity.get_id().as_bytes().to_vec();
         let quantity = nutrient_quantity.get_value();
         let nutrient_id = nutrient_quantity
@@ -24,7 +25,7 @@ impl NutrientQuantityRecord {
             .as_bytes()
             .to_vec();
         let output_unit_id =
-            NutrientUnitRecord::from_nutrient_unit(nutrient_quantity.get_output_unit())
+            NutrientUnitRecord::from_nutrient_unit(nutrient_quantity.get_output_unit(), pool)
                 .await
                 .get_unit_type_id()
                 .expect("Invalid unit");
@@ -37,19 +38,19 @@ impl NutrientQuantityRecord {
         }
     }
 
-    pub async fn to_nutrient_quantity(&self) -> NutrientQuantity {
+    pub async fn to_nutrient_quantity(&self, pool: &Pool<Sqlite>) -> NutrientQuantity {
         let id = Uuid::from_slice(&self.id).unwrap();
         let quantity = self.quantity;
         let nutrient =
-            NutrientRecord::load_from_database(Uuid::from_slice(&self.nutrient_id).unwrap())
+            NutrientRecord::load_from_database(Uuid::from_slice(&self.nutrient_id).unwrap(), pool)
                 .await
                 .unwrap()
-                .to_nutrient()
+                .to_nutrient(pool)
                 .await;
-        let output_unit = NutrientUnitRecord::load_from_database(self.output_unit_id)
+        let output_unit = NutrientUnitRecord::load_from_database(self.output_unit_id, pool)
             .await
             .unwrap()
-            .to_nutrient_unit()
+            .to_nutrient_unit(pool)
             .await;
 
         let mut nutrient_quantity = NutrientQuantity::new(quantity, nutrient, output_unit).unwrap();
@@ -57,9 +58,7 @@ impl NutrientQuantityRecord {
         return nutrient_quantity;
     }
 
-    pub async fn load_from_database(id: Uuid) -> Result<Self, sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-
+    pub async fn load_from_database(id: Uuid, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
         Ok(sqlx::query_as!(
             NutrientQuantityRecord,
             r#"
@@ -74,13 +73,11 @@ impl NutrientQuantityRecord {
                 "#,
             id
         )
-        .fetch_one(&database_service.pool)
+        .fetch_one(pool)
         .await?)
     }
 
-    pub async fn save_to_database(&self) -> Result<(), sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-
+    pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         sqlx::query!(
             r#"
                 INSERT INTO nutrients_nutrient_quantity_table (id, quantity, nutrient_id, output_unit_id)
@@ -97,19 +94,17 @@ impl NutrientQuantityRecord {
             self.nutrient_id,
             self.output_unit_id,
         )
-            .execute(&database_service.pool)
+            .execute(pool)
             .await?;
         Ok(())
     }
 
-    pub async fn delete_nutrient_quantity(&self) -> Result<(), sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-
+    pub async fn delete_nutrient_quantity(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         sqlx::query!(
             "DELETE FROM nutrients_nutrient_quantity_table WHERE id = ?",
             self.id
         )
-        .execute(&database_service.pool)
+        .execute(pool)
         .await?;
 
         Ok(())

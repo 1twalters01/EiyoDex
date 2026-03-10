@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 
+use sqlx::{Pool, Sqlite};
 use utils::{database::DatabaseService, dsa::node::GraphNode};
 use uuid::Uuid;
 
@@ -20,19 +21,19 @@ pub struct NutrientRecord {
 }
 
 impl NutrientRecord {
-    pub async fn from_nutrient(nutrient: Nutrient) -> Result<Self, &'static str> {
+    pub async fn from_nutrient(nutrient: Nutrient, pool: &Pool<Sqlite>) -> Result<Self, &'static str> {
         let nutrient_id = nutrient.get_id().as_bytes().to_vec();
         let name = nutrient.get_name();
         let description = nutrient.get_description();
         let nutrient_type = NutrientTypeRecord::from_nutrient_type(nutrient.get_nutrient_type());
-        let main_unit_id = NutrientUnitRecord::from_nutrient_unit(nutrient.get_main_unit())
+        let main_unit_id = NutrientUnitRecord::from_nutrient_unit(nutrient.get_main_unit(), pool)
             .await
             .get_unit_type_id()
             .unwrap();
 
         let essentiality_type_id = nutrient_type.get_essentiality_type_id();
         let quantity_type_id = nutrient_type.get_quantity_type_id();
-        let chemical_id = nutrient_type.get_chemical_id().await.unwrap();
+        let chemical_id = nutrient_type.get_chemical_id(pool).await.unwrap();
 
         Ok(Self {
             nutrient_id,
@@ -45,7 +46,7 @@ impl NutrientRecord {
         })
     }
 
-    pub async fn to_nutrient(&self) -> Nutrient {
+    pub async fn to_nutrient(&self, pool: &Pool<Sqlite>) -> Nutrient {
         let id = Some(Uuid::from_slice(&self.nutrient_id).unwrap());
         let name = self.name.clone();
         let description = self.description.clone();
@@ -54,14 +55,15 @@ impl NutrientRecord {
                 self.quantity_type_id,
                 self.essentiality_type_id,
                 self.chemical_id,
+                pool,
             )
             .await
             .unwrap();
         let nutrient_type = nutrient_type_record.to_nutrient_type();
-        let main_unit_id = NutrientUnitRecord::load_from_database(self.main_unit_id)
+        let main_unit_id = NutrientUnitRecord::load_from_database(self.main_unit_id, pool)
             .await
             .unwrap()
-            .to_nutrient_unit()
+            .to_nutrient_unit(pool)
             .await;
 
         let mut nutrient = Nutrient::new(id, name, nutrient_type, main_unit_id);
@@ -70,9 +72,7 @@ impl NutrientRecord {
         return nutrient;
     }
 
-    pub async fn load_from_database(id: Uuid) -> Result<Self, sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-
+    pub async fn load_from_database(id: Uuid, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
         Ok(sqlx::query_as!(
             NutrientRecord,
             r#"
@@ -90,13 +90,11 @@ impl NutrientRecord {
                 "#,
             id
         )
-        .fetch_one(&database_service.pool)
+        .fetch_one(pool)
         .await?)
     }
 
-    pub async fn save_to_database(&self) -> Result<(), sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-
+    pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         sqlx::query!(
             r#"
                 INSERT INTO nutrients_nutrient_table (id, name, description, main_unit_id, quantity_type_id, essentiality_type_id, chemical_id)
@@ -119,19 +117,19 @@ impl NutrientRecord {
             self.essentiality_type_id,
             self.chemical_id,
         )
-            .execute(&database_service.pool)
+            .execute(pool)
             .await?;
         Ok(())
     }
 
-    pub async fn delete_nutrient(&self) -> Result<(), sqlx::Error> {
+    pub async fn delete_nutrient(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         let database_service = DatabaseService::new().await.unwrap();
 
         sqlx::query!(
             "DELETE FROM nutrients_nutrient_table WHERE id = ?",
             self.nutrient_id
         )
-        .execute(&database_service.pool)
+        .execute(pool)
         .await?;
 
         Ok(())
@@ -145,12 +143,12 @@ pub struct NutrientConversionsRecord {
 }
 
 impl NutrientConversionsRecord {
-    pub async fn from_nutrient(nutrient: Nutrient) -> Result<Vec<Self>, &'static str> {
+    pub async fn from_nutrient(nutrient: Nutrient, pool: &Pool<Sqlite>) -> Result<Vec<Self>, &'static str> {
         let nutrient_id = nutrient.get_id().as_bytes().to_vec().clone();
         let mut conversion_vec = Vec::new();
 
         for (unit, factor) in nutrient.get_unit_conversions().iter() {
-            let unit_id = NutrientUnitRecord::from_nutrient_unit(*unit)
+            let unit_id = NutrientUnitRecord::from_nutrient_unit(*unit, pool)
                 .await
                 .get_unit_type_id()
                 .expect("invalid nutrient");
@@ -166,13 +164,13 @@ impl NutrientConversionsRecord {
         Ok(conversion_vec)
     }
 
-    pub async fn to_btree_map_from_vec(items: Vec<Self>) -> BTreeMap<NutrientUnit, f64> {
+    pub async fn to_btree_map_from_vec(items: Vec<Self>, pool: &Pool<Sqlite>) -> BTreeMap<NutrientUnit, f64> {
         let mut map: BTreeMap<NutrientUnit, f64> = BTreeMap::new();
         for conversion in items.iter() {
-            let unit = NutrientUnitRecord::load_from_database(conversion.unit_id)
+            let unit = NutrientUnitRecord::load_from_database(conversion.unit_id, pool)
                 .await
                 .unwrap()
-                .to_nutrient_unit()
+                .to_nutrient_unit(pool)
                 .await;
             let factor = conversion.factor;
             map.insert(unit, factor);
@@ -181,9 +179,7 @@ impl NutrientConversionsRecord {
         return map;
     }
 
-    pub async fn load_from_sqlite(nutrient_id: Uuid) -> Result<Vec<Self>, sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-
+    pub async fn load_from_sqlite(nutrient_id: Uuid, pool: &Pool<Sqlite>) -> Result<Vec<Self>, sqlx::Error> {
         Ok(sqlx::query_as!(
             NutrientConversionsRecord,
             r#"
@@ -197,13 +193,11 @@ impl NutrientConversionsRecord {
                 "#,
             nutrient_id
         )
-        .fetch_all(&database_service.pool)
+        .fetch_all(pool)
         .await?)
     }
 
-    pub async fn save_to_database(&self) -> Result<(), sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-
+    pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         sqlx::query!(
             r#"
                 INSERT INTO nutrients_unit_conversions (nutrient_id, unit_id, factor)
@@ -218,14 +212,13 @@ impl NutrientConversionsRecord {
             self.unit_id,
             self.factor
         )
-        .execute(&database_service.pool)
+        .execute(pool)
         .await?;
         Ok(())
     }
 
-    pub async fn save_vec_to_database(items: Vec<&Self>) -> Result<(), sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-        let mut tx = database_service.pool.begin().await?;
+    pub async fn save_vec_to_database(items: Vec<&Self>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let mut tx = pool.begin().await?;
 
         for item in items {
             sqlx::query!(
@@ -248,9 +241,7 @@ impl NutrientConversionsRecord {
         Ok(())
     }
 
-    pub async fn delete_conversion(&self) -> Result<(), sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-
+    pub async fn delete_conversion(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         sqlx::query!(
             r#"
                 DELETE FROM nutrients_unit_conversions 
@@ -261,15 +252,14 @@ impl NutrientConversionsRecord {
             self.nutrient_id,
             self.unit_id,
         )
-        .execute(&database_service.pool)
+        .execute(pool)
         .await?;
 
         Ok(())
     }
 
-    pub async fn delete_conversion_vec(items: Vec<&Self>) -> Result<(), sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-        let mut tx = database_service.pool.begin().await?;
+    pub async fn delete_conversion_vec(items: Vec<&Self>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let mut tx = pool.begin().await?;
 
         for item in items {
             sqlx::query!(
@@ -298,12 +288,12 @@ pub struct NutrientLinkRecord {
 }
 
 impl NutrientLinkRecord {
-    pub async fn from_nutrient(nutrient: Nutrient) -> Result<Self, &'static str> {
+    pub async fn from_nutrient(nutrient: Nutrient, pool: &Pool<Sqlite>) -> Result<Self, &'static str> {
         let nutrient_id = nutrient.get_id().as_bytes().to_vec().clone();
         let mut child_ids: Vec<Vec<u8>> = Vec::new();
         for child in nutrient.get_children() {
             child_ids.push(
-                NutrientRecord::from_nutrient(child.borrow().clone())
+                NutrientRecord::from_nutrient(child.borrow().clone(), pool)
                     .await
                     .unwrap()
                     .nutrient_id,
@@ -314,7 +304,7 @@ impl NutrientLinkRecord {
         for parent_weak in nutrient.get_parents() {
             if let Some(parent) = parent_weak.upgrade() {
                 parent_ids.push(
-                    NutrientRecord::from_nutrient(parent.borrow().clone())
+                    NutrientRecord::from_nutrient(parent.borrow().clone(), pool)
                         .await
                         .unwrap()
                         .nutrient_id,
@@ -331,9 +321,8 @@ impl NutrientLinkRecord {
         })
     }
 
-    pub async fn save_to_database(&self) -> Result<(), sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-        let mut tx = database_service.pool.begin().await?;
+    pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let mut tx = pool.begin().await?;
 
         for child_id in &self.child_ids {
             sqlx::query!(
@@ -369,9 +358,7 @@ impl NutrientLinkRecord {
         Ok(())
     }
 
-    pub async fn load_from_sqlite(nutrient_id: Uuid) -> Result<Self, sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-
+    pub async fn load_from_sqlite(nutrient_id: Uuid, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
         let parent_rows = sqlx::query!(
             r#"
                 SELECT
@@ -382,7 +369,7 @@ impl NutrientLinkRecord {
             "#,
             nutrient_id
         )
-        .fetch_all(&database_service.pool)
+        .fetch_all(pool)
         .await?;
         let parent_ids: Vec<Vec<u8>> = parent_rows
             .iter()
@@ -399,7 +386,7 @@ impl NutrientLinkRecord {
             "#,
             nutrient_id
         )
-        .fetch_all(&database_service.pool)
+        .fetch_all(pool)
         .await?;
         let child_ids: Vec<Vec<u8>> = child_rows.iter().map(|row| row.child_id.clone()).collect();
 
@@ -411,9 +398,8 @@ impl NutrientLinkRecord {
         Ok(nutrient_link_record)
     }
 
-    pub async fn delete_nutrient_link(&self) -> Result<(), sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-        let mut tx = database_service.pool.begin().await?;
+    pub async fn delete_nutrient_link(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let mut tx = pool.begin().await?;
 
         sqlx::query!(
             r#"

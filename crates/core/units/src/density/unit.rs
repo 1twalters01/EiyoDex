@@ -38,6 +38,7 @@ macro_rules! define_density_units {
             ),* $(,)?
         },
     ) => {
+        use sqlx::{Pool, Sqlite};
         use crate::{
             density::measurement_system::DensityMeasurementSystem,
             mass::unit::MassUnit,

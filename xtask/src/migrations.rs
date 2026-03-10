@@ -2,7 +2,7 @@ use std::fs;
 
 use anyhow::Result;
 use config::{config::get_workspace_pathbuf, database_config::DatabaseConfig};
-use utils::database::DatabaseService;
+use sqlx::{Pool, Sqlite};
 
 #[derive(::serde::Deserialize)]
 struct Migration {
@@ -15,7 +15,7 @@ struct MigrationList {
     migration: Vec<Migration>,
 }
 
-pub async fn run_database_migrations(current_env: &str) -> Result<(), sqlx::Error> {
+pub async fn run_database_migrations(current_env: &str, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
     let database_config = DatabaseConfig::default();
 
     let content = fs::read_to_string(database_config.get_migrations_path())
@@ -32,8 +32,7 @@ pub async fn run_database_migrations(current_env: &str) -> Result<(), sqlx::Erro
         let sql = fs::read_to_string(sql_path)
             .unwrap_or_else(|_| panic!("Failed to read migration file: {}", migration.file));
 
-        let pool = DatabaseService::new().await.unwrap().pool;
-        sqlx::query(&sql).execute(&pool).await?;
+        sqlx::query(&sql).execute(pool).await?;
     }
 
     Ok(())

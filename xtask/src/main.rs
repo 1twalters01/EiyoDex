@@ -1,5 +1,6 @@
 use anyhow::Result;
 use clap::Parser;
+use utils::database::DatabaseService;
 
 mod args;
 mod css;
@@ -13,11 +14,13 @@ mod xaml;
 async fn main() -> Result<()> {
     let cli = args::Cli::parse();
 
+    let pool = DatabaseService::new().await.unwrap().get_pool();
+
     match cli.command {
         args::Commands::SetupPython => python::setup_python()?,
         args::Commands::RunPrettier => prettier::run_prettier()?,
         args::Commands::RunMigrations { env } => {
-            migrations::run_database_migrations(&env.to_string())
+            migrations::run_database_migrations(&env.to_string(), &pool)
                 .await
                 .unwrap()
         }

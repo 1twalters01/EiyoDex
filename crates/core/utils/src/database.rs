@@ -2,7 +2,7 @@ use config::database_config::DatabaseConfig;
 use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite};
 
 pub struct DatabaseService {
-    pub pool: Pool<Sqlite>,
+    pool: Pool<Sqlite>,
 }
 
 impl DatabaseService {
@@ -31,5 +31,9 @@ impl DatabaseService {
             .await?;
 
         Ok(Self { pool })
+    }
+
+    pub fn get_pool(&self) -> Pool<Sqlite> {
+        self.pool.clone()
     }
 }

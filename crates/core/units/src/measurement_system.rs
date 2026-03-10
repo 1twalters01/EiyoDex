@@ -1,4 +1,4 @@
-use utils::database::DatabaseService;
+use sqlx::{Pool, Sqlite};
 
 #[macro_export]
 macro_rules! define_measurement_systems {
@@ -22,9 +22,8 @@ macro_rules! define_measurement_systems {
                 }
             }
 
-            pub async fn save_to_database() -> Result<(), sqlx::Error> {
+            pub async fn save_to_database(pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
                 let enumerations = MeasurementSystem::get_enumerations();
-                let database_service = DatabaseService::new().await?;
                 for measurement_system in enumerations {
                     let name = measurement_system.as_string();
                     sqlx::query!(
@@ -34,14 +33,13 @@ macro_rules! define_measurement_systems {
                         "#,
                         name
                     )
-                    .execute(&database_service.pool)
+                    .execute(pool)
                     .await?;
                 }
                 return Ok(())
             }
 
-            pub async fn get_database_id(&self) -> Result<Option<i64>, sqlx::Error> {
-                let database_service = DatabaseService::new().await?;
+            pub async fn get_database_id(&self, pool: &Pool<Sqlite>) -> Result<Option<i64>, sqlx::Error> {
                 let name = self.as_string();
                 let row = sqlx::query!(
                     r#"
@@ -51,11 +49,26 @@ macro_rules! define_measurement_systems {
                     "#,
                     name
                 )
-                .fetch_one(&database_service.pool)
+                .fetch_one(pool)
                 .await?;
                 Ok(row.id)
             }
 
+            // pub async fn from_database_id(id: i64, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
+            //     let row = sqlx::query!(
+            //         r#"
+            //             SELECT name
+            //             FROM units_measurement_systems
+            //             WHERE id = ?
+            //         "#,
+            //         id
+            //     )
+            //     .fetch_one(pool)
+            //     .await?;
+            //
+            //     // FIX THIS
+            //     Ok(Self::from_str(&row.name).unwrap())
+            // }
         }
     };
 }

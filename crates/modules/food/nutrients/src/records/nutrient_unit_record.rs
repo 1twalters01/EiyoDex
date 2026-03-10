@@ -1,3 +1,4 @@
+use sqlx::{Pool, Sqlite};
 use units::{energy::unit::EnergyUnit, mass::unit::MassUnit, volume::unit::VolumeUnit};
 use utils::database::DatabaseService;
 
@@ -11,7 +12,7 @@ pub struct NutrientUnitRecord {
 }
 
 impl NutrientUnitRecord {
-    pub async fn from_nutrient_unit(nutrient_unit: NutrientUnit) -> Self {
+    pub async fn from_nutrient_unit(nutrient_unit: NutrientUnit, pool: &Pool<Sqlite>) -> Self {
         let unit_type_id: Option<i64>;
         let mut mass_type_id: Option<i64> = None;
         let mut volume_type_id: Option<i64> = None;
@@ -20,15 +21,15 @@ impl NutrientUnitRecord {
         match nutrient_unit {
             NutrientUnit::Mass(mass) => {
                 unit_type_id = Some(1);
-                mass_type_id = Some(mass.get_database_id().await.unwrap());
+                mass_type_id = Some(mass.get_database_id(pool).await.unwrap());
             }
             NutrientUnit::Volume(volume) => {
                 unit_type_id = Some(2);
-                volume_type_id = Some(volume.get_database_id().await.unwrap());
+                volume_type_id = Some(volume.get_database_id(pool).await.unwrap());
             }
             NutrientUnit::Energy(energy) => {
                 unit_type_id = Some(3);
-                energy_type_id = Some(energy.get_database_id().await.unwrap());
+                energy_type_id = Some(energy.get_database_id(pool).await.unwrap());
             }
             NutrientUnit::IU => unit_type_id = Some(4),
             NutrientUnit::DFE => unit_type_id = Some(5),
@@ -49,25 +50,25 @@ impl NutrientUnitRecord {
         }
     }
 
-    pub async fn to_nutrient_unit(&self) -> NutrientUnit {
+    pub async fn to_nutrient_unit(&self, pool: &Pool<Sqlite>) -> NutrientUnit {
         match self.unit_type_id {
             Some(1) => {
                 let mass =
-                    MassUnit::from_database_id(self.mass_type_id.expect("Invalid mass unit"))
+                    MassUnit::from_database_id(self.mass_type_id.expect("Invalid mass unit"), pool)
                         .await
                         .expect("Mass not found");
                 NutrientUnit::Mass(mass)
             }
             Some(2) => {
                 let volume =
-                    VolumeUnit::from_database_id(self.volume_type_id.expect("Invalid volume unit"))
+                    VolumeUnit::from_database_id(self.volume_type_id.expect("Invalid volume unit"), pool)
                         .await
                         .expect("Volume not found");
                 NutrientUnit::Volume(volume)
             }
             Some(3) => {
                 let energy =
-                    EnergyUnit::from_database_id(self.energy_type_id.expect("Invalid energy unit"))
+                    EnergyUnit::from_database_id(self.energy_type_id.expect("Invalid energy unit"), pool)
                         .await
                         .expect("Energy not found");
                 NutrientUnit::Energy(energy)
@@ -85,7 +86,7 @@ impl NutrientUnitRecord {
         }
     }
 
-    pub async fn save_to_database(&self) -> Result<(), sqlx::Error> {
+    pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         let database_service = DatabaseService::new().await.unwrap();
 
         sqlx::query!(
@@ -97,7 +98,7 @@ impl NutrientUnitRecord {
             self.mass_type_id,
             self.volume_type_id,
             self.energy_type_id,
-        ).execute(&database_service.pool).await?;
+        ).execute(pool).await?;
 
         Ok(())
     }
@@ -106,7 +107,7 @@ impl NutrientUnitRecord {
         self.unit_type_id
     }
 
-    pub async fn load_from_database(id: i64) -> Result<Self, sqlx::Error> {
+    pub async fn load_from_database(id: i64, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
         let database_service = DatabaseService::new().await.unwrap();
 
         Ok(sqlx::query_as!(
@@ -123,7 +124,7 @@ impl NutrientUnitRecord {
                 "#,
             id
         )
-        .fetch_one(&database_service.pool)
+        .fetch_one(pool)
         .await?)
     }
 }

@@ -1,3 +1,4 @@
+use sqlx::{Pool, Sqlite};
 use utils::database::DatabaseService;
 
 use crate::schema::{
@@ -202,7 +203,7 @@ impl NutrientTypeRecord {
         NutrientType::new(chemical_type, quantity_type, essentiality_type)
     }
 
-    pub async fn save_to_database(&self) -> Result<(), sqlx::Error> {
+    pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         let database_service = DatabaseService::new().await.unwrap();
 
         let chemical_id = match self.energy_type_id {
@@ -215,7 +216,7 @@ impl NutrientTypeRecord {
                     "#,
                     self.carbohydrate_type_id
                 )
-                .fetch_one(&database_service.pool)
+                .fetch_one(pool)
                 .await?
                 .id;
 
@@ -227,7 +228,7 @@ impl NutrientTypeRecord {
                     "#,
                     self.energy_type_id,
                     carbohydrate_id
-                ).fetch_one(&database_service.pool).await?.id;
+                ).fetch_one(pool).await?.id;
 
                 sqlx::query!(
                     r#"
@@ -237,7 +238,7 @@ impl NutrientTypeRecord {
                     "#,
                     self.chemical_type_id,
                     energy_id
-                ).fetch_one(&database_service.pool).await?.id
+                ).fetch_one(pool).await?.id
             }
             Some(2) => {
                 let protein_id = sqlx::query!(
@@ -248,7 +249,7 @@ impl NutrientTypeRecord {
                     "#,
                     self.is_bcaa
                 )
-                .fetch_one(&database_service.pool)
+                .fetch_one(pool)
                 .await?
                 .id;
 
@@ -260,7 +261,7 @@ impl NutrientTypeRecord {
                     "#,
                     self.energy_type_id,
                     protein_id
-                ).fetch_one(&database_service.pool).await?.id;
+                ).fetch_one(pool).await?.id;
 
                 sqlx::query!(
                     r#"
@@ -270,7 +271,7 @@ impl NutrientTypeRecord {
                     "#,
                     self.chemical_type_id,
                     energy_id
-                ).fetch_one(&database_service.pool).await?.id
+                ).fetch_one(pool).await?.id
             }
             Some(3) => {
                 let lipid_table_id = sqlx::query!(
@@ -283,7 +284,7 @@ impl NutrientTypeRecord {
                     self.sterol_type_id,
                     self.fat_type_id,
                     self.transfat_type_id
-                ).fetch_one(&database_service.pool).await?.id;
+                ).fetch_one(pool).await?.id;
 
                 let lipid_id = sqlx::query!(
                     r#"
@@ -293,7 +294,7 @@ impl NutrientTypeRecord {
                     "#,
                     lipid_table_id
                 )
-                .fetch_one(&database_service.pool)
+                .fetch_one(pool)
                 .await?
                 .id;
 
@@ -305,7 +306,7 @@ impl NutrientTypeRecord {
                     "#,
                     self.energy_type_id,
                     lipid_id
-                ).fetch_one(&database_service.pool).await?.id;
+                ).fetch_one(pool).await?.id;
 
                 sqlx::query!(
                     r#"
@@ -315,7 +316,7 @@ impl NutrientTypeRecord {
                     "#,
                     self.chemical_type_id,
                     energy_id
-                ).fetch_one(&database_service.pool).await?.id
+                ).fetch_one(pool).await?.id
             }
             Some(4) => {
                 let energy_id = sqlx::query!(
@@ -325,7 +326,7 @@ impl NutrientTypeRecord {
                         RETURNING id
                     "#,
                     self.energy_type_id,
-                ).fetch_one(&database_service.pool).await?.id;
+                ).fetch_one(pool).await?.id;
 
                 sqlx::query!(
                     r#"
@@ -335,7 +336,7 @@ impl NutrientTypeRecord {
                     "#,
                     self.chemical_type_id,
                     energy_id
-                ).fetch_one(&database_service.pool).await?.id
+                ).fetch_one(pool).await?.id
             }
             None => {
                 sqlx::query!(
@@ -346,7 +347,7 @@ impl NutrientTypeRecord {
                     "#,
                     self.chemical_type_id,
                 )
-                .fetch_one(&database_service.pool)
+                .fetch_one(pool)
                 .await?
                 .id
             }
@@ -361,7 +362,7 @@ impl NutrientTypeRecord {
             self.quantity_type_id,
             self.essentiality_type_id,
             chemical_id
-        ).execute(&database_service.pool).await?;
+        ).execute(pool).await?;
 
         Ok(())
     }
@@ -369,7 +370,7 @@ impl NutrientTypeRecord {
     pub async fn load_from_database_from_nutrient_type_composite_key(
         quantity_type_id: i64,
         essentiality_type_id: Option<i64>,
-        chemical_id: i64,
+        chemical_id: i64, pool: &Pool<Sqlite>,
     ) -> Result<Self, sqlx::Error> {
         let database_service = DatabaseService::new().await.unwrap();
 
@@ -409,7 +410,7 @@ impl NutrientTypeRecord {
             essentiality_type_id,
             chemical_id
         )
-        .fetch_one(&database_service.pool)
+        .fetch_one(pool)
         .await?;
 
         return Ok(row);
@@ -423,7 +424,7 @@ impl NutrientTypeRecord {
         self.quantity_type_id
     }
 
-    pub async fn get_chemical_id(&self) -> Result<i64, sqlx::Error> {
+    pub async fn get_chemical_id(&self, pool: &Pool<Sqlite>) -> Result<i64, sqlx::Error> {
         let database_service = DatabaseService::new().await.unwrap();
 
         let row = sqlx::query!(
@@ -441,7 +442,7 @@ impl NutrientTypeRecord {
             self.essentiality_type_id,
             self.chemical_type_id
         )
-        .fetch_one(&database_service.pool)
+        .fetch_one(pool)
         .await?;
 
         Ok(row.id.expect("Invalid record"))

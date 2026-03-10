@@ -1,5 +1,6 @@
 use std::collections::BTreeSet;
 
+use sqlx::{Pool, Sqlite};
 use utils::database::DatabaseService;
 use uuid::Uuid;
 
@@ -24,9 +25,7 @@ impl NutrientQuantityListRecord {
         return nutrient_quantity_list;
     }
 
-    pub async fn save_to_database(&self) -> Result<(), sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-
+    pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         sqlx::query!(
             r#"
                 INSERT INTO nutrients_nutrient_quantity_list_table (id)
@@ -35,19 +34,17 @@ impl NutrientQuantityListRecord {
             "#,
             self.id,
         )
-        .execute(&database_service.pool)
+        .execute(pool)
         .await?;
         Ok(())
     }
 
-    pub async fn delete_from_database(&self) -> Result<(), sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-
+    pub async fn delete_from_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         sqlx::query!(
             "DELETE FROM nutrients_nutrient_quantity_list_table WHERE id = ?",
             self.id
         )
-        .execute(&database_service.pool)
+        .execute(pool)
         .await?;
 
         Ok(())
@@ -84,7 +81,7 @@ impl NutrientQuantityListItemRecord {
     }
 
     pub async fn to_btree_map_from_vec(
-        items: Vec<&Self>,
+        items: Vec<&Self>, pool: &Pool<Sqlite>,
     ) -> Result<BTreeSet<NutrientQuantity>, sqlx::Error> {
         if let Some(first) = items.first() {
             if !items
@@ -95,8 +92,7 @@ impl NutrientQuantityListItemRecord {
             };
         }
 
-        let database_service = DatabaseService::new().await.unwrap();
-        let mut tx = database_service.pool.begin().await?;
+        let mut tx = pool.begin().await?;
 
         let mut quantity_tree: BTreeSet<NutrientQuantity> = BTreeSet::new();
         for item in items {
@@ -117,7 +113,7 @@ impl NutrientQuantityListItemRecord {
             .fetch_one(&mut *tx)
             .await?;
 
-            let nutrient_quantity = nutrient_quantity_record.to_nutrient_quantity().await;
+            let nutrient_quantity = nutrient_quantity_record.to_nutrient_quantity(pool).await;
             quantity_tree.insert(nutrient_quantity);
         }
 
@@ -125,10 +121,8 @@ impl NutrientQuantityListItemRecord {
     }
 
     pub async fn load_from_sqlite(
-        nutrient_quantity_list_id: Uuid,
+        nutrient_quantity_list_id: Uuid, pool: &Pool<Sqlite>,
     ) -> Result<Vec<Self>, sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-
         Ok(sqlx::query_as!(
             NutrientQuantityListItemRecord,
             r#"
@@ -141,13 +135,11 @@ impl NutrientQuantityListItemRecord {
                 "#,
             nutrient_quantity_list_id
         )
-        .fetch_all(&database_service.pool)
+        .fetch_all(pool)
         .await?)
     }
 
-    pub async fn save_to_database(&self) -> Result<(), sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-
+    pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         sqlx::query!(
             r#"
                 INSERT INTO nutrients_nutrient_quantity_list_items (nutrient_quantity_list_id, nutrient_quantity_id)
@@ -157,14 +149,13 @@ impl NutrientQuantityListItemRecord {
             self.nutrient_quantity_list_id,
             self.nutrient_quantity_id,
         )
-            .execute(&database_service.pool)
+            .execute(pool)
             .await?;
         Ok(())
     }
 
-    pub async fn save_vec_to_database(items: Vec<&Self>) -> Result<(), sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-        let mut tx = database_service.pool.begin().await?;
+    pub async fn save_vec_to_database(items: Vec<&Self>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let mut tx = pool.begin().await?;
 
         for item in items {
             sqlx::query!(
@@ -182,9 +173,7 @@ impl NutrientQuantityListItemRecord {
         Ok(())
     }
 
-    pub async fn delete_conversion(&self) -> Result<(), sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-
+    pub async fn delete_conversion(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         sqlx::query!(
             r#"
                 DELETE FROM nutrients_nutrient_quantity_list_items 
@@ -195,15 +184,14 @@ impl NutrientQuantityListItemRecord {
             self.nutrient_quantity_list_id,
             self.nutrient_quantity_id,
         )
-        .execute(&database_service.pool)
+        .execute(pool)
         .await?;
 
         Ok(())
     }
 
-    pub async fn delete_conversion_vec(items: Vec<&Self>) -> Result<(), sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-        let mut tx = database_service.pool.begin().await?;
+    pub async fn delete_conversion_vec(items: Vec<&Self>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let mut tx = pool.begin().await?;
 
         for item in items {
             sqlx::query!(

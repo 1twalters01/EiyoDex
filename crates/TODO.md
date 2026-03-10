@@ -35,4 +35,5 @@ infrastructure/external/
 infrastructure/extensions/
 module/environment/sunlight/
 module/environment/air_polution/
+module/environment/pollen/
 module/sleep/sleep/

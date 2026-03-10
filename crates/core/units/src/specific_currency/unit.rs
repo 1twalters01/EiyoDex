@@ -74,6 +74,7 @@ macro_rules! define_specific_currency_units {
             ),* $(,)?
         },
     ) => {
+        use sqlx::{Pool, Sqlite};
         use std::{
         str::FromStr,
         };
