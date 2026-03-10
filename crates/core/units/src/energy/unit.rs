@@ -64,7 +64,7 @@ macro_rules! define_energy_units {
                 }
             }
 
-            pub async fn save_to_database(pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+            pub async fn save_enumerations_to_database(pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
                 let energy_enumerations = EnergyUnit::get_enumerations();
                 for energy in energy_enumerations {
                     let unit_type = energy.as_unit_type();

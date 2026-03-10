@@ -123,7 +123,8 @@ fn test_from_str() {
 #[tokio::test]
 async fn test_save_to_database() {
     let database_service = DatabaseService::new().await.unwrap();
-    let res = CurrencyUnit::save_to_database().await;
+    let pool = database_service.get_pool();
+    let res = CurrencyUnit::save_enumerations_to_database(&pool).await;
     assert!(res.is_ok());
 
     let currency = CurrencyUnit::EUR.as_unit_type();
@@ -135,7 +136,7 @@ async fn test_save_to_database() {
         "#,
         currency
     )
-    .fetch_one(&database_service.pool)
+    .fetch_one(&pool)
     .await
     .unwrap();
     let unit_type = rows.unit_type;
@@ -145,10 +146,12 @@ async fn test_save_to_database() {
 
 #[tokio::test]
 async fn test_get_database_id() {
-    let res = CurrencyUnit::save_to_database().await;
+    let database_service = DatabaseService::new().await.unwrap();
+    let pool = database_service.get_pool();
+    let res = CurrencyUnit::save_enumerations_to_database(&pool).await;
     assert!(res.is_ok());
 
     let pint = CurrencyUnit::USD;
-    let id = pint.get_database_id().await;
+    let id = pint.get_database_id(&pool).await;
     assert!(id.is_ok());
 }

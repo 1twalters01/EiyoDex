@@ -65,7 +65,7 @@ macro_rules! define_duration_units {
                 }
             }
 
-            pub async fn save_to_database(pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+            pub async fn save_enumerations_to_database(pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
                 let duration_enumerations = DurationUnit::get_enumerations();
                 for duration in duration_enumerations {
                     let unit_type = duration.as_unit_type();

@@ -22,7 +22,7 @@ macro_rules! define_measurement_systems {
                 }
             }
 
-            pub async fn save_to_database(pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+            pub async fn save_enumerations_to_database(pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
                 let enumerations = MeasurementSystem::get_enumerations();
                 for measurement_system in enumerations {
                     let name = measurement_system.as_string();

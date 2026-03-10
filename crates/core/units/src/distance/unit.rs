@@ -66,7 +66,7 @@ macro_rules! define_distance_units {
                 }
             }
 
-            pub async fn save_to_database(pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+            pub async fn save_enumerations_to_database(pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
                 let distance_enumerations = DistanceUnit::get_enumerations();
                 for distance in distance_enumerations {
                     let unit_type = distance.as_unit_type();
