@@ -33,8 +33,11 @@ impl Default for DatabaseConfig {
                 // Prepend workspace root if it's SQLite with a relative path
                 if url.starts_with("sqlite://") && !url.starts_with("sqlite:///") {
                     let relative_path = &url["sqlite://".len()..];
-                    let absolute_path = workspace_pathbuf.join(relative_path);
-                    format!("sqlite://{}", absolute_path.to_str().unwrap())
+                    let sqlite_file_path = workspace_pathbuf.join(relative_path);
+                    if !sqlite_file_path.exists() {
+                        fs::File::create(&sqlite_file_path).expect("Failed to create sqlite file");
+                    }
+                    format!("sqlite://{}", sqlite_file_path.to_str().unwrap())
                 } else {
                     url
                 }

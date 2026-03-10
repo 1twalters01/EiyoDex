@@ -12,3 +12,4 @@ chrono = { version = "0.4.42", features = ["serde"] }
 sqlx = { version = "0.8.6", features = ["sqlite", "runtime-tokio", "uuid", "chrono", "macros"] }
 tokio = "1.48.0"
 thiserror = "2.0.18"
+uuid = { version = "1.8.0", features = ["v4", "fast-rng", "macro-diagnostics", "serde"] }

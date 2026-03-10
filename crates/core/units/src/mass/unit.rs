@@ -20,9 +20,7 @@ macro_rules! define_mass_units {
             mass::error::MassUnitParseError,
             measurement_system::MeasurementSystem,
         };
-        use std::{
-            str::FromStr,
-        };
+        use std::str::FromStr;
         use serde::{Deserialize, Serialize};
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]

@@ -2,6 +2,7 @@ use units::{
     mass::{quantity::MassQuantity, unit::MassUnit},
     measurement_system::MeasurementSystem,
 };
+use utils::database::DatabaseService;
 
 #[test]
 fn test_new_mass() {
@@ -9,23 +10,38 @@ fn test_new_mass() {
 
     let mass_new_g = MassQuantity::new(value, MassUnit::Gram);
     let mass_from_g = MassQuantity::from_g(value);
-    assert_eq!(mass_new_g, mass_from_g);
+    assert_eq!(
+        mass_new_g.get_mass_quantity_idless(),
+        mass_from_g.get_mass_quantity_idless()
+    );
 
     let mass_new_mg = MassQuantity::new(value, MassUnit::Milligram);
     let mass_from_mg = MassQuantity::from_mg(value);
-    assert_eq!(mass_new_mg, mass_from_mg);
+    assert_eq!(
+        mass_new_mg.get_mass_quantity_idless(),
+        mass_from_mg.get_mass_quantity_idless()
+    );
 
     let mass_new_kg = MassQuantity::new(value, MassUnit::Kilogram);
     let mass_from_kg = MassQuantity::from_kg(value);
-    assert_eq!(mass_new_kg, mass_from_kg);
+    assert_eq!(
+        mass_new_kg.get_mass_quantity_idless(),
+        mass_from_kg.get_mass_quantity_idless()
+    );
 
     let mass_new_ug = MassQuantity::new(value, MassUnit::Microgram);
     let mass_from_ug = MassQuantity::from_ug(value);
-    assert_eq!(mass_new_ug, mass_from_ug);
+    assert_eq!(
+        mass_new_ug.get_mass_quantity_idless(),
+        mass_from_ug.get_mass_quantity_idless()
+    );
 
     let mass_new_oz = MassQuantity::new(value, MassUnit::Ounce);
     let mass_from_oz = MassQuantity::from_oz(value);
-    assert_eq!(mass_new_oz, mass_from_oz);
+    assert_eq!(
+        mass_new_oz.get_mass_quantity_idless(),
+        mass_from_oz.get_mass_quantity_idless()
+    );
 }
 
 #[test]
@@ -36,12 +52,18 @@ fn test_mass_rounding() {
     let mut mass_new = MassQuantity::new(value, MassUnit::Gram);
     let mass_rounded = mass_new.round(5);
     let mass_coded = MassQuantity::new(5.68033, MassUnit::Gram);
-    assert_eq!(mass_rounded, mass_coded);
+    assert_eq!(
+        mass_rounded.get_mass_quantity_idless(),
+        mass_coded.get_mass_quantity_idless()
+    );
 
     let mut mass_new_2 = MassQuantity::new(value_2, MassUnit::Gram);
     let mass_rounded_2 = mass_new_2.round(5);
     let mass_coded_2 = MassQuantity::new(147.20473, MassUnit::Gram);
-    assert_eq!(mass_rounded_2, mass_coded_2);
+    assert_eq!(
+        mass_rounded_2.get_mass_quantity_idless(),
+        mass_coded_2.get_mass_quantity_idless()
+    );
 }
 
 #[test]
@@ -92,7 +114,10 @@ fn test_mass_to_unit() {
     let mass_g_to_oz = mass_g.to_unit(MassUnit::Ounce);
 
     print!("mass_ounces1: {},\nmass_ounces2: {}", mass_oz, mass_g_to_oz);
-    assert_eq!(mass_oz, mass_g_to_oz);
+    assert_eq!(
+        mass_oz.get_mass_quantity_idless(),
+        mass_g_to_oz.get_mass_quantity_idless()
+    );
 }
 
 #[test]
@@ -105,7 +130,10 @@ fn test_mass_to_fn() {
     let mass_g_to_oz = mass_g.to_oz();
 
     print!("mass_ounces1: {},\nmass_ounces2: {}", mass_oz, mass_g_to_oz);
-    assert_eq!(mass_oz, mass_g_to_oz);
+    assert_eq!(
+        mass_oz.get_mass_quantity_idless(),
+        mass_g_to_oz.get_mass_quantity_idless()
+    );
 }
 
 #[test]
@@ -258,9 +286,18 @@ fn test_mass_add() {
     let mass_kg_plus_g_1 = MassQuantity::from_kg(2.1);
     let mass_g_2_plus_kg = MassQuantity::from_g(2500f64);
 
-    assert_eq!(mass_g_1 + mass_g_2, mass_g_1_plus_g_2);
-    assert_eq!(mass_kg + mass_g_1, mass_kg_plus_g_1);
-    assert_eq!(mass_g_2 + mass_kg, mass_g_2_plus_kg);
+    assert_eq!(
+        (mass_g_1 + mass_g_2).get_mass_quantity_idless(),
+        mass_g_1_plus_g_2.get_mass_quantity_idless()
+    );
+    assert_eq!(
+        (mass_kg + mass_g_1).get_mass_quantity_idless(),
+        mass_kg_plus_g_1.get_mass_quantity_idless()
+    );
+    assert_eq!(
+        (mass_g_2 + mass_kg).get_mass_quantity_idless(),
+        mass_g_2_plus_kg.get_mass_quantity_idless()
+    );
 }
 
 #[test]
@@ -273,19 +310,36 @@ fn test_mass_subtract() {
     let mass_kg_minus_g_1 = MassQuantity::from_kg(-5.5);
     let mass_g_2_minus_kg = MassQuantity::from_g(3500f64);
 
-    assert_eq!(mass_g_1 - mass_g_2, mass_g_1_minus_g_2);
-    assert_eq!(mass_kg - mass_g_1, mass_kg_minus_g_1);
-    assert_eq!(mass_g_2 - mass_kg, mass_g_2_minus_kg);
+    assert_eq!(
+        (mass_g_1 - mass_g_2).get_mass_quantity_idless(),
+        mass_g_1_minus_g_2.get_mass_quantity_idless()
+    );
+    assert_eq!(
+        (mass_kg - mass_g_1).get_mass_quantity_idless(),
+        mass_kg_minus_g_1.get_mass_quantity_idless()
+    );
+    assert_eq!(
+        (mass_g_2 - mass_kg).get_mass_quantity_idless(),
+        mass_g_2_minus_kg.get_mass_quantity_idless()
+    );
 }
 
 #[test]
 fn test_mass_multiply() {
     let mass_g_1 = MassQuantity::from_g(70f64);
-    let mass_g_2 = MassQuantity::from_g(350f64);
-    let mass_g_3 = MassQuantity::from_g(267.4f64);
+    let mut mass_g_2 = MassQuantity::from_g(350f64);
+    mass_g_2.set_id(mass_g_1.get_id());
+    let mut mass_g_3 = MassQuantity::from_g(267.4f64);
+    mass_g_3.set_id(mass_g_1.get_id());
 
-    assert_eq!(mass_g_1 * 5, mass_g_2);
-    assert_eq!(mass_g_1 * 3.82, mass_g_3);
+    assert_eq!(
+        (mass_g_1 * 5).get_mass_quantity_idless(),
+        mass_g_2.get_mass_quantity_idless()
+    );
+    assert_eq!(
+        (mass_g_1 * 3.82).get_mass_quantity_idless(),
+        mass_g_3.get_mass_quantity_idless()
+    );
 }
 
 #[test]
@@ -293,11 +347,14 @@ fn test_mass_divide() {
     let mass_g_1 = MassQuantity::from_g(350f64);
     let mass_g_2 = MassQuantity::from_g(70f64);
 
-    assert_eq!(mass_g_1 / 5, mass_g_2);
+    assert_eq!(
+        (mass_g_1 / 5).get_mass_quantity_idless(),
+        mass_g_2.get_mass_quantity_idless()
+    );
 }
 
 #[test]
-fn test_energy_sum() {
+fn test_mass_sum() {
     let mass_1 = MassQuantity::from_kg(30f64);
     let mass_2 = MassQuantity::from_kg(20f64);
     let mass_3 = MassQuantity::from_kg(50f64).to_oz();
@@ -309,7 +366,12 @@ fn test_energy_sum() {
 
     let sum: MassQuantity = masses.iter().map(|mass| *mass * 2).sum();
     assert_eq!(sum.get_unit(), mass_5.get_unit());
-    assert_eq!(sum, (mass_total * 2).to_unit(mass_5.get_unit()));
+    assert_eq!(
+        sum.get_mass_quantity_idless(),
+        (mass_total * 2)
+            .to_unit(mass_5.get_unit())
+            .get_mass_quantity_idless()
+    );
 }
 
 #[test]
@@ -320,4 +382,26 @@ fn test_mass_partial_order() {
     assert!(mass_g_1 > mass_g_2);
     assert!(mass_g_1 > mass_kg);
     assert!(mass_kg > mass_g_2);
+}
+
+#[tokio::test]
+async fn test_save_to_database() {
+    let database_service = DatabaseService::new().await.unwrap();
+    let pool = database_service.get_pool();
+
+    let _ = MassUnit::save_enumerations_to_database(&pool).await;
+
+    let mass_g = MassQuantity::from_g(6700f64);
+    let res = MassQuantity::save_to_database(&mass_g, &pool).await;
+    assert!(res.is_ok());
+
+    let mass_saved = MassQuantity::get_from_database_id(mass_g.get_id(), &pool).await;
+    assert!(mass_saved.is_ok());
+    assert_eq!(mass_saved.unwrap(), mass_g);
+
+    let res = MassQuantity::delete_from_database_id(mass_g.get_id(), &pool).await;
+    assert!(res.is_ok());
+
+    let mass_saved_2 = MassQuantity::get_from_database_id(mass_g.get_id(), &pool).await;
+    assert!(mass_saved_2.is_err());
 }
