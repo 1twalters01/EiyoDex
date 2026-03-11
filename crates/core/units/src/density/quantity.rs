@@ -37,6 +37,7 @@ macro_rules! define_densities {
             fmt,
             ops::{Add, Div, Mul, Sub},
             iter::Sum,
+            str::FromStr,
         };
         use serde::{Deserialize, Serialize};
 
@@ -134,6 +135,83 @@ macro_rules! define_densities {
             }
         }
     };
+}
+
+impl SaveToDatabase for DensityQuantity {
+    async fn save_to_database(&self, uuid: Uuid, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let mass_type_id = self.get_unit().get_mass_variant().get_database_id(pool).await.unwrap();
+        let volume_type_id = self.get_unit().get_volume_variant().get_database_id(pool).await.unwrap();
+        let value = self.get_value();
+        sqlx::query!(
+            r#"
+                INSERT INTO units_density_quantities (id, mass_type_id, volume_type_id, value)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT (id) DO UPDATE SET
+                    mass_type_id = excluded.mass_type_id,
+                    volume_type_id = excluded.volume_type_id,
+                    value = excluded.value
+            "#,
+            uuid,
+            mass_type_id,
+            volume_type_id,
+            value,
+        )
+        .execute(pool)
+        .await?;
+
+        return Ok(());
+    }
+}
+
+impl GetFromDatabaseUsingId<DensityQuantity> for DensityQuantity {
+    async fn get_from_database_using_id(
+        uuid: Uuid,
+        pool: &Pool<Sqlite>,
+    ) -> Result<Record<Self>, sqlx::Error> {
+        let row = sqlx::query!(
+            r#"
+                SELECT 
+                    dq.id, 
+                    mt.unit_type as mass_unit_type,
+                    vt.unit_type as volume_unit_type,
+                    dq.value
+                FROM units_density_quantities dq
+                INNER JOIN units_mass_types mt
+                    ON dq.mass_type_id = mt.id
+                INNER JOIN units_volume_types vt
+                    ON dq.volume_type_id = vt.id
+                WHERE dq.id = ?
+            "#,
+            uuid
+        )
+        .fetch_one(pool)
+        .await?;
+
+        let mass_unit = MassUnit::from_str(&row.mass_unit_type).unwrap();
+        let volume_unit = VolumeUnit::from_str(&row.mass_unit_type).unwrap();
+
+        let unit = DensityUnit::from_variants(mass_unit, volume_unit);
+        let value = row.value;
+
+        let inner = Self { unit, value };
+        let new_uuid = Uuid::from_slice(&row.id.to_vec()).unwrap();
+        let id = Id::from_uuid(new_uuid, inner);
+        let density_record = Record::new_with_id(id, inner);
+        Ok(density_record)
+    }
+}
+
+impl DeleteFromDatabaseUsingId for DensityQuantity {
+    async fn delete_from_database_using_id(
+        uuid: Uuid,
+        pool: &Pool<Sqlite>,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!("DELETE FROM units_density_quantities WHERE id = ?", uuid)
+            .execute(pool)
+            .await?;
+
+        return Ok(());
+    }
 }
 
 impl fmt::Display for DensityQuantity {
@@ -235,7 +313,11 @@ impl PartialOrd for DensityQuantity {
     }
 }
 
+use sqlx::{Pool, Sqlite};
 use units_macro::include_densities_from_json;
+use uuid::Uuid;
+
+use crate::record::{DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase};
 include_densities_from_json!(
     DensityUnit => "data/units/density",
     MassUnit => "data/units/mass",

@@ -1,11 +1,9 @@
 use units::{
     density::{
         measurement_system::DensityMeasurementSystem, quantity::DensityQuantity, unit::DensityUnit,
-    },
-    mass::{quantity::MassQuantity, unit::MassUnit},
-    measurement_system::MeasurementSystem,
-    volume::{quantity::VolumeQuantity, unit::VolumeUnit},
+    }, mass::{quantity::MassQuantity, unit::MassUnit}, measurement_system::MeasurementSystem, record::{GetFromDatabaseUsingId, Record}, volume::{quantity::VolumeQuantity, unit::VolumeUnit}
 };
+use utils::database::DatabaseService;
 
 #[test]
 fn test_density_from_variants() {
@@ -1193,3 +1191,31 @@ fn test_density_partial_order() {
     assert!(density_1 < density_3);
     assert!(density_2 < density_3);
 }
+
+#[tokio::test]
+async fn test_save_to_database() {
+    let database_service = DatabaseService::new().await.unwrap();
+    let pool = database_service.get_pool();
+
+    let _ = MassUnit::save_enumerations_to_database(&pool).await;
+    let _ = VolumeUnit::save_enumerations_to_database(&pool).await;
+
+    let density_oz_per_l = DensityQuantity::from_oz_per_l(6700f64);
+    let density_record = Record::new(density_oz_per_l);
+
+    let res = density_record.save_to_database(&pool).await;
+    assert!(res.is_ok());
+
+    let density_saved =
+        DensityQuantity::get_from_database_using_id(density_record.get_uuid(), &pool).await;
+    assert!(density_saved.is_ok());
+    assert_eq!(density_saved.unwrap(), density_record);
+
+    let res = density_record.delete_from_database_using_id(&pool).await;
+    assert!(res.is_ok());
+
+    let density_saved_2 =
+        DensityQuantity::get_from_database_using_id(density_record.get_uuid(), &pool).await;
+    assert!(density_saved_2.is_err());
+}
+

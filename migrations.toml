@@ -34,6 +34,21 @@ file = "migrations/units/0007_create_currency_tables.sql"
 description = "Create essentiality_types lookup table"
 environments = ["dev", "staging", "prod"]
 
+[[migration]]
+file = "migrations/units/0008_create_density_table.sql"
+description = "Create essentiality_types lookup table"
+environments = ["dev", "staging", "prod"]
+
+[[migration]]
+file = "migrations/units/0009_create_power_table.sql"
+description = "Create essentiality_types lookup table"
+environments = ["dev", "staging", "prod"]
+
+[[migration]]
+file = "migrations/units/0010_create_specific_currency_tables.sql"
+description = "Create essentiality_types lookup table"
+environments = ["dev", "staging", "prod"]
+
 
 # nutrients
 [[migration]]
