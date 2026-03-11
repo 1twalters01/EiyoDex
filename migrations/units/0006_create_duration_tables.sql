@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS units_duration_types (
 CREATE TABLE IF NOT EXISTS units_duration_quantities (
     id BLOB PRIMARY KEY NOT NULL,
     duration_type_id INTEGER NOT NULL,
-    quantity INTEGER NOT NULL,
+    value INTEGER NOT NULL,
     FOREIGN KEY (duration_type_id)
         REFERENCES units_duration_types(id)
         ON DELETE CASCADE,

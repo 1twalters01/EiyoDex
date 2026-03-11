@@ -2,6 +2,7 @@ use units::{
     distance::{quantity::DistanceQuantity, unit::DistanceUnit},
     measurement_system::MeasurementSystem,
 };
+use utils::database::DatabaseService;
 
 #[test]
 fn test_new_distance() {
@@ -9,27 +10,27 @@ fn test_new_distance() {
 
     let distance_new_km = DistanceQuantity::new(value, DistanceUnit::Kilometer);
     let distance_from_km = DistanceQuantity::from_km(value);
-    assert_eq!(distance_new_km, distance_from_km);
+    assert_eq!(distance_new_km.get_distance_quantity_idless(), distance_from_km.get_distance_quantity_idless());
 
     let distance_new_m = DistanceQuantity::new(value, DistanceUnit::Meter);
     let distance_from_m = DistanceQuantity::from_m(value);
-    assert_eq!(distance_new_m, distance_from_m);
+    assert_eq!(distance_new_m.get_distance_quantity_idless(), distance_from_m.get_distance_quantity_idless());
 
     let distance_new_cm = DistanceQuantity::new(value, DistanceUnit::Centimeter);
     let distance_from_cm = DistanceQuantity::from_cm(value);
-    assert_eq!(distance_new_cm, distance_from_cm);
+    assert_eq!(distance_new_cm.get_distance_quantity_idless(), distance_from_cm.get_distance_quantity_idless());
 
     let distance_new_mm = DistanceQuantity::new(value, DistanceUnit::Millimeter);
     let distance_from_mm = DistanceQuantity::from_mm(value);
-    assert_eq!(distance_new_mm, distance_from_mm);
+    assert_eq!(distance_new_mm.get_distance_quantity_idless(), distance_from_mm.get_distance_quantity_idless());
 
     let distance_new_ft = DistanceQuantity::new(value, DistanceUnit::Foot);
     let distance_from_ft = DistanceQuantity::from_ft(value);
-    assert_eq!(distance_new_ft, distance_from_ft);
+    assert_eq!(distance_new_ft.get_distance_quantity_idless(), distance_from_ft.get_distance_quantity_idless());
 
     let distance_new_in = DistanceQuantity::new(value, DistanceUnit::Inch);
     let distance_from_in = DistanceQuantity::from_in(value);
-    assert_eq!(distance_new_in, distance_from_in);
+    assert_eq!(distance_new_in.get_distance_quantity_idless(), distance_from_in.get_distance_quantity_idless());
 }
 
 #[test]
@@ -40,12 +41,12 @@ fn test_distance_rounding() {
     let mut distance_new = DistanceQuantity::new(value, DistanceUnit::Meter);
     let distance_rounded = distance_new.round(5);
     let distance_coded = DistanceQuantity::new(5.68033, DistanceUnit::Meter);
-    assert_eq!(distance_rounded, distance_coded);
+    assert_eq!(distance_rounded.get_distance_quantity_idless(), distance_coded.get_distance_quantity_idless());
 
     let mut distance_new_2 = DistanceQuantity::new(value_2, DistanceUnit::Meter);
     let distance_rounded_2 = distance_new_2.round(5);
     let distance_coded_2 = DistanceQuantity::new(147.20473, DistanceUnit::Meter);
-    assert_eq!(distance_rounded_2, distance_coded_2);
+    assert_eq!(distance_rounded_2.get_distance_quantity_idless(), distance_coded_2.get_distance_quantity_idless());
 }
 
 #[test]
@@ -118,10 +119,10 @@ fn test_distance_to_unit() {
     let distance_m_to_cm = distance_m.to_unit(DistanceUnit::Centimeter);
 
     print!(
-        "mass_ounces1: {},\nmass_ounces2: {}",
+        "distance_cm1: {},\ndistance_cm2: {}",
         distance_cm, distance_m_to_cm
     );
-    assert_eq!(distance_cm, distance_m_to_cm);
+    assert_eq!(distance_cm.get_distance_quantity_idless(), distance_m_to_cm.get_distance_quantity_idless());
 }
 
 #[test]
@@ -132,7 +133,7 @@ fn test_distance_to_fn() {
     let distance_m = DistanceQuantity::from_m(value);
     let distance_cm = DistanceQuantity::from_cm(new_value);
     let distance_m_to_cm = distance_m.to_cm();
-    assert_eq!(distance_cm, distance_m_to_cm);
+    assert_eq!(distance_cm.get_distance_quantity_idless(), distance_m_to_cm.get_distance_quantity_idless());
 }
 
 #[test]
@@ -312,9 +313,9 @@ fn test_distance_add() {
     let distance_cm_plus_m_1 = DistanceQuantity::from_cm(300f64);
     let distance_m_2_plus_cm = DistanceQuantity::from_m(7f64);
 
-    assert_eq!(distance_m_1 + distance_m_2, distance_m_1_plus_m_2);
-    assert_eq!(distance_cm + distance_m_1, distance_cm_plus_m_1);
-    assert_eq!(distance_m_2 + distance_cm, distance_m_2_plus_cm);
+    assert_eq!((distance_m_1 + distance_m_2).get_distance_quantity_idless(), distance_m_1_plus_m_2.get_distance_quantity_idless());
+    assert_eq!((distance_cm + distance_m_1).get_distance_quantity_idless(), distance_cm_plus_m_1.get_distance_quantity_idless());
+    assert_eq!((distance_m_2 + distance_cm).get_distance_quantity_idless(), distance_m_2_plus_cm.get_distance_quantity_idless());
 }
 
 #[test]
@@ -327,26 +328,26 @@ fn test_distance_subtract() {
     let distance_cm_minus_m_1 = DistanceQuantity::from_cm(-5700f64);
     let distance_m_2_minus_cm = DistanceQuantity::from_m(37f64);
 
-    assert_eq!(distance_m_1 - distance_m_2, distance_m_1_minus_m_2);
-    assert_eq!(distance_cm - distance_m_1, distance_cm_minus_m_1);
-    assert_eq!(distance_m_2 - distance_cm, distance_m_2_minus_cm);
+    assert_eq!((distance_m_1 - distance_m_2).get_distance_quantity_idless(), distance_m_1_minus_m_2.get_distance_quantity_idless());
+    assert_eq!((distance_cm - distance_m_1).get_distance_quantity_idless(), distance_cm_minus_m_1.get_distance_quantity_idless());
+    assert_eq!((distance_m_2 - distance_cm).get_distance_quantity_idless(), distance_m_2_minus_cm.get_distance_quantity_idless());
 }
 
 #[test]
 fn test_distance_multiply() {
     let distance_m_1 = DistanceQuantity::from_m(70f64);
     let distance_m_2 = DistanceQuantity::from_m(350f64);
-    let mass_g_3 = DistanceQuantity::from_m(267.4f64);
+    let distance_m_3 = DistanceQuantity::from_m(267.4f64);
 
-    assert_eq!(distance_m_1 * 5, distance_m_2);
-    assert_eq!(distance_m_1 * 3.82, mass_g_3);
+    assert_eq!((distance_m_1 * 5).get_distance_quantity_idless(), distance_m_2.get_distance_quantity_idless());
+    assert_eq!((distance_m_1 * 3.82).get_distance_quantity_idless(), distance_m_3.get_distance_quantity_idless());
 }
 
 #[test]
 fn test_distance_divide() {
     let distance_m_1 = DistanceQuantity::from_m(350f64);
     let distance_m_2 = DistanceQuantity::from_m(70f64);
-    assert_eq!(distance_m_1 / 5, distance_m_2);
+    assert_eq!((distance_m_1 / 5).get_distance_quantity_idless(), distance_m_2.get_distance_quantity_idless());
 }
 
 #[test]
@@ -362,7 +363,7 @@ fn test_distance_sum() {
 
     let sum: DistanceQuantity = distances.iter().map(|distance| *distance * 2).sum();
     assert_eq!(sum.get_unit(), distance_5.get_unit());
-    assert_eq!(sum, (distance_total * 2).to_unit(distance_5.get_unit()));
+    assert_eq!(sum.get_distance_quantity_idless(), (distance_total * 2).to_unit(distance_5.get_unit()).get_distance_quantity_idless());
 }
 
 #[test]
@@ -374,3 +375,26 @@ fn test_distance_partial_order() {
     assert!(distance_m_1 > distance_cm);
     assert!(distance_cm > distance_m_2);
 }
+
+#[tokio::test]
+async fn test_save_to_database() {
+    let database_service = DatabaseService::new().await.unwrap();
+    let pool = database_service.get_pool();
+
+    let _ = DistanceUnit::save_enumerations_to_database(&pool).await;
+
+    let distance_m = DistanceQuantity::from_m(6700f64);
+    let res = DistanceQuantity::save_to_database(&distance_m, &pool).await;
+    assert!(res.is_ok());
+
+    let distance_saved = DistanceQuantity::get_from_database_id(distance_m.get_id(), &pool).await;
+    assert!(distance_saved.is_ok());
+    assert_eq!(distance_saved.unwrap(), distance_m);
+
+    let res = DistanceQuantity::delete_from_database_id(distance_m.get_id(), &pool).await;
+    assert!(res.is_ok());
+
+    let distance_saved_2 = DistanceQuantity::get_from_database_id(distance_m.get_id(), &pool).await;
+    assert!(distance_saved_2.is_err());
+}
+

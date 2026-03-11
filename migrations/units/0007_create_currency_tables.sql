@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS units_currency_types (
 CREATE TABLE IF NOT EXISTS units_currency_quantities (
     id BLOB PRIMARY KEY NOT NULL,
     currency_type_id INTEGER NOT NULL,
-    quantity REAL NOT NULL,
+    value REAL NOT NULL,
     FOREIGN KEY (currency_type_id)
         REFERENCES units_currency_types(id)
         ON DELETE CASCADE,
