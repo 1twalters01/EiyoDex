@@ -30,7 +30,6 @@ macro_rules! define_currency_units {
         use serde::{Deserialize, Serialize};
         use utils::{
             cache::CacheService,
-            database::DatabaseService,
         };
 
         pub struct CurrencyMetadata {
@@ -387,26 +386,30 @@ macro_rules! define_currency_units {
                 Ok(Self::from_str(&row.unit_type).unwrap())
             }
         }
+    }
+}
 
-        impl FromStr for CurrencyUnit {
-            type Err = &'static str;
+impl FromStr for CurrencyUnit {
+    type Err = &'static str;
 
-            fn from_str(s: &str) -> Result<Self, Self::Err> {
-                let formatted_string = s.trim().to_uppercase();
-                for variant in Self::get_enumerations() {
-                    if formatted_string == variant.as_code() || formatted_string == variant.as_symbol() {
-                        return Ok(*variant);
-                    }
-                }
-                Err("Unknown currency unit")
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let formatted_string = s.trim().to_uppercase();
+        for variant in Self::get_enumerations() {
+            if formatted_string == variant.as_code().to_uppercase()
+                || formatted_string == variant.as_symbol().to_uppercase()
+                || formatted_string == variant.as_unit_type().to_uppercase()
+                || formatted_string == variant.as_unit_type_plural().to_uppercase()
+            {
+                return Ok(*variant);
             }
         }
+        Err("Unknown currency unit")
+    }
+}
 
-        impl fmt::Display for CurrencyUnit {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                write!(f, "{}", self.as_code())
-            }
-        }
+impl fmt::Display for CurrencyUnit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.as_code())
     }
 }
 

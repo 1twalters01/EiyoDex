@@ -33,7 +33,11 @@ impl<T: Clone + PartialEq> Id<T> {
 }
 
 pub trait SaveToDatabase {
-    fn save_to_database<'a>(&'a self, uuid: Uuid, pool: &'a Pool<Sqlite>) -> impl Future<Output = Result<(), sqlx::Error>> + Send + 'a;
+    fn save_to_database<'a>(
+        &'a self,
+        uuid: Uuid,
+        pool: &'a Pool<Sqlite>,
+    ) -> impl Future<Output = Result<(), sqlx::Error>> + Send + 'a;
 }
 
 pub trait GetFromDatabaseUsingId<T: Clone + PartialEq> {

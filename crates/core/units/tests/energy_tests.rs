@@ -1,6 +1,7 @@
 use units::{
     energy::{quantity::EnergyQuantity, unit::EnergyUnit},
-    measurement_system::MeasurementSystem, record::{GetFromDatabaseUsingId, Record},
+    measurement_system::MeasurementSystem,
+    record::{GetFromDatabaseUsingId, Record},
 };
 use utils::database::DatabaseService;
 
@@ -10,17 +11,11 @@ fn test_new_energy() {
 
     let energy_new_kcal = EnergyQuantity::new(value, EnergyUnit::Kilocalorie);
     let energy_from_kcal = EnergyQuantity::from_kcal(value);
-    assert_eq!(
-        energy_new_kcal,
-        energy_from_kcal
-    );
+    assert_eq!(energy_new_kcal, energy_from_kcal);
 
     let energy_new_kj = EnergyQuantity::new(value, EnergyUnit::Kilojoule);
     let energy_from_kj = EnergyQuantity::from_kj(value);
-    assert_eq!(
-        energy_new_kj,
-        energy_from_kj
-    );
+    assert_eq!(energy_new_kj, energy_from_kj);
 }
 
 #[test]
@@ -31,18 +26,12 @@ fn test_energy_rounding() {
     let mut energy_new = EnergyQuantity::new(value, EnergyUnit::Kilocalorie);
     let energy_rounded = energy_new.round(5);
     let energy_coded = EnergyQuantity::new(5.68033, EnergyUnit::Kilocalorie);
-    assert_eq!(
-        energy_rounded,
-        energy_coded
-    );
+    assert_eq!(energy_rounded, energy_coded);
 
     let mut energy_new_2 = EnergyQuantity::new(value_2, EnergyUnit::Kilocalorie);
     let energy_rounded_2 = energy_new_2.round(5);
     let energy_coded_2 = EnergyQuantity::new(147.20473, EnergyUnit::Kilocalorie);
-    assert_eq!(
-        energy_rounded_2,
-        energy_coded_2
-    );
+    assert_eq!(energy_rounded_2, energy_coded_2);
 }
 
 #[test]
@@ -76,10 +65,7 @@ fn test_energy_to_unit() {
         "energy_kj1: {},\nenergy_kj2: {}",
         energy_kj, energy_kcal_to_kj
     );
-    assert_eq!(
-        energy_kj,
-        energy_kcal_to_kj
-    );
+    assert_eq!(energy_kj, energy_kcal_to_kj);
 }
 
 #[test]
@@ -95,10 +81,7 @@ fn test_energy_to_fn() {
         "energy_kj1: {},\nenergy_kj2: {}",
         energy_kj, energy_kcal_to_kj
     );
-    assert_eq!(
-        energy_kj,
-        energy_kcal_to_kj
-    );
+    assert_eq!(energy_kj, energy_kcal_to_kj);
 }
 
 #[test]
@@ -218,18 +201,9 @@ fn test_energy_add() {
     let energy_kj_plus_kcal_1 = EnergyQuantity::from_kj(618.4);
     let energy_kcal_2_plus_kj = EnergyQuantity::from_kcal(547.8011472275334);
 
-    assert_eq!(
-        (energy_kcal_1 + energy_kcal_2),
-        energy_kcal_1_plus_kcal_2
-    );
-    assert_eq!(
-        (energy_kj + energy_kcal_1),
-        energy_kj_plus_kcal_1
-    );
-    assert_eq!(
-        (energy_kcal_2 + energy_kj),
-        energy_kcal_2_plus_kj
-    );
+    assert_eq!((energy_kcal_1 + energy_kcal_2), energy_kcal_1_plus_kcal_2);
+    assert_eq!((energy_kj + energy_kcal_1), energy_kj_plus_kcal_1);
+    assert_eq!((energy_kcal_2 + energy_kj), energy_kcal_2_plus_kj);
 }
 
 #[test]
@@ -242,18 +216,9 @@ fn test_energy_subtract() {
     let energy_kj_minus_kcal_1 = EnergyQuantity::from_kj(-24.104);
     let energy_kcal_2_minus_kj = EnergyQuantity::from_kcal(3.7609942638623326);
 
-    assert_eq!(
-        (energy_kcal_1 - energy_kcal_2),
-        energy_g_1_minus_g_2
-    );
-    assert_eq!(
-        (energy_kj - energy_kcal_1),
-        energy_kj_minus_kcal_1
-    );
-    assert_eq!(
-        (energy_kcal_2 - energy_kj),
-        energy_kcal_2_minus_kj
-    );
+    assert_eq!((energy_kcal_1 - energy_kcal_2), energy_g_1_minus_g_2);
+    assert_eq!((energy_kj - energy_kcal_1), energy_kj_minus_kcal_1);
+    assert_eq!((energy_kcal_2 - energy_kj), energy_kcal_2_minus_kj);
 }
 
 #[test]
@@ -262,14 +227,8 @@ fn test_energy_multiply() {
     let energy_kcal_2 = EnergyQuantity::from_kcal(350f64);
     let energy_g_3 = EnergyQuantity::from_kcal(267.4f64);
 
-    assert_eq!(
-        (energy_kcal_1 * 5),
-        energy_kcal_2
-    );
-    assert_eq!(
-        (energy_kcal_1 * 3.82),
-        energy_g_3
-    );
+    assert_eq!((energy_kcal_1 * 5), energy_kcal_2);
+    assert_eq!((energy_kcal_1 * 3.82), energy_g_3);
 }
 
 #[test]
@@ -277,10 +236,7 @@ fn test_energy_divide() {
     let energy_kcal_1 = EnergyQuantity::from_kcal(350f64);
     let energy_kcal_2 = EnergyQuantity::from_kcal(70f64);
 
-    assert_eq!(
-        (energy_kcal_1 / 5),
-        energy_kcal_2
-    );
+    assert_eq!((energy_kcal_1 / 5), energy_kcal_2);
 }
 
 #[test]
@@ -296,12 +252,7 @@ fn test_energy_sum() {
 
     let sum: EnergyQuantity = energies.iter().map(|energy| *energy * 2).sum();
     assert_eq!(sum.get_unit(), energy_5.get_unit());
-    assert_eq!(
-        sum,
-        (energy_total * 2)
-            .to_unit(energy_5.get_unit())
-            
-    );
+    assert_eq!(sum, (energy_total * 2).to_unit(energy_5.get_unit()));
 }
 
 #[test]

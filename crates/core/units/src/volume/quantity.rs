@@ -174,12 +174,9 @@ impl DeleteFromDatabaseUsingId for VolumeQuantity {
         uuid: Uuid,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
-        sqlx::query!(
-            "DELETE FROM units_volume_quantities WHERE id = ?",
-            uuid,
-        )
-        .execute(pool)
-        .await?;
+        sqlx::query!("DELETE FROM units_volume_quantities WHERE id = ?", uuid,)
+            .execute(pool)
+            .await?;
 
         return Ok(());
     }
@@ -248,5 +245,7 @@ impl PartialOrd for VolumeQuantity {
 
 use units_macro::include_volumes_from_json;
 
-use crate::record::{DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase};
+use crate::record::{
+    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase,
+};
 include_volumes_from_json!("data/units/volume",);

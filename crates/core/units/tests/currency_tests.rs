@@ -1,5 +1,9 @@
 // use chrono::NaiveDate;
-use units::currency::{quantity::CurrencyQuantity, unit::CurrencyUnit};
+use units::{
+    currency::{quantity::CurrencyQuantity, unit::CurrencyUnit},
+    record::{GetFromDatabaseUsingId, Record},
+};
+use utils::database::DatabaseService;
 
 #[test]
 fn test_new_currency() {
@@ -275,4 +279,30 @@ fn test_subtraction() {
     let currency_3 = CurrencyQuantity::from_usd(value_3);
 
     assert_eq!((currency_1 - currency_2).round(2), currency_3);
+}
+
+#[tokio::test]
+async fn test_save_to_database() {
+    let database_service = DatabaseService::new().await.unwrap();
+    let pool = database_service.get_pool();
+
+    let _ = CurrencyUnit::save_enumerations_to_database(&pool).await;
+
+    let currency_gbp = CurrencyQuantity::from_gbp(6700f64);
+    let currency_record = Record::new(currency_gbp);
+
+    let res = currency_record.save_to_database(&pool).await;
+    assert!(res.is_ok());
+
+    let currency_saved =
+        CurrencyQuantity::get_from_database_using_id(currency_record.get_uuid(), &pool).await;
+    assert!(currency_saved.is_ok());
+    assert_eq!(currency_saved.unwrap(), currency_record);
+
+    let res = currency_record.delete_from_database_using_id(&pool).await;
+    assert!(res.is_ok());
+
+    let currency_saved_2 =
+        CurrencyQuantity::get_from_database_using_id(currency_record.get_uuid(), &pool).await;
+    assert!(currency_saved_2.is_err());
 }

@@ -44,7 +44,7 @@ macro_rules! define_energies {
                     Self::new(value, EnergyUnit::$variant)
                 }
             )+
-        
+
             pub fn round(&mut self, dp: u8) -> Self {
                 let factor = 10f64.powi(dp as i32);
                 self.value = (self.value * factor).round()/factor;
@@ -133,10 +133,10 @@ impl SaveToDatabase for EnergyQuantity {
             energy_type_id,
             value,
         )
-            .execute(pool)
+        .execute(pool)
         .await?;
 
-        return Ok(())
+        return Ok(());
     }
 }
 
@@ -158,7 +158,7 @@ impl GetFromDatabaseUsingId<EnergyQuantity> for EnergyQuantity {
             "#,
             uuid
         )
-            .fetch_one(pool)
+        .fetch_one(pool)
         .await?;
 
         let unit = EnergyUnit::from_str(&row.unit_type).unwrap();
@@ -177,15 +177,12 @@ impl DeleteFromDatabaseUsingId for EnergyQuantity {
         uuid: Uuid,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
-    sqlx::query!(
-        "DELETE FROM units_energy_quantities WHERE id = ?",
-        uuid,
-    )
-        .execute(pool)
-    .await?;
+        sqlx::query!("DELETE FROM units_energy_quantities WHERE id = ?", uuid,)
+            .execute(pool)
+            .await?;
 
-    return Ok(())
-}
+        return Ok(());
+    }
 }
 
 impl fmt::Display for EnergyQuantity {
@@ -255,5 +252,7 @@ impl PartialOrd for EnergyQuantity {
 
 use units_macro::include_energies_from_json;
 
-use crate::record::{DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase};
+use crate::record::{
+    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase,
+};
 include_energies_from_json!("data/units/energy");

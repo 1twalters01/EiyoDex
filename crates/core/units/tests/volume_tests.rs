@@ -1,5 +1,7 @@
 use units::{
-    measurement_system::MeasurementSystem, record::{GetFromDatabaseUsingId, Record}, volume::{quantity::VolumeQuantity, unit::VolumeUnit}
+    measurement_system::MeasurementSystem,
+    record::{GetFromDatabaseUsingId, Record},
+    volume::{quantity::VolumeQuantity, unit::VolumeUnit},
 };
 use utils::database::DatabaseService;
 
@@ -9,45 +11,27 @@ fn test_new_volume() {
 
     let liter_new_l = VolumeQuantity::new(value, VolumeUnit::Liter);
     let liter_from_l = VolumeQuantity::from_l(value);
-    assert_eq!(
-        liter_new_l,
-        liter_from_l
-    );
+    assert_eq!(liter_new_l, liter_from_l);
 
     let liter_new_ml = VolumeQuantity::new(value, VolumeUnit::Milliliter);
     let liter_from_ml = VolumeQuantity::from_ml(value);
-    assert_eq!(
-        liter_new_ml,
-        liter_from_ml
-    );
+    assert_eq!(liter_new_ml, liter_from_ml);
 
     let liter_new_pt = VolumeQuantity::new(value, VolumeUnit::Pint);
     let liter_from_pt = VolumeQuantity::from_pt(value);
-    assert_eq!(
-        liter_new_pt,
-        liter_from_pt
-    );
+    assert_eq!(liter_new_pt, liter_from_pt);
 
     let liter_new_gal = VolumeQuantity::new(value, VolumeUnit::Gallon);
     let liter_from_gal = VolumeQuantity::from_gal(value);
-    assert_eq!(
-        liter_new_gal,
-        liter_from_gal
-    );
+    assert_eq!(liter_new_gal, liter_from_gal);
 
     let liter_new_tbsp = VolumeQuantity::new(value, VolumeUnit::Tablespoon);
     let liter_from_tbsp = VolumeQuantity::from_tbsp(value);
-    assert_eq!(
-        liter_new_tbsp,
-        liter_from_tbsp
-    );
+    assert_eq!(liter_new_tbsp, liter_from_tbsp);
 
     let liter_new_tsp = VolumeQuantity::new(value, VolumeUnit::Teaspoon);
     let liter_from_tsp = VolumeQuantity::from_tsp(value);
-    assert_eq!(
-        liter_new_tsp,
-        liter_from_tsp
-    );
+    assert_eq!(liter_new_tsp, liter_from_tsp);
 }
 
 #[test]
@@ -58,18 +42,12 @@ fn test_volume_rounding() {
     let mut liter_new = VolumeQuantity::new(value, VolumeUnit::Liter);
     let liter_rounded = liter_new.round(5);
     let liter_coded = VolumeQuantity::new(5.68033, VolumeUnit::Liter);
-    assert_eq!(
-        liter_rounded,
-        liter_coded
-    );
+    assert_eq!(liter_rounded, liter_coded);
 
     let mut liter_new_2 = VolumeQuantity::new(value_2, VolumeUnit::Liter);
     let liter_rounded_2 = liter_new_2.round(5);
     let liter_coded_2 = VolumeQuantity::new(147.20473, VolumeUnit::Liter);
-    assert_eq!(
-        liter_rounded_2,
-        liter_coded_2
-    );
+    assert_eq!(liter_rounded_2, liter_coded_2);
 }
 
 #[test]
@@ -145,10 +123,7 @@ fn test_volume_to_unit() {
         "volume_ounces1: {},\nvolume_ounces2: {}",
         volume_pt, volume_l_to_pt
     );
-    assert_eq!(
-        volume_pt,
-        volume_l_to_pt
-    );
+    assert_eq!(volume_pt, volume_l_to_pt);
 }
 
 #[test]
@@ -164,10 +139,7 @@ fn test_volume_to_fn() {
         "volume_pints 1: {},\nvolume_pints 2: {}",
         volume_pt, volume_l_to_pt
     );
-    assert_eq!(
-        volume_pt,
-        volume_l_to_pt
-    );
+    assert_eq!(volume_pt, volume_l_to_pt);
 }
 
 #[test]
@@ -330,18 +302,9 @@ fn test_volume_add() {
     let volume_l_plus_ml_1 = VolumeQuantity::from_l(2.1);
     let volume_ml_2_plus_l = VolumeQuantity::from_ml(2500f64);
 
-    assert_eq!(
-        (volume_ml_1 + volume_ml_2),
-        volume_ml_1_plus_ml_2
-    );
-    assert_eq!(
-        (volume_l + volume_ml_1),
-        volume_l_plus_ml_1
-    );
-    assert_eq!(
-        (volume_ml_2 + volume_l),
-        volume_ml_2_plus_l
-    );
+    assert_eq!((volume_ml_1 + volume_ml_2), volume_ml_1_plus_ml_2);
+    assert_eq!((volume_l + volume_ml_1), volume_l_plus_ml_1);
+    assert_eq!((volume_ml_2 + volume_l), volume_ml_2_plus_l);
 }
 
 #[test]
@@ -354,22 +317,9 @@ fn test_volume_subtract() {
     let volume_l_minus_ml_1 = VolumeQuantity::from_l(-5.5);
     let volume_ml_2_minus_l = VolumeQuantity::from_ml(3500f64);
 
-    assert_eq!(
-        (volume_ml_1 - volume_ml_2)
-            .round(1)
-            ,
-        volume_ml_1_minus_ml_2
-    );
-    assert_eq!(
-        (volume_l - volume_ml_1)
-            .round(1)
-            ,
-        volume_l_minus_ml_1
-    );
-    assert_eq!(
-        (volume_ml_2 - volume_l),
-        volume_ml_2_minus_l
-    );
+    assert_eq!((volume_ml_1 - volume_ml_2).round(1), volume_ml_1_minus_ml_2);
+    assert_eq!((volume_l - volume_ml_1).round(1), volume_l_minus_ml_1);
+    assert_eq!((volume_ml_2 - volume_l), volume_ml_2_minus_l);
 }
 
 #[test]
@@ -378,14 +328,8 @@ fn test_volume_multiply() {
     let volume_l_2 = VolumeQuantity::from_l(350f64);
     let liter_l_3 = VolumeQuantity::from_l(267.4f64);
 
-    assert_eq!(
-        (volume_l_1 * 5),
-        volume_l_2
-    );
-    assert_eq!(
-        (volume_l_1 * 3.82),
-        liter_l_3
-    );
+    assert_eq!((volume_l_1 * 5), volume_l_2);
+    assert_eq!((volume_l_1 * 3.82), liter_l_3);
 }
 
 #[test]
@@ -393,10 +337,7 @@ fn test_volume_divide() {
     let volume_l_1 = VolumeQuantity::from_l(350f64);
     let volume_l_2 = VolumeQuantity::from_l(70f64);
 
-    assert_eq!(
-        (volume_l_1 / 5),
-        volume_l_2
-    );
+    assert_eq!((volume_l_1 / 5), volume_l_2);
 }
 
 #[test]
@@ -412,12 +353,7 @@ fn test_volume_sum() {
 
     let sum: VolumeQuantity = volumes.iter().map(|volume| *volume * 2).sum();
     assert_eq!(sum.get_unit(), volume_5.get_unit());
-    assert_eq!(
-        sum,
-        (volume_total * 2)
-            .to_unit(volume_5.get_unit())
-            
-    );
+    assert_eq!(sum, (volume_total * 2).to_unit(volume_5.get_unit()));
 }
 
 #[test]

@@ -1,6 +1,7 @@
 use units::{
     duration::{quantity::DurationQuantity, unit::DurationUnit},
-    measurement_system::MeasurementSystem, record::{GetFromDatabaseUsingId, Record},
+    measurement_system::MeasurementSystem,
+    record::{GetFromDatabaseUsingId, Record},
 };
 
 #[test]

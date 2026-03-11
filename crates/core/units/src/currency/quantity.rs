@@ -15,6 +15,7 @@ macro_rules! define_currencies {
             cmp::Ordering,
             fmt,
             ops::{Add, Div, Mul, Sub},
+            str::FromStr,
         };
         use serde::{Deserialize, Serialize};
 
@@ -137,60 +138,140 @@ macro_rules! define_currencies {
                 }
             )+
         }
-
-        impl fmt::Display for CurrencyQuantity {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                write!(f, "{}{}", self.get_symbol(), self.value)
-            }
-        }
-
-        impl Add for CurrencyQuantity {
-            type Output = Self;
-            fn add(self, rhs: Self) -> Self::Output {
-                match rhs.convert_to_sync(self.unit) {
-                    Ok(converted_rhs) => Self::new(self.value + converted_rhs.value, self.unit),
-                    Err(_) => panic!("CurrencyQuantity conversion failed in addition"),
-                }
-            }
-        }
-
-        impl Sub for CurrencyQuantity {
-            type Output = Self;
-
-            fn sub(self, rhs: Self) -> Self::Output {
-                match rhs.convert_to_sync(self.unit) {
-                    Ok(converted_rhs) => Self::new(self.value - converted_rhs.value, self.unit),
-                    Err(_) => panic!("CurrencyQuantity conversion failed in subtraction"),
-                }
-            }
-        }
-
-        impl Mul<f64> for CurrencyQuantity {
-            type Output = Self;
-
-            fn mul(self, rhs: f64) -> Self::Output {
-                Self::new(self.value * rhs, self.unit)
-            }
-        }
-
-        impl Div<f64> for CurrencyQuantity {
-            type Output = Self;
-
-            fn div(self, rhs: f64) -> Self::Output {
-                Self::new(self.value / rhs, self.unit)
-            }
-        }
-
-        impl PartialOrd for CurrencyQuantity {
-            fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-                match other.convert_to_sync(self.unit) {
-                    Ok(converted_other) => self.value.partial_cmp(&converted_other.value),
-                    Err(_) => None,
-                }
-            }
-        }
    };
 }
 
+impl SaveToDatabase for CurrencyQuantity {
+    async fn save_to_database(&self, uuid: Uuid, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let currency_type_id = self.get_unit().get_database_id(pool).await.unwrap();
+        let value = self.get_value();
+        sqlx::query!(
+            r#"
+                INSERT INTO units_currency_quantities (id, currency_type_id, value)
+                VALUES (?, ?, ?)
+                ON CONFLICT (id) DO UPDATE SET
+                    currency_type_id = excluded.currency_type_id,
+                    value = excluded.value
+            "#,
+            uuid,
+            currency_type_id,
+            value,
+        )
+        .execute(pool)
+        .await?;
+
+        return Ok(());
+    }
+}
+
+impl GetFromDatabaseUsingId<CurrencyQuantity> for CurrencyQuantity {
+    async fn get_from_database_using_id(
+        uuid: Uuid,
+        pool: &Pool<Sqlite>,
+    ) -> Result<Record<Self>, sqlx::Error> {
+        let row = sqlx::query!(
+            r#"
+                SELECT 
+                    cq.id, 
+                    ct.unit_type,
+                    cq.value
+                FROM units_currency_quantities cq
+                INNER JOIN units_currency_types ct
+                    ON cq.currency_type_id = ct.id
+                WHERE cq.id = ?
+            "#,
+            uuid
+        )
+        .fetch_one(pool)
+        .await?;
+
+        println!(
+            "row.unit_type: {}, unit_type: {}",
+            row.unit_type,
+            CurrencyUnit::GBP.as_unit_type()
+        );
+        // assert!(&row.unit_type, CurrencyUnit::GBP.as_unit_type());
+        let unit = CurrencyUnit::from_str(&row.unit_type).unwrap();
+        let value = row.value;
+
+        let inner = Self { unit, value };
+        let new_uuid = Uuid::from_slice(&row.id.to_vec()).unwrap();
+        let id = Id::from_uuid(new_uuid, inner);
+        let distance_record = Record::new_with_id(id, inner);
+        Ok(distance_record)
+    }
+}
+
+impl DeleteFromDatabaseUsingId for CurrencyQuantity {
+    async fn delete_from_database_using_id(
+        uuid: Uuid,
+        pool: &Pool<Sqlite>,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!("DELETE FROM units_currency_quantities WHERE id = ?", uuid)
+            .execute(pool)
+            .await?;
+
+        return Ok(());
+    }
+}
+
+impl fmt::Display for CurrencyQuantity {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}{}", self.get_symbol(), self.value)
+    }
+}
+
+impl Add for CurrencyQuantity {
+    type Output = Self;
+    fn add(self, rhs: Self) -> Self::Output {
+        match rhs.convert_to_sync(self.unit) {
+            Ok(converted_rhs) => Self::new(self.value + converted_rhs.value, self.unit),
+            Err(_) => panic!("CurrencyQuantity conversion failed in addition"),
+        }
+    }
+}
+
+impl Sub for CurrencyQuantity {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        match rhs.convert_to_sync(self.unit) {
+            Ok(converted_rhs) => Self::new(self.value - converted_rhs.value, self.unit),
+            Err(_) => panic!("CurrencyQuantity conversion failed in subtraction"),
+        }
+    }
+}
+
+impl Mul<f64> for CurrencyQuantity {
+    type Output = Self;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        Self::new(self.value * rhs, self.unit)
+    }
+}
+
+impl Div<f64> for CurrencyQuantity {
+    type Output = Self;
+
+    fn div(self, rhs: f64) -> Self::Output {
+        Self::new(self.value / rhs, self.unit)
+    }
+}
+
+impl PartialOrd for CurrencyQuantity {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        match other.convert_to_sync(self.unit) {
+            Ok(converted_other) => self.value.partial_cmp(&converted_other.value),
+            Err(_) => None,
+        }
+    }
+}
+
+use sqlx::{Pool, Sqlite};
 use units_macro::include_currencies_from_json;
+use uuid::Uuid;
+
+use crate::record::{
+    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase,
+};
 include_currencies_from_json!("data/units/currency");

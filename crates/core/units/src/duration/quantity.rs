@@ -259,5 +259,7 @@ use sqlx::{Pool, Sqlite};
 use units_macro::include_durations_from_json;
 use uuid::Uuid;
 
-use crate::record::{DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase};
+use crate::record::{
+    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase,
+};
 include_durations_from_json!("data/units/duration");
