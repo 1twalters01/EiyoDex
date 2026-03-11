@@ -114,12 +114,12 @@ fn test_volume_to_unit() {
     let value = 5.6;
     let new_value = value / 0.5682612;
 
-    let mass_l = VolumeQuantity::from_l(value);
-    let mass_pt = VolumeQuantity::from_pt(new_value).round(5);
-    let mass_l_to_pt = mass_l.to_unit(VolumeUnit::Pint).round(5);
+    let volume_l = VolumeQuantity::from_l(value);
+    let volume_pt = VolumeQuantity::from_pt(new_value).round(5);
+    let volume_l_to_pt = volume_l.to_unit(VolumeUnit::Pint).round(5);
 
-    print!("mass_ounces1: {},\nmass_ounces2: {}", mass_pt, mass_l_to_pt);
-    assert_eq!(mass_pt.get_volume_quantity_idless(), mass_l_to_pt.get_volume_quantity_idless());
+    print!("volume_ounces1: {},\nvolume_ounces2: {}", volume_pt, volume_l_to_pt);
+    assert_eq!(volume_pt.get_volume_quantity_idless(), volume_l_to_pt.get_volume_quantity_idless());
 }
 
 #[test]
@@ -127,15 +127,15 @@ fn test_volume_to_fn() {
     let value = 6.9;
     let new_value = value / 0.5682612;
 
-    let mass_l = VolumeQuantity::from_l(value);
-    let mass_pt = VolumeQuantity::from_pt(new_value).round(6);
-    let mass_l_to_pt = mass_l.to_pt().round(6);
+    let volume_l = VolumeQuantity::from_l(value);
+    let volume_pt = VolumeQuantity::from_pt(new_value).round(6);
+    let volume_l_to_pt = volume_l.to_pt().round(6);
 
     print!(
         "volume_pints 1: {},\nvolume_pints 2: {}",
-        mass_pt, mass_l_to_pt
+        volume_pt, volume_l_to_pt
     );
-    assert_eq!(mass_pt.get_volume_quantity_idless(), mass_l_to_pt.get_volume_quantity_idless());
+    assert_eq!(volume_pt.get_volume_quantity_idless(), volume_l_to_pt.get_volume_quantity_idless());
 }
 
 #[test]
@@ -201,7 +201,7 @@ fn test_volume_get_symbol() {
 }
 
 #[test]
-fn test_mass_get_measurement_system() {
+fn test_volume_get_measurement_system() {
     let value = 4.2;
 
     let volume_l = VolumeQuantity::from_l(value);

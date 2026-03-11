@@ -476,8 +476,8 @@ fn test_power_mul_power_by_duration() {
     let power = PowerQuantity::from_kcal_per_hr(4.2);
     let duration = DurationQuantity::from_day(1f64);
     let energy = EnergyQuantity::from_kcal(100.8);
-    assert_eq!((power * duration).round(2), energy);
-    assert_eq!((duration * power).round(2), energy);
+    assert_eq!((power * duration).round(2).get_energy_quantity_idless(), energy.get_energy_quantity_idless());
+    assert_eq!((duration * power).round(2).get_energy_quantity_idless(), energy.get_energy_quantity_idless());
 }
 
 #[test]

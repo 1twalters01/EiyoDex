@@ -15,25 +15,45 @@ macro_rules! define_energies {
         use crate::{
             energy::unit::EnergyUnit,
             measurement_system::MeasurementSystem,
+            into_f64::IntoF64Safe,
         };
         use std::{
             cmp::Ordering,
             fmt,
             ops::{Add, Div, Mul, Sub},
             iter::Sum,
+            str::FromStr,
         };
+        use sqlx::{Pool, Sqlite};
         use serde::{Deserialize, Serialize};
-        use crate::into_f64::IntoF64Safe;
+        use uuid::Uuid;
+
+        #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+        pub struct EnergyQuantityIdless {
+            value: f64,
+            unit: EnergyUnit,
+        }
+
+        impl EnergyQuantityIdless {
+            pub fn get_value(&self) -> f64 {
+                self.value
+            }
+
+            pub fn get_unit(&self) -> EnergyUnit {
+                self.unit
+            }
+        }
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
         pub struct EnergyQuantity {
+            id: Uuid,
             value: f64,
             unit: EnergyUnit,
         }
 
         impl EnergyQuantity {
             pub fn new(value: f64, unit: EnergyUnit) -> Self {
-                Self { value, unit }
+                Self { id: Uuid::new_v4(), value, unit }
             }
 
             $(
@@ -42,6 +62,20 @@ macro_rules! define_energies {
                 }
             )+
 
+            pub fn get_id(&self) -> Uuid {
+                self.id
+            }
+
+            pub fn set_id(&mut self, id: Uuid) {
+                self.id = id;
+            }
+
+            pub fn get_energy_quantity_idless(&self) -> EnergyQuantityIdless {
+                EnergyQuantityIdless {
+                    value: self.get_value(),
+                    unit: self.get_unit(),
+                }
+            }
             pub fn round(&mut self, dp: u8) -> Self {
                 let factor = 10f64.powi(dp as i32);
                 self.value = (self.value * factor).round()/factor;
@@ -55,10 +89,11 @@ macro_rules! define_energies {
             )+
 
             pub fn to_unit(&self, unit: EnergyUnit) -> Self {
+                let id = self.get_id();
                 let value = match unit {
                     $(EnergyUnit::$variant => self.$as_fn_name()),+
                 };
-                Self { value, unit }
+                Self { id, value, unit }
             }
 
             $(
@@ -109,6 +144,73 @@ macro_rules! define_energies {
 
             pub fn to_string(&self) -> String {
                 format!("{}{}", self.value.to_string().trim(), self.get_symbol().trim())
+            }
+
+            pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+                let id = self.get_id();
+                let energy_type_id = self.get_unit().get_database_id(pool).await.unwrap();
+                let value = self.get_value();
+                sqlx::query!(
+                    r#"
+                        INSERT INTO units_energy_quantities (id, energy_type_id, value)
+                        VALUES (?, ?, ?)
+                        ON CONFLICT (id) DO UPDATE SET
+                            energy_type_id = excluded.energy_type_id,
+                            value = excluded.value
+                    "#,
+                    id,
+                    energy_type_id,
+                    value,
+                )
+                .execute(pool)
+                .await?;
+
+                return Ok(())
+            }
+
+            pub async fn get_from_database_id(id: Uuid, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
+                let row = sqlx::query!(
+                    r#"
+                        SELECT 
+                            mq.id, 
+                            mt.unit_type,
+                            mq.value
+                        FROM units_energy_quantities mq
+                        INNER JOIN units_energy_types mt
+                            ON mq.energy_type_id = mt.id
+                        WHERE mq.id = ?
+                    "#,
+                    id
+                )
+                .fetch_one(pool)
+                .await?;
+
+                let id = Uuid::from_slice(&row.id.to_vec()).unwrap();
+                let unit = EnergyUnit::from_str(&row.unit_type).unwrap();
+                let value = row.value;
+                println!("id: {}", id);
+                println!("unit: {:#?}", unit);
+                println!("value: {}", value);
+
+                let energy_quantity = Self {
+                    id,
+                    unit,
+                    value,
+                };
+                Ok(energy_quantity)
+            }
+
+            pub async fn delete_from_database_id(id: Uuid, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+                sqlx::query!(
+                    r#"
+                        DELETE FROM units_energy_quantities WHERE id = ?
+                    "#,
+                    id,
+                )
+                .execute(pool)
+                .await?;
+
+                return Ok(())
             }
 
         }

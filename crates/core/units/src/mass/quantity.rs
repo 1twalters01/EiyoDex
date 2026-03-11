@@ -18,8 +18,8 @@ macro_rules! define_masses {
             cmp::Ordering,
             fmt,
             ops::{Add, Div, Mul, Sub},
-            str::FromStr,
             iter::Sum,
+            str::FromStr,
         };
         use sqlx::{Pool, Sqlite};
         use serde::{Deserialize, Serialize};
@@ -150,7 +150,6 @@ macro_rules! define_masses {
 
             pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
                 let id = self.get_id();
-                // println!("{:#?}", self);
                 let mass_type_id = self.get_unit().get_database_id(pool).await.unwrap();
                 let value = self.get_value();
                 sqlx::query!(
