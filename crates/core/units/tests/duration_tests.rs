@@ -1,6 +1,6 @@
 use units::{
     duration::{quantity::DurationQuantity, unit::DurationUnit},
-    measurement_system::MeasurementSystem,
+    measurement_system::MeasurementSystem, record::{GetFromDatabaseUsingId, Record},
 };
 
 #[test]
@@ -142,6 +142,7 @@ fn test_get_duration() {
 }
 
 use chrono::Duration;
+use utils::database::DatabaseService;
 #[test]
 fn test_distance_get_value() {
     let days = 6.882;
@@ -342,4 +343,30 @@ fn test_mass_partial_order() {
     assert!(duration_day_1 > duration_day_2);
     assert!(duration_day_1 > duration_hr);
     assert!(duration_hr > duration_day_2);
+}
+
+#[tokio::test]
+async fn test_save_to_database() {
+    let database_service = DatabaseService::new().await.unwrap();
+    let pool = database_service.get_pool();
+
+    let _ = DurationUnit::save_enumerations_to_database(&pool).await;
+
+    let duration_hr = DurationQuantity::from_hr(6.78f64);
+    let duration_record = Record::new(duration_hr);
+
+    let res = duration_record.save_to_database(&pool).await;
+    assert!(res.is_ok());
+
+    let duration_saved =
+        DurationQuantity::get_from_database_using_id(duration_record.get_uuid(), &pool).await;
+    assert!(duration_saved.is_ok());
+    assert_eq!(duration_saved.unwrap(), duration_record);
+
+    let res = duration_record.delete_from_database_using_id(&pool).await;
+    assert!(res.is_ok());
+
+    let duration_saved_2 =
+        DurationQuantity::get_from_database_using_id(duration_record.get_uuid(), &pool).await;
+    assert!(duration_saved_2.is_err());
 }

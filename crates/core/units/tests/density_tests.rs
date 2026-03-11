@@ -1145,14 +1145,8 @@ fn test_density_mul_by_volume() {
     let density = DensityQuantity::from_kg_per_l(70f64);
     let volume = VolumeQuantity::from_ml(2000f64);
     let mass = MassQuantity::from_kg(140f64);
-    assert_eq!(
-        (density * volume).get_mass_quantity_idless(),
-        mass.get_mass_quantity_idless()
-    );
-    assert_eq!(
-        (volume * density).get_mass_quantity_idless(),
-        mass.get_mass_quantity_idless()
-    );
+    assert_eq!((density * volume), mass);
+    assert_eq!((volume * density), mass);
 }
 
 #[test]

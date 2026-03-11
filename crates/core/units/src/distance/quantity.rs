@@ -25,32 +25,15 @@ macro_rules! define_distances {
         use serde::{Deserialize, Serialize};
         use uuid::Uuid;
 
-        #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-        pub struct DistanceQuantityIdless {
-            value: f64,
-            unit: DistanceUnit,
-        }
-
-        impl DistanceQuantityIdless {
-            pub fn get_value(&self) -> f64 {
-                self.value
-            }
-
-            pub fn get_unit(&self) -> DistanceUnit {
-                self.unit
-            }
-        }
-
         #[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq)]
         pub struct DistanceQuantity {
-            id: Uuid,
             value: f64,
             unit: DistanceUnit,
         }
 
         impl DistanceQuantity {
             pub fn new(value: f64, unit: DistanceUnit) -> Self {
-                Self { id: Uuid::new_v4(), value, unit }
+                Self { value, unit }
             }
 
             $(
@@ -58,21 +41,6 @@ macro_rules! define_distances {
                     Self::new(value, DistanceUnit::$variant)
                 }
             )+
-
-            pub fn get_id(&self) -> Uuid {
-                self.id
-            }
-
-            pub fn set_id(&mut self, id: Uuid) {
-                self.id = id;
-            }
-
-            pub fn get_distance_quantity_idless(&self) -> DistanceQuantityIdless {
-                DistanceQuantityIdless {
-                    value: self.get_value(),
-                    unit: self.get_unit(),
-                }
-            }
 
             pub fn round(&mut self, dp: u8) -> Self {
                 let factor = 10f64.powi(dp as i32);
@@ -87,11 +55,10 @@ macro_rules! define_distances {
             )+
 
             pub fn to_unit(&self, unit: DistanceUnit) -> Self {
-                let id = self.get_id();
                 let value = match unit {
                     $(DistanceUnit::$variant => self.$as_fn_name()),+
                 };
-                Self { id, value, unit }
+                Self { value, unit }
             }
 
             $(
@@ -143,76 +110,76 @@ macro_rules! define_distances {
             pub fn to_string(&self) -> String {
                 format!("{}{}", self.value.to_string().trim(), self.get_symbol().trim())
             }
-
-            pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
-                let id = self.get_id();
-                let distance_type_id = self.get_unit().get_database_id(pool).await.unwrap();
-                let value = self.get_value();
-                sqlx::query!(
-                    r#"
-                        INSERT INTO units_distance_quantities (id, distance_type_id, value)
-                        VALUES (?, ?, ?)
-                        ON CONFLICT (id) DO UPDATE SET
-                            distance_type_id = excluded.distance_type_id,
-                            value = excluded.value
-                    "#,
-                    id,
-                    distance_type_id,
-                    value,
-                )
-                .execute(pool)
-                .await?;
-
-                return Ok(())
-            }
-
-            pub async fn get_from_database_id(id: Uuid, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
-                let row = sqlx::query!(
-                    r#"
-                        SELECT 
-                            mq.id, 
-                            mt.unit_type,
-                            mq.value
-                        FROM units_distance_quantities mq
-                        INNER JOIN units_distance_types mt
-                            ON mq.distance_type_id = mt.id
-                        WHERE mq.id = ?
-                    "#,
-                    id
-                )
-                .fetch_one(pool)
-                .await?;
-
-                let id = Uuid::from_slice(&row.id.to_vec()).unwrap();
-                let unit = DistanceUnit::from_str(&row.unit_type).unwrap();
-                let value = row.value;
-                println!("id: {}", id);
-                println!("unit: {:#?}", unit);
-                println!("value: {}", value);
-
-                let distance_quantity = Self {
-                    id,
-                    unit,
-                    value,
-                };
-                Ok(distance_quantity)
-            }
-
-            pub async fn delete_from_database_id(id: Uuid, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
-                sqlx::query!(
-                    r#"
-                        DELETE FROM units_distance_quantities WHERE id = ?
-                    "#,
-                    id,
-                )
-                .execute(pool)
-                .await?;
-
-                return Ok(())
-            }
-
         }
     };
+}
+
+impl SaveToDatabase for DistanceQuantity {
+    async fn save_to_database(&self, uuid: Uuid, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let distance_type_id = self.get_unit().get_database_id(pool).await.unwrap();
+        let value = self.get_value();
+        sqlx::query!(
+            r#"
+                INSERT INTO units_distance_quantities (id, distance_type_id, value)
+                VALUES (?, ?, ?)
+                ON CONFLICT (id) DO UPDATE SET
+                    distance_type_id = excluded.distance_type_id,
+                    value = excluded.value
+            "#,
+            uuid,
+            distance_type_id,
+            value,
+        )
+        .execute(pool)
+        .await?;
+
+        return Ok(());
+    }
+}
+
+impl GetFromDatabaseUsingId<DistanceQuantity> for DistanceQuantity {
+    async fn get_from_database_using_id(
+        uuid: Uuid,
+        pool: &Pool<Sqlite>,
+    ) -> Result<Record<Self>, sqlx::Error> {
+        let row = sqlx::query!(
+            r#"
+                SELECT 
+                    dq.id, 
+                    dt.unit_type,
+                    dq.value
+                FROM units_distance_quantities dq
+                INNER JOIN units_distance_types dt
+                    ON dq.distance_type_id = dt.id
+                WHERE dq.id = ?
+            "#,
+            uuid
+        )
+        .fetch_one(pool)
+        .await?;
+
+        let unit = DistanceUnit::from_str(&row.unit_type).unwrap();
+        let value = row.value;
+
+        let inner = Self { unit, value };
+        let new_uuid = Uuid::from_slice(&row.id.to_vec()).unwrap();
+        let id = Id::from_uuid(new_uuid, inner);
+        let distance_record = Record::new_with_id(id, inner);
+        Ok(distance_record)
+    }
+}
+
+impl DeleteFromDatabaseUsingId for DistanceQuantity {
+    async fn delete_from_database_using_id(
+        uuid: Uuid,
+        pool: &Pool<Sqlite>,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!("DELETE FROM units_distance_quantities WHERE id = ?", uuid)
+            .execute(pool)
+            .await?;
+
+        return Ok(());
+    }
 }
 
 impl fmt::Display for DistanceQuantity {
@@ -279,4 +246,8 @@ impl PartialOrd for DistanceQuantity {
 }
 
 use units_macro::include_distances_from_json;
+
+use crate::record::{
+    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase,
+};
 include_distances_from_json!("data/units/distance",);

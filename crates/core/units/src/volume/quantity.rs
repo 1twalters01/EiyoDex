@@ -25,32 +25,15 @@ macro_rules! define_volumes {
         use serde::{Deserialize, Serialize};
         use uuid::Uuid;
 
-        #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-        pub struct VolumeQuantityIdless {
-            value: f64,
-            unit: VolumeUnit,
-        }
-
-        impl VolumeQuantityIdless {
-            pub fn get_value(&self) -> f64 {
-                self.value
-            }
-
-            pub fn get_unit(&self) -> VolumeUnit {
-                self.unit
-            }
-        }
-
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
         pub struct VolumeQuantity {
-            id: Uuid,
             value: f64,
             unit: VolumeUnit,
         }
 
         impl VolumeQuantity {
             pub fn new(value: f64, unit: VolumeUnit) -> Self {
-                Self { id: Uuid::new_v4(), value, unit }
+                Self { value, unit }
             }
 
             $(
@@ -58,21 +41,6 @@ macro_rules! define_volumes {
                     Self::new(value, VolumeUnit::$variant)
                 }
             )+
-
-            pub fn get_id(&self) -> Uuid {
-                self.id
-            }
-
-            pub fn set_id(&mut self, id: Uuid) {
-                self.id = id;
-            }
-
-            pub fn get_volume_quantity_idless(&self) -> VolumeQuantityIdless {
-                VolumeQuantityIdless {
-                    value: self.get_value(),
-                    unit: self.get_unit(),
-                }
-            }
 
             pub fn round(&mut self, dp: u8) -> Self {
                 let factor = 10f64.powi(dp as i32);
@@ -87,11 +55,10 @@ macro_rules! define_volumes {
             )+
 
             pub fn to_unit(&self, unit: VolumeUnit) -> Self {
-                let id = self.get_id();
                 let value = match unit {
                     $(VolumeUnit::$variant => self.$as_fn_name()),+
                 };
-                Self { id, value, unit }
+                Self { value, unit }
             }
 
             $(
@@ -143,76 +110,79 @@ macro_rules! define_volumes {
             pub fn to_string(&self) -> String {
                 format!("{}{}", self.value.to_string().trim(), self.get_symbol().trim())
             }
-
-            pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
-                let id = self.get_id();
-                let volume_type_id = self.get_unit().get_database_id(pool).await.unwrap();
-                let value = self.get_value();
-                sqlx::query!(
-                    r#"
-                        INSERT INTO units_volume_quantities (id, volume_type_id, value)
-                        VALUES (?, ?, ?)
-                        ON CONFLICT (id) DO UPDATE SET
-                            volume_type_id = excluded.volume_type_id,
-                            value = excluded.value
-                    "#,
-                    id,
-                    volume_type_id,
-                    value,
-                )
-                .execute(pool)
-                .await?;
-
-                return Ok(())
-            }
-
-            pub async fn get_from_database_id(id: Uuid, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
-                let row = sqlx::query!(
-                    r#"
-                        SELECT 
-                            mq.id, 
-                            mt.unit_type,
-                            mq.value
-                        FROM units_volume_quantities mq
-                        INNER JOIN units_volume_types mt
-                            ON mq.volume_type_id = mt.id
-                        WHERE mq.id = ?
-                    "#,
-                    id
-                )
-                .fetch_one(pool)
-                .await?;
-
-                let id = Uuid::from_slice(&row.id.to_vec()).unwrap();
-                let unit = VolumeUnit::from_str(&row.unit_type).unwrap();
-                let value = row.value;
-                println!("id: {}", id);
-                println!("unit: {:#?}", unit);
-                println!("value: {}", value);
-
-                let volume_quantity = Self {
-                    id,
-                    unit,
-                    value,
-                };
-                Ok(volume_quantity)
-            }
-
-            pub async fn delete_from_database_id(id: Uuid, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
-                sqlx::query!(
-                    r#"
-                        DELETE FROM units_volume_quantities WHERE id = ?
-                    "#,
-                    id,
-                )
-                .execute(pool)
-                .await?;
-
-                return Ok(())
-            }
-
         }
     };
+}
+
+impl SaveToDatabase for VolumeQuantity {
+    async fn save_to_database(&self, uuid: Uuid, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let volume_type_id = self.get_unit().get_database_id(pool).await.unwrap();
+        let value = self.get_value();
+        sqlx::query!(
+            r#"
+                INSERT INTO units_volume_quantities (id, volume_type_id, value)
+                VALUES (?, ?, ?)
+                ON CONFLICT (id) DO UPDATE SET
+                    volume_type_id = excluded.volume_type_id,
+                    value = excluded.value
+            "#,
+            uuid,
+            volume_type_id,
+            value,
+        )
+        .execute(pool)
+        .await?;
+
+        return Ok(());
+    }
+}
+
+impl GetFromDatabaseUsingId<VolumeQuantity> for VolumeQuantity {
+    async fn get_from_database_using_id(
+        uuid: Uuid,
+        pool: &Pool<Sqlite>,
+    ) -> Result<Record<Self>, sqlx::Error> {
+        let row = sqlx::query!(
+            r#"
+                SELECT 
+                    vq.id, 
+                    vt.unit_type,
+                    vq.value
+                FROM units_volume_quantities vq
+                INNER JOIN units_volume_types vt
+                    ON vq.volume_type_id = vt.id
+                WHERE vq.id = ?
+            "#,
+            uuid
+        )
+        .fetch_one(pool)
+        .await?;
+
+        let unit = VolumeUnit::from_str(&row.unit_type).unwrap();
+        let value = row.value;
+
+        let inner = Self { unit, value };
+        let new_uuid = Uuid::from_slice(&row.id.to_vec()).unwrap();
+        let id = Id::from_uuid(new_uuid, inner);
+        let distance_record = Record::new_with_id(id, inner);
+        Ok(distance_record)
+    }
+}
+
+impl DeleteFromDatabaseUsingId for VolumeQuantity {
+    async fn delete_from_database_using_id(
+        uuid: Uuid,
+        pool: &Pool<Sqlite>,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            "DELETE FROM units_volume_quantities WHERE id = ?",
+            uuid,
+        )
+        .execute(pool)
+        .await?;
+
+        return Ok(());
+    }
 }
 
 impl fmt::Display for VolumeQuantity {
@@ -277,4 +247,6 @@ impl PartialOrd for VolumeQuantity {
 }
 
 use units_macro::include_volumes_from_json;
+
+use crate::record::{DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase};
 include_volumes_from_json!("data/units/volume",);

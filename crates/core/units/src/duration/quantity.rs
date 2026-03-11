@@ -21,6 +21,7 @@ macro_rules! define_durations {
             fmt,
             ops::{Add, Div, Mul, Sub},
             iter::Sum,
+            str::FromStr,
         };
         use serde::{Deserialize, Serialize};
         use chrono::Duration;
@@ -128,6 +129,74 @@ macro_rules! define_durations {
     };
 }
 
+impl SaveToDatabase for DurationQuantity {
+    async fn save_to_database(&self, uuid: Uuid, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let duration_type_id = self.get_unit().get_database_id(pool).await.unwrap();
+        let duration = self.get_duration();
+        sqlx::query!(
+            r#"
+                INSERT INTO units_duration_quantities (id, duration_type_id, value)
+                VALUES (?, ?, ?)
+                ON CONFLICT (id) DO UPDATE SET
+                    duration_type_id = excluded.duration_type_id,
+                    value = excluded.value
+            "#,
+            uuid,
+            duration_type_id,
+            duration,
+        )
+        .execute(pool)
+        .await?;
+
+        return Ok(());
+    }
+}
+
+impl GetFromDatabaseUsingId<DurationQuantity> for DurationQuantity {
+    async fn get_from_database_using_id(
+        uuid: Uuid,
+        pool: &Pool<Sqlite>,
+    ) -> Result<Record<Self>, sqlx::Error> {
+        let row = sqlx::query!(
+            r#"
+                SELECT 
+                    dq.id, 
+                    dt.unit_type,
+                    dq.value
+                FROM units_duration_quantities dq
+                INNER JOIN units_duration_types dt
+                    ON dq.duration_type_id = dt.id
+                WHERE dq.id = ?
+            "#,
+            uuid
+        )
+        .fetch_one(pool)
+        .await?;
+
+        let unit = DurationUnit::from_str(&row.unit_type).unwrap();
+        let value = row.value;
+
+        let inner = Self::new(value, unit);
+        let new_uuid = Uuid::from_slice(&row.id.to_vec()).unwrap();
+        let id = Id::from_uuid(new_uuid, inner);
+        let distance_record = Record::new_with_id(id, inner);
+        Ok(distance_record)
+    }
+}
+
+impl DeleteFromDatabaseUsingId for DurationQuantity {
+    async fn delete_from_database_using_id(
+        uuid: Uuid,
+        pool: &Pool<Sqlite>,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!("DELETE FROM units_duration_quantities WHERE id = ?", uuid)
+            .execute(pool)
+            .await?;
+
+        return Ok(());
+    }
+}
+
 impl fmt::Display for DurationQuantity {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let precision = Some(2);
@@ -186,5 +255,9 @@ impl PartialOrd for DurationQuantity {
     }
 }
 
+use sqlx::{Pool, Sqlite};
 use units_macro::include_durations_from_json;
+use uuid::Uuid;
+
+use crate::record::{DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase};
 include_durations_from_json!("data/units/duration");
