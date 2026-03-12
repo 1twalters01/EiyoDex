@@ -92,6 +92,30 @@ macro_rules! define_specific_currency_units {
             VolumeDenominator(VolumeUnit),
         }
 
+        impl Denominator {
+            pub fn from_mass_unit(mass_unit: MassUnit) -> Self {
+                Self::MassDenominator(mass_unit)
+            }
+
+            pub fn from_volume_unit(volume_unit: VolumeUnit) -> Self {
+                Self::VolumeDenominator(volume_unit)
+            }
+
+            pub fn get_mass_variant(&self) -> Option<MassUnit> {
+                match self {
+                    Denominator::MassDenominator(mass_unit) => Some(*mass_unit),
+                    Denominator::VolumeDenominator(_) => None,
+                }
+            }
+
+            pub fn get_volume_variant(&self) -> Option<VolumeUnit> {
+                match self {
+                    Denominator::MassDenominator(_) => None,
+                    Denominator::VolumeDenominator(volume_unit) => Some(*volume_unit),
+                }
+            }
+        }
+
         #[derive(Debug, PartialEq)]
         pub enum DenominatorType {
             MassDenominator,

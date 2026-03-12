@@ -1,14 +1,10 @@
 use units::{
-    currency::{quantity::CurrencyQuantity, unit::CurrencyUnit},
-    density::{quantity::DensityQuantity, unit::DensityUnit},
-    mass::{quantity::MassQuantity, unit::MassUnit},
-    measurement_system::MeasurementSystem,
-    specific_currency::{
+    currency::{quantity::CurrencyQuantity, unit::CurrencyUnit}, density::{quantity::DensityQuantity, unit::DensityUnit}, mass::{quantity::MassQuantity, unit::MassUnit}, measurement_system::MeasurementSystem, record::{GetFromDatabaseUsingId, Record}, specific_currency::{
         quantity::SpecificCurrencyQuantity,
         unit::{Denominator, DenominatorType, SpecificCurrencyUnit},
-    },
-    volume::{quantity::VolumeQuantity, unit::VolumeUnit},
+    }, volume::{quantity::VolumeQuantity, unit::VolumeUnit}
 };
+use utils::database::DatabaseService;
 
 #[test]
 fn test_density_from_variants() {
@@ -280,3 +276,33 @@ fn test_specific_currency_division_specific_currency_and_density() {
     let specific_currency_2 = SpecificCurrencyQuantity::new(6.1, SpecificCurrencyUnit::EURPerOunce);
     assert_eq!((specific_currency / density).round(2), specific_currency_2);
 }
+
+#[tokio::test]
+async fn test_save_to_database() {
+    let database_service = DatabaseService::new().await.unwrap();
+    let pool = database_service.get_pool();
+
+    let _ = CurrencyUnit::save_enumerations_to_database(&pool).await;
+    let _ = MassUnit::save_enumerations_to_database(&pool).await;
+    let _ = VolumeUnit::save_enumerations_to_database(&pool).await;
+
+    let specific_currency_eur_per_ug = SpecificCurrencyQuantity::from_eur_per_ug(6700f64);
+    let specific_currency_record = Record::new(specific_currency_eur_per_ug);
+
+    let res = specific_currency_record.save_to_database(&pool).await;
+    assert!(res.is_ok());
+
+    let specific_currency_saved =
+        SpecificCurrencyQuantity::get_from_database_using_id(specific_currency_record.get_uuid(), &pool).await;
+    println!("{:#?}", specific_currency_saved);
+    assert!(specific_currency_saved.is_ok());
+    assert_eq!(specific_currency_saved.unwrap(), specific_currency_record);
+
+    let res = specific_currency_record.delete_from_database_using_id(&pool).await;
+    assert!(res.is_ok());
+
+    let density_saved_2 =
+        DensityQuantity::get_from_database_using_id(specific_currency_record.get_uuid(), &pool).await;
+    assert!(density_saved_2.is_err());
+}
+

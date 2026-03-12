@@ -58,6 +58,7 @@ macro_rules! define_specific_currencies {
         cmp::Ordering,
         fmt,
         ops::{Div, Mul},
+        str::FromStr,
         };
         use serde::{Deserialize, Serialize};
         use crate::{
@@ -182,6 +183,101 @@ macro_rules! define_specific_currencies {
             }
         }
     };
+}
+
+impl SaveToDatabase for SpecificCurrencyQuantity {
+    async fn save_to_database(&self, uuid: Uuid, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let currency_type_id = self.get_unit().get_currency_unit().get_database_id(pool).await.unwrap();
+        let mass_type_id = match self.get_unit().get_denominator().get_mass_variant() {
+            Some(mass_unit) => Some(mass_unit.get_database_id(pool).await.unwrap()),
+            None => None,
+        };
+        let volume_type_id = match self.get_unit().get_denominator().get_volume_variant() {
+            Some(volume_unit) => Some(volume_unit.get_database_id(pool).await.unwrap()),
+            None => None,
+        };
+        let value = self.get_value();
+
+        sqlx::query!(
+            r#"
+                INSERT INTO units_specific_currency_quantities (id, currency_type_id, mass_type_id, volume_type_id, value)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT (id) DO UPDATE SET
+                    currency_type_id = excluded.currency_type_id,
+                    mass_type_id = excluded.mass_type_id,
+                    volume_type_id = excluded.volume_type_id,
+                    value = excluded.value
+            "#,
+            uuid,
+            currency_type_id,
+            mass_type_id,
+            volume_type_id,
+            value,
+        )
+        .execute(pool)
+        .await?;
+
+        return Ok(());
+    }
+}
+
+impl GetFromDatabaseUsingId<SpecificCurrencyQuantity> for SpecificCurrencyQuantity {
+    async fn get_from_database_using_id(
+        uuid: Uuid,
+        pool: &Pool<Sqlite>,
+    ) -> Result<Record<Self>, sqlx::Error> {
+        let row = sqlx::query!(
+            r#"
+                SELECT 
+                    scq.id, 
+                    ct.unit_type as currency_unit_type,
+                    mt.unit_type as "mass_unit_type?",
+                    vt.unit_type as "volume_unit_type?",
+                    scq.value
+                FROM units_specific_currency_quantities scq
+                INNER JOIN units_currency_types ct
+                    ON scq.currency_type_id = ct.id
+                LEFT JOIN units_mass_types mt
+                    ON scq.mass_type_id = mt.id
+                LEFT JOIN units_volume_types vt
+                    ON scq.volume_type_id = vt.id
+                WHERE scq.id = ?
+            "#,
+            uuid
+        )
+        .fetch_one(pool)
+        .await?;
+
+        let currency_unit = CurrencyUnit::from_str(&row.currency_unit_type).unwrap();
+        let denominator = match (row.mass_unit_type, row.volume_unit_type) {
+            (Some(mass_unit_str), None) => Denominator::from_mass_unit(MassUnit::from_str(&mass_unit_str).unwrap()),
+            (None, Some(volume_unit_str)) => Denominator::from_volume_unit(VolumeUnit::from_str(&volume_unit_str).unwrap()),
+            (None, None) => panic!("no units found"),
+            (Some(_), Some(_)) => panic!("Too many units found"),
+        };
+
+        let unit = SpecificCurrencyUnit::from_variants(currency_unit, denominator);
+        let value = row.value;
+
+        let inner = Self { unit, value };
+        let new_uuid = Uuid::from_slice(&row.id.to_vec()).unwrap();
+        let id = Id::from_uuid(new_uuid, inner);
+        let specific_currency_record = Record::new_with_id(id, inner);
+        Ok(specific_currency_record)
+    }
+}
+
+impl DeleteFromDatabaseUsingId for SpecificCurrencyQuantity {
+    async fn delete_from_database_using_id(
+        uuid: Uuid,
+        pool: &Pool<Sqlite>,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!("DELETE FROM units_specific_currency_quantities  WHERE id = ?", uuid)
+            .execute(pool)
+            .await?;
+
+        return Ok(());
+    }
 }
 
 impl fmt::Display for SpecificCurrencyQuantity {
@@ -401,7 +497,11 @@ impl PartialOrd for SpecificCurrencyQuantity {
     }
 }
 
+use sqlx::{Pool, Sqlite};
 use units_macro::include_specific_currencies_from_json;
+use uuid::Uuid;
+
+use crate::{mass::unit::MassUnit, record::{DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase}, volume::unit::VolumeUnit};
 include_specific_currencies_from_json!(
     CurrencyUnit => "data/units/currency",
     VolumeUnit => "data/units/volume",

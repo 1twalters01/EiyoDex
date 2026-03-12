@@ -45,7 +45,7 @@ description = "Create essentiality_types lookup table"
 environments = ["dev", "staging", "prod"]
 
 [[migration]]
-file = "migrations/units/0010_create_specific_currency_tables.sql"
+file = "migrations/units/0010_create_specific_currency_table.sql"
 description = "Create essentiality_types lookup table"
 environments = ["dev", "staging", "prod"]
 
