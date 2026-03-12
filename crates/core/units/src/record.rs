@@ -3,16 +3,16 @@ use std::{future::Future, marker::PhantomData};
 use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Id<T: Clone + PartialEq> {
+pub struct Id<T> {
     uuid: Uuid,
     _marker: PhantomData<T>,
 }
 
 impl<T: Clone + PartialEq> Id<T> {
-    pub fn new(_type: T) -> Self {
+    pub fn new() -> Self {
         Self {
             uuid: Uuid::new_v4(),
-            _marker: PhantomData::<T>,
+            _marker: PhantomData,
         }
     }
 
@@ -63,7 +63,7 @@ pub struct Record<T: Clone + PartialEq> {
 impl<T: Clone + PartialEq> Record<T> {
     pub fn new(inner: T) -> Record<T> {
         Self {
-            id: Id::new(inner.clone()),
+            id: Id::<T>::new(),
             inner: inner,
         }
     }

@@ -144,10 +144,24 @@ macro_rules! define_powers {
 }
 
 impl SaveToDatabase<PowerQuantity> for PowerQuantity {
-    async fn save_to_database(&self, id: Id<PowerQuantity>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+    async fn save_to_database(
+        &self,
+        id: Id<PowerQuantity>,
+        pool: &Pool<Sqlite>,
+    ) -> Result<(), sqlx::Error> {
         let uuid = id.get_uuid();
-        let energy_type_id = self.get_unit().get_energy_variant().get_database_id(pool).await.unwrap();
-        let duration_type_id = self.get_unit().get_duration_variant().get_database_id(pool).await.unwrap();
+        let energy_type_id = self
+            .get_unit()
+            .get_energy_variant()
+            .get_database_id(pool)
+            .await
+            .unwrap();
+        let duration_type_id = self
+            .get_unit()
+            .get_duration_variant()
+            .get_database_id(pool)
+            .await
+            .unwrap();
         let value = self.get_value();
         sqlx::query!(
             r#"
@@ -328,7 +342,9 @@ use sqlx::{Pool, Sqlite};
 use units_macro::include_powers_from_json;
 use uuid::Uuid;
 
-use crate::record::{DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase};
+use crate::record::{
+    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase,
+};
 include_powers_from_json!(
     EnergyUnit => "data/units/energy",
     PowerUnit => "data/units/power",

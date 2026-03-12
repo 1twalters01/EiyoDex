@@ -118,7 +118,11 @@ macro_rules! define_energies {
 }
 
 impl SaveToDatabase<EnergyQuantity> for EnergyQuantity {
-    async fn save_to_database(&self, id: Id<EnergyQuantity>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+    async fn save_to_database(
+        &self,
+        id: Id<EnergyQuantity>,
+        pool: &Pool<Sqlite>,
+    ) -> Result<(), sqlx::Error> {
         let uuid = id.get_uuid();
         let energy_type_id = self.get_unit().get_database_id(pool).await.unwrap();
         let value = self.get_value();

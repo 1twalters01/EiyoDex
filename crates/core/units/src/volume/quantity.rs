@@ -115,7 +115,11 @@ macro_rules! define_volumes {
 }
 
 impl SaveToDatabase<VolumeQuantity> for VolumeQuantity {
-    async fn save_to_database(&self, id: Id<VolumeQuantity>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+    async fn save_to_database(
+        &self,
+        id: Id<VolumeQuantity>,
+        pool: &Pool<Sqlite>,
+    ) -> Result<(), sqlx::Error> {
         let uuid = id.get_uuid();
         let volume_type_id = self.get_unit().get_database_id(pool).await.unwrap();
         let value = self.get_value();

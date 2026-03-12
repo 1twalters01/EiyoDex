@@ -1,7 +1,7 @@
 use units::{
     distance::{quantity::DistanceQuantity, unit::DistanceUnit},
     measurement_system::MeasurementSystem,
-    record::{GetFromDatabaseUsingId, Record, SaveToDatabase},
+    record::{GetFromDatabaseUsingId, Record},
 };
 use utils::database::DatabaseService;
 

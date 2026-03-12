@@ -344,7 +344,6 @@ async fn test_save_to_database() {
     let res = mass_record.delete_from_database_using_id(&pool).await;
     assert!(res.is_ok());
 
-    let mass_saved_2 =
-        MassQuantity::get_from_database_using_id(mass_record.get_id(), &pool).await;
+    let mass_saved_2 = MassQuantity::get_from_database_using_id(mass_record.get_id(), &pool).await;
     assert!(mass_saved_2.is_err());
 }

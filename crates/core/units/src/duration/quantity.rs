@@ -130,7 +130,11 @@ macro_rules! define_durations {
 }
 
 impl SaveToDatabase<DurationQuantity> for DurationQuantity {
-    async fn save_to_database(&self, id: Id<DurationQuantity>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+    async fn save_to_database(
+        &self,
+        id: Id<DurationQuantity>,
+        pool: &Pool<Sqlite>,
+    ) -> Result<(), sqlx::Error> {
         let uuid = id.get_uuid();
         let duration_type_id = self.get_unit().get_database_id(pool).await.unwrap();
         let duration = self.get_duration();

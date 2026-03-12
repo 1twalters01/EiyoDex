@@ -5,7 +5,6 @@ members = [
     "crates/*/*",
     "crates/modules/*/*",
     "proc_macros/*",
-    "ui/gtk",
     "xtask",
 ]
 exclude = [

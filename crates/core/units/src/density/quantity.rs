@@ -138,10 +138,24 @@ macro_rules! define_densities {
 }
 
 impl SaveToDatabase<DensityQuantity> for DensityQuantity {
-    async fn save_to_database(&self, id: Id<DensityQuantity>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+    async fn save_to_database(
+        &self,
+        id: Id<DensityQuantity>,
+        pool: &Pool<Sqlite>,
+    ) -> Result<(), sqlx::Error> {
         let uuid = id.get_uuid();
-        let mass_type_id = self.get_unit().get_mass_variant().get_database_id(pool).await.unwrap();
-        let volume_type_id = self.get_unit().get_volume_variant().get_database_id(pool).await.unwrap();
+        let mass_type_id = self
+            .get_unit()
+            .get_mass_variant()
+            .get_database_id(pool)
+            .await
+            .unwrap();
+        let volume_type_id = self
+            .get_unit()
+            .get_volume_variant()
+            .get_database_id(pool)
+            .await
+            .unwrap();
         let value = self.get_value();
         sqlx::query!(
             r#"
@@ -320,7 +334,9 @@ use sqlx::{Pool, Sqlite};
 use units_macro::include_densities_from_json;
 use uuid::Uuid;
 
-use crate::record::{DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase};
+use crate::record::{
+    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase,
+};
 include_densities_from_json!(
     DensityUnit => "data/units/density",
     MassUnit => "data/units/mass",

@@ -142,7 +142,11 @@ macro_rules! define_currencies {
 }
 
 impl SaveToDatabase<CurrencyQuantity> for CurrencyQuantity {
-    async fn save_to_database(&self, id: Id<CurrencyQuantity>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+    async fn save_to_database(
+        &self,
+        id: Id<CurrencyQuantity>,
+        pool: &Pool<Sqlite>,
+    ) -> Result<(), sqlx::Error> {
         let uuid = id.get_uuid();
         let currency_type_id = self.get_unit().get_database_id(pool).await.unwrap();
         let value = self.get_value();

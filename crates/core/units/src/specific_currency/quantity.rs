@@ -186,9 +186,18 @@ macro_rules! define_specific_currencies {
 }
 
 impl SaveToDatabase<SpecificCurrencyQuantity> for SpecificCurrencyQuantity {
-    async fn save_to_database(&self, id: Id<SpecificCurrencyQuantity>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+    async fn save_to_database(
+        &self,
+        id: Id<SpecificCurrencyQuantity>,
+        pool: &Pool<Sqlite>,
+    ) -> Result<(), sqlx::Error> {
         let uuid = id.get_uuid();
-        let currency_type_id = self.get_unit().get_currency_unit().get_database_id(pool).await.unwrap();
+        let currency_type_id = self
+            .get_unit()
+            .get_currency_unit()
+            .get_database_id(pool)
+            .await
+            .unwrap();
         let mass_type_id = match self.get_unit().get_denominator().get_mass_variant() {
             Some(mass_unit) => Some(mass_unit.get_database_id(pool).await.unwrap()),
             None => None,
@@ -252,8 +261,12 @@ impl GetFromDatabaseUsingId<SpecificCurrencyQuantity> for SpecificCurrencyQuanti
 
         let currency_unit = CurrencyUnit::from_str(&row.currency_unit_type).unwrap();
         let denominator = match (row.mass_unit_type, row.volume_unit_type) {
-            (Some(mass_unit_str), None) => Denominator::from_mass_unit(MassUnit::from_str(&mass_unit_str).unwrap()),
-            (None, Some(volume_unit_str)) => Denominator::from_volume_unit(VolumeUnit::from_str(&volume_unit_str).unwrap()),
+            (Some(mass_unit_str), None) => {
+                Denominator::from_mass_unit(MassUnit::from_str(&mass_unit_str).unwrap())
+            }
+            (None, Some(volume_unit_str)) => {
+                Denominator::from_volume_unit(VolumeUnit::from_str(&volume_unit_str).unwrap())
+            }
             (None, None) => panic!("no units found"),
             (Some(_), Some(_)) => panic!("Too many units found"),
         };
@@ -275,9 +288,12 @@ impl DeleteFromDatabaseUsingId<SpecificCurrencyQuantity> for SpecificCurrencyQua
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
         let uuid = id.get_uuid();
-        sqlx::query!("DELETE FROM units_specific_currency_quantities  WHERE id = ?", uuid)
-            .execute(pool)
-            .await?;
+        sqlx::query!(
+            "DELETE FROM units_specific_currency_quantities  WHERE id = ?",
+            uuid
+        )
+        .execute(pool)
+        .await?;
 
         return Ok(());
     }
@@ -504,7 +520,11 @@ use sqlx::{Pool, Sqlite};
 use units_macro::include_specific_currencies_from_json;
 use uuid::Uuid;
 
-use crate::{mass::unit::MassUnit, record::{DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase}, volume::unit::VolumeUnit};
+use crate::{
+    mass::unit::MassUnit,
+    record::{DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase},
+    volume::unit::VolumeUnit,
+};
 include_specific_currencies_from_json!(
     CurrencyUnit => "data/units/currency",
     VolumeUnit => "data/units/volume",

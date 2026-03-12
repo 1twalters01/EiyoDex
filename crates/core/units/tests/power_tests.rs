@@ -2,7 +2,8 @@ use units::{
     duration::{quantity::DurationQuantity, unit::DurationUnit},
     energy::{quantity::EnergyQuantity, unit::EnergyUnit},
     measurement_system::MeasurementSystem,
-    power::{measurement_system::PowerMeasurementSystem, quantity::PowerQuantity, unit::PowerUnit}, record::{GetFromDatabaseUsingId, Record},
+    power::{measurement_system::PowerMeasurementSystem, quantity::PowerQuantity, unit::PowerUnit},
+    record::{GetFromDatabaseUsingId, Record},
 };
 use utils::database::DatabaseService;
 
@@ -536,4 +537,3 @@ async fn test_save_to_database() {
         PowerQuantity::get_from_database_using_id(power_record.get_id(), &pool).await;
     assert!(power_saved_2.is_err());
 }
-

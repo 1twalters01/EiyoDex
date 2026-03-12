@@ -1,7 +1,11 @@
 use units::{
     density::{
         measurement_system::DensityMeasurementSystem, quantity::DensityQuantity, unit::DensityUnit,
-    }, mass::{quantity::MassQuantity, unit::MassUnit}, measurement_system::MeasurementSystem, record::{GetFromDatabaseUsingId, Record}, volume::{quantity::VolumeQuantity, unit::VolumeUnit}
+    },
+    mass::{quantity::MassQuantity, unit::MassUnit},
+    measurement_system::MeasurementSystem,
+    record::{GetFromDatabaseUsingId, Record},
+    volume::{quantity::VolumeQuantity, unit::VolumeUnit},
 };
 use utils::database::DatabaseService;
 
@@ -1218,4 +1222,3 @@ async fn test_save_to_database() {
         DensityQuantity::get_from_database_using_id(density_record.get_id(), &pool).await;
     assert!(density_saved_2.is_err());
 }
-
