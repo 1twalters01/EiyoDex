@@ -2,8 +2,9 @@ use units::{
     duration::{quantity::DurationQuantity, unit::DurationUnit},
     energy::{quantity::EnergyQuantity, unit::EnergyUnit},
     measurement_system::MeasurementSystem,
-    power::{measurement_system::PowerMeasurementSystem, quantity::PowerQuantity, unit::PowerUnit},
+    power::{measurement_system::PowerMeasurementSystem, quantity::PowerQuantity, unit::PowerUnit}, record::{GetFromDatabaseUsingId, Record},
 };
+use utils::database::DatabaseService;
 
 #[test]
 fn test_power_from_variants() {
@@ -508,3 +509,31 @@ fn test_power_partial_order() {
     assert!(power_1 < power_3);
     assert!(power_2 < power_3);
 }
+
+#[tokio::test]
+async fn test_save_to_database() {
+    let database_service = DatabaseService::new().await.unwrap();
+    let pool = database_service.get_pool();
+
+    let _ = EnergyUnit::save_enumerations_to_database(&pool).await;
+    let _ = DurationUnit::save_enumerations_to_database(&pool).await;
+
+    let power_kcal_per_week = PowerQuantity::from_kcal_per_week(6700f64);
+    let power_record = Record::new(power_kcal_per_week);
+
+    let res = power_record.save_to_database(&pool).await;
+    assert!(res.is_ok());
+
+    let density_saved =
+        PowerQuantity::get_from_database_using_id(power_record.get_uuid(), &pool).await;
+    assert!(density_saved.is_ok());
+    assert_eq!(density_saved.unwrap(), power_record);
+
+    let res = power_record.delete_from_database_using_id(&pool).await;
+    assert!(res.is_ok());
+
+    let power_saved_2 =
+        PowerQuantity::get_from_database_using_id(power_record.get_uuid(), &pool).await;
+    assert!(power_saved_2.is_err());
+}
+

@@ -1200,8 +1200,8 @@ async fn test_save_to_database() {
     let _ = MassUnit::save_enumerations_to_database(&pool).await;
     let _ = VolumeUnit::save_enumerations_to_database(&pool).await;
 
-    let density_oz_per_l = DensityQuantity::from_oz_per_l(6700f64);
-    let density_record = Record::new(density_oz_per_l);
+    let density_oz_per_tsp = DensityQuantity::from_oz_per_tsp(6700f64);
+    let density_record = Record::new(density_oz_per_tsp);
 
     let res = density_record.save_to_database(&pool).await;
     assert!(res.is_ok());

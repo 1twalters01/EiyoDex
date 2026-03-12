@@ -42,6 +42,7 @@ macro_rules! define_powers {
             fmt,
             ops::{Add, Div, Mul, Sub},
             iter::Sum,
+            str::FromStr,
         };
 
         use serde::{Deserialize, Serialize};
@@ -139,6 +140,83 @@ macro_rules! define_powers {
                 format!("{}{}", self.value, self.get_symbol())
             }
         }
+    }
+}
+
+impl SaveToDatabase for PowerQuantity {
+    async fn save_to_database(&self, uuid: Uuid, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let energy_type_id = self.get_unit().get_energy_variant().get_database_id(pool).await.unwrap();
+        let duration_type_id = self.get_unit().get_duration_variant().get_database_id(pool).await.unwrap();
+        let value = self.get_value();
+        sqlx::query!(
+            r#"
+                INSERT INTO units_power_quantities (id, energy_type_id, duration_type_id, value)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT (id) DO UPDATE SET
+                    energy_type_id = excluded.energy_type_id,
+                    duration_type_id = excluded.duration_type_id,
+                    value = excluded.value
+            "#,
+            uuid,
+            energy_type_id,
+            duration_type_id,
+            value,
+        )
+        .execute(pool)
+        .await?;
+
+        return Ok(());
+    }
+}
+
+impl GetFromDatabaseUsingId<PowerQuantity> for PowerQuantity {
+    async fn get_from_database_using_id(
+        uuid: Uuid,
+        pool: &Pool<Sqlite>,
+    ) -> Result<Record<Self>, sqlx::Error> {
+        let row = sqlx::query!(
+            r#"
+                SELECT 
+                    pq.id, 
+                    et.unit_type as energy_unit_type,
+                    dt.unit_type as duration_unit_type,
+                    pq.value
+                FROM units_power_quantities pq
+                INNER JOIN units_energy_types et
+                    ON pq.energy_type_id = et.id
+                INNER JOIN units_duration_types dt
+                    ON pq.duration_type_id = dt.id
+                WHERE pq.id = ?
+            "#,
+            uuid
+        )
+        .fetch_one(pool)
+        .await?;
+
+        let energy_unit = EnergyUnit::from_str(&row.energy_unit_type).unwrap();
+        let duration_unit = DurationUnit::from_str(&row.duration_unit_type).unwrap();
+
+        let unit = PowerUnit::from_variants(energy_unit, duration_unit);
+        let value = row.value;
+
+        let inner = Self { unit, value };
+        let new_uuid = Uuid::from_slice(&row.id.to_vec()).unwrap();
+        let id = Id::from_uuid(new_uuid, inner);
+        let density_record = Record::new_with_id(id, inner);
+        Ok(density_record)
+    }
+}
+
+impl DeleteFromDatabaseUsingId for PowerQuantity {
+    async fn delete_from_database_using_id(
+        uuid: Uuid,
+        pool: &Pool<Sqlite>,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!("DELETE FROM units_power_quantities WHERE id = ?", uuid)
+            .execute(pool)
+            .await?;
+
+        return Ok(());
     }
 }
 
@@ -243,7 +321,11 @@ impl PartialOrd for PowerQuantity {
     }
 }
 
+use sqlx::{Pool, Sqlite};
 use units_macro::include_powers_from_json;
+use uuid::Uuid;
+
+use crate::record::{DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase};
 include_powers_from_json!(
     EnergyUnit => "data/units/energy",
     PowerUnit => "data/units/power",

@@ -188,7 +188,7 @@ impl GetFromDatabaseUsingId<DensityQuantity> for DensityQuantity {
         .await?;
 
         let mass_unit = MassUnit::from_str(&row.mass_unit_type).unwrap();
-        let volume_unit = VolumeUnit::from_str(&row.mass_unit_type).unwrap();
+        let volume_unit = VolumeUnit::from_str(&row.volume_unit_type).unwrap();
 
         let unit = DensityUnit::from_variants(mass_unit, volume_unit);
         let value = row.value;

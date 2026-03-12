@@ -32,13 +32,6 @@ macro_rules! define_currency_units {
             cache::CacheService,
         };
 
-        pub struct CurrencyMetadata {
-            pub symbol: &'static str,
-            pub code: &'static str,
-            pub unit_type: &'static str,
-            pub unit_type_plural: &'static str,
-        }
-
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
         pub enum CurrencyUnit {
             $($variant),+
