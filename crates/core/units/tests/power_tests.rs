@@ -525,7 +525,7 @@ async fn test_save_to_database() {
     assert!(res.is_ok());
 
     let density_saved =
-        PowerQuantity::get_from_database_using_id(power_record.get_uuid(), &pool).await;
+        PowerQuantity::get_from_database_using_id(power_record.get_id(), &pool).await;
     assert!(density_saved.is_ok());
     assert_eq!(density_saved.unwrap(), power_record);
 
@@ -533,7 +533,7 @@ async fn test_save_to_database() {
     assert!(res.is_ok());
 
     let power_saved_2 =
-        PowerQuantity::get_from_database_using_id(power_record.get_uuid(), &pool).await;
+        PowerQuantity::get_from_database_using_id(power_record.get_id(), &pool).await;
     assert!(power_saved_2.is_err());
 }
 

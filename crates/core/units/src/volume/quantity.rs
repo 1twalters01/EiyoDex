@@ -114,8 +114,9 @@ macro_rules! define_volumes {
     };
 }
 
-impl SaveToDatabase for VolumeQuantity {
-    async fn save_to_database(&self, uuid: Uuid, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+impl SaveToDatabase<VolumeQuantity> for VolumeQuantity {
+    async fn save_to_database(&self, id: Id<VolumeQuantity>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let uuid = id.get_uuid();
         let volume_type_id = self.get_unit().get_database_id(pool).await.unwrap();
         let value = self.get_value();
         sqlx::query!(
@@ -139,9 +140,10 @@ impl SaveToDatabase for VolumeQuantity {
 
 impl GetFromDatabaseUsingId<VolumeQuantity> for VolumeQuantity {
     async fn get_from_database_using_id(
-        uuid: Uuid,
+        id: Id<VolumeQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<Record<Self>, sqlx::Error> {
+        let uuid = id.get_uuid();
         let row = sqlx::query!(
             r#"
                 SELECT 
@@ -169,11 +171,12 @@ impl GetFromDatabaseUsingId<VolumeQuantity> for VolumeQuantity {
     }
 }
 
-impl DeleteFromDatabaseUsingId for VolumeQuantity {
+impl DeleteFromDatabaseUsingId<VolumeQuantity> for VolumeQuantity {
     async fn delete_from_database_using_id(
-        uuid: Uuid,
+        id: Id<VolumeQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
+        let uuid = id.get_uuid();
         sqlx::query!("DELETE FROM units_volume_quantities WHERE id = ?", uuid,)
             .execute(pool)
             .await?;

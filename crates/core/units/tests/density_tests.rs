@@ -1207,7 +1207,7 @@ async fn test_save_to_database() {
     assert!(res.is_ok());
 
     let density_saved =
-        DensityQuantity::get_from_database_using_id(density_record.get_uuid(), &pool).await;
+        DensityQuantity::get_from_database_using_id(density_record.get_id(), &pool).await;
     assert!(density_saved.is_ok());
     assert_eq!(density_saved.unwrap(), density_record);
 
@@ -1215,7 +1215,7 @@ async fn test_save_to_database() {
     assert!(res.is_ok());
 
     let density_saved_2 =
-        DensityQuantity::get_from_database_using_id(density_record.get_uuid(), &pool).await;
+        DensityQuantity::get_from_database_using_id(density_record.get_id(), &pool).await;
     assert!(density_saved_2.is_err());
 }
 

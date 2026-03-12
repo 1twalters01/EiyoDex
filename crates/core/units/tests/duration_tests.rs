@@ -360,7 +360,7 @@ async fn test_save_to_database() {
     assert!(res.is_ok());
 
     let duration_saved =
-        DurationQuantity::get_from_database_using_id(duration_record.get_uuid(), &pool).await;
+        DurationQuantity::get_from_database_using_id(duration_record.get_id(), &pool).await;
     assert!(duration_saved.is_ok());
     assert_eq!(duration_saved.unwrap(), duration_record);
 
@@ -368,6 +368,6 @@ async fn test_save_to_database() {
     assert!(res.is_ok());
 
     let duration_saved_2 =
-        DurationQuantity::get_from_database_using_id(duration_record.get_uuid(), &pool).await;
+        DurationQuantity::get_from_database_using_id(duration_record.get_id(), &pool).await;
     assert!(duration_saved_2.is_err());
 }

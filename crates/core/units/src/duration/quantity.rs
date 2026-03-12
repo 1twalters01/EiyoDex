@@ -129,8 +129,9 @@ macro_rules! define_durations {
     };
 }
 
-impl SaveToDatabase for DurationQuantity {
-    async fn save_to_database(&self, uuid: Uuid, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+impl SaveToDatabase<DurationQuantity> for DurationQuantity {
+    async fn save_to_database(&self, id: Id<DurationQuantity>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let uuid = id.get_uuid();
         let duration_type_id = self.get_unit().get_database_id(pool).await.unwrap();
         let duration = self.get_duration();
         sqlx::query!(
@@ -154,9 +155,10 @@ impl SaveToDatabase for DurationQuantity {
 
 impl GetFromDatabaseUsingId<DurationQuantity> for DurationQuantity {
     async fn get_from_database_using_id(
-        uuid: Uuid,
+        id: Id<DurationQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<Record<Self>, sqlx::Error> {
+        let uuid = id.get_uuid();
         let row = sqlx::query!(
             r#"
                 SELECT 
@@ -184,11 +186,12 @@ impl GetFromDatabaseUsingId<DurationQuantity> for DurationQuantity {
     }
 }
 
-impl DeleteFromDatabaseUsingId for DurationQuantity {
+impl DeleteFromDatabaseUsingId<DurationQuantity> for DurationQuantity {
     async fn delete_from_database_using_id(
-        uuid: Uuid,
+        id: Id<DurationQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
+        let uuid = id.get_uuid();
         sqlx::query!("DELETE FROM units_duration_quantities WHERE id = ?", uuid)
             .execute(pool)
             .await?;

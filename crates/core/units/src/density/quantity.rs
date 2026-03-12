@@ -137,8 +137,9 @@ macro_rules! define_densities {
     };
 }
 
-impl SaveToDatabase for DensityQuantity {
-    async fn save_to_database(&self, uuid: Uuid, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+impl SaveToDatabase<DensityQuantity> for DensityQuantity {
+    async fn save_to_database(&self, id: Id<DensityQuantity>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let uuid = id.get_uuid();
         let mass_type_id = self.get_unit().get_mass_variant().get_database_id(pool).await.unwrap();
         let volume_type_id = self.get_unit().get_volume_variant().get_database_id(pool).await.unwrap();
         let value = self.get_value();
@@ -165,9 +166,10 @@ impl SaveToDatabase for DensityQuantity {
 
 impl GetFromDatabaseUsingId<DensityQuantity> for DensityQuantity {
     async fn get_from_database_using_id(
-        uuid: Uuid,
+        id: Id<DensityQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<Record<Self>, sqlx::Error> {
+        let uuid = id.get_uuid();
         let row = sqlx::query!(
             r#"
                 SELECT 
@@ -201,11 +203,12 @@ impl GetFromDatabaseUsingId<DensityQuantity> for DensityQuantity {
     }
 }
 
-impl DeleteFromDatabaseUsingId for DensityQuantity {
+impl DeleteFromDatabaseUsingId<DensityQuantity> for DensityQuantity {
     async fn delete_from_database_using_id(
-        uuid: Uuid,
+        id: Id<DensityQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
+        let uuid = id.get_uuid();
         sqlx::query!("DELETE FROM units_density_quantities WHERE id = ?", uuid)
             .execute(pool)
             .await?;

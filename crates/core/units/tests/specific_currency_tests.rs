@@ -293,7 +293,7 @@ async fn test_save_to_database() {
     assert!(res.is_ok());
 
     let specific_currency_saved =
-        SpecificCurrencyQuantity::get_from_database_using_id(specific_currency_record.get_uuid(), &pool).await;
+        SpecificCurrencyQuantity::get_from_database_using_id(specific_currency_record.get_id(), &pool).await;
     println!("{:#?}", specific_currency_saved);
     assert!(specific_currency_saved.is_ok());
     assert_eq!(specific_currency_saved.unwrap(), specific_currency_record);
@@ -302,7 +302,7 @@ async fn test_save_to_database() {
     assert!(res.is_ok());
 
     let density_saved_2 =
-        DensityQuantity::get_from_database_using_id(specific_currency_record.get_uuid(), &pool).await;
+        SpecificCurrencyQuantity::get_from_database_using_id(specific_currency_record.get_id(), &pool).await;
     assert!(density_saved_2.is_err());
 }
 

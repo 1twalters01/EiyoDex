@@ -32,24 +32,24 @@ impl<T: Clone + PartialEq> Id<T> {
     }
 }
 
-pub trait SaveToDatabase {
+pub trait SaveToDatabase<T: Clone + PartialEq> {
     fn save_to_database<'a>(
         &'a self,
-        uuid: Uuid,
+        id: Id<T>,
         pool: &'a Pool<Sqlite>,
     ) -> impl Future<Output = Result<(), sqlx::Error>> + Send + 'a;
 }
 
 pub trait GetFromDatabaseUsingId<T: Clone + PartialEq> {
     fn get_from_database_using_id<'a>(
-        uuid: Uuid,
+        id: Id<T>,
         pool: &'a Pool<Sqlite>,
     ) -> impl Future<Output = Result<Record<T>, sqlx::Error>> + Send + 'a;
 }
 
-pub trait DeleteFromDatabaseUsingId {
+pub trait DeleteFromDatabaseUsingId<T: Clone + PartialEq> {
     fn delete_from_database_using_id<'a>(
-        uuid: Uuid,
+        uuid: Id<T>,
         pool: &'a Pool<Sqlite>,
     ) -> impl Future<Output = Result<(), sqlx::Error>> + Send + 'a;
 }
@@ -99,11 +99,11 @@ impl<T: Clone + PartialEq> Record<T> {
 
 impl<T> Record<T>
 where
-    T: SaveToDatabase + Clone + PartialEq,
+    T: SaveToDatabase<T> + Clone + PartialEq,
 {
     pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
-        let uuid = self.get_uuid();
-        self.inner.save_to_database(uuid, pool).await
+        let id = self.get_id();
+        self.inner.save_to_database(id, pool).await
     }
 }
 
@@ -118,13 +118,13 @@ where
 
 impl<T> Record<T>
 where
-    T: DeleteFromDatabaseUsingId + Clone + PartialEq,
+    T: DeleteFromDatabaseUsingId<T> + Clone + PartialEq,
 {
     pub async fn delete_from_database_using_id(
         &self,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
-        let uuid = self.get_uuid();
-        T::delete_from_database_using_id(uuid, pool).await
+        let id = self.get_id();
+        T::delete_from_database_using_id(id, pool).await
     }
 }

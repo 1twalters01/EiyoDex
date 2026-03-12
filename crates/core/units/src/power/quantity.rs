@@ -143,8 +143,9 @@ macro_rules! define_powers {
     }
 }
 
-impl SaveToDatabase for PowerQuantity {
-    async fn save_to_database(&self, uuid: Uuid, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+impl SaveToDatabase<PowerQuantity> for PowerQuantity {
+    async fn save_to_database(&self, id: Id<PowerQuantity>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let uuid = id.get_uuid();
         let energy_type_id = self.get_unit().get_energy_variant().get_database_id(pool).await.unwrap();
         let duration_type_id = self.get_unit().get_duration_variant().get_database_id(pool).await.unwrap();
         let value = self.get_value();
@@ -171,9 +172,10 @@ impl SaveToDatabase for PowerQuantity {
 
 impl GetFromDatabaseUsingId<PowerQuantity> for PowerQuantity {
     async fn get_from_database_using_id(
-        uuid: Uuid,
+        id: Id<PowerQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<Record<Self>, sqlx::Error> {
+        let uuid = id.get_uuid();
         let row = sqlx::query!(
             r#"
                 SELECT 
@@ -207,11 +209,12 @@ impl GetFromDatabaseUsingId<PowerQuantity> for PowerQuantity {
     }
 }
 
-impl DeleteFromDatabaseUsingId for PowerQuantity {
+impl DeleteFromDatabaseUsingId<PowerQuantity> for PowerQuantity {
     async fn delete_from_database_using_id(
-        uuid: Uuid,
+        id: Id<PowerQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
+        let uuid = id.get_uuid();
         sqlx::query!("DELETE FROM units_power_quantities WHERE id = ?", uuid)
             .execute(pool)
             .await?;

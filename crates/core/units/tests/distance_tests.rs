@@ -391,7 +391,7 @@ async fn test_save_to_database() {
     assert!(res.is_ok());
 
     let distance_saved =
-        DistanceQuantity::get_from_database_using_id(distance_record.get_uuid(), &pool).await;
+        DistanceQuantity::get_from_database_using_id(distance_record.get_id(), &pool).await;
     assert!(distance_saved.is_ok());
     assert_eq!(distance_saved.unwrap(), distance_record);
 
@@ -399,6 +399,6 @@ async fn test_save_to_database() {
     assert!(res.is_ok());
 
     let distance_saved_2 =
-        DistanceQuantity::get_from_database_using_id(distance_record.get_uuid(), &pool).await;
+        DistanceQuantity::get_from_database_using_id(distance_record.get_id(), &pool).await;
     assert!(distance_saved_2.is_err());
 }

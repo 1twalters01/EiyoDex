@@ -279,7 +279,7 @@ async fn test_save_to_database() {
     assert!(res.is_ok());
 
     let energy_saved =
-        EnergyQuantity::get_from_database_using_id(energy_record.get_uuid(), &pool).await;
+        EnergyQuantity::get_from_database_using_id(energy_record.get_id(), &pool).await;
     assert!(energy_saved.is_ok());
     assert_eq!(energy_saved.unwrap(), energy_record);
 
@@ -287,6 +287,6 @@ async fn test_save_to_database() {
     assert!(res.is_ok());
 
     let energy_saved_2 =
-        EnergyQuantity::get_from_database_using_id(energy_record.get_uuid(), &pool).await;
+        EnergyQuantity::get_from_database_using_id(energy_record.get_id(), &pool).await;
     assert!(energy_saved_2.is_err());
 }

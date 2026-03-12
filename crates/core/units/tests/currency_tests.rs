@@ -295,7 +295,7 @@ async fn test_save_to_database() {
     assert!(res.is_ok());
 
     let currency_saved =
-        CurrencyQuantity::get_from_database_using_id(currency_record.get_uuid(), &pool).await;
+        CurrencyQuantity::get_from_database_using_id(currency_record.get_id(), &pool).await;
     assert!(currency_saved.is_ok());
     assert_eq!(currency_saved.unwrap(), currency_record);
 
@@ -303,6 +303,6 @@ async fn test_save_to_database() {
     assert!(res.is_ok());
 
     let currency_saved_2 =
-        CurrencyQuantity::get_from_database_using_id(currency_record.get_uuid(), &pool).await;
+        CurrencyQuantity::get_from_database_using_id(currency_record.get_id(), &pool).await;
     assert!(currency_saved_2.is_err());
 }

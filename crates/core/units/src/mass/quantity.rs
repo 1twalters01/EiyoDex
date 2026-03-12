@@ -117,8 +117,9 @@ macro_rules! define_masses {
     };
 }
 
-impl SaveToDatabase for MassQuantity {
-    async fn save_to_database(&self, uuid: Uuid, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+impl SaveToDatabase<MassQuantity> for MassQuantity {
+    async fn save_to_database(&self, id: Id<MassQuantity>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let uuid = id.get_uuid();
         let mass_type_id = self.get_unit().get_database_id(pool).await.unwrap();
         let value = self.get_value();
         sqlx::query!(
@@ -142,9 +143,10 @@ impl SaveToDatabase for MassQuantity {
 
 impl GetFromDatabaseUsingId<MassQuantity> for MassQuantity {
     async fn get_from_database_using_id(
-        uuid: Uuid,
+        id: Id<MassQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<Record<Self>, sqlx::Error> {
+        let uuid = id.get_uuid();
         let row = sqlx::query!(
             r#"
                 SELECT 
@@ -172,11 +174,12 @@ impl GetFromDatabaseUsingId<MassQuantity> for MassQuantity {
     }
 }
 
-impl DeleteFromDatabaseUsingId for MassQuantity {
+impl DeleteFromDatabaseUsingId<MassQuantity> for MassQuantity {
     async fn delete_from_database_using_id(
-        uuid: Uuid,
+        id: Id<MassQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
+        let uuid = id.get_uuid();
         sqlx::query!("DELETE FROM units_mass_quantities WHERE id = ?", uuid)
             .execute(pool)
             .await?;

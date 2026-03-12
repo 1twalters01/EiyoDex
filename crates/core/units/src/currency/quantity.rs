@@ -141,8 +141,9 @@ macro_rules! define_currencies {
    };
 }
 
-impl SaveToDatabase for CurrencyQuantity {
-    async fn save_to_database(&self, uuid: Uuid, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+impl SaveToDatabase<CurrencyQuantity> for CurrencyQuantity {
+    async fn save_to_database(&self, id: Id<CurrencyQuantity>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let uuid = id.get_uuid();
         let currency_type_id = self.get_unit().get_database_id(pool).await.unwrap();
         let value = self.get_value();
         sqlx::query!(
@@ -166,9 +167,10 @@ impl SaveToDatabase for CurrencyQuantity {
 
 impl GetFromDatabaseUsingId<CurrencyQuantity> for CurrencyQuantity {
     async fn get_from_database_using_id(
-        uuid: Uuid,
+        id: Id<CurrencyQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<Record<Self>, sqlx::Error> {
+        let uuid = id.get_uuid();
         let row = sqlx::query!(
             r#"
                 SELECT 
@@ -202,11 +204,12 @@ impl GetFromDatabaseUsingId<CurrencyQuantity> for CurrencyQuantity {
     }
 }
 
-impl DeleteFromDatabaseUsingId for CurrencyQuantity {
+impl DeleteFromDatabaseUsingId<CurrencyQuantity> for CurrencyQuantity {
     async fn delete_from_database_using_id(
-        uuid: Uuid,
+        id: Id<CurrencyQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
+        let uuid = id.get_uuid();
         sqlx::query!("DELETE FROM units_currency_quantities WHERE id = ?", uuid)
             .execute(pool)
             .await?;

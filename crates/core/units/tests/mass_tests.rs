@@ -337,7 +337,7 @@ async fn test_save_to_database() {
     let res = mass_record.save_to_database(&pool).await;
     assert!(res.is_ok());
 
-    let mass_saved = MassQuantity::get_from_database_using_id(mass_record.get_uuid(), &pool).await;
+    let mass_saved = MassQuantity::get_from_database_using_id(mass_record.get_id(), &pool).await;
     assert!(mass_saved.is_ok());
     assert_eq!(mass_saved.unwrap(), mass_record);
 
@@ -345,6 +345,6 @@ async fn test_save_to_database() {
     assert!(res.is_ok());
 
     let mass_saved_2 =
-        MassQuantity::get_from_database_using_id(mass_record.get_uuid(), &pool).await;
+        MassQuantity::get_from_database_using_id(mass_record.get_id(), &pool).await;
     assert!(mass_saved_2.is_err());
 }
