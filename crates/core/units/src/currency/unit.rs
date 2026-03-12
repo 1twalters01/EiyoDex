@@ -17,7 +17,11 @@ macro_rules! define_currency_units {
                 symbol: $symbol:expr,
                 code: $code:expr,
                 unit_type: $unit_type:expr,
-                unit_type_plural: $unit_type_plural:expr
+                unit_type_plural: $unit_type_plural:expr,
+                symbol_lc: $symbol_lc:expr,
+                code_lc: $code_lc:expr,
+                unit_type_lc: $unit_type_lc:expr,
+                unit_type_plural_lc: $unit_type_plural_lc:expr
             }
         ),+ $(,)?
     ) => {
@@ -379,24 +383,32 @@ macro_rules! define_currency_units {
                 Ok(Self::from_str(&row.unit_type).unwrap())
             }
         }
-    }
-}
 
-impl FromStr for CurrencyUnit {
-    type Err = &'static str;
+        impl FromStr for CurrencyUnit {
+            type Err = &'static str;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let formatted_string = s.trim().to_uppercase();
-        for variant in Self::get_enumerations() {
-            if formatted_string == variant.as_code().to_uppercase()
-                || formatted_string == variant.as_symbol().to_uppercase()
-                || formatted_string == variant.as_unit_type().to_uppercase()
-                || formatted_string == variant.as_unit_type_plural().to_uppercase()
-            {
-                return Ok(*variant);
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                let formatted_string = s.trim().to_lowercase();
+
+                match formatted_string.as_str() {
+                    $($symbol_lc | $code_lc | $unit_type_lc => return Ok(CurrencyUnit::$variant),)+
+                    _ => match formatted_string.as_str() {
+                        $($unit_type_plural_lc => return Ok(CurrencyUnit::$variant),)+
+                        _ => Err("Unknown currency unit"),
+                    }
+                }
+                // for variant in Self::get_enumerations() {
+                // if formatted_string == variant.as_code().to_uppercase()
+                //     || formatted_string == variant.as_symbol().to_uppercase()
+                //     || formatted_string == variant.as_unit_type().to_uppercase()
+                //     || formatted_string == variant.as_unit_type_plural().to_uppercase()
+                //     {
+                //         return Ok(*variant);
+                //     }
+                // }
+                // Err("Unknown currency unit")
             }
         }
-        Err("Unknown currency unit")
     }
 }
 

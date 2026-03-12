@@ -116,13 +116,21 @@ pub fn generate_units(input: TokenStream) -> TokenStream {
         let code = &data.code;
         let unit_type = &data.unit_type;
         let unit_type_plural = &data.unit_type_plural;
+        let symbol_lc = &data.symbol.to_lowercase();
+        let code_lc = &data.code.to_lowercase();
+        let unit_type_lc = &data.unit_type.to_lowercase();
+        let unit_type_plural_lc = &data.unit_type_plural.to_lowercase();
 
         quote! {
             #variant => {
                 symbol: #symbol,
                 code: #code,
                 unit_type: #unit_type,
-                unit_type_plural: #unit_type_plural
+                unit_type_plural: #unit_type_plural,
+                symbol_lc: #symbol_lc,
+                code_lc: #code_lc,
+                unit_type_lc: #unit_type_lc,
+                unit_type_plural_lc: #unit_type_plural_lc
             }
         }
     });

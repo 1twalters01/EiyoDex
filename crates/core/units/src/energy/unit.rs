@@ -22,7 +22,6 @@ macro_rules! define_energy_units {
         };
         use std::str::FromStr;
         use serde::{Deserialize, Serialize};
-        use utils::database::DatabaseService;
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
         pub enum EnergyUnit {

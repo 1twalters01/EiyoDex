@@ -24,7 +24,6 @@ macro_rules! define_distance_units {
             str::FromStr,
         };
         use serde::{Deserialize, Serialize};
-        use utils::database::DatabaseService;
 
         #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
         pub enum DistanceUnit {
