@@ -1,8 +1,8 @@
 const gtk = @import("../gtk.zig").gtk_lib;
 const page_2 = @import("page_2.zig");
 
-pub fn show_page_1(_: *gtk.GtkWidget, data: *gtk.gpointer) callconv(.c) void {
-    const window: *gtk.GtkWindow = @ptrCast(data);
+pub export fn show_page_1(_: *gtk.GtkWidget, data: gtk.gpointer) callconv(.c) void {
+    const window: *gtk.GtkWindow = @ptrCast(@alignCast(data));
 
     // Create a new button
     const button_widget: *gtk.GtkWidget = gtk.gtk_button_new();
@@ -14,6 +14,7 @@ pub fn show_page_1(_: *gtk.GtkWidget, data: *gtk.gpointer) callconv(.c) void {
         button,
         "clicked",
         @ptrCast(&page_2.show_page_2),
+        // @ptrCast(&gtk.show_page_3),
         window,
         null,
         0,

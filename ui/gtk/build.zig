@@ -46,6 +46,7 @@ pub fn build(b: *std.Build) void {
     exe.linkSystemLibrary("gobject-2.0");
     exe.linkSystemLibrary("glib-2.0");
 
+    // Link libC
     exe.linkLibC();
 
     b.installArtifact(exe);
