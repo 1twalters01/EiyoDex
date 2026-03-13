@@ -1,62 +1,63 @@
 const std = @import("std");
 
-// Opaque types for GTK4 C structs (we don't need their internals)
-const GtkApplication = opaque {};
-const GtkApplicationWindow = opaque {};
-const GtkWidget = opaque {};
-const GtkButton = opaque {};
+const gtk = @cImport({
+    @cInclude("gtk/gtk.h");
+});
 
-// FFI declarations - C functions from GTK4
-extern fn gtk_application_new(application_id: [*:0]const u8, flags: c_int) ?*GtkApplication;
-extern fn g_application_run(app: *GtkApplication, argc: c_int, argv: ?[*]const ?[*:0]u8) c_int;
-extern fn g_object_unref(object: *anyopaque) void; // Decrement ref count
-extern fn g_signal_connect_data(
-    instance: *anyopaque, // GTK object emitting the signal
-    detailed_signal: [*:0]const u8, // Signal name (e.g., "clicked", "activate")
-    c_handler: *const anyopaque, // Callback function pointer
-    data: ?*anyopaque, // Optional user data to pass to callback
-    destroy_data: ?*const anyopaque, // Optional cleanup function for user data
-    connect_flags: c_int, // Connection flags (0 = default)
-) c_ulong;
-
-extern fn gtk_application_window_new(app: *GtkApplication) *GtkApplicationWindow;
-extern fn gtk_window_set_title(window: *GtkApplicationWindow, title: [*:0]const u8) void;
-extern fn gtk_window_set_default_size(window: *GtkApplicationWindow, width: c_int, height: c_int) void;
-extern fn gtk_window_set_child(window: *GtkApplicationWindow, child: *GtkWidget) void; // GTK4: single child
-extern fn gtk_window_present(window: *GtkApplicationWindow) void; // Show window
-extern fn gtk_button_new_with_label(label: [*:0]const u8) *GtkButton;
-extern fn gtk_button_set_label(button: *GtkButton, label: [*:0]const u8) void;
-
-// Helper to connect signals (wraps g_signal_connect_data)
-fn connect(instance: *anyopaque, signal: [*:0]const u8, handler: *const anyopaque) void {
-    const inst: *anyopaque = @ptrCast(instance); // Cast to void* for C API
-    const func: *const anyopaque = @ptrCast(handler);
-    _ = g_signal_connect_data(inst, signal, func, null, null, 0);
+// Button clicked callback
+fn on_button_clicked(button: *gtk.GtkButton, _: ?*gtk.gpointer) callconv(.c) void {
+    gtk.gtk_button_set_label(button, "Clicked!");
 }
 
-// Called when app starts (activate signal)
-fn activate(app: *GtkApplication, _: ?*anyopaque) callconv(.c) void {
-    const window = gtk_application_window_new(app);
-    gtk_window_set_title(window, "GTK4 + Zig");
-    gtk_window_set_default_size(window, 400, 300);
+// Application "activate" callback
+fn activate(app: *gtk.GtkApplication, _: ?*gtk.gpointer) callconv(.c) void {
+    // Create a new window
+    const window_widget: *gtk.GtkWidget = gtk.gtk_application_window_new(app);
+    const window: *gtk.GtkWindow = @ptrCast(window_widget);
+    gtk.gtk_window_set_title(window, "GTK4 + Zig");
+    gtk.gtk_window_set_default_size(window, 400, 300);
 
-    const button = gtk_button_new_with_label("Click Me!");
-    gtk_window_set_child(window, @ptrCast(button));
-    connect(@ptrCast(button), "clicked", @ptrCast(&onButtonClicked));
+    // Create a new button
+    const button_widget: *gtk.GtkWidget = gtk.gtk_button_new();
+    const button: *gtk.GtkButton = @ptrCast(button_widget);
+    gtk.gtk_button_set_label(button, "Press here!");
 
-    gtk_window_present(window);
-}
+    // Add button to window
+    gtk.gtk_window_set_child(window, button_widget);
 
-// Called when button is clicked
-fn onButtonClicked(button: *GtkButton, _: ?*anyopaque) callconv(.c) void {
-    gtk_button_set_label(button, "Clicked!");
+    // Connect "clicked" signal
+    _ = gtk.g_signal_connect_data(
+        button,
+        "clicked",
+        @ptrCast(&on_button_clicked),
+        null,
+        null,
+        0,
+    );
+
+    // Show the window
+    gtk.gtk_window_present(window);
 }
 
 pub fn main() !void {
-    const app = gtk_application_new("eiyodex.gtk", 0) orelse return error.FailedToCreateApp;
-    defer g_object_unref(app); // Cleanup on exit
+    const argc: c_int = 0;
+    const argv: [*c][*c]u8 = null;
 
-    connect(app, "activate", &activate);
-    std.process.exit(@intCast(g_application_run(app, 0, null))); // Run event loop
+    const app: *gtk.GtkApplication = gtk.gtk_application_new("eiyodex.gtk", 0);
+    const app_ptr: *gtk.GApplication = @ptrCast(app);
+    defer gtk.g_object_unref(app);
+
+    // Connect "activate" signal
+    _ = gtk.g_signal_connect_data(
+        app,
+        "activate",
+        @ptrCast(&activate),
+        null,
+        null,
+        0,
+    );
+
+    // Run the application and exit with proper type
+    const status: c_int = gtk.g_application_run(app_ptr, argc, argv);
+    std.process.exit(@intCast(status));
 }
-
