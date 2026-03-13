@@ -1,7 +1,4 @@
 const std = @import("std");
-// const gtk = @cImport({
-//     @cInclude("gtk/gtk.h");
-// });
 
 // Opaque types for GTK4 C structs (we don't need their internals)
 const GtkApplication = opaque {};
@@ -11,7 +8,7 @@ const GtkButton = opaque {};
 
 // FFI declarations - C functions from GTK4
 extern fn gtk_application_new(application_id: [*:0]const u8, flags: c_int) ?*GtkApplication;
-extern fn g_application_run(app: *GtkApplication, argc: c_int, argv: ?[*]?[*:0]u8) c_int;
+extern fn g_application_run(app: *GtkApplication, argc: c_int, argv: ?[*]const ?[*:0]u8) c_int;
 extern fn g_object_unref(object: *anyopaque) void; // Decrement ref count
 extern fn g_signal_connect_data(
     instance: *anyopaque, // GTK object emitting the signal
@@ -27,11 +24,11 @@ extern fn gtk_window_set_title(window: *GtkApplicationWindow, title: [*:0]const 
 extern fn gtk_window_set_default_size(window: *GtkApplicationWindow, width: c_int, height: c_int) void;
 extern fn gtk_window_set_child(window: *GtkApplicationWindow, child: *GtkWidget) void; // GTK4: single child
 extern fn gtk_window_present(window: *GtkApplicationWindow) void; // Show window
-extern fn gtk_button_new_with_label(label: [*:0]const u8) *GtkWidget;
+extern fn gtk_button_new_with_label(label: [*:0]const u8) *GtkButton;
 extern fn gtk_button_set_label(button: *GtkButton, label: [*:0]const u8) void;
 
 // Helper to connect signals (wraps g_signal_connect_data)
-fn connect(instance: anytype, signal: [*:0]const u8, handler: anytype) void {
+fn connect(instance: *anyopaque, signal: [*:0]const u8, handler: *const anyopaque) void {
     const inst: *anyopaque = @ptrCast(instance); // Cast to void* for C API
     const func: *const anyopaque = @ptrCast(handler);
     _ = g_signal_connect_data(inst, signal, func, null, null, 0);
@@ -44,8 +41,8 @@ fn activate(app: *GtkApplication, _: ?*anyopaque) callconv(.c) void {
     gtk_window_set_default_size(window, 400, 300);
 
     const button = gtk_button_new_with_label("Click Me!");
-    gtk_window_set_child(window, button);
-    connect(button, "clicked", &onButtonClicked);
+    gtk_window_set_child(window, @ptrCast(button));
+    connect(@ptrCast(button), "clicked", @ptrCast(&onButtonClicked));
 
     gtk_window_present(window);
 }
@@ -62,3 +59,4 @@ pub fn main() !void {
     connect(app, "activate", &activate);
     std.process.exit(@intCast(g_application_run(app, 0, null))); // Run event loop
 }
+
