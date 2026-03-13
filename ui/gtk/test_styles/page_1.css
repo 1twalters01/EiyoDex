@@ -1,0 +1,36 @@
+#page1 {
+    padding: 30px;
+    background-color: #EAE8EC;
+}
+
+#page1 label#title {
+    font-size: 50px;
+}
+
+#page1 button {
+    all: unset;
+    color: white;
+    background-color: #7871AA;
+    padding: 50px 10px;
+    border-radius: 10px;
+    font-size: 25px;
+}
+
+#page1 button:hover {
+    color: white;
+    background-color: #4E5283;
+}
+
+#page1 button#page3button {
+    background-color: #84BC9C;
+    color: black;
+}
+
+#page1 button#page3button:hover {
+    color: white;
+    background-color: #3D844B;
+}
+
+#page1 button#page3button:active {
+    background-color: #293F14;
+}
