@@ -1,7 +1,8 @@
-#include "page_3.h"
 #include "page_4.h"
 
-void show_page_3(GtkWidget *widget, gpointer data) {
+extern void show_page_1(GtkWidget *widget, gpointer data);
+
+void show_page_4(GtkWidget *widget, gpointer data) {
     GtkWindow *window = (GtkWindow *)data;
 
     // Create a new button
@@ -9,9 +10,9 @@ void show_page_3(GtkWidget *widget, gpointer data) {
     GtkButton *button = (GtkButton *)button_widget;
     gtk_button_set_label(
         button,
-        "This is page 3 (c).\nClick to go to page 4 (c)"
+        "This is page 4 (c).\nClick to go to page 1 (zig)"
     );
 
-    g_signal_connect(button, "clicked", G_CALLBACK(show_page_4), window);
+    g_signal_connect(button, "clicked", G_CALLBACK(show_page_1), window);
     gtk_window_set_child(window, button_widget);
 }

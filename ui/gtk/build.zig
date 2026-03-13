@@ -24,6 +24,7 @@ pub fn build(b: *std.Build) void {
     exe.root_module.addCSourceFiles(.{
         .files = &[_][]const u8{
             "src/pages/page_3.c",
+            "src/pages/page_4.c",
         },
     });
 

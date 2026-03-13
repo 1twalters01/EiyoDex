@@ -4,6 +4,7 @@ const gtk = @cImport({
 
 const pages = @cImport({
     @cInclude("pages/page_3.h");
+    @cInclude("pages/page_4.h");
 });
 
 pub const gtk_lib = gtk;
