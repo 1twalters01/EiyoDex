@@ -1,7 +1,6 @@
 const std = @import("std");
 
-const gtk = @import("gtk.zig").gtk_lib;
-
+const gtk = @import("c.zig").gtk_lib;
 const activate = @import("activate.zig").activate;
 
 

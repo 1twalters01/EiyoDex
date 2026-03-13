@@ -1,4 +1,4 @@
-const gtk = @import("gtk.zig").gtk_lib;
+const gtk = @import("c.zig").gtk_lib;
 const page_1 = @import("pages/page_1.zig");
 
     

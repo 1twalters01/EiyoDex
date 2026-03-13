@@ -2,7 +2,7 @@ use std::process::{Command, Stdio};
 use std::io::{BufReader, BufRead};
 
 fn main() {
-    let mut ui = Command::new("./ui/gtk/zig-out/bin/gtk-ui")
+    let mut ui = Command::new("./ui/gtk/zig-out/bin/eiyodex-gtk-ui")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())  // <-- capture stdout
         .spawn()

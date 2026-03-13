@@ -1,53 +1,56 @@
 const std = @import("std");
 
 pub fn build(b: *std.Build) void {
+    // Get target/optimize from command line
+    // (e.g. `zig build -Doptimize=ReleaseFast`)
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const exe = b.addExecutable(.{
-        .name = "gtk-ui",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/main.zig"),
-            .target = target,
-            .optimize = optimize,
-        }),
+    // Create module
+    const module = b.createModule(.{
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
     });
 
-    // Include paths (system headers must use cwd_relative)
-    exe.addIncludePath(.{ .cwd_relative = "/usr/include/gtk-4.0" });
-    exe.addIncludePath(.{ .cwd_relative = "/usr/include/pango-1.0" });
-    exe.addIncludePath(.{ .cwd_relative = "/usr/include/fribidi" });
-    exe.addIncludePath(.{ .cwd_relative = "/usr/include/harfbuzz" });
-    exe.addIncludePath(.{ .cwd_relative = "/usr/include/gdk-pixbuf-2.0" });
-    exe.addIncludePath(.{ .cwd_relative = "/usr/include/glycin-2" });
-    exe.addIncludePath(.{ .cwd_relative = "/usr/include/cairo" });
-    exe.addIncludePath(.{ .cwd_relative = "/usr/include/freetype2" });
-    exe.addIncludePath(.{ .cwd_relative = "/usr/include/libpng16" });
-    exe.addIncludePath(.{ .cwd_relative = "/usr/include/pixman-1" });
-    exe.addIncludePath(.{ .cwd_relative = "/usr/include/graphene-1.0" });
-    exe.addIncludePath(.{ .cwd_relative = "/usr/lib/graphene-1.0/include" });
-    exe.addIncludePath(.{ .cwd_relative = "/usr/include/glib-2.0" });
-    exe.addIncludePath(.{ .cwd_relative = "/usr/lib/glib-2.0/include" });
-    exe.addIncludePath(.{ .cwd_relative = "/usr/include/libmount" });
-    exe.addIncludePath(.{ .cwd_relative = "/usr/include/blkid" });
-    exe.addIncludePath(.{ .cwd_relative = "/usr/include/sysprof-6" });
+    // Create executable with main.zig as entry point
+    const exe = b.addExecutable(.{
+        .name = "eiyodex-gtk-ui",
+        .root_module = module,
+    });
 
-    // Link libraries
-    exe.linkSystemLibrary("gtk-4");
-    exe.linkSystemLibrary("pangocairo-1.0");
-    exe.linkSystemLibrary("pango-1.0");
-    exe.linkSystemLibrary("harfbuzz");
-    exe.linkSystemLibrary("gdk_pixbuf-2.0");
-    exe.linkSystemLibrary("cairo-gobject");
-    exe.linkSystemLibrary("cairo");
-    exe.linkSystemLibrary("vulkan");
-    exe.linkSystemLibrary("graphene-1.0");
-    exe.linkSystemLibrary("gio-2.0");
-    exe.linkSystemLibrary("gobject-2.0");
-    exe.linkSystemLibrary("glib-2.0");
+    // Add c pages
+    exe.root_module.addIncludePath(b.path("src"));
+    exe.root_module.addCSourceFiles(.{
+        .files = &[_][]const u8{
+            "src/pages/page_3.c",
+        },
+    });
 
-    // Link libC
-    exe.linkLibC();
+    // Apply c links/macros to module
+    exe.root_module.link_libc = true;
+    exe.root_module.linkSystemLibrary("gtk4", .{
+        .use_pkg_config = .yes,
+    });
+    exe.root_module.addCMacro("G_DISABLE_DEPRECATED", "1");
+    exe.root_module.addCMacro("GTK_DISABLE_DEPRECATED", "1");
+    exe.root_module.addCMacro("G_LOG_USE_STRUCTURED", "1");
 
+
+
+    // Install executable to zig-out/bin/
     b.installArtifact(exe);
+
+    // Create run command (`zig build run`)
+    const run_cmd = b.addRunArtifact(exe);
+    run_cmd.step.dependOn(b.getInstallStep()); // Build before running
+
+    // Forward command-line args to the executable
+    if (b.args) |args| {
+        run_cmd.addArgs(args);
+    }
+
+    // Register "run" step
+    const run_step = b.step("run", "Run the app");
+    run_step.dependOn(&run_cmd.step);
 }

@@ -12,5 +12,5 @@ void show_page_3(GtkWidget *widget, gpointer data) {
     );
 
     g_signal_connect(button, "clicked", G_CALLBACK(show_page_1), window);
-    gtk_window_set_child(GTK_WINDOW(window), button);
+    gtk_window_set_child(GTK_WINDOW(window), button_widget);
 }
