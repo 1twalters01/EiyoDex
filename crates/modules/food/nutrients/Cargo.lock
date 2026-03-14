@@ -1113,11 +1113,23 @@ dependencies = [
 name = "nutrients"
 version = "0.1.0"
 dependencies = [
+ "nutrients_macro",
  "sqlx",
  "tokio",
  "units",
  "utils",
  "uuid",
+]
+
+[[package]]
+name = "nutrients_macro"
+version = "0.1.0"
+dependencies = [
+ "glob",
+ "quote",
+ "serde",
+ "serde_json",
+ "syn",
 ]
 
 [[package]]

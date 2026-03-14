@@ -1,14 +1,9 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+mod unit;
+
+use proc_macro::TokenStream;
+
+#[proc_macro]
+pub fn include_nutrient_units_from_json(input: TokenStream) -> TokenStream {
+    unit::generate_nutrient_units(input)
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
