@@ -156,9 +156,15 @@ async fn test_load_from_database() {
 
     let nutrient_record = NutrientUnitRecord::from_values(unit_id, None, None, None).await;
     let res_2 = nutrient_record.save_to_database(&pool).await;
+    println!("res: {:#?}", res_2);
     assert!(res_2.is_ok());
     let nutrient_record_id = nutrient_record.get_database_id(&pool).await.unwrap();
+    println!("nutrient_record: {:#?}", nutrient_record);
+    println!("{:#?}",NutrientUnitRecord::load_from_database(nutrient_record_id, &pool).await.unwrap()); 
     assert_eq!(nutrient_record, NutrientUnitRecord::load_from_database(nutrient_record_id, &pool).await.unwrap());
+
+
+    assert!(NutrientUnitRecord::delete_unit_type_from_database(unit_name.clone(), &pool).await.is_err());
 
     let res_3 = NutrientUnitRecord::delete_unit_type_from_database(unit_name.clone(), &pool).await;
     assert!(res_3.is_err());

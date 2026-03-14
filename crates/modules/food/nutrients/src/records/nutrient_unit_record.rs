@@ -153,15 +153,15 @@ impl NutrientUnitRecord {
                 DELETE FROM nutrients_nutrient_units
                 WHERE
                     unit_type_id = ?
-                    AND mass_type_id = ?
-                    AND volume_type_id = ?
-                    AND energy_type_id = ?
+                    AND mass_type_id IS ?
+                    AND volume_type_id IS ?
+                    AND energy_type_id IS ?
             "#,
             self.unit_type_id,
             self.mass_type_id,
             self.volume_type_id,
             self.energy_type_id,
-        ).fetch_one(pool).await?;
+        ).execute(pool).await?;
 
         return Ok(())
     }
@@ -187,10 +187,10 @@ impl NutrientUnitRecord {
                 SELECT id 
                 FROM nutrients_nutrient_units
                 WHERE
-                    unit_type_id = ?
-                    AND mass_type_id = ?
-                    AND volume_type_id = ?
-                    AND energy_type_id = ?
+                    unit_type_id IS ?
+                    AND mass_type_id IS ?
+                    AND volume_type_id IS ?
+                    AND energy_type_id IS ?
             "#,
             self.unit_type_id,
             self.mass_type_id,
