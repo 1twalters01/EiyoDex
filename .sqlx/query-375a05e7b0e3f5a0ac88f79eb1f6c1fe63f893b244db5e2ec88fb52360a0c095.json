@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                SELECT \n                    pq.id, \n                    et.unit_type as energy_unit_type,\n                    dt.unit_type as duration_unit_type,\n                    pq.value\n                FROM units_power_quantities pq\n                INNER JOIN units_energy_types et\n                    ON pq.energy_type_id = et.id\n                INNER JOIN units_duration_types dt\n                    ON pq.duration_type_id = dt.id\n                WHERE pq.id = ?\n            ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Blob"
+      },
+      {
+        "name": "energy_unit_type",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "duration_unit_type",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "value",
+        "ordinal": 3,
+        "type_info": "Float"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "375a05e7b0e3f5a0ac88f79eb1f6c1fe63f893b244db5e2ec88fb52360a0c095"
+}

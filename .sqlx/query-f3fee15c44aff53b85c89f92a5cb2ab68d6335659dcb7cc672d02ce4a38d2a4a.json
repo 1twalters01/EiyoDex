@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                            INSERT OR IGNORE INTO units_currency_types (unit_type)\n                            VALUES (?)\n                        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "f3fee15c44aff53b85c89f92a5cb2ab68d6335659dcb7cc672d02ce4a38d2a4a"
+}

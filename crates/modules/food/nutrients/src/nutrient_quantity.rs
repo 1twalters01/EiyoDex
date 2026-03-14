@@ -6,10 +6,10 @@ use std::{
     rc::Rc,
 };
 
-use units::{energy::{quantity::EnergyQuantity, unit::EnergyUnit}, mass::unit::MassUnit};
+use units::{energy::quantity::EnergyQuantity, mass::unit::MassUnit};
 use uuid::Uuid;
 
-use crate::{nutrient::Nutrient, nutrient_units::NutrientUnit, schema::{energy::EnergyYieldingNutrients, nutrient_classes::ChemicalType}};
+use crate::{nutrient::Nutrient, nutrient_units::NutrientUnit};
 
 #[derive(Debug, Clone)]
 pub struct NutrientQuantity {
@@ -25,7 +25,12 @@ impl NutrientQuantity {
         nutrient: Nutrient,
         output_unit: NutrientUnit,
     ) -> Result<Self, &'static str> {
-        match nutrient.get_conversion_factor(output_unit, nutrient.get_main_unit()) {
+        let main_unit = match nutrient.get_main_unit() {
+            Some(main_unit) => main_unit,
+            None => return Err("Main unit of nutrient cannot be none"),
+        };
+
+        match nutrient.get_conversion_factor(output_unit, main_unit) {
             Ok(_) => Ok(Self {
                 id: Uuid::new_v4(),
                 value,
@@ -42,8 +47,13 @@ impl NutrientQuantity {
         output_unit: NutrientUnit,
     ) -> Result<Self, &'static str> {
         let nutrient_borrowed = nutrient.borrow().clone();
+        let main_unit = match nutrient_borrowed.get_main_unit() {
+            Some(main_unit) => main_unit,
+            None => return Err("Main unit of nutrient cannot be none"),
+        };
+
         match nutrient_borrowed
-            .get_conversion_factor(output_unit, nutrient_borrowed.get_main_unit())
+            .get_conversion_factor(output_unit, main_unit)
         {
             Ok(_) => Ok(Self {
                 id: Uuid::new_v4(),
@@ -192,7 +202,11 @@ impl Mul<f64> for NutrientQuantity {
     type Output = Self;
     fn mul(self, rhs: f64) -> Self {
         let nutrient_borrowed = self.nutrient.borrow();
-        let main_unit = nutrient_borrowed.get_main_unit();
+        let main_unit = match nutrient_borrowed.get_main_unit() {
+            Some(unit) => unit,
+            None => panic!("No unit found"),
+        };
+
         Self::from_rc_refcell(self.value * rhs, self.get_nutrient(), main_unit).unwrap()
     }
 }
@@ -201,7 +215,11 @@ impl Div<f64> for NutrientQuantity {
     type Output = Self;
     fn div(self, rhs: f64) -> Self {
         let nutrient_borrowed = self.nutrient.borrow();
-        let main_unit = nutrient_borrowed.get_main_unit();
+        let main_unit = match nutrient_borrowed.get_main_unit() {
+            Some(unit) => unit,
+            None => panic!("No unit found"),
+        };
+
         Self::from_rc_refcell(self.value / rhs, self.get_nutrient(), main_unit).unwrap()
     }
 }
@@ -211,7 +229,8 @@ impl Sum<NutrientQuantity> for NutrientQuantity {
         if let Some(first) = iter.next() {
             iter.fold(first, |acc, n| acc + n)
         } else {
-            NutrientQuantity::new(0f64, Nutrient::default(), NutrientUnit::None).unwrap()
+            panic!("Zero elements in list")
+            // NutrientQuantity::new(0f64, Nutrient::default(), NutrientUnit::None).unwrap()
         }
     }
 }

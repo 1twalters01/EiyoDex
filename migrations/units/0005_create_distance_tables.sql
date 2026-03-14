@@ -9,6 +9,6 @@ CREATE TABLE IF NOT EXISTS units_distance_quantities (
     value REAL NOT NULL,
     FOREIGN KEY (distance_type_id)
         REFERENCES units_distance_types(id)
-        ON DELETE CASCADE,
+        ON DELETE RESTRICT,
     CHECK (LENGTH(id) = 16)
 );

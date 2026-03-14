@@ -9,6 +9,6 @@ CREATE TABLE IF NOT EXISTS units_energy_quantities (
     value REAL NOT NULL,
     FOREIGN KEY (energy_type_id)
         REFERENCES units_energy_types(id)
-        ON DELETE CASCADE,
+        ON DELETE RESTRICT,
     CHECK (LENGTH(id) = 16)
 );

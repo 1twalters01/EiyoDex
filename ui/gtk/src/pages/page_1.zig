@@ -10,7 +10,7 @@ pub export fn show_page_1(_: *gtk.GtkWidget, data: gtk.gpointer) callconv(.c) vo
     const page_child_spacing: c_int = 10;
     const page_widget: *gtk.GtkWidget = gtk.gtk_box_new(gtk.GTK_ORIENTATION_VERTICAL, page_child_spacing);
     const page: *gtk.GtkBox = @ptrCast(page_widget);
-    gtk.gtk_widget_set_name(page_widget, "Page1 (Zig)"); // set css id
+    gtk.gtk_widget_set_name(page_widget, "page1"); // set css id
     gtk.gtk_widget_set_hexpand(page_widget, 1); // horizontally expand page widget as much as possible
     gtk.gtk_widget_set_vexpand(page_widget, 1);
     gtk.gtk_window_set_child(window, page_widget);
@@ -105,7 +105,7 @@ pub export fn show_page_1(_: *gtk.GtkWidget, data: gtk.gpointer) callconv(.c) vo
 
     // Load CSS
     const provider = gtk.gtk_css_provider_new();
-    _ = gtk.gtk_css_provider_load_from_path(provider, "ui/gtk/test_styles/page_1.css");
+    _ = gtk.gtk_css_provider_load_from_path(provider, "ui/test_styles/page_1.css");
 
     // Apply CSS globally so it affects children
     const display = gtk.gdk_display_get_default();

@@ -1,5 +1,4 @@
 use sqlx::{Pool, Sqlite};
-use utils::database::DatabaseService;
 use uuid::Uuid;
 
 use crate::{
@@ -15,7 +14,7 @@ pub struct NutrientQuantityRecord {
 }
 
 impl NutrientQuantityRecord {
-    pub async fn from_nutrient_quantity(nutrient_quantity: NutrientQuantity, pool: &Pool<Sqlite>) -> Self {
+    pub async fn from_nutrient_quantity(nutrient_quantity: NutrientQuantity, pool: &Pool<Sqlite>) -> Result<Self, &'static str> {
         let id: Vec<u8> = nutrient_quantity.get_id().as_bytes().to_vec();
         let quantity = nutrient_quantity.get_value();
         let nutrient_id = nutrient_quantity
@@ -24,18 +23,21 @@ impl NutrientQuantityRecord {
             .get_id()
             .as_bytes()
             .to_vec();
-        let output_unit_id =
-            NutrientUnitRecord::from_nutrient_unit(nutrient_quantity.get_output_unit(), pool)
-                .await
-                .get_unit_type_id()
-                .expect("Invalid unit");
 
-        Self {
+        let output_unit_id = match NutrientUnitRecord::from_nutrient_unit(nutrient_quantity.get_output_unit(), pool).await {
+            Some(nutrient_quantity_record) => match nutrient_quantity_record.get_unit_type_id() {
+                Some(id) => id,
+                None => return Err("No id found for unit type"),
+            },
+            None => return Err("No main unit chosen for nutrient"),
+        };
+
+        Ok(Self {
             id,
             quantity,
             nutrient_id,
             output_unit_id,
-        }
+        })
     }
 
     pub async fn to_nutrient_quantity(&self, pool: &Pool<Sqlite>) -> NutrientQuantity {

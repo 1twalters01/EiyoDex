@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                        SELECT unit_type\n                        FROM units_distance_types\n                        WHERE id = ?\n                    ",
+  "describe": {
+    "columns": [
+      {
+        "name": "unit_type",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "bbd6f95d9028f71c6e86cd3b3004baf15a78b01742e9f03001d95e9f1cf4af43"
+}

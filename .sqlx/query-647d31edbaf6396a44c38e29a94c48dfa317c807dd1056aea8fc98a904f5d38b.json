@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                    SELECT unit_type\n                    FROM units_energy_types\n                    WHERE id = ?\n                ",
+  "describe": {
+    "columns": [
+      {
+        "name": "unit_type",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "647d31edbaf6396a44c38e29a94c48dfa317c807dd1056aea8fc98a904f5d38b"
+}

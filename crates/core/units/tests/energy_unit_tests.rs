@@ -117,7 +117,8 @@ async fn test_get_database_id() {
     let res = EnergyUnit::save_enumerations_to_database(&pool).await;
     assert!(res.is_ok());
 
-    let pint = EnergyUnit::Kilojoule;
-    let id = pint.get_database_id(&pool).await;
+    let kj = EnergyUnit::Kilojoule;
+    let id = kj.get_database_id(&pool).await;
     assert!(id.is_ok());
+    assert_ne!(EnergyUnit::Kilojoule.get_database_id(&pool).await.unwrap(), EnergyUnit::Kilocalorie.get_database_id(&pool).await.unwrap());
 }

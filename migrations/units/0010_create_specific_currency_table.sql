@@ -6,13 +6,13 @@ CREATE TABLE IF NOT EXISTS units_specific_currency_quantities (
     value REAL NOT NULL,
     FOREIGN KEY (currency_type_id)
         REFERENCES units_currency_types(id)
-        ON DELETE CASCADE,
+        ON DELETE RESTRICT,
     FOREIGN KEY (mass_type_id)
         REFERENCES units_mass_types(id)
-        ON DELETE CASCADE,
+        ON DELETE RESTRICT,
     FOREIGN KEY (volume_type_id)
         REFERENCES units_volume_types(id)
-        ON DELETE CASCADE,
+        ON DELETE RESTRICT,
     CHECK (LENGTH(id) = 16),
     CHECK (
         (mass_type_id IS NOT NULL) +

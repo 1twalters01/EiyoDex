@@ -1,0 +1,44 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                SELECT \n                    scq.id, \n                    ct.unit_type as currency_unit_type,\n                    mt.unit_type as \"mass_unit_type?\",\n                    vt.unit_type as \"volume_unit_type?\",\n                    scq.value\n                FROM units_specific_currency_quantities scq\n                INNER JOIN units_currency_types ct\n                    ON scq.currency_type_id = ct.id\n                LEFT JOIN units_mass_types mt\n                    ON scq.mass_type_id = mt.id\n                LEFT JOIN units_volume_types vt\n                    ON scq.volume_type_id = vt.id\n                WHERE scq.id = ?\n            ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Blob"
+      },
+      {
+        "name": "currency_unit_type",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "mass_unit_type?",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "volume_unit_type?",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "value",
+        "ordinal": 4,
+        "type_info": "Float"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "3e187c2152c7c6edbe3269d30a7e1d3885bea661537e0a69b71cf60caf6a1829"
+}

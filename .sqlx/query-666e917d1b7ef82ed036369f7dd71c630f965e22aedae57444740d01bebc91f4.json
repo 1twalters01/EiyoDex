@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                INSERT INTO units_power_quantities (id, energy_type_id, duration_type_id, value)\n                VALUES (?, ?, ?, ?)\n                ON CONFLICT (id) DO UPDATE SET\n                    energy_type_id = excluded.energy_type_id,\n                    duration_type_id = excluded.duration_type_id,\n                    value = excluded.value\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "666e917d1b7ef82ed036369f7dd71c630f965e22aedae57444740d01bebc91f4"
+}

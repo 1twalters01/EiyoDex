@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                SELECT \n                    mq.id, \n                    mt.unit_type,\n                    mq.value\n                FROM units_energy_quantities mq\n                INNER JOIN units_energy_types mt\n                    ON mq.energy_type_id = mt.id\n                WHERE mq.id = ?\n            ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Blob"
+      },
+      {
+        "name": "unit_type",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "value",
+        "ordinal": 2,
+        "type_info": "Float"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "e4b3d3b2815d2793bb360bd4a9fdfb1f4d85775bec33c199e0697f0c63101898"
+}

@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                SELECT \n                    cq.id, \n                    ct.unit_type,\n                    cq.value\n                FROM units_currency_quantities cq\n                INNER JOIN units_currency_types ct\n                    ON cq.currency_type_id = ct.id\n                WHERE cq.id = ?\n            ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Blob"
+      },
+      {
+        "name": "unit_type",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "value",
+        "ordinal": 2,
+        "type_info": "Float"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "598c209fff748482b4aa86faa6bd2094d7864378004b5f6e874bc7d182e2ff8c"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                INSERT INTO units_distance_quantities (id, distance_type_id, value)\n                VALUES (?, ?, ?)\n                ON CONFLICT (id) DO UPDATE SET\n                    distance_type_id = excluded.distance_type_id,\n                    value = excluded.value\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "79b7e0a5e1cb3833b5b823fa933c0b83a8b1f395fb62f97643bb015cd787f14c"
+}

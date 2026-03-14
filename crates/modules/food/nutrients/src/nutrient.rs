@@ -22,7 +22,7 @@ pub struct Nutrient {
     description: String,
     nutrient_type: NutrientType,
     unit_conversions: BTreeMap<NutrientUnit, f64>, // 1 unit = factor * main_unit
-    main_unit: NutrientUnit,
+    main_unit: Option<NutrientUnit>,
 
     parents: Vec<Weak<RefCell<Nutrient>>>,
     children: Vec<Rc<RefCell<Nutrient>>>,
@@ -64,7 +64,7 @@ impl Nutrient {
             description: String::new(),
             nutrient_type: nutrient_type,
             unit_conversions: BTreeMap::new(),
-            main_unit: NutrientUnit::None,
+            main_unit: None,
             parents: Vec::new(),
             children: Vec::new(),
         }
@@ -128,7 +128,7 @@ impl Nutrient {
             name,
             description: String::new(),
             nutrient_type: nutrient_type,
-            main_unit,
+            main_unit: Some(main_unit),
             unit_conversions: unit_conversions,
             parents: Vec::new(),
             children: Vec::new(),
@@ -193,7 +193,7 @@ impl Nutrient {
             name,
             description: String::new(),
             nutrient_type: nutrient_type,
-            main_unit,
+            main_unit: Some(main_unit),
             unit_conversions: unit_conversions,
             parents: Vec::new(),
             children: Vec::new(),
@@ -283,7 +283,12 @@ impl Nutrient {
     }
 
     pub fn remove_conversion(&mut self, unit: NutrientUnit) -> Result<(), &'static str> {
-        if unit == self.main_unit {
+        let main_unit = match self.main_unit {
+            Some(main_unit) => main_unit,
+            None => return Err("Main unit is empty"),
+        };
+
+        if unit == main_unit {
             return Err("Cannot remove a conversion if it is the main unit");
         }
 
@@ -340,7 +345,7 @@ impl Nutrient {
         self.unit_conversions.keys().cloned().collect()
     }
 
-    pub fn get_main_unit(&self) -> NutrientUnit {
+    pub fn get_main_unit(&self) -> Option<NutrientUnit> {
         self.main_unit
     }
 
@@ -355,7 +360,7 @@ impl Nutrient {
             *value /= conversion_factor;
         }
 
-        self.main_unit = new_main_unit;
+        self.main_unit = Some(new_main_unit);
         Ok(())
     }
 

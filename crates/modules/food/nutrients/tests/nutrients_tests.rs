@@ -212,7 +212,7 @@ fn test_convert() {
     // First set of tests
     let main_unit = milligram_unit;
     let nutrient = Nutrient::new_rc_refcell(id, name.clone(), nutrient_type, main_unit);
-    assert_eq!(nutrient.borrow().get_main_unit(), milligram_unit);
+    assert_eq!(nutrient.borrow().get_main_unit(), Some(milligram_unit));
 
     let mut res = nutrient
         .borrow()
@@ -245,7 +245,7 @@ fn test_convert() {
 
     // Change the main unit and repeat conversions
     let _ = nutrient.borrow_mut().set_main_unit(kilogram_unit);
-    assert_eq!(nutrient.borrow().get_main_unit(), kilogram_unit);
+    assert_eq!(nutrient.borrow().get_main_unit(), Some(kilogram_unit));
 
     let mut res = nutrient
         .borrow()
@@ -345,7 +345,7 @@ fn test_nutrient_unit_main_unit() {
     let milliliter_unit = NutrientUnit::Volume(VolumeUnit::Milliliter);
 
     let nutrient = Nutrient::new_rc_refcell(id, name.clone(), nutrient_type, milligram_unit);
-    assert_eq!(nutrient.borrow().get_main_unit(), milligram_unit);
+    assert_eq!(nutrient.borrow().get_main_unit(), Some(milligram_unit));
 
     let mut from_unit = milligram_unit;
     let mut to_unit = microgram_unit;
@@ -357,7 +357,7 @@ fn test_nutrient_unit_main_unit() {
     // Test setting a value that is in the conversions
     let mut res = nutrient.borrow_mut().set_main_unit(microgram_unit);
     assert!(res.is_ok());
-    assert_eq!(nutrient.borrow().get_main_unit(), microgram_unit);
+    assert_eq!(nutrient.borrow().get_main_unit(), Some(microgram_unit));
     assert!(nutrient
         .borrow()
         .get_accepted_units()

@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                SELECT \n                    dq.id, \n                    mt.unit_type as mass_unit_type,\n                    vt.unit_type as volume_unit_type,\n                    dq.value\n                FROM units_density_quantities dq\n                INNER JOIN units_mass_types mt\n                    ON dq.mass_type_id = mt.id\n                INNER JOIN units_volume_types vt\n                    ON dq.volume_type_id = vt.id\n                WHERE dq.id = ?\n            ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Blob"
+      },
+      {
+        "name": "mass_unit_type",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "volume_unit_type",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "value",
+        "ordinal": 3,
+        "type_info": "Float"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "cd06f3ea172aa7f60982febb6dad5b6ad1b8e2ae02cdcea9939e966d8828acec"
+}

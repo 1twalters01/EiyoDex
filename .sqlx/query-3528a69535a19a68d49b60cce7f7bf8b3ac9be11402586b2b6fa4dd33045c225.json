@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                            INSERT OR IGNORE INTO units_measurement_systems (name)\n                            VALUES (?)\n                        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "3528a69535a19a68d49b60cce7f7bf8b3ac9be11402586b2b6fa4dd33045c225"
+}

@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                        SELECT id \n                        FROM units_measurement_systems\n                        WHERE name = ?\n                    ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "7a1c278c988c81e43553dcfb851bbe005c1532b0a985a78986a1e193d227918e"
+}

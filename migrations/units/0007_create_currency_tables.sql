@@ -9,6 +9,6 @@ CREATE TABLE IF NOT EXISTS units_currency_quantities (
     value REAL NOT NULL,
     FOREIGN KEY (currency_type_id)
         REFERENCES units_currency_types(id)
-        ON DELETE CASCADE,
+        ON DELETE RESTRICT,
     CHECK (LENGTH(id) = 16)
 );

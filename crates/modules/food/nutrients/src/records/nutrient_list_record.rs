@@ -1,5 +1,4 @@
 use sqlx::{Pool, Sqlite};
-use utils::database::DatabaseService;
 use uuid::Uuid;
 
 use crate::{
@@ -239,7 +238,6 @@ impl NutrientListItemRecord {
     }
 
     pub async fn delete_conversion_vec(items: Vec<&Self>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
         let mut tx = pool.begin().await?;
 
         for item in items {

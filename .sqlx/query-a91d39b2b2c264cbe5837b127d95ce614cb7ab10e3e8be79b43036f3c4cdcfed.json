@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                        SELECT id \n                        FROM units_volume_types\n                        WHERE unit_type = ?\n                    ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "a91d39b2b2c264cbe5837b127d95ce614cb7ab10e3e8be79b43036f3c4cdcfed"
+}

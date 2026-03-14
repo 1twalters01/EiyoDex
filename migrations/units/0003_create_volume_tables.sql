@@ -9,6 +9,6 @@ CREATE TABLE IF NOT EXISTS units_volume_quantities (
     value REAL NOT NULL,
     FOREIGN KEY (volume_type_id)
         REFERENCES units_volume_types(id)
-        ON DELETE CASCADE,
+        ON DELETE RESTRICT,
     CHECK (LENGTH(id) = 16)
 );

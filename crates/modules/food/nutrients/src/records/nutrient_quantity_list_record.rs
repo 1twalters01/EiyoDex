@@ -1,7 +1,6 @@
 use std::collections::BTreeSet;
 
 use sqlx::{Pool, Sqlite};
-use utils::database::DatabaseService;
 use uuid::Uuid;
 
 use crate::{
