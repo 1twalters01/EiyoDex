@@ -1,5 +1,6 @@
 # rust build
 **/target/
+.sqlx/
 
 # python build
 **/__pycache__/
