@@ -21,38 +21,38 @@ fn test_get_distance_unit_enumerations() {
 
 #[test]
 fn test_get_symbols() {
-    assert_eq!(DistanceUnit::Kilometer.as_symbol(), "km");
-    assert_eq!(DistanceUnit::Meter.as_symbol(), "m");
-    assert_eq!(DistanceUnit::Centimeter.as_symbol(), "cm");
-    assert_eq!(DistanceUnit::Millimeter.as_symbol(), "mm");
-    assert_eq!(DistanceUnit::Foot.as_symbol(), "ft");
-    assert_eq!(DistanceUnit::Inch.as_symbol(), "in");
+    assert_eq!(DistanceUnit::Kilometer.get_symbol(), "km");
+    assert_eq!(DistanceUnit::Meter.get_symbol(), "m");
+    assert_eq!(DistanceUnit::Centimeter.get_symbol(), "cm");
+    assert_eq!(DistanceUnit::Millimeter.get_symbol(), "mm");
+    assert_eq!(DistanceUnit::Foot.get_symbol(), "ft");
+    assert_eq!(DistanceUnit::Inch.get_symbol(), "in");
 }
 
 #[test]
 fn test_get_unit_types() {
-    assert_eq!(DistanceUnit::Kilometer.as_unit_type(), "kilometer");
-    assert_eq!(DistanceUnit::Meter.as_unit_type(), "meter");
-    assert_eq!(DistanceUnit::Centimeter.as_unit_type(), "centimeter");
-    assert_eq!(DistanceUnit::Millimeter.as_unit_type(), "millimeter");
-    assert_eq!(DistanceUnit::Foot.as_unit_type(), "foot");
-    assert_eq!(DistanceUnit::Inch.as_unit_type(), "inch");
+    assert_eq!(DistanceUnit::Kilometer.get_unit_type(), "kilometer");
+    assert_eq!(DistanceUnit::Meter.get_unit_type(), "meter");
+    assert_eq!(DistanceUnit::Centimeter.get_unit_type(), "centimeter");
+    assert_eq!(DistanceUnit::Millimeter.get_unit_type(), "millimeter");
+    assert_eq!(DistanceUnit::Foot.get_unit_type(), "foot");
+    assert_eq!(DistanceUnit::Inch.get_unit_type(), "inch");
 }
 
 #[test]
 fn test_get_plural_unit_types() {
-    assert_eq!(DistanceUnit::Kilometer.as_unit_type_plural(), "kilometers");
-    assert_eq!(DistanceUnit::Meter.as_unit_type_plural(), "meters");
+    assert_eq!(DistanceUnit::Kilometer.get_unit_type_plural(), "kilometers");
+    assert_eq!(DistanceUnit::Meter.get_unit_type_plural(), "meters");
     assert_eq!(
-        DistanceUnit::Centimeter.as_unit_type_plural(),
+        DistanceUnit::Centimeter.get_unit_type_plural(),
         "centimeters"
     );
     assert_eq!(
-        DistanceUnit::Millimeter.as_unit_type_plural(),
+        DistanceUnit::Millimeter.get_unit_type_plural(),
         "millimeters"
     );
-    assert_eq!(DistanceUnit::Foot.as_unit_type_plural(), "feet");
-    assert_eq!(DistanceUnit::Inch.as_unit_type_plural(), "inches");
+    assert_eq!(DistanceUnit::Foot.get_unit_type_plural(), "feet");
+    assert_eq!(DistanceUnit::Inch.get_unit_type_plural(), "inches");
 }
 
 #[test]
@@ -172,7 +172,7 @@ async fn test_save_to_database() {
     let res = DistanceUnit::save_enumerations_to_database(&pool).await;
     assert!(res.is_ok());
 
-    let distance = DistanceUnit::Kilometer.as_unit_type();
+    let distance = DistanceUnit::Kilometer.get_unit_type();
     let rows = sqlx::query!(
         r#"
             SELECT id, unit_type

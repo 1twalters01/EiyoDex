@@ -1,49 +1,49 @@
 {
     "IU": {
         "identifier": "iu",
-        "symbol": "IU",
+        "symbol": "iu",
         "unit_type": "international unit",
         "unit_type_plural": "international units"
     },
     "DFE": {
         "identifier": "dfe",
-        "symbol": "DFE",
+        "symbol": "dfe",
         "unit_type": "dietary folate equivalent",
         "unit_type_plural": "dietary folate equivalents"
     },
     "NE": {
         "identifier": "ne",
-        "symbol": "NE",
+        "symbol": "ne",
         "unit_type": "niacin equivalent",
         "unit_type_plural": "niacin equivalents"
     },
     "RAE": {
         "identifier": "rae",
-        "symbol": "RAE",
+        "symbol": "rae",
         "unit_type": "retinol activity equivalent",
         "unit_type_plural": "retinol activity equivalents"
     },
     "PDCAAS": {
         "identifier": "pdcaas",
-        "symbol": "PDCAAS",
+        "symbol": "pdcaas",
         "unit_type": "protein digestibility corrected amino acid score",
         "unit_type_plural": "protein digestibility corrected amino acid scores"
     },
     "DIAAS1": {
         "identifier": "diaas1",
-        "symbol": "DIAAS",
+        "symbol": "diaas",
         "unit_type": "digestible indispensable amino acid score (0–6 months)",
         "unit_type_plural": "digestible indispensable amino acid scores (0–6 months)"
     },
     "DIAAS2": {
         "identifier": "diaas2",
-        "symbol": "DIAAS",
+        "symbol": "diaas",
         "unit_type": "digestible indispensable amino acid score (6 months to 3 years)",
         "unit_type_plural": "digestible indispensable amino acid scores (6 months to 3 years)"
     },
     "DIAAS3": {
         "identifier": "diaas3",
-        "symbol": "DIAAS",
+        "symbol": "diaas",
         "unit_type": "digestible indispensable amino acid score (over 3 years)",
         "unit_type_plural": "digestible indispensable amino acid scores (over 3 years)"
     }

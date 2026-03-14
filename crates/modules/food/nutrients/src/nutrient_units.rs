@@ -1,4 +1,5 @@
 use units::{energy::unit::EnergyUnit, mass::unit::MassUnit, volume::unit::VolumeUnit};
+use std::str::FromStr;
 
 #[macro_export]
 macro_rules! define_nutrient_units {
@@ -39,12 +40,47 @@ macro_rules! define_nutrient_units {
                 return enumerations
             }
 
+            pub fn get_unit_type(&self) -> &'static str {
+                match self {
+                    NutrientUnit::Mass(unit) => unit.get_unit_type(),
+                    NutrientUnit::Volume(unit) => unit.get_unit_type(),
+                    NutrientUnit::Energy(unit) => unit.get_unit_type(),
+                    $(NutrientUnit::$variant => $unit_type),+
+                }
+            }
+
+            pub fn get_unit_type_plural(&self) -> &'static str {
+                match self {
+                    NutrientUnit::Mass(unit) => unit.get_unit_type_plural(),
+                    NutrientUnit::Volume(unit) => unit.get_unit_type_plural(),
+                    NutrientUnit::Energy(unit) => unit.get_unit_type_plural(),
+                    $(NutrientUnit::$variant => $unit_type_plural),+
+                }
+            }
+
             pub fn si_factor(&self) -> Option<f64> {
                 match self {
                     Self::Mass(unit) => Some(unit.si_factor()),
                     Self::Volume(unit) => Some(unit.si_factor()),
                     Self::Energy(unit) => Some(unit.si_factor()),
                     _ => None,
+                }
+            }
+        }
+
+        impl FromStr for NutrientUnit {
+            type Err = &'static str;
+
+            fn from_str(s: &str) -> Result<Self, &'static str> {
+                let formatted_string = s.trim().to_lowercase();
+                match formatted_string.as_str() {
+                    $($symbol_lc | $unit_type_lc | $unit_type_plural_lc => return Ok(NutrientUnit::$variant),)+
+                    _ => {
+                        match formatted_string.as_str() {
+                            $($identifier_lc => Ok(NutrientUnit::$variant),)+
+                            err => Err("Unknown unit"),
+                        }
+                    }
                 }
             }
         }

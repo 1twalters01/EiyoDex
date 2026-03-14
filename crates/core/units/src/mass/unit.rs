@@ -33,19 +33,19 @@ macro_rules! define_mass_units {
                 &[$(MassUnit::$variant),+]
             }
 
-            pub fn as_symbol(&self) -> &'static str {
+            pub fn get_symbol(&self) -> &'static str {
                 match self {
                     $(MassUnit::$variant => $symbol),+
                 }
             }
 
-            pub fn as_unit_type(&self) -> &'static str {
+            pub fn get_unit_type(&self) -> &'static str {
                 match self {
                     $(MassUnit::$variant => $unit_type),+
                 }
             }
 
-            pub fn as_unit_type_plural(&self) -> &'static str {
+            pub fn get_unit_type_plural(&self) -> &'static str {
                 match self {
                     $(MassUnit::$variant => $unit_type_plural),+
                 }
@@ -66,7 +66,7 @@ macro_rules! define_mass_units {
             pub async fn save_enumerations_to_database(pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
                 let mass_enumerations = MassUnit::get_enumerations();
                 for mass in mass_enumerations {
-                    let unit_type = mass.as_unit_type();
+                    let unit_type = mass.get_unit_type();
                     sqlx::query!(
                         r#"
                             INSERT OR IGNORE INTO units_mass_types (unit_type)
@@ -81,7 +81,7 @@ macro_rules! define_mass_units {
             }
 
             pub async fn get_database_id(&self, pool: &Pool<Sqlite>) -> Result<i64, sqlx::Error> {
-                let unit_type = self.as_unit_type();
+                let unit_type = self.get_unit_type();
                 let row = sqlx::query!(
                     r#"
                         SELECT id 

@@ -155,71 +155,71 @@ fn test_get_selected_density_unit_enumerations() {
 
 #[test]
 fn test_get_symbols() {
-    assert_eq!(SpecificCurrencyUnit::USDPerGram.as_symbol(), "$/g");
-    assert_eq!(SpecificCurrencyUnit::GBPPerKilogram.as_symbol(), "£/kg");
-    assert_eq!(SpecificCurrencyUnit::EURPerMilligram.as_symbol(), "€/mg");
-    assert_eq!(SpecificCurrencyUnit::JPYPerMicrogram.as_symbol(), "¥/ug");
-    assert_eq!(SpecificCurrencyUnit::USDPerOunce.as_symbol(), "$/oz");
-    assert_eq!(SpecificCurrencyUnit::GBPPerLiter.as_symbol(), "£/L");
-    assert_eq!(SpecificCurrencyUnit::EURPerMilliliter.as_symbol(), "€/mL");
-    assert_eq!(SpecificCurrencyUnit::JPYPerPint.as_symbol(), "¥/pt");
-    assert_eq!(SpecificCurrencyUnit::USDPerGallon.as_symbol(), "$/gal");
+    assert_eq!(SpecificCurrencyUnit::USDPerGram.get_symbol(), "$/g");
+    assert_eq!(SpecificCurrencyUnit::GBPPerKilogram.get_symbol(), "£/kg");
+    assert_eq!(SpecificCurrencyUnit::EURPerMilligram.get_symbol(), "€/mg");
+    assert_eq!(SpecificCurrencyUnit::JPYPerMicrogram.get_symbol(), "¥/ug");
+    assert_eq!(SpecificCurrencyUnit::USDPerOunce.get_symbol(), "$/oz");
+    assert_eq!(SpecificCurrencyUnit::GBPPerLiter.get_symbol(), "£/L");
+    assert_eq!(SpecificCurrencyUnit::EURPerMilliliter.get_symbol(), "€/mL");
+    assert_eq!(SpecificCurrencyUnit::JPYPerPint.get_symbol(), "¥/pt");
+    assert_eq!(SpecificCurrencyUnit::USDPerGallon.get_symbol(), "$/gal");
     assert_eq!(
-        SpecificCurrencyUnit::GBPPerFluidOunce.as_symbol(),
+        SpecificCurrencyUnit::GBPPerFluidOunce.get_symbol(),
         "£/fl oz"
     );
-    assert_eq!(SpecificCurrencyUnit::EURPerTablespoon.as_symbol(), "€/tbsp");
-    assert_eq!(SpecificCurrencyUnit::JPYPerTeaspoon.as_symbol(), "¥/tsp");
+    assert_eq!(SpecificCurrencyUnit::EURPerTablespoon.get_symbol(), "€/tbsp");
+    assert_eq!(SpecificCurrencyUnit::JPYPerTeaspoon.get_symbol(), "¥/tsp");
 }
 
 #[test]
 fn test_get_unit_types() {
     assert_eq!(
-        SpecificCurrencyUnit::USDPerGram.as_unit_type(),
+        SpecificCurrencyUnit::USDPerGram.get_unit_type(),
         "dollar per gram"
     );
     assert_eq!(
-        SpecificCurrencyUnit::GBPPerKilogram.as_unit_type(),
+        SpecificCurrencyUnit::GBPPerKilogram.get_unit_type(),
         "pound per kilogram"
     );
     assert_eq!(
-        SpecificCurrencyUnit::EURPerMilligram.as_unit_type(),
+        SpecificCurrencyUnit::EURPerMilligram.get_unit_type(),
         "euro per milligram"
     );
     assert_eq!(
-        SpecificCurrencyUnit::JPYPerMicrogram.as_unit_type(),
+        SpecificCurrencyUnit::JPYPerMicrogram.get_unit_type(),
         "yen per microgram"
     );
     assert_eq!(
-        SpecificCurrencyUnit::USDPerOunce.as_unit_type(),
+        SpecificCurrencyUnit::USDPerOunce.get_unit_type(),
         "dollar per ounce"
     );
     assert_eq!(
-        SpecificCurrencyUnit::GBPPerLiter.as_unit_type(),
+        SpecificCurrencyUnit::GBPPerLiter.get_unit_type(),
         "pound per liter"
     );
     assert_eq!(
-        SpecificCurrencyUnit::EURPerMilliliter.as_unit_type(),
+        SpecificCurrencyUnit::EURPerMilliliter.get_unit_type(),
         "euro per milliliter"
     );
     assert_eq!(
-        SpecificCurrencyUnit::JPYPerPint.as_unit_type(),
+        SpecificCurrencyUnit::JPYPerPint.get_unit_type(),
         "yen per pint"
     );
     assert_eq!(
-        SpecificCurrencyUnit::USDPerGallon.as_unit_type(),
+        SpecificCurrencyUnit::USDPerGallon.get_unit_type(),
         "dollar per gallon"
     );
     assert_eq!(
-        SpecificCurrencyUnit::GBPPerFluidOunce.as_unit_type(),
+        SpecificCurrencyUnit::GBPPerFluidOunce.get_unit_type(),
         "pound per fluid ounce"
     );
     assert_eq!(
-        SpecificCurrencyUnit::EURPerTablespoon.as_unit_type(),
+        SpecificCurrencyUnit::EURPerTablespoon.get_unit_type(),
         "euro per tablespoon"
     );
     assert_eq!(
-        SpecificCurrencyUnit::JPYPerTeaspoon.as_unit_type(),
+        SpecificCurrencyUnit::JPYPerTeaspoon.get_unit_type(),
         "yen per teaspoon"
     );
 }
@@ -227,51 +227,51 @@ fn test_get_unit_types() {
 #[test]
 fn test_get_plural_unit_types() {
     assert_eq!(
-        SpecificCurrencyUnit::USDPerGram.as_unit_type_plural(),
+        SpecificCurrencyUnit::USDPerGram.get_unit_type_plural(),
         "dollars per gram"
     );
     assert_eq!(
-        SpecificCurrencyUnit::GBPPerKilogram.as_unit_type_plural(),
+        SpecificCurrencyUnit::GBPPerKilogram.get_unit_type_plural(),
         "pounds per kilogram"
     );
     assert_eq!(
-        SpecificCurrencyUnit::EURPerMilligram.as_unit_type_plural(),
+        SpecificCurrencyUnit::EURPerMilligram.get_unit_type_plural(),
         "euros per milligram"
     );
     assert_eq!(
-        SpecificCurrencyUnit::JPYPerMicrogram.as_unit_type_plural(),
+        SpecificCurrencyUnit::JPYPerMicrogram.get_unit_type_plural(),
         "yen per microgram"
     );
     assert_eq!(
-        SpecificCurrencyUnit::USDPerOunce.as_unit_type_plural(),
+        SpecificCurrencyUnit::USDPerOunce.get_unit_type_plural(),
         "dollars per ounce"
     );
     assert_eq!(
-        SpecificCurrencyUnit::GBPPerLiter.as_unit_type_plural(),
+        SpecificCurrencyUnit::GBPPerLiter.get_unit_type_plural(),
         "pounds per liter"
     );
     assert_eq!(
-        SpecificCurrencyUnit::EURPerMilliliter.as_unit_type_plural(),
+        SpecificCurrencyUnit::EURPerMilliliter.get_unit_type_plural(),
         "euros per milliliter"
     );
     assert_eq!(
-        SpecificCurrencyUnit::JPYPerPint.as_unit_type_plural(),
+        SpecificCurrencyUnit::JPYPerPint.get_unit_type_plural(),
         "yen per pint"
     );
     assert_eq!(
-        SpecificCurrencyUnit::USDPerGallon.as_unit_type_plural(),
+        SpecificCurrencyUnit::USDPerGallon.get_unit_type_plural(),
         "dollars per gallon"
     );
     assert_eq!(
-        SpecificCurrencyUnit::GBPPerFluidOunce.as_unit_type_plural(),
+        SpecificCurrencyUnit::GBPPerFluidOunce.get_unit_type_plural(),
         "pounds per fluid ounce"
     );
     assert_eq!(
-        SpecificCurrencyUnit::EURPerTablespoon.as_unit_type_plural(),
+        SpecificCurrencyUnit::EURPerTablespoon.get_unit_type_plural(),
         "euros per tablespoon"
     );
     assert_eq!(
-        SpecificCurrencyUnit::JPYPerTeaspoon.as_unit_type_plural(),
+        SpecificCurrencyUnit::JPYPerTeaspoon.get_unit_type_plural(),
         "yen per teaspoon"
     );
 }

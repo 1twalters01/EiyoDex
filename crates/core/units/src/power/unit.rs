@@ -71,19 +71,19 @@ macro_rules! define_power_units {
                 &[$(PowerUnit::$json_variant),*]
             }
 
-            pub fn as_symbol(&self) -> &'static str {
+            pub fn get_symbol(&self) -> &'static str {
                 match self {
                     $(PowerUnit::$all_variant => $all_symbol),+
                 }
             }
 
-            pub fn as_unit_type(&self) -> &'static str {
+            pub fn get_unit_type(&self) -> &'static str {
                 match self {
                     $(PowerUnit::$all_variant => $all_unit_type),+
                 }
             }
 
-            pub fn as_unit_type_plural(&self) -> &'static str {
+            pub fn get_unit_type_plural(&self) -> &'static str {
                 match self {
                     $(PowerUnit::$all_variant => $all_unit_type_plural),+
                 }

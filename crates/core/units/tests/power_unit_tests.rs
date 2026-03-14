@@ -93,60 +93,60 @@ fn test_get_selected_power_unit_enumerations() {
 
 #[test]
 fn test_get_symbols() {
-    assert_eq!(PowerUnit::KilocaloriePerSecond.as_symbol(), "kcal/s");
-    assert_eq!(PowerUnit::KilocaloriePerMinute.as_symbol(), "kcal/min");
-    assert_eq!(PowerUnit::KilocaloriePerHour.as_symbol(), "kcal/hr");
-    assert_eq!(PowerUnit::KilocaloriePerDay.as_symbol(), "kcal/day");
-    assert_eq!(PowerUnit::KilocaloriePerWeek.as_symbol(), "kcal/week");
+    assert_eq!(PowerUnit::KilocaloriePerSecond.get_symbol(), "kcal/s");
+    assert_eq!(PowerUnit::KilocaloriePerMinute.get_symbol(), "kcal/min");
+    assert_eq!(PowerUnit::KilocaloriePerHour.get_symbol(), "kcal/hr");
+    assert_eq!(PowerUnit::KilocaloriePerDay.get_symbol(), "kcal/day");
+    assert_eq!(PowerUnit::KilocaloriePerWeek.get_symbol(), "kcal/week");
 
-    assert_eq!(PowerUnit::KilojoulePerSecond.as_symbol(), "kj/s");
-    assert_eq!(PowerUnit::KilojoulePerMinute.as_symbol(), "kj/min");
-    assert_eq!(PowerUnit::KilojoulePerHour.as_symbol(), "kj/hr");
-    assert_eq!(PowerUnit::KilojoulePerDay.as_symbol(), "kj/day");
-    assert_eq!(PowerUnit::KilojoulePerWeek.as_symbol(), "kj/week");
+    assert_eq!(PowerUnit::KilojoulePerSecond.get_symbol(), "kj/s");
+    assert_eq!(PowerUnit::KilojoulePerMinute.get_symbol(), "kj/min");
+    assert_eq!(PowerUnit::KilojoulePerHour.get_symbol(), "kj/hr");
+    assert_eq!(PowerUnit::KilojoulePerDay.get_symbol(), "kj/day");
+    assert_eq!(PowerUnit::KilojoulePerWeek.get_symbol(), "kj/week");
 }
 
 #[test]
 fn test_get_unit_types() {
     assert_eq!(
-        PowerUnit::KilocaloriePerSecond.as_unit_type(),
+        PowerUnit::KilocaloriePerSecond.get_unit_type(),
         "kilocalorie per second"
     );
     assert_eq!(
-        PowerUnit::KilocaloriePerMinute.as_unit_type(),
+        PowerUnit::KilocaloriePerMinute.get_unit_type(),
         "kilocalorie per minute"
     );
     assert_eq!(
-        PowerUnit::KilocaloriePerHour.as_unit_type(),
+        PowerUnit::KilocaloriePerHour.get_unit_type(),
         "kilocalorie per hour"
     );
     assert_eq!(
-        PowerUnit::KilocaloriePerDay.as_unit_type(),
+        PowerUnit::KilocaloriePerDay.get_unit_type(),
         "kilocalorie per day"
     );
     assert_eq!(
-        PowerUnit::KilocaloriePerWeek.as_unit_type(),
+        PowerUnit::KilocaloriePerWeek.get_unit_type(),
         "kilocalorie per week"
     );
 
     assert_eq!(
-        PowerUnit::KilojoulePerSecond.as_unit_type(),
+        PowerUnit::KilojoulePerSecond.get_unit_type(),
         "kilojoule per second"
     );
     assert_eq!(
-        PowerUnit::KilojoulePerMinute.as_unit_type(),
+        PowerUnit::KilojoulePerMinute.get_unit_type(),
         "kilojoule per minute"
     );
     assert_eq!(
-        PowerUnit::KilojoulePerHour.as_unit_type(),
+        PowerUnit::KilojoulePerHour.get_unit_type(),
         "kilojoule per hour"
     );
     assert_eq!(
-        PowerUnit::KilojoulePerDay.as_unit_type(),
+        PowerUnit::KilojoulePerDay.get_unit_type(),
         "kilojoule per day"
     );
     assert_eq!(
-        PowerUnit::KilojoulePerWeek.as_unit_type(),
+        PowerUnit::KilojoulePerWeek.get_unit_type(),
         "kilojoule per week"
     );
 }
@@ -154,44 +154,44 @@ fn test_get_unit_types() {
 #[test]
 fn test_get_unit_types_plural() {
     assert_eq!(
-        PowerUnit::KilocaloriePerSecond.as_unit_type_plural(),
+        PowerUnit::KilocaloriePerSecond.get_unit_type_plural(),
         "kilocalories per second"
     );
     assert_eq!(
-        PowerUnit::KilocaloriePerMinute.as_unit_type_plural(),
+        PowerUnit::KilocaloriePerMinute.get_unit_type_plural(),
         "kilocalories per minute"
     );
     assert_eq!(
-        PowerUnit::KilocaloriePerHour.as_unit_type_plural(),
+        PowerUnit::KilocaloriePerHour.get_unit_type_plural(),
         "kilocalories per hour"
     );
     assert_eq!(
-        PowerUnit::KilocaloriePerDay.as_unit_type_plural(),
+        PowerUnit::KilocaloriePerDay.get_unit_type_plural(),
         "kilocalories per day"
     );
     assert_eq!(
-        PowerUnit::KilocaloriePerWeek.as_unit_type_plural(),
+        PowerUnit::KilocaloriePerWeek.get_unit_type_plural(),
         "kilocalories per week"
     );
 
     assert_eq!(
-        PowerUnit::KilojoulePerSecond.as_unit_type_plural(),
+        PowerUnit::KilojoulePerSecond.get_unit_type_plural(),
         "kilojoules per second"
     );
     assert_eq!(
-        PowerUnit::KilojoulePerMinute.as_unit_type_plural(),
+        PowerUnit::KilojoulePerMinute.get_unit_type_plural(),
         "kilojoules per minute"
     );
     assert_eq!(
-        PowerUnit::KilojoulePerHour.as_unit_type_plural(),
+        PowerUnit::KilojoulePerHour.get_unit_type_plural(),
         "kilojoules per hour"
     );
     assert_eq!(
-        PowerUnit::KilojoulePerDay.as_unit_type_plural(),
+        PowerUnit::KilojoulePerDay.get_unit_type_plural(),
         "kilojoules per day"
     );
     assert_eq!(
-        PowerUnit::KilojoulePerWeek.as_unit_type_plural(),
+        PowerUnit::KilojoulePerWeek.get_unit_type_plural(),
         "kilojoules per week"
     );
 }

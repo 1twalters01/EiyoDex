@@ -46,25 +46,25 @@ macro_rules! define_currency_units {
                 &[$(CurrencyUnit::$variant),+]
             }
 
-            pub fn as_symbol(&self) -> &'static str {
+            pub fn get_symbol(&self) -> &'static str {
                 match self {
                     $(CurrencyUnit::$variant => $symbol),+
                 }
             }
 
-            pub fn as_code(&self) -> &'static str {
+            pub fn get_code(&self) -> &'static str {
                 match self {
                     $(CurrencyUnit::$variant => $code),+
                 }
             }
 
-            pub fn as_unit_type(&self) -> &'static str {
+            pub fn get_unit_type(&self) -> &'static str {
                 match self {
                     $(CurrencyUnit::$variant => $unit_type),+
                 }
             }
 
-            pub fn as_unit_type_plural(&self) -> &'static str {
+            pub fn get_unit_type_plural(&self) -> &'static str {
                 match self {
                     $(CurrencyUnit::$variant => $unit_type_plural),+
                 }
@@ -78,7 +78,7 @@ macro_rules! define_currency_units {
                 let url = format!(
                     "https://api.frankfurter.app/latest?amount=1&from={}&to={}",
                     self.to_string(),
-                    CurrencyUnit::USD.as_code(),
+                    CurrencyUnit::USD.get_code(),
                 );
                 let resp = reqwest::get(&url).await.map_err(|e| e.to_string())?;
                 let data: ExchangeResponse = resp.json().await.map_err(|e| e.to_string())?;
@@ -93,7 +93,7 @@ macro_rules! define_currency_units {
                 let url = format!(
                     "https://api.frankfurter.app/latest?amount=1&from={}&to={}",
                     self.to_string(),
-                    CurrencyUnit::USD.as_code(),
+                    CurrencyUnit::USD.get_code(),
                 );
                 let resp = reqwest::blocking::get(&url).map_err(|e| e.to_string())?;
                 let data: ExchangeResponse = resp.json().map_err(|e| e.to_string())?;
@@ -338,7 +338,7 @@ macro_rules! define_currency_units {
             pub async fn save_enumerations_to_database(pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
                 let currency_enumerations = CurrencyUnit::get_enumerations();
                 for currency in currency_enumerations {
-                    let unit_type = currency.as_unit_type();
+                    let unit_type = currency.get_unit_type();
                     sqlx::query!(
                         r#"
                             INSERT OR IGNORE INTO units_currency_types (unit_type)
@@ -353,7 +353,7 @@ macro_rules! define_currency_units {
             }
 
             pub async fn get_database_id(&self, pool: &Pool<Sqlite>) -> Result<i64, sqlx::Error> {
-                let unit_type = self.as_unit_type();
+                let unit_type = self.get_unit_type();
                 let row = sqlx::query!(
                     r#"
                         SELECT id 
@@ -397,16 +397,6 @@ macro_rules! define_currency_units {
                         _ => Err("Unknown currency unit"),
                     }
                 }
-                // for variant in Self::get_enumerations() {
-                // if formatted_string == variant.as_code().to_uppercase()
-                //     || formatted_string == variant.as_symbol().to_uppercase()
-                //     || formatted_string == variant.as_unit_type().to_uppercase()
-                //     || formatted_string == variant.as_unit_type_plural().to_uppercase()
-                //     {
-                //         return Ok(*variant);
-                //     }
-                // }
-                // Err("Unknown currency unit")
             }
         }
     }
@@ -414,7 +404,7 @@ macro_rules! define_currency_units {
 
 impl fmt::Display for CurrencyUnit {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.as_code())
+        write!(f, "{}", self.get_code())
     }
 }
 

@@ -35,19 +35,19 @@ macro_rules! define_distance_units {
                 &[$(DistanceUnit::$variant),+]
             }
 
-            pub fn as_symbol(&self) -> &'static str {
+            pub fn get_symbol(&self) -> &'static str {
                 match self {
                     $(DistanceUnit::$variant => $symbol),+
                 }
             }
 
-            pub fn as_unit_type(&self) -> &'static str {
+            pub fn get_unit_type(&self) -> &'static str {
                 match self {
                     $(DistanceUnit::$variant => $unit_type),+
                 }
             }
 
-            pub fn as_unit_type_plural(&self) -> &'static str {
+            pub fn get_unit_type_plural(&self) -> &'static str {
                 match self {
                     $(DistanceUnit::$variant => $unit_type_plural),+
                 }
@@ -68,7 +68,7 @@ macro_rules! define_distance_units {
             pub async fn save_enumerations_to_database(pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
                 let distance_enumerations = DistanceUnit::get_enumerations();
                 for distance in distance_enumerations {
-                    let unit_type = distance.as_unit_type();
+                    let unit_type = distance.get_unit_type();
                     sqlx::query!(
                         r#"
                             INSERT OR IGNORE INTO units_distance_types (unit_type)
@@ -83,7 +83,7 @@ macro_rules! define_distance_units {
             }
 
             pub async fn get_database_id(&self, pool: &Pool<Sqlite>) -> Result<i64, sqlx::Error> {
-                let unit_type = self.as_unit_type();
+                let unit_type = self.get_unit_type();
                 let row = sqlx::query!(
                     r#"
                         SELECT id 

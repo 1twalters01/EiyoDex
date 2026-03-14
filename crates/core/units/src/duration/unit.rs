@@ -34,19 +34,19 @@ macro_rules! define_duration_units {
                 &[$(DurationUnit::$variant),+]
             }
 
-            pub fn as_symbol(&self) -> &'static str {
+            pub fn get_symbol(&self) -> &'static str {
                 match self {
                     $(DurationUnit::$variant => $symbol),+
                 }
             }
 
-            pub fn as_unit_type(&self) -> &'static str {
+            pub fn get_unit_type(&self) -> &'static str {
                 match self {
                     $(DurationUnit::$variant => $unit_type),+
                 }
             }
 
-            pub fn as_unit_type_plural(&self) -> &'static str {
+            pub fn get_unit_type_plural(&self) -> &'static str {
                 match self {
                     $(DurationUnit::$variant => $unit_type_plural),+
                 }
@@ -67,7 +67,7 @@ macro_rules! define_duration_units {
             pub async fn save_enumerations_to_database(pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
                 let duration_enumerations = DurationUnit::get_enumerations();
                 for duration in duration_enumerations {
-                    let unit_type = duration.as_unit_type();
+                    let unit_type = duration.get_unit_type();
                     sqlx::query!(
                         r#"
                             INSERT OR IGNORE INTO units_duration_types (unit_type)
@@ -82,7 +82,7 @@ macro_rules! define_duration_units {
             }
 
             pub async fn get_database_id(&self, pool: &Pool<Sqlite>) -> Result<i64, sqlx::Error> {
-                let unit_type = self.as_unit_type();
+                let unit_type = self.get_unit_type();
                 let row = sqlx::query!(
                     r#"
                         SELECT id 

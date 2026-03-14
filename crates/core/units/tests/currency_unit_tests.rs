@@ -20,34 +20,34 @@ fn test_get_mass_unit_enumerations() {
 
 #[test]
 fn test_get_symbols() {
-    assert_eq!(CurrencyUnit::USD.as_symbol(), "$");
-    assert_eq!(CurrencyUnit::GBP.as_symbol(), "£");
-    assert_eq!(CurrencyUnit::EUR.as_symbol(), "€");
-    assert_eq!(CurrencyUnit::JPY.as_symbol(), "¥");
+    assert_eq!(CurrencyUnit::USD.get_symbol(), "$");
+    assert_eq!(CurrencyUnit::GBP.get_symbol(), "£");
+    assert_eq!(CurrencyUnit::EUR.get_symbol(), "€");
+    assert_eq!(CurrencyUnit::JPY.get_symbol(), "¥");
 }
 
 #[test]
 fn test_get_codes() {
-    assert_eq!(CurrencyUnit::USD.as_code(), "USD");
-    assert_eq!(CurrencyUnit::GBP.as_code(), "GBP");
-    assert_eq!(CurrencyUnit::EUR.as_code(), "EUR");
-    assert_eq!(CurrencyUnit::JPY.as_code(), "JPY");
+    assert_eq!(CurrencyUnit::USD.get_code(), "USD");
+    assert_eq!(CurrencyUnit::GBP.get_code(), "GBP");
+    assert_eq!(CurrencyUnit::EUR.get_code(), "EUR");
+    assert_eq!(CurrencyUnit::JPY.get_code(), "JPY");
 }
 
 #[test]
 fn test_get_unit_types() {
-    assert_eq!(CurrencyUnit::USD.as_unit_type(), "dollar");
-    assert_eq!(CurrencyUnit::GBP.as_unit_type(), "pound");
-    assert_eq!(CurrencyUnit::EUR.as_unit_type(), "euro");
-    assert_eq!(CurrencyUnit::JPY.as_unit_type(), "yen");
+    assert_eq!(CurrencyUnit::USD.get_unit_type(), "dollar");
+    assert_eq!(CurrencyUnit::GBP.get_unit_type(), "pound");
+    assert_eq!(CurrencyUnit::EUR.get_unit_type(), "euro");
+    assert_eq!(CurrencyUnit::JPY.get_unit_type(), "yen");
 }
 
 #[test]
 fn test_get_plural_unit_types() {
-    assert_eq!(CurrencyUnit::USD.as_unit_type_plural(), "dollars");
-    assert_eq!(CurrencyUnit::GBP.as_unit_type_plural(), "pounds");
-    assert_eq!(CurrencyUnit::EUR.as_unit_type_plural(), "euros");
-    assert_eq!(CurrencyUnit::JPY.as_unit_type_plural(), "yen");
+    assert_eq!(CurrencyUnit::USD.get_unit_type_plural(), "dollars");
+    assert_eq!(CurrencyUnit::GBP.get_unit_type_plural(), "pounds");
+    assert_eq!(CurrencyUnit::EUR.get_unit_type_plural(), "euros");
+    assert_eq!(CurrencyUnit::JPY.get_unit_type_plural(), "yen");
 }
 
 #[tokio::test]
@@ -127,7 +127,7 @@ async fn test_save_to_database() {
     let res = CurrencyUnit::save_enumerations_to_database(&pool).await;
     assert!(res.is_ok());
 
-    let currency = CurrencyUnit::EUR.as_unit_type();
+    let currency = CurrencyUnit::EUR.get_unit_type();
     let rows = sqlx::query!(
         r#"
             SELECT id, unit_type

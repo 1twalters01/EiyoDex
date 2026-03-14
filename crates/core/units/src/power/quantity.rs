@@ -121,7 +121,7 @@ macro_rules! define_powers {
             }
 
             pub fn get_symbol(&self) -> &'static str {
-                self.unit.as_symbol()
+                self.unit.get_symbol()
             }
 
             pub fn get_measurement_system(&self) -> PowerMeasurementSystem {
@@ -129,11 +129,11 @@ macro_rules! define_powers {
             }
 
             pub fn get_unit_type(&self) -> &'static str {
-                self.unit.as_unit_type()
+                self.unit.get_unit_type()
             }
 
             pub fn get_unit_type_plural(&self) -> &'static str {
-                self.unit.as_unit_type_plural()
+                self.unit.get_unit_type_plural()
             }
 
             pub fn to_string(&self) -> String {

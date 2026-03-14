@@ -67,19 +67,19 @@ macro_rules! define_currencies {
             }
 
             pub fn get_symbol(&self) -> &'static str {
-                self.unit.as_symbol()
+                self.unit.get_symbol()
             }
 
             pub fn get_unit_type(&self) -> &'static str {
-                self.unit.as_unit_type()
+                self.unit.get_unit_type()
             }
 
             pub fn get_unit_type_plural(&self) -> &'static str {
-                self.unit.as_unit_type_plural()
+                self.unit.get_unit_type_plural()
             }
 
             pub fn get_code(&self) -> &'static str {
-                self.unit.as_code()
+                self.unit.get_code()
             }
 
             pub async fn convert_to_async(&self, target_unit: CurrencyUnit) -> Result<CurrencyQuantity, String> {
@@ -194,7 +194,7 @@ impl GetFromDatabaseUsingId<CurrencyQuantity> for CurrencyQuantity {
         println!(
             "row.unit_type: {}, unit_type: {}",
             row.unit_type,
-            CurrencyUnit::GBP.as_unit_type()
+            CurrencyUnit::GBP.get_unit_type()
         );
         // assert!(&row.unit_type, CurrencyUnit::GBP.as_unit_type());
         let unit = CurrencyUnit::from_str(&row.unit_type).unwrap();

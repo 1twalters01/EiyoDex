@@ -20,29 +20,29 @@ fn test_get_distance_unit_enumerations() {
 
 #[test]
 fn test_get_symbols() {
-    assert_eq!(DurationUnit::Week.as_symbol(), "week");
-    assert_eq!(DurationUnit::Day.as_symbol(), "day");
-    assert_eq!(DurationUnit::Hour.as_symbol(), "hr");
-    assert_eq!(DurationUnit::Minute.as_symbol(), "min");
-    assert_eq!(DurationUnit::Second.as_symbol(), "s");
+    assert_eq!(DurationUnit::Week.get_symbol(), "week");
+    assert_eq!(DurationUnit::Day.get_symbol(), "day");
+    assert_eq!(DurationUnit::Hour.get_symbol(), "hr");
+    assert_eq!(DurationUnit::Minute.get_symbol(), "min");
+    assert_eq!(DurationUnit::Second.get_symbol(), "s");
 }
 
 #[test]
 fn test_get_unit_types() {
-    assert_eq!(DurationUnit::Week.as_unit_type(), "week");
-    assert_eq!(DurationUnit::Day.as_unit_type(), "day");
-    assert_eq!(DurationUnit::Hour.as_unit_type(), "hour");
-    assert_eq!(DurationUnit::Minute.as_unit_type(), "minute");
-    assert_eq!(DurationUnit::Second.as_unit_type(), "second");
+    assert_eq!(DurationUnit::Week.get_unit_type(), "week");
+    assert_eq!(DurationUnit::Day.get_unit_type(), "day");
+    assert_eq!(DurationUnit::Hour.get_unit_type(), "hour");
+    assert_eq!(DurationUnit::Minute.get_unit_type(), "minute");
+    assert_eq!(DurationUnit::Second.get_unit_type(), "second");
 }
 
 #[test]
 fn test_get_plural_unit_types() {
-    assert_eq!(DurationUnit::Week.as_unit_type_plural(), "weeks");
-    assert_eq!(DurationUnit::Day.as_unit_type_plural(), "days");
-    assert_eq!(DurationUnit::Hour.as_unit_type_plural(), "hours");
-    assert_eq!(DurationUnit::Minute.as_unit_type_plural(), "minutes");
-    assert_eq!(DurationUnit::Second.as_unit_type_plural(), "seconds");
+    assert_eq!(DurationUnit::Week.get_unit_type_plural(), "weeks");
+    assert_eq!(DurationUnit::Day.get_unit_type_plural(), "days");
+    assert_eq!(DurationUnit::Hour.get_unit_type_plural(), "hours");
+    assert_eq!(DurationUnit::Minute.get_unit_type_plural(), "minutes");
+    assert_eq!(DurationUnit::Second.get_unit_type_plural(), "seconds");
 }
 
 #[test]
@@ -120,7 +120,7 @@ async fn test_save_to_database() {
     let res = DurationUnit::save_enumerations_to_database(&pool).await;
     assert!(res.is_ok());
 
-    let duration = DurationUnit::Second.as_unit_type();
+    let duration = DurationUnit::Second.get_unit_type();
     let rows = sqlx::query!(
         r#"
             SELECT id, unit_type

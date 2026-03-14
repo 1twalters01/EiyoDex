@@ -14,21 +14,21 @@ fn test_get_energy_unit_enumerations() {
 
 #[test]
 fn test_get_symbols() {
-    assert_eq!(EnergyUnit::Kilojoule.as_symbol(), "kj");
-    assert_eq!(EnergyUnit::Kilocalorie.as_symbol(), "kcal");
+    assert_eq!(EnergyUnit::Kilojoule.get_symbol(), "kj");
+    assert_eq!(EnergyUnit::Kilocalorie.get_symbol(), "kcal");
 }
 
 #[test]
 fn test_get_unit_types() {
-    assert_eq!(EnergyUnit::Kilojoule.as_unit_type(), "kilojoule");
-    assert_eq!(EnergyUnit::Kilocalorie.as_unit_type(), "kilocalorie");
+    assert_eq!(EnergyUnit::Kilojoule.get_unit_type(), "kilojoule");
+    assert_eq!(EnergyUnit::Kilocalorie.get_unit_type(), "kilocalorie");
 }
 
 #[test]
 fn test_get_plural_unit_types() {
-    assert_eq!(EnergyUnit::Kilojoule.as_unit_type_plural(), "kilojoules");
+    assert_eq!(EnergyUnit::Kilojoule.get_unit_type_plural(), "kilojoules");
     assert_eq!(
-        EnergyUnit::Kilocalorie.as_unit_type_plural(),
+        EnergyUnit::Kilocalorie.get_unit_type_plural(),
         "kilocalories"
     );
 }
@@ -93,7 +93,7 @@ async fn test_save_to_database() {
     let res = EnergyUnit::save_enumerations_to_database(&pool).await;
     assert!(res.is_ok());
 
-    let energy = EnergyUnit::Kilocalorie.as_unit_type();
+    let energy = EnergyUnit::Kilocalorie.get_unit_type();
     let rows = sqlx::query!(
         r#"
             SELECT id, unit_type

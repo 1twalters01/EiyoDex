@@ -20,29 +20,29 @@ fn test_get_mass_unit_enumerations() {
 
 #[test]
 fn test_get_symbols() {
-    assert_eq!(MassUnit::Gram.as_symbol(), "g");
-    assert_eq!(MassUnit::Milligram.as_symbol(), "mg");
-    assert_eq!(MassUnit::Kilogram.as_symbol(), "kg");
-    assert_eq!(MassUnit::Microgram.as_symbol(), "ug");
-    assert_eq!(MassUnit::Ounce.as_symbol(), "oz");
+    assert_eq!(MassUnit::Gram.get_symbol(), "g");
+    assert_eq!(MassUnit::Milligram.get_symbol(), "mg");
+    assert_eq!(MassUnit::Kilogram.get_symbol(), "kg");
+    assert_eq!(MassUnit::Microgram.get_symbol(), "ug");
+    assert_eq!(MassUnit::Ounce.get_symbol(), "oz");
 }
 
 #[test]
 fn test_get_unit_types() {
-    assert_eq!(MassUnit::Gram.as_unit_type(), "gram");
-    assert_eq!(MassUnit::Milligram.as_unit_type(), "milligram");
-    assert_eq!(MassUnit::Kilogram.as_unit_type(), "kilogram");
-    assert_eq!(MassUnit::Microgram.as_unit_type(), "microgram");
-    assert_eq!(MassUnit::Ounce.as_unit_type(), "ounce");
+    assert_eq!(MassUnit::Gram.get_unit_type(), "gram");
+    assert_eq!(MassUnit::Milligram.get_unit_type(), "milligram");
+    assert_eq!(MassUnit::Kilogram.get_unit_type(), "kilogram");
+    assert_eq!(MassUnit::Microgram.get_unit_type(), "microgram");
+    assert_eq!(MassUnit::Ounce.get_unit_type(), "ounce");
 }
 
 #[test]
 fn test_get_plural_unit_types() {
-    assert_eq!(MassUnit::Gram.as_unit_type_plural(), "grams");
-    assert_eq!(MassUnit::Milligram.as_unit_type_plural(), "milligrams");
-    assert_eq!(MassUnit::Kilogram.as_unit_type_plural(), "kilograms");
-    assert_eq!(MassUnit::Microgram.as_unit_type_plural(), "micrograms");
-    assert_eq!(MassUnit::Ounce.as_unit_type_plural(), "ounces");
+    assert_eq!(MassUnit::Gram.get_unit_type_plural(), "grams");
+    assert_eq!(MassUnit::Milligram.get_unit_type_plural(), "milligrams");
+    assert_eq!(MassUnit::Kilogram.get_unit_type_plural(), "kilograms");
+    assert_eq!(MassUnit::Microgram.get_unit_type_plural(), "micrograms");
+    assert_eq!(MassUnit::Ounce.get_unit_type_plural(), "ounces");
 }
 
 #[test]
@@ -123,7 +123,7 @@ async fn test_save_to_database() {
     let res = MassUnit::save_enumerations_to_database(&pool).await;
     assert!(res.is_ok());
 
-    let mass = MassUnit::Gram.as_unit_type();
+    let mass = MassUnit::Gram.get_unit_type();
     let rows = sqlx::query!(
         r#"
             SELECT id, unit_type

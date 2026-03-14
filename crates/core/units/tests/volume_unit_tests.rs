@@ -22,35 +22,35 @@ fn test_get_volume_unit_enumerations() {
 
 #[test]
 fn test_get_symbols() {
-    assert_eq!(VolumeUnit::Liter.as_symbol(), "L");
-    assert_eq!(VolumeUnit::Milliliter.as_symbol(), "mL");
-    assert_eq!(VolumeUnit::Pint.as_symbol(), "pt");
-    assert_eq!(VolumeUnit::Gallon.as_symbol(), "gal");
-    assert_eq!(VolumeUnit::FluidOunce.as_symbol(), "fl oz");
-    assert_eq!(VolumeUnit::Teaspoon.as_symbol(), "tsp");
-    assert_eq!(VolumeUnit::Tablespoon.as_symbol(), "tbsp");
+    assert_eq!(VolumeUnit::Liter.get_symbol(), "L");
+    assert_eq!(VolumeUnit::Milliliter.get_symbol(), "mL");
+    assert_eq!(VolumeUnit::Pint.get_symbol(), "pt");
+    assert_eq!(VolumeUnit::Gallon.get_symbol(), "gal");
+    assert_eq!(VolumeUnit::FluidOunce.get_symbol(), "fl oz");
+    assert_eq!(VolumeUnit::Teaspoon.get_symbol(), "tsp");
+    assert_eq!(VolumeUnit::Tablespoon.get_symbol(), "tbsp");
 }
 
 #[test]
 fn test_get_unit_types() {
-    assert_eq!(VolumeUnit::Liter.as_unit_type(), "liter");
-    assert_eq!(VolumeUnit::Milliliter.as_unit_type(), "milliliter");
-    assert_eq!(VolumeUnit::Pint.as_unit_type(), "pint");
-    assert_eq!(VolumeUnit::Gallon.as_unit_type(), "gallon");
-    assert_eq!(VolumeUnit::FluidOunce.as_unit_type(), "fluid ounce");
-    assert_eq!(VolumeUnit::Tablespoon.as_unit_type(), "tablespoon");
-    assert_eq!(VolumeUnit::Teaspoon.as_unit_type(), "teaspoon");
+    assert_eq!(VolumeUnit::Liter.get_unit_type(), "liter");
+    assert_eq!(VolumeUnit::Milliliter.get_unit_type(), "milliliter");
+    assert_eq!(VolumeUnit::Pint.get_unit_type(), "pint");
+    assert_eq!(VolumeUnit::Gallon.get_unit_type(), "gallon");
+    assert_eq!(VolumeUnit::FluidOunce.get_unit_type(), "fluid ounce");
+    assert_eq!(VolumeUnit::Tablespoon.get_unit_type(), "tablespoon");
+    assert_eq!(VolumeUnit::Teaspoon.get_unit_type(), "teaspoon");
 }
 
 #[test]
 fn test_get_plural_unit_types() {
-    assert_eq!(VolumeUnit::Liter.as_unit_type_plural(), "liters");
-    assert_eq!(VolumeUnit::Milliliter.as_unit_type_plural(), "milliliters");
-    assert_eq!(VolumeUnit::Pint.as_unit_type_plural(), "pints");
-    assert_eq!(VolumeUnit::Gallon.as_unit_type_plural(), "gallons");
-    assert_eq!(VolumeUnit::FluidOunce.as_unit_type_plural(), "fluid ounces");
-    assert_eq!(VolumeUnit::Tablespoon.as_unit_type_plural(), "tablespoons");
-    assert_eq!(VolumeUnit::Teaspoon.as_unit_type_plural(), "teaspoons");
+    assert_eq!(VolumeUnit::Liter.get_unit_type_plural(), "liters");
+    assert_eq!(VolumeUnit::Milliliter.get_unit_type_plural(), "milliliters");
+    assert_eq!(VolumeUnit::Pint.get_unit_type_plural(), "pints");
+    assert_eq!(VolumeUnit::Gallon.get_unit_type_plural(), "gallons");
+    assert_eq!(VolumeUnit::FluidOunce.get_unit_type_plural(), "fluid ounces");
+    assert_eq!(VolumeUnit::Tablespoon.get_unit_type_plural(), "tablespoons");
+    assert_eq!(VolumeUnit::Teaspoon.get_unit_type_plural(), "teaspoons");
 }
 
 #[test]
@@ -172,7 +172,7 @@ async fn test_save_to_database() {
     let res = VolumeUnit::save_enumerations_to_database(&pool).await;
     assert!(res.is_ok());
 
-    let volume = VolumeUnit::Pint.as_unit_type();
+    let volume = VolumeUnit::Pint.get_unit_type();
     let rows = sqlx::query!(
         r#"
             SELECT id, unit_type

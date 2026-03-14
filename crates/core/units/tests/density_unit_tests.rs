@@ -229,176 +229,176 @@ fn test_get_selected_density_unit_enumerations() {
 
 #[test]
 fn test_get_symbols() {
-    assert_eq!(DensityUnit::GramPerLiter.as_symbol(), "g/L");
-    assert_eq!(DensityUnit::GramPerMilliliter.as_symbol(), "g/mL");
-    assert_eq!(DensityUnit::GramPerPint.as_symbol(), "g/pt");
-    assert_eq!(DensityUnit::GramPerGallon.as_symbol(), "g/gal");
-    assert_eq!(DensityUnit::GramPerFluidOunce.as_symbol(), "g/fl oz");
-    assert_eq!(DensityUnit::GramPerTablespoon.as_symbol(), "g/tbsp");
-    assert_eq!(DensityUnit::GramPerTeaspoon.as_symbol(), "g/tsp");
+    assert_eq!(DensityUnit::GramPerLiter.get_symbol(), "g/L");
+    assert_eq!(DensityUnit::GramPerMilliliter.get_symbol(), "g/mL");
+    assert_eq!(DensityUnit::GramPerPint.get_symbol(), "g/pt");
+    assert_eq!(DensityUnit::GramPerGallon.get_symbol(), "g/gal");
+    assert_eq!(DensityUnit::GramPerFluidOunce.get_symbol(), "g/fl oz");
+    assert_eq!(DensityUnit::GramPerTablespoon.get_symbol(), "g/tbsp");
+    assert_eq!(DensityUnit::GramPerTeaspoon.get_symbol(), "g/tsp");
 
-    assert_eq!(DensityUnit::KilogramPerLiter.as_symbol(), "kg/L");
-    assert_eq!(DensityUnit::KilogramPerMilliliter.as_symbol(), "kg/mL");
-    assert_eq!(DensityUnit::KilogramPerPint.as_symbol(), "kg/pt");
-    assert_eq!(DensityUnit::KilogramPerGallon.as_symbol(), "kg/gal");
-    assert_eq!(DensityUnit::KilogramPerFluidOunce.as_symbol(), "kg/fl oz");
-    assert_eq!(DensityUnit::KilogramPerTablespoon.as_symbol(), "kg/tbsp");
-    assert_eq!(DensityUnit::KilogramPerTeaspoon.as_symbol(), "kg/tsp");
+    assert_eq!(DensityUnit::KilogramPerLiter.get_symbol(), "kg/L");
+    assert_eq!(DensityUnit::KilogramPerMilliliter.get_symbol(), "kg/mL");
+    assert_eq!(DensityUnit::KilogramPerPint.get_symbol(), "kg/pt");
+    assert_eq!(DensityUnit::KilogramPerGallon.get_symbol(), "kg/gal");
+    assert_eq!(DensityUnit::KilogramPerFluidOunce.get_symbol(), "kg/fl oz");
+    assert_eq!(DensityUnit::KilogramPerTablespoon.get_symbol(), "kg/tbsp");
+    assert_eq!(DensityUnit::KilogramPerTeaspoon.get_symbol(), "kg/tsp");
 
-    assert_eq!(DensityUnit::MilligramPerLiter.as_symbol(), "mg/L");
-    assert_eq!(DensityUnit::MilligramPerMilliliter.as_symbol(), "mg/mL");
-    assert_eq!(DensityUnit::MilligramPerPint.as_symbol(), "mg/pt");
-    assert_eq!(DensityUnit::MilligramPerGallon.as_symbol(), "mg/gal");
-    assert_eq!(DensityUnit::MilligramPerFluidOunce.as_symbol(), "mg/fl oz");
-    assert_eq!(DensityUnit::MilligramPerTablespoon.as_symbol(), "mg/tbsp");
-    assert_eq!(DensityUnit::MilligramPerTeaspoon.as_symbol(), "mg/tsp");
+    assert_eq!(DensityUnit::MilligramPerLiter.get_symbol(), "mg/L");
+    assert_eq!(DensityUnit::MilligramPerMilliliter.get_symbol(), "mg/mL");
+    assert_eq!(DensityUnit::MilligramPerPint.get_symbol(), "mg/pt");
+    assert_eq!(DensityUnit::MilligramPerGallon.get_symbol(), "mg/gal");
+    assert_eq!(DensityUnit::MilligramPerFluidOunce.get_symbol(), "mg/fl oz");
+    assert_eq!(DensityUnit::MilligramPerTablespoon.get_symbol(), "mg/tbsp");
+    assert_eq!(DensityUnit::MilligramPerTeaspoon.get_symbol(), "mg/tsp");
 
-    assert_eq!(DensityUnit::MicrogramPerLiter.as_symbol(), "ug/L");
-    assert_eq!(DensityUnit::MicrogramPerMilliliter.as_symbol(), "ug/mL");
-    assert_eq!(DensityUnit::MicrogramPerPint.as_symbol(), "ug/pt");
-    assert_eq!(DensityUnit::MicrogramPerGallon.as_symbol(), "ug/gal");
-    assert_eq!(DensityUnit::MicrogramPerFluidOunce.as_symbol(), "ug/fl oz");
-    assert_eq!(DensityUnit::MicrogramPerTablespoon.as_symbol(), "ug/tbsp");
-    assert_eq!(DensityUnit::MicrogramPerTeaspoon.as_symbol(), "ug/tsp");
+    assert_eq!(DensityUnit::MicrogramPerLiter.get_symbol(), "ug/L");
+    assert_eq!(DensityUnit::MicrogramPerMilliliter.get_symbol(), "ug/mL");
+    assert_eq!(DensityUnit::MicrogramPerPint.get_symbol(), "ug/pt");
+    assert_eq!(DensityUnit::MicrogramPerGallon.get_symbol(), "ug/gal");
+    assert_eq!(DensityUnit::MicrogramPerFluidOunce.get_symbol(), "ug/fl oz");
+    assert_eq!(DensityUnit::MicrogramPerTablespoon.get_symbol(), "ug/tbsp");
+    assert_eq!(DensityUnit::MicrogramPerTeaspoon.get_symbol(), "ug/tsp");
 
-    assert_eq!(DensityUnit::OuncePerLiter.as_symbol(), "oz/L");
-    assert_eq!(DensityUnit::OuncePerMilliliter.as_symbol(), "oz/mL");
-    assert_eq!(DensityUnit::OuncePerPint.as_symbol(), "oz/pt");
-    assert_eq!(DensityUnit::OuncePerGallon.as_symbol(), "oz/gal");
-    assert_eq!(DensityUnit::OuncePerFluidOunce.as_symbol(), "oz/fl oz");
-    assert_eq!(DensityUnit::OuncePerTablespoon.as_symbol(), "oz/tbsp");
-    assert_eq!(DensityUnit::OuncePerTeaspoon.as_symbol(), "oz/tsp");
+    assert_eq!(DensityUnit::OuncePerLiter.get_symbol(), "oz/L");
+    assert_eq!(DensityUnit::OuncePerMilliliter.get_symbol(), "oz/mL");
+    assert_eq!(DensityUnit::OuncePerPint.get_symbol(), "oz/pt");
+    assert_eq!(DensityUnit::OuncePerGallon.get_symbol(), "oz/gal");
+    assert_eq!(DensityUnit::OuncePerFluidOunce.get_symbol(), "oz/fl oz");
+    assert_eq!(DensityUnit::OuncePerTablespoon.get_symbol(), "oz/tbsp");
+    assert_eq!(DensityUnit::OuncePerTeaspoon.get_symbol(), "oz/tsp");
 }
 
 #[test]
 fn test_get_unit_types() {
-    assert_eq!(DensityUnit::GramPerLiter.as_unit_type(), "gram per liter");
+    assert_eq!(DensityUnit::GramPerLiter.get_unit_type(), "gram per liter");
     assert_eq!(
-        DensityUnit::GramPerMilliliter.as_unit_type(),
+        DensityUnit::GramPerMilliliter.get_unit_type(),
         "gram per milliliter"
     );
-    assert_eq!(DensityUnit::GramPerPint.as_unit_type(), "gram per pint");
-    assert_eq!(DensityUnit::GramPerGallon.as_unit_type(), "gram per gallon");
+    assert_eq!(DensityUnit::GramPerPint.get_unit_type(), "gram per pint");
+    assert_eq!(DensityUnit::GramPerGallon.get_unit_type(), "gram per gallon");
     assert_eq!(
-        DensityUnit::GramPerFluidOunce.as_unit_type(),
+        DensityUnit::GramPerFluidOunce.get_unit_type(),
         "gram per fluid ounce"
     );
     assert_eq!(
-        DensityUnit::GramPerTablespoon.as_unit_type(),
+        DensityUnit::GramPerTablespoon.get_unit_type(),
         "gram per tablespoon"
     );
     assert_eq!(
-        DensityUnit::GramPerTeaspoon.as_unit_type(),
+        DensityUnit::GramPerTeaspoon.get_unit_type(),
         "gram per teaspoon"
     );
 
     assert_eq!(
-        DensityUnit::KilogramPerLiter.as_unit_type(),
+        DensityUnit::KilogramPerLiter.get_unit_type(),
         "kilogram per liter"
     );
     assert_eq!(
-        DensityUnit::KilogramPerMilliliter.as_unit_type(),
+        DensityUnit::KilogramPerMilliliter.get_unit_type(),
         "kilogram per milliliter"
     );
     assert_eq!(
-        DensityUnit::KilogramPerPint.as_unit_type(),
+        DensityUnit::KilogramPerPint.get_unit_type(),
         "kilogram per pint"
     );
     assert_eq!(
-        DensityUnit::KilogramPerGallon.as_unit_type(),
+        DensityUnit::KilogramPerGallon.get_unit_type(),
         "kilogram per gallon"
     );
     assert_eq!(
-        DensityUnit::KilogramPerFluidOunce.as_unit_type(),
+        DensityUnit::KilogramPerFluidOunce.get_unit_type(),
         "kilogram per fluid ounce"
     );
     assert_eq!(
-        DensityUnit::KilogramPerTablespoon.as_unit_type(),
+        DensityUnit::KilogramPerTablespoon.get_unit_type(),
         "kilogram per tablespoon"
     );
     assert_eq!(
-        DensityUnit::KilogramPerTeaspoon.as_unit_type(),
+        DensityUnit::KilogramPerTeaspoon.get_unit_type(),
         "kilogram per teaspoon"
     );
 
     assert_eq!(
-        DensityUnit::MilligramPerLiter.as_unit_type(),
+        DensityUnit::MilligramPerLiter.get_unit_type(),
         "milligram per liter"
     );
     assert_eq!(
-        DensityUnit::MilligramPerMilliliter.as_unit_type(),
+        DensityUnit::MilligramPerMilliliter.get_unit_type(),
         "milligram per milliliter"
     );
     assert_eq!(
-        DensityUnit::MilligramPerPint.as_unit_type(),
+        DensityUnit::MilligramPerPint.get_unit_type(),
         "milligram per pint"
     );
     assert_eq!(
-        DensityUnit::MilligramPerGallon.as_unit_type(),
+        DensityUnit::MilligramPerGallon.get_unit_type(),
         "milligram per gallon"
     );
     assert_eq!(
-        DensityUnit::MilligramPerFluidOunce.as_unit_type(),
+        DensityUnit::MilligramPerFluidOunce.get_unit_type(),
         "milligram per fluid ounce"
     );
     assert_eq!(
-        DensityUnit::MilligramPerTablespoon.as_unit_type(),
+        DensityUnit::MilligramPerTablespoon.get_unit_type(),
         "milligram per tablespoon"
     );
     assert_eq!(
-        DensityUnit::MilligramPerTeaspoon.as_unit_type(),
+        DensityUnit::MilligramPerTeaspoon.get_unit_type(),
         "milligram per teaspoon"
     );
 
     assert_eq!(
-        DensityUnit::MicrogramPerLiter.as_unit_type(),
+        DensityUnit::MicrogramPerLiter.get_unit_type(),
         "microgram per liter"
     );
     assert_eq!(
-        DensityUnit::MicrogramPerMilliliter.as_unit_type(),
+        DensityUnit::MicrogramPerMilliliter.get_unit_type(),
         "microgram per milliliter"
     );
     assert_eq!(
-        DensityUnit::MicrogramPerPint.as_unit_type(),
+        DensityUnit::MicrogramPerPint.get_unit_type(),
         "microgram per pint"
     );
     assert_eq!(
-        DensityUnit::MicrogramPerGallon.as_unit_type(),
+        DensityUnit::MicrogramPerGallon.get_unit_type(),
         "microgram per gallon"
     );
     assert_eq!(
-        DensityUnit::MicrogramPerFluidOunce.as_unit_type(),
+        DensityUnit::MicrogramPerFluidOunce.get_unit_type(),
         "microgram per fluid ounce"
     );
     assert_eq!(
-        DensityUnit::MicrogramPerTablespoon.as_unit_type(),
+        DensityUnit::MicrogramPerTablespoon.get_unit_type(),
         "microgram per tablespoon"
     );
     assert_eq!(
-        DensityUnit::MicrogramPerTeaspoon.as_unit_type(),
+        DensityUnit::MicrogramPerTeaspoon.get_unit_type(),
         "microgram per teaspoon"
     );
 
-    assert_eq!(DensityUnit::OuncePerLiter.as_unit_type(), "ounce per liter");
+    assert_eq!(DensityUnit::OuncePerLiter.get_unit_type(), "ounce per liter");
     assert_eq!(
-        DensityUnit::OuncePerMilliliter.as_unit_type(),
+        DensityUnit::OuncePerMilliliter.get_unit_type(),
         "ounce per milliliter"
     );
-    assert_eq!(DensityUnit::OuncePerPint.as_unit_type(), "ounce per pint");
+    assert_eq!(DensityUnit::OuncePerPint.get_unit_type(), "ounce per pint");
     assert_eq!(
-        DensityUnit::OuncePerGallon.as_unit_type(),
+        DensityUnit::OuncePerGallon.get_unit_type(),
         "ounce per gallon"
     );
     assert_eq!(
-        DensityUnit::OuncePerFluidOunce.as_unit_type(),
+        DensityUnit::OuncePerFluidOunce.get_unit_type(),
         "ounce per fluid ounce"
     );
     assert_eq!(
-        DensityUnit::OuncePerTablespoon.as_unit_type(),
+        DensityUnit::OuncePerTablespoon.get_unit_type(),
         "ounce per tablespoon"
     );
     assert_eq!(
-        DensityUnit::OuncePerTeaspoon.as_unit_type(),
+        DensityUnit::OuncePerTeaspoon.get_unit_type(),
         "ounce per teaspoon"
     );
 }
@@ -406,147 +406,147 @@ fn test_get_unit_types() {
 #[test]
 fn test_get_plural_unit_types() {
     assert_eq!(
-        DensityUnit::GramPerLiter.as_unit_type_plural(),
+        DensityUnit::GramPerLiter.get_unit_type_plural(),
         "grams per liter"
     );
     assert_eq!(
-        DensityUnit::GramPerMilliliter.as_unit_type_plural(),
+        DensityUnit::GramPerMilliliter.get_unit_type_plural(),
         "grams per milliliter"
     );
     assert_eq!(
-        DensityUnit::GramPerPint.as_unit_type_plural(),
+        DensityUnit::GramPerPint.get_unit_type_plural(),
         "grams per pint"
     );
     assert_eq!(
-        DensityUnit::GramPerGallon.as_unit_type_plural(),
+        DensityUnit::GramPerGallon.get_unit_type_plural(),
         "grams per gallon"
     );
     assert_eq!(
-        DensityUnit::GramPerFluidOunce.as_unit_type_plural(),
+        DensityUnit::GramPerFluidOunce.get_unit_type_plural(),
         "grams per fluid ounce"
     );
     assert_eq!(
-        DensityUnit::GramPerTablespoon.as_unit_type_plural(),
+        DensityUnit::GramPerTablespoon.get_unit_type_plural(),
         "grams per tablespoon"
     );
     assert_eq!(
-        DensityUnit::GramPerTeaspoon.as_unit_type_plural(),
+        DensityUnit::GramPerTeaspoon.get_unit_type_plural(),
         "grams per teaspoon"
     );
 
     assert_eq!(
-        DensityUnit::KilogramPerLiter.as_unit_type_plural(),
+        DensityUnit::KilogramPerLiter.get_unit_type_plural(),
         "kilograms per liter"
     );
     assert_eq!(
-        DensityUnit::KilogramPerMilliliter.as_unit_type_plural(),
+        DensityUnit::KilogramPerMilliliter.get_unit_type_plural(),
         "kilograms per milliliter"
     );
     assert_eq!(
-        DensityUnit::KilogramPerPint.as_unit_type_plural(),
+        DensityUnit::KilogramPerPint.get_unit_type_plural(),
         "kilograms per pint"
     );
     assert_eq!(
-        DensityUnit::KilogramPerGallon.as_unit_type_plural(),
+        DensityUnit::KilogramPerGallon.get_unit_type_plural(),
         "kilograms per gallon"
     );
     assert_eq!(
-        DensityUnit::KilogramPerFluidOunce.as_unit_type_plural(),
+        DensityUnit::KilogramPerFluidOunce.get_unit_type_plural(),
         "kilograms per fluid ounce"
     );
     assert_eq!(
-        DensityUnit::KilogramPerTablespoon.as_unit_type_plural(),
+        DensityUnit::KilogramPerTablespoon.get_unit_type_plural(),
         "kilograms per tablespoon"
     );
     assert_eq!(
-        DensityUnit::KilogramPerTeaspoon.as_unit_type_plural(),
+        DensityUnit::KilogramPerTeaspoon.get_unit_type_plural(),
         "kilograms per teaspoon"
     );
 
     assert_eq!(
-        DensityUnit::MilligramPerLiter.as_unit_type_plural(),
+        DensityUnit::MilligramPerLiter.get_unit_type_plural(),
         "milligrams per liter"
     );
     assert_eq!(
-        DensityUnit::MilligramPerMilliliter.as_unit_type_plural(),
+        DensityUnit::MilligramPerMilliliter.get_unit_type_plural(),
         "milligrams per milliliter"
     );
     assert_eq!(
-        DensityUnit::MilligramPerPint.as_unit_type_plural(),
+        DensityUnit::MilligramPerPint.get_unit_type_plural(),
         "milligrams per pint"
     );
     assert_eq!(
-        DensityUnit::MilligramPerGallon.as_unit_type_plural(),
+        DensityUnit::MilligramPerGallon.get_unit_type_plural(),
         "milligrams per gallon"
     );
     assert_eq!(
-        DensityUnit::MilligramPerFluidOunce.as_unit_type_plural(),
+        DensityUnit::MilligramPerFluidOunce.get_unit_type_plural(),
         "milligrams per fluid ounce"
     );
     assert_eq!(
-        DensityUnit::MilligramPerTablespoon.as_unit_type_plural(),
+        DensityUnit::MilligramPerTablespoon.get_unit_type_plural(),
         "milligrams per tablespoon"
     );
     assert_eq!(
-        DensityUnit::MilligramPerTeaspoon.as_unit_type_plural(),
+        DensityUnit::MilligramPerTeaspoon.get_unit_type_plural(),
         "milligrams per teaspoon"
     );
 
     assert_eq!(
-        DensityUnit::MicrogramPerLiter.as_unit_type_plural(),
+        DensityUnit::MicrogramPerLiter.get_unit_type_plural(),
         "micrograms per liter"
     );
     assert_eq!(
-        DensityUnit::MicrogramPerMilliliter.as_unit_type_plural(),
+        DensityUnit::MicrogramPerMilliliter.get_unit_type_plural(),
         "micrograms per milliliter"
     );
     assert_eq!(
-        DensityUnit::MicrogramPerPint.as_unit_type_plural(),
+        DensityUnit::MicrogramPerPint.get_unit_type_plural(),
         "micrograms per pint"
     );
     assert_eq!(
-        DensityUnit::MicrogramPerGallon.as_unit_type_plural(),
+        DensityUnit::MicrogramPerGallon.get_unit_type_plural(),
         "micrograms per gallon"
     );
     assert_eq!(
-        DensityUnit::MicrogramPerFluidOunce.as_unit_type_plural(),
+        DensityUnit::MicrogramPerFluidOunce.get_unit_type_plural(),
         "micrograms per fluid ounce"
     );
     assert_eq!(
-        DensityUnit::MicrogramPerTablespoon.as_unit_type_plural(),
+        DensityUnit::MicrogramPerTablespoon.get_unit_type_plural(),
         "micrograms per tablespoon"
     );
     assert_eq!(
-        DensityUnit::MicrogramPerTeaspoon.as_unit_type_plural(),
+        DensityUnit::MicrogramPerTeaspoon.get_unit_type_plural(),
         "micrograms per teaspoon"
     );
 
     assert_eq!(
-        DensityUnit::OuncePerLiter.as_unit_type_plural(),
+        DensityUnit::OuncePerLiter.get_unit_type_plural(),
         "ounces per liter"
     );
     assert_eq!(
-        DensityUnit::OuncePerMilliliter.as_unit_type_plural(),
+        DensityUnit::OuncePerMilliliter.get_unit_type_plural(),
         "ounces per milliliter"
     );
     assert_eq!(
-        DensityUnit::OuncePerPint.as_unit_type_plural(),
+        DensityUnit::OuncePerPint.get_unit_type_plural(),
         "ounces per pint"
     );
     assert_eq!(
-        DensityUnit::OuncePerGallon.as_unit_type_plural(),
+        DensityUnit::OuncePerGallon.get_unit_type_plural(),
         "ounces per gallon"
     );
     assert_eq!(
-        DensityUnit::OuncePerFluidOunce.as_unit_type_plural(),
+        DensityUnit::OuncePerFluidOunce.get_unit_type_plural(),
         "ounces per fluid ounce"
     );
     assert_eq!(
-        DensityUnit::OuncePerTablespoon.as_unit_type_plural(),
+        DensityUnit::OuncePerTablespoon.get_unit_type_plural(),
         "ounces per tablespoon"
     );
     assert_eq!(
-        DensityUnit::OuncePerTeaspoon.as_unit_type_plural(),
+        DensityUnit::OuncePerTeaspoon.get_unit_type_plural(),
         "ounces per teaspoon"
     );
 }
