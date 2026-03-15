@@ -9,46 +9,46 @@ use nutrients::schema::{
 #[test]
 pub fn test_nutrients_carbohydrate_net_calculation() {
     let fiber = NutrientType::new(
+        Some(EssentialityType::NonEssential),
+        QuantityType::Macronutrient,
         ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Carbohydrate(
             CarbohydrateNutrient {
                 carbohydrate_type: Carbohydrate::Fiber,
             },
         )),
-        QuantityType::Macronutrient,
-        Some(EssentialityType::NonEssential),
     );
     assert_eq!(fiber.use_in_net_carbs(), false);
 
     let starch = NutrientType::new(
+        Some(EssentialityType::NonEssential),
+        QuantityType::Macronutrient,
         ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Carbohydrate(
             CarbohydrateNutrient {
                 carbohydrate_type: Carbohydrate::Starch,
             },
         )),
-        QuantityType::Macronutrient,
-        Some(EssentialityType::NonEssential),
     );
     assert_eq!(starch.use_in_net_carbs(), true);
 
     let sugar = NutrientType::new(
+        Some(EssentialityType::NonEssential),
+        QuantityType::Macronutrient,
         ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Carbohydrate(
             CarbohydrateNutrient {
                 carbohydrate_type: Carbohydrate::Sugar,
             },
         )),
-        QuantityType::Macronutrient,
-        Some(EssentialityType::NonEssential),
     );
     assert_eq!(sugar.use_in_net_carbs(), true);
 
     let sugar_alcohol = NutrientType::new(
+        Some(EssentialityType::NonEssential),
+        QuantityType::Macronutrient,
         ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Carbohydrate(
             CarbohydrateNutrient {
                 carbohydrate_type: Carbohydrate::SugarAlcohol,
             },
         )),
-        QuantityType::Macronutrient,
-        Some(EssentialityType::NonEssential),
     );
     assert_eq!(sugar_alcohol.use_in_net_carbs(), false);
 }
@@ -56,18 +56,18 @@ pub fn test_nutrients_carbohydrate_net_calculation() {
 #[test]
 pub fn test_nutrients_is_macronutrient() {
     let essential_amino_acid = NutrientType::new(
+        Some(EssentialityType::Essential),
+        QuantityType::Macronutrient,
         ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Protein(ProteinNutrient {
             is_bcaa: false,
         })),
-        QuantityType::Macronutrient,
-        Some(EssentialityType::Essential),
     );
     assert_eq!(essential_amino_acid.is_macronutrient(), true);
 
     let water = NutrientType::new(
-        ChemicalType::Water,
-        QuantityType::NonNutrient,
         Some(EssentialityType::Essential),
+        QuantityType::NonNutrient,
+        ChemicalType::Water,
     );
     assert_eq!(water.is_macronutrient(), false);
 }
@@ -75,23 +75,23 @@ pub fn test_nutrients_is_macronutrient() {
 #[test]
 pub fn test_nutrients_is_micronutrient() {
     let vitamin = NutrientType::new(
-        ChemicalType::Vitamin,
-        QuantityType::Micronutrient,
         Some(EssentialityType::Essential),
+        QuantityType::Micronutrient,
+        ChemicalType::Vitamin,
     );
     assert_eq!(vitamin.is_micronutrient(), true);
 
     let mineral = NutrientType::new(
-        ChemicalType::Mineral,
-        QuantityType::Micronutrient,
         Some(EssentialityType::Essential),
+        QuantityType::Micronutrient,
+        ChemicalType::Mineral,
     );
     assert_eq!(mineral.is_micronutrient(), true);
 
     let water = NutrientType::new(
-        ChemicalType::Water,
-        QuantityType::NonNutrient,
         Some(EssentialityType::Essential),
+        QuantityType::NonNutrient,
+        ChemicalType::Water,
     );
     assert_eq!(water.is_micronutrient(), false);
 }
@@ -99,16 +99,16 @@ pub fn test_nutrients_is_micronutrient() {
 #[test]
 pub fn test_nutrients_is_conditionally_essential() {
     let vitamin = NutrientType::new(
-        ChemicalType::Vitamin,
-        QuantityType::Micronutrient,
         Some(EssentialityType::Essential),
+        QuantityType::Micronutrient,
+        ChemicalType::Vitamin,
     );
     assert_eq!(vitamin.is_conditionally_essential(), false);
 
     let conditionally_essential = NutrientType::new(
-        ChemicalType::Other,
-        QuantityType::NonNutrient,
         Some(EssentialityType::ConditionallyEssential),
+        QuantityType::NonNutrient,
+        ChemicalType::Other,
     );
     assert_eq!(conditionally_essential.is_conditionally_essential(), true);
 }
@@ -116,16 +116,16 @@ pub fn test_nutrients_is_conditionally_essential() {
 #[test]
 pub fn test_nutrients_is_phytonutrient() {
     let phytonutrient = NutrientType::new(
-        ChemicalType::Phytonutrient,
-        QuantityType::NonNutrient,
         Some(EssentialityType::NonEssential),
+        QuantityType::NonNutrient,
+        ChemicalType::Phytonutrient,
     );
     assert_eq!(phytonutrient.is_phytonutrient(), true);
 
     let water = NutrientType::new(
-        ChemicalType::Water,
-        QuantityType::NonNutrient,
         Some(EssentialityType::Essential),
+        QuantityType::NonNutrient,
+        ChemicalType::Water,
     );
     assert_eq!(water.is_phytonutrient(), false);
 }
@@ -133,16 +133,16 @@ pub fn test_nutrients_is_phytonutrient() {
 #[test]
 pub fn test_nutrients_is_antinutrient() {
     let antinutrient = NutrientType::new(
-        ChemicalType::Antinutrient,
-        QuantityType::Micronutrient,
         Some(EssentialityType::NonEssential),
+        QuantityType::Micronutrient,
+        ChemicalType::Antinutrient,
     );
     assert_eq!(antinutrient.is_antinutrient(), true);
 
     let water = NutrientType::new(
-        ChemicalType::Water,
-        QuantityType::NonNutrient,
         Some(EssentialityType::Essential),
+        QuantityType::NonNutrient,
+        ChemicalType::Water,
     );
     assert_eq!(water.is_antinutrient(), false);
 }

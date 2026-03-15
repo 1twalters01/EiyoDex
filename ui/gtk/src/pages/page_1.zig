@@ -101,8 +101,6 @@ pub export fn show_page_1(_: *gtk.GtkWidget, data: gtk.gpointer) callconv(.c) vo
     gtk.gtk_box_append(content, page_3_button_widget);
     gtk.gtk_box_append(content, page_4_button_widget);
 
-    // Set container as window child
-
     // Load CSS
     const provider = gtk.gtk_css_provider_new();
     _ = gtk.gtk_css_provider_load_from_path(provider, "ui/test_styles/page_1.css");

@@ -278,7 +278,10 @@ fn test_get_unit_types() {
         "gram per milliliter"
     );
     assert_eq!(DensityUnit::GramPerPint.get_unit_type(), "gram per pint");
-    assert_eq!(DensityUnit::GramPerGallon.get_unit_type(), "gram per gallon");
+    assert_eq!(
+        DensityUnit::GramPerGallon.get_unit_type(),
+        "gram per gallon"
+    );
     assert_eq!(
         DensityUnit::GramPerFluidOunce.get_unit_type(),
         "gram per fluid ounce"
@@ -379,7 +382,10 @@ fn test_get_unit_types() {
         "microgram per teaspoon"
     );
 
-    assert_eq!(DensityUnit::OuncePerLiter.get_unit_type(), "ounce per liter");
+    assert_eq!(
+        DensityUnit::OuncePerLiter.get_unit_type(),
+        "ounce per liter"
+    );
     assert_eq!(
         DensityUnit::OuncePerMilliliter.get_unit_type(),
         "ounce per milliliter"

@@ -9,10 +9,9 @@ pub fn main() !void {
     const argv: [*c][*c]u8 = null;
 
     const app: *gtk.GtkApplication = gtk.gtk_application_new("eiyodex.gtk", 0);
-    const app_ptr: *gtk.GApplication = @ptrCast(app);
+    const app_gapp: *gtk.GApplication = @ptrCast(app);
     defer gtk.g_object_unref(app);
 
-    // Connect "activate" signal
     _ = gtk.g_signal_connect_data(
         app,
         "activate",
@@ -22,7 +21,6 @@ pub fn main() !void {
         0,
     );
 
-    // Run the application and exit with proper type
-    const status: c_int = gtk.g_application_run(app_ptr, argc, argv);
+    const status: c_int = gtk.g_application_run(app_gapp, argc, argv);
     std.process.exit(@intCast(status));
 }

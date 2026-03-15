@@ -56,8 +56,8 @@ fn populate_nutrient_units(input: TokenStream) -> HashMap<String, NutrientUnitJs
 pub fn generate_nutrient_units(input: TokenStream) -> TokenStream {
     let nutrient_units = populate_nutrient_units(input);
     // if nutrient_units.is_empty() {
-    //     panic!("include_nutrient_units_from_json! found no JSON nutrient unit files");
-    // }
+    //     panic!("include_nutrient_units_from_json! found no JSON nutrient unit
+    // files"); }
 
     let variants = nutrient_units.iter().map(|(key, data)| {
         let variant = format_ident!("{}", key);

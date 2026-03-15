@@ -57,7 +57,7 @@ impl Nutrient {
         let quantity_type = QuantityType::NonNutrient;
         let essentiality_type = None;
 
-        let nutrient_type = NutrientType::new(chemical_type, quantity_type, essentiality_type);
+        let nutrient_type = NutrientType::new(essentiality_type, quantity_type, chemical_type);
         Nutrient {
             id: Uuid::nil(),
             name: String::new(),

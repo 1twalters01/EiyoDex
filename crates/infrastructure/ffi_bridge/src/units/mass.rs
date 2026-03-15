@@ -1,5 +1,5 @@
-use units::mass::unit::MassUnit;
 use crate::units::error::UnitConversionError;
+use units::mass::unit::MassUnit;
 
 macro_rules! define_mass_units_c {
     ($($variant:ident),+) => {

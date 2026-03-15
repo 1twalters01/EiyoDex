@@ -23,7 +23,7 @@ async fn main() -> Result<()> {
             migrations::run_database_migrations(&env.to_string(), &pool)
                 .await
                 .unwrap()
-        },
+        }
         args::Commands::BuildCSS => css::build_css_from_scss()?,
         args::Commands::BuildXaml => xaml::build_xaml_from_scss()?,
         args::Commands::BuildSwiftuiModifiers => swiftui::build_swiftui_modifiers_from_scss()?,

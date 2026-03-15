@@ -48,7 +48,10 @@ fn test_get_plural_unit_types() {
     assert_eq!(VolumeUnit::Milliliter.get_unit_type_plural(), "milliliters");
     assert_eq!(VolumeUnit::Pint.get_unit_type_plural(), "pints");
     assert_eq!(VolumeUnit::Gallon.get_unit_type_plural(), "gallons");
-    assert_eq!(VolumeUnit::FluidOunce.get_unit_type_plural(), "fluid ounces");
+    assert_eq!(
+        VolumeUnit::FluidOunce.get_unit_type_plural(),
+        "fluid ounces"
+    );
     assert_eq!(VolumeUnit::Tablespoon.get_unit_type_plural(), "tablespoons");
     assert_eq!(VolumeUnit::Teaspoon.get_unit_type_plural(), "teaspoons");
 }

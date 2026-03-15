@@ -168,7 +168,10 @@ fn test_get_symbols() {
         SpecificCurrencyUnit::GBPPerFluidOunce.get_symbol(),
         "£/fl oz"
     );
-    assert_eq!(SpecificCurrencyUnit::EURPerTablespoon.get_symbol(), "€/tbsp");
+    assert_eq!(
+        SpecificCurrencyUnit::EURPerTablespoon.get_symbol(),
+        "€/tbsp"
+    );
     assert_eq!(SpecificCurrencyUnit::JPYPerTeaspoon.get_symbol(), "¥/tsp");
 }
 

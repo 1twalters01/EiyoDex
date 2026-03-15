@@ -7,12 +7,12 @@ pub struct LipidNutrient {
 pub enum Lipid {
     Fats(Fat),
     TransFats(TransFat),
-    Sterols(Sterols),
+    Sterols(Sterol),
     Phospholipid,
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-pub enum Sterols {
+pub enum Sterol {
     Cholesterol,
     Phytosterol,
 }

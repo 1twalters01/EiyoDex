@@ -60,9 +60,9 @@ fn test_nutrient_unit_id() {
     let id2: Uuid = Uuid::from_u128(0xa1a2a3a4b1b2c1c2c3c4d1d2d3d4e1e2u128);
     let name = String::from("Potassium");
     let nutrient_type = NutrientType {
-        chemical_type: ChemicalType::Mineral,
-        quantity_type: QuantityType::Micronutrient,
         essentiality_type: Some(EssentialityType::Essential),
+        quantity_type: QuantityType::Micronutrient,
+        chemical_type: ChemicalType::Mineral,
     };
     let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
 

@@ -1,5 +1,5 @@
-use units::volume::unit::VolumeUnit;
 use crate::units::error::UnitConversionError;
+use units::volume::unit::VolumeUnit;
 
 macro_rules! define_volume_units_c {
     ($($variant:ident),+) => {

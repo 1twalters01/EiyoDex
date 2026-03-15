@@ -2,21 +2,21 @@ use crate::schema::nutrient_classes::{ChemicalType, EssentialityType, QuantityTy
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct NutrientType {
-    pub chemical_type: ChemicalType,
-    pub quantity_type: QuantityType,
     pub essentiality_type: Option<EssentialityType>,
+    pub quantity_type: QuantityType,
+    pub chemical_type: ChemicalType,
 }
 
 impl NutrientType {
     pub fn new(
-        chemical_type: ChemicalType,
-        quantity_type: QuantityType,
         essentiality_type: Option<EssentialityType>,
+        quantity_type: QuantityType,
+        chemical_type: ChemicalType,
     ) -> Self {
         Self {
-            chemical_type,
-            quantity_type,
             essentiality_type,
+            quantity_type,
+            chemical_type,
         }
     }
 

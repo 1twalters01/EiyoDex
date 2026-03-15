@@ -5,3 +5,5 @@ edition = "2021"
 
 [dependencies]
 config = { path = "../../crates/core/config" }
+units = { path = "../../crates/core/units" }
+nutrients = { path = "../../crates/modules/food/nutrients" }

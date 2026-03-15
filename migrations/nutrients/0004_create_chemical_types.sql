@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS nutrients_chemical_type_table (
     id INTEGER PRIMARY KEY,
     chemical_type_id INTEGER NOT NULL,
     energy_yielding_nutrient_id INTEGER,
+    UNIQUE (chemical_type_id, energy_yielding_nutrient_id),
     FOREIGN KEY (chemical_type_id)
         REFERENCES nutrients_chemical_types(id)
         ON DELETE CASCADE,
@@ -23,7 +24,12 @@ CREATE TABLE IF NOT EXISTS nutrients_chemical_type_table (
         REFERENCES nutrients_energy_yielding_nutrients(id)
         ON DELETE CASCADE,
     CHECK (
-        chemical_type_id != 1
-        OR energy_yielding_nutrient_id IS NOT NULL
+        (chemical_type_id = 1 AND energy_yielding_nutrient_id IS NOT NULL)
+        OR
+        (chemical_type_id != 1 AND energy_yielding_nutrient_id IS NULL)
     )
 );
+
+CREATE UNIQUE INDEX nutrients_unique_chemical_type_bar_energy
+ON nutrients_chemical_type_table(chemical_type_id)
+WHERE chemical_type_id != 1;

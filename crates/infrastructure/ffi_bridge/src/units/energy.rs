@@ -1,5 +1,5 @@
-use units::energy::unit::EnergyUnit;
 use crate::units::error::UnitConversionError;
+use units::energy::unit::EnergyUnit;
 
 macro_rules! define_energy_units_c {
     ($($variant:ident),+) => {

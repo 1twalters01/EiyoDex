@@ -120,5 +120,11 @@ async fn test_get_database_id() {
     let kj = EnergyUnit::Kilojoule;
     let id = kj.get_database_id(&pool).await;
     assert!(id.is_ok());
-    assert_ne!(EnergyUnit::Kilojoule.get_database_id(&pool).await.unwrap(), EnergyUnit::Kilocalorie.get_database_id(&pool).await.unwrap());
+    assert_ne!(
+        EnergyUnit::Kilojoule.get_database_id(&pool).await.unwrap(),
+        EnergyUnit::Kilocalorie
+            .get_database_id(&pool)
+            .await
+            .unwrap()
+    );
 }

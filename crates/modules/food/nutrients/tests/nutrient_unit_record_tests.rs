@@ -7,8 +7,10 @@ async fn test_from_nutrient_unit() {
     let database_service = DatabaseService::new().await.unwrap();
     let pool = database_service.get_pool();
 
-    let _ = NutrientUnitRecord::save_enumerations_to_database(&pool).await;
+    let _ = MassUnit::save_enumerations_to_database(&pool).await;
+    let _ = VolumeUnit::save_enumerations_to_database(&pool).await;
     let _ = EnergyUnit::save_enumerations_to_database(&pool).await;
+    let _ = NutrientUnitRecord::save_enumerations_to_database(&pool).await;
 
     assert_eq!(
         NutrientUnitRecord::from_nutrient_unit(NutrientUnit::Mass(MassUnit::Gram), &pool).await,
@@ -146,6 +148,9 @@ async fn test_load_from_database() {
     let database_service = DatabaseService::new().await.unwrap();
     let pool = database_service.get_pool();
 
+    let _ = MassUnit::save_enumerations_to_database(&pool).await;
+    let _ = VolumeUnit::save_enumerations_to_database(&pool).await;
+    let _ = EnergyUnit::save_enumerations_to_database(&pool).await;
     let _ = NutrientUnitRecord::save_enumerations_to_database(&pool).await;
 
     let unit_name = String::from("bv"); // biological value

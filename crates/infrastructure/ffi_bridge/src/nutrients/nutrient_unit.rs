@@ -1,16 +1,8 @@
-use nutrients::nutrient_units::NutrientUnit;
-use units::{
-    mass::unit::MassUnit,
-    volume::unit::VolumeUnit,
-    energy::unit::EnergyUnit,
-};
 use crate::units::error::UnitConversionError;
+use nutrients::nutrient_units::NutrientUnit;
+use units::{energy::unit::EnergyUnit, mass::unit::MassUnit, volume::unit::VolumeUnit};
 
-use crate::units::{
-    mass::MassUnitC,
-    volume::VolumeUnitC,
-    energy::EnergyUnitC,
-};
+use crate::units::{energy::EnergyUnitC, mass::MassUnitC, volume::VolumeUnitC};
 
 use std::fmt::Debug;
 

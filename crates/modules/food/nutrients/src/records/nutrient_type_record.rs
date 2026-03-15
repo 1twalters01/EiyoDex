@@ -1,15 +1,15 @@
 use sqlx::{Pool, Sqlite};
-use utils::database::DatabaseService;
 
 use crate::schema::{
     carbohydrate::{Carbohydrate, CarbohydrateNutrient},
     energy::EnergyYieldingNutrients,
-    lipid::{Fat, Lipid, LipidNutrient, Sterols, TransFat},
+    lipid::{Fat, Lipid, LipidNutrient, Sterol, TransFat},
     nutrient_classes::{ChemicalType, EssentialityType, QuantityType},
     nutrient_type::NutrientType,
     protein::ProteinNutrient,
 };
 
+#[derive(Debug, PartialEq)]
 pub struct NutrientTypeRecord {
     essentiality_type_id: Option<i64>,
     quantity_type_id: i64,
@@ -28,6 +28,32 @@ pub struct NutrientTypeRecord {
 }
 
 impl NutrientTypeRecord {
+    pub fn from_values(
+        essentiality_type_id: Option<i64>,
+        quantity_type_id: i64,
+        chemical_type_id: i64,
+        energy_type_id: Option<i64>,
+        carbohydrate_type_id: Option<i64>,
+        is_bcaa: Option<bool>,
+        lipid_type_id: Option<i64>,
+        sterol_type_id: Option<i64>,
+        fat_type_id: Option<i64>,
+        transfat_type_id: Option<i64>,
+    ) -> Self {
+        Self {
+            essentiality_type_id,
+            quantity_type_id,
+            chemical_type_id,
+            energy_type_id,
+            carbohydrate_type_id,
+            is_bcaa,
+            lipid_type_id,
+            sterol_type_id,
+            fat_type_id,
+            transfat_type_id,
+        }
+    }
+
     pub fn from_nutrient_type(nutrient_type: NutrientType) -> Self {
         let quantity_type_id = match nutrient_type.quantity_type {
             QuantityType::Macronutrient => 1,
@@ -74,8 +100,8 @@ impl NutrientTypeRecord {
                             Lipid::Sterols(sterol) => {
                                 lipid_type_id = Some(1);
                                 match sterol {
-                                    Sterols::Cholesterol => sterol_type_id = Some(1),
-                                    Sterols::Phytosterol => sterol_type_id = Some(2),
+                                    Sterol::Cholesterol => sterol_type_id = Some(1),
+                                    Sterol::Phytosterol => sterol_type_id = Some(2),
                                 }
                             }
                             Lipid::Fats(fat) => {
@@ -143,8 +169,8 @@ impl NutrientTypeRecord {
                 )),
                 3 => {
                     let sterol = match self.sterol_type_id {
-                        Some(1) => Some(Lipid::Sterols(Sterols::Cholesterol)),
-                        Some(2) => Some(Lipid::Sterols(Sterols::Phytosterol)),
+                        Some(1) => Some(Lipid::Sterols(Sterol::Cholesterol)),
+                        Some(2) => Some(Lipid::Sterols(Sterol::Phytosterol)),
                         None => None,
                         _ => panic!("Unknown sterol"),
                     };
@@ -200,12 +226,10 @@ impl NutrientTypeRecord {
             Some(_) => panic!("Unknown essentiality_id"),
         };
 
-        NutrientType::new(chemical_type, quantity_type, essentiality_type)
+        NutrientType::new(essentiality_type, quantity_type, chemical_type)
     }
 
     pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-
         let chemical_id = match self.energy_type_id {
             Some(1) => {
                 let carbohydrate_id = sqlx::query!(
@@ -372,8 +396,6 @@ impl NutrientTypeRecord {
         essentiality_type_id: Option<i64>,
         chemical_id: i64, pool: &Pool<Sqlite>,
     ) -> Result<Self, sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-
         let row = sqlx::query_as!(
             NutrientTypeRecord,
             r#"
@@ -425,8 +447,6 @@ impl NutrientTypeRecord {
     }
 
     pub async fn get_chemical_id(&self, pool: &Pool<Sqlite>) -> Result<i64, sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-
         let row = sqlx::query!(
             r#"
                 SELECT ch_t.id 
