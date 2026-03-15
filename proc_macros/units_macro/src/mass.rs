@@ -122,3 +122,23 @@ pub fn generate_units(input: TokenStream) -> TokenStream {
 
     expanded.into()
 }
+
+pub fn generate_units_c(input: TokenStream) -> TokenStream {
+    let masses = populate_masses(input);
+
+    let variants = masses.iter().map(|(key, _)| {
+        let variant = format_ident!("{}", key);
+
+        quote! {
+            #variant
+        }
+    });
+
+    let expanded = quote! {
+        define_mass_units_c! {
+            #(#variants),*
+        }
+    };
+
+    expanded.into()
+}

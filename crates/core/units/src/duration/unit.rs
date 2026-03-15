@@ -118,19 +118,12 @@ macro_rules! define_duration_units {
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 let formatted_string = s.trim().to_lowercase();
+
+                // Warning shows if just one of the user defined types repeats
+                #[allow(unreachable_patterns)]
                 match formatted_string.as_str() {
-                    $($symbol_lc | $unit_type_plural_lc => return Ok(DurationUnit::$variant),)+
-                    _ => {
-                        match formatted_string.as_str() {
-                            $($unit_type_lc => Ok(DurationUnit::$variant),)+
-                            _ => {
-                                match formatted_string.as_str() {
-                                    $($identifier_lc => Ok(DurationUnit::$variant),)+
-                                    err => Err(DurationUnitParseError::UnknownUnit { input: err.to_string() }),
-                                }
-                            }
-                        }
-                    }
+                    $($symbol_lc | $unit_type_plural_lc | $unit_type_lc | $identifier_lc => return Ok(DurationUnit::$variant),)+
+                    err => Err(DurationUnitParseError::UnknownUnit { input: err.to_string() }),
                 }
             }
         }

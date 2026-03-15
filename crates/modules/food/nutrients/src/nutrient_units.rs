@@ -73,14 +73,12 @@ macro_rules! define_nutrient_units {
 
             fn from_str(s: &str) -> Result<Self, &'static str> {
                 let formatted_string = s.trim().to_lowercase();
+
+                // Warning shows if just one of the user defined types repeats
+                #[allow(unreachable_patterns)]
                 match formatted_string.as_str() {
-                    $($symbol_lc | $unit_type_lc | $unit_type_plural_lc => return Ok(NutrientUnit::$variant),)+
-                    _ => {
-                        match formatted_string.as_str() {
-                            $($identifier_lc => Ok(NutrientUnit::$variant),)+
-                            err => Err("Unknown unit"),
-                        }
-                    }
+                    $($symbol_lc | $unit_type_lc | $unit_type_plural_lc | $identifier_lc => return Ok(NutrientUnit::$variant),)+
+                    _ => Err("Unknown unit"),
                 }
             }
         }

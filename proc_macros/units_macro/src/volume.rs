@@ -121,3 +121,23 @@ pub fn generate_units(input: TokenStream) -> TokenStream {
 
     expanded.into()
 }
+
+pub fn generate_units_c(input: TokenStream) -> TokenStream {
+    let volumes = populate_volumes(input);
+
+    let variants = volumes.iter().map(|(key, _)| {
+        let variant = format_ident!("{}", key);
+
+        quote! {
+            #variant
+        }
+    });
+
+    let expanded = quote! {
+        define_volume_units_c! {
+            #(#variants),*
+        }
+    };
+
+    expanded.into()
+}

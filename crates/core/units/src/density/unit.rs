@@ -125,14 +125,12 @@ macro_rules! define_density_units {
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 let formatted_string = s.trim().to_lowercase();
+
+                // Warning shows if just one of the user defined types repeats
+                #[allow(unreachable_patterns)]
                 match formatted_string.as_str() {
-                    $($all_symbol_lc | $all_unit_type_lc | $all_unit_type_plural_lc => return Ok(DensityUnit::$all_variant),)+
-                    _ => {
-                        match formatted_string.as_str() {
-                            $($all_identifier_lc => Ok(DensityUnit::$all_variant),)+
-                            _ => Err("Unknown density unit"),
-                        }
-                    }
+                    $($all_symbol_lc | $all_unit_type_lc | $all_unit_type_plural_lc |$all_identifier_lc => return Ok(DensityUnit::$all_variant),)+
+                    _ => Err("Unknown density unit"),
                 }
             }
         }

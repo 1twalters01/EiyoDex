@@ -390,12 +390,11 @@ macro_rules! define_currency_units {
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 let formatted_string = s.trim().to_lowercase();
 
+                // Warning shows if just one of the user defined types repeats
+                #[allow(unreachable_patterns)]
                 match formatted_string.as_str() {
-                    $($symbol_lc | $code_lc | $unit_type_lc => return Ok(CurrencyUnit::$variant),)+
-                    _ => match formatted_string.as_str() {
-                        $($unit_type_plural_lc => return Ok(CurrencyUnit::$variant),)+
-                        _ => Err("Unknown currency unit"),
-                    }
+                    $($symbol_lc | $code_lc | $unit_type_lc | $unit_type_plural_lc => return Ok(CurrencyUnit::$variant),)+
+                    _ => Err("Unknown currency unit"),
                 }
             }
         }

@@ -1,0 +1,13 @@
+[package]
+name = "ffi_bridge"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+units = { path = "../../core/units" }
+units_macro = { path = "../../../proc_macros/units_macro" }
+nutrients = { path = "../../modules/food/nutrients/" }
+nutrients_macro = { path = "../../../proc_macros/nutrients_macro" }

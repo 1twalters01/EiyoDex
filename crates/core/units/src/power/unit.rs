@@ -125,13 +125,8 @@ macro_rules! define_power_units {
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 let formatted_string = s.trim().to_lowercase();
                 match formatted_string.as_str() {
-                    $($all_symbol_lc | $all_unit_type_lc | $all_unit_type_plural_lc => return Ok(PowerUnit::$all_variant),)+
-                    _ => {
-                        match formatted_string.as_str() {
-                            $($all_identifier_lc => Ok(PowerUnit::$all_variant),)+
-                            err => Err(PowerUnitParseError::UnknownUnit { input: err.to_string() }),
-                        }
-                    }
+                    $($all_symbol_lc | $all_unit_type_lc | $all_unit_type_plural_lc | $all_identifier_lc => return Ok(PowerUnit::$all_variant),)+
+                    err => Err(PowerUnitParseError::UnknownUnit { input: err.to_string() }),
                 }
             }
         }

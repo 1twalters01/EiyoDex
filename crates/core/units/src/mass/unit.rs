@@ -117,14 +117,12 @@ macro_rules! define_mass_units {
 
             fn from_str(s: &str) -> Result<Self, MassUnitParseError> {
                 let formatted_string = s.trim().to_lowercase();
+
+                // Warning shows if just one of the user defined types repeats
+                #[allow(unreachable_patterns)]
                 match formatted_string.as_str() {
-                    $($symbol_lc | $unit_type_lc | $unit_type_plural_lc => return Ok(MassUnit::$variant),)+
-                    _ => {
-                        match formatted_string.as_str() {
-                            $($identifier_lc => Ok(MassUnit::$variant),)+
-                            err => Err(MassUnitParseError::UnknownUnit { input: err.to_string() }),
-                        }
-                    }
+                    $($symbol_lc | $unit_type_lc | $unit_type_plural_lc | $identifier_lc => return Ok(MassUnit::$variant),)+
+                    err => Err(MassUnitParseError::UnknownUnit { input: err.to_string() }),
                 }
             }
         }

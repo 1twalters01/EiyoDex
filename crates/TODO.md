@@ -1,5 +1,7 @@
 # Done
+core/config/
 core/utils/
+proc_macros/
 core/units/
 
 # In progress
@@ -10,12 +12,11 @@ module/exercise/exercise/
 
 # Minor progress
 core/profiles/
+infrastructure/ffi_bridge/
 module/food/nutrient_balances/
-proc_macros/
 
 # Todo
 core/profile_reports/
-core/config/
 interface/cli/
 
 # Future

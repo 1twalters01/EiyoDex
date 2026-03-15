@@ -27,6 +27,11 @@ pub fn include_mass_units_from_json(input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
+pub fn include_mass_units_c_from_json(input: TokenStream) -> TokenStream {
+    mass::generate_units_c(input)
+}
+
+#[proc_macro]
 pub fn include_volumes_from_json(input: TokenStream) -> TokenStream {
     volume::generate(input)
 }
@@ -34,6 +39,10 @@ pub fn include_volumes_from_json(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn include_volume_units_from_json(input: TokenStream) -> TokenStream {
     volume::generate_units(input)
+}
+#[proc_macro]
+pub fn include_volume_units_c_from_json(input: TokenStream) -> TokenStream {
+    volume::generate_units_c(input)
 }
 
 #[proc_macro]
@@ -44,6 +53,11 @@ pub fn include_energies_from_json(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn include_energy_units_from_json(input: TokenStream) -> TokenStream {
     energy::generate_units(input)
+}
+
+#[proc_macro]
+pub fn include_energy_units_c_from_json(input: TokenStream) -> TokenStream {
+    energy::generate_units_c(input)
 }
 
 #[proc_macro]
