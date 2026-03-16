@@ -144,7 +144,7 @@ async fn test_to_nutrient_unit() {
 }
 
 #[tokio::test]
-async fn test_load_from_database() {
+async fn test_database_operations() {
     let database_service = DatabaseService::new().await.unwrap();
     let pool = database_service.get_pool();
 

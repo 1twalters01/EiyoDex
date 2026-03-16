@@ -32,8 +32,8 @@ pub export fn show_page_1(_: *gtk.GtkWidget, data: gtk.gpointer) callconv(.c) vo
     gtk.gtk_box_append(header, title_widget);
 
     // Page Content
-    const child_spacing: c_int = 10;
-    const content_widget: *gtk.GtkWidget = gtk.gtk_box_new(gtk.GTK_ORIENTATION_HORIZONTAL, child_spacing);
+    const content_child_spacing: c_int = 10;
+    const content_widget: *gtk.GtkWidget = gtk.gtk_box_new(gtk.GTK_ORIENTATION_HORIZONTAL, content_child_spacing);
     const content: *gtk.GtkBox = @ptrCast(content_widget);
     gtk.gtk_widget_set_hexpand(content_widget, 1);
     gtk.gtk_widget_set_vexpand(content_widget, 1);
@@ -68,7 +68,7 @@ pub export fn show_page_1(_: *gtk.GtkWidget, data: gtk.gpointer) callconv(.c) vo
         "Page 4 (zig)"
     );
 
-    // Connect "clicked" signal
+    // Connect "clicked" signal to button and function
     _ = gtk.g_signal_connect_data(
         page_2_button,
         "clicked",
@@ -96,7 +96,7 @@ pub export fn show_page_1(_: *gtk.GtkWidget, data: gtk.gpointer) callconv(.c) vo
         0,
     );
 
-    // Add page_2_button to container
+    // Add buttons to container
     gtk.gtk_box_append(content, page_2_button_widget);
     gtk.gtk_box_append(content, page_3_button_widget);
     gtk.gtk_box_append(content, page_4_button_widget);

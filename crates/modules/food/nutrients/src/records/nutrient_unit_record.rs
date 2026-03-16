@@ -93,10 +93,6 @@ impl NutrientUnitRecord {
         }
     }
 
-    pub fn get_unit_type_id(&self) -> i64 {
-        self.unit_type_id
-    }
-
     pub async fn save_enumerations_to_database(pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         let mut tx = pool.begin().await?;
 

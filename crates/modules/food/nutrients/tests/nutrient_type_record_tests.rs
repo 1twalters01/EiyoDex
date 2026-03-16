@@ -319,14 +319,5 @@ fn test_to_nutrient_type() {
 }
 
 #[test]
-fn test_save_to_database() {
+fn test_database_operations() {
 }
-
-#[test]
-fn test_load_from_database() {
-}
-
-#[test]
-fn test_delete_from_database() {
-}
-

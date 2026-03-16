@@ -438,14 +438,6 @@ impl NutrientTypeRecord {
         return Ok(row);
     }
 
-    pub fn get_essentiality_type_id(&self) -> Option<i64> {
-        self.essentiality_type_id
-    }
-
-    pub fn get_quantity_type_id(&self) -> i64 {
-        self.quantity_type_id
-    }
-
     pub async fn get_chemical_id(&self, pool: &Pool<Sqlite>) -> Result<i64, sqlx::Error> {
         let row = sqlx::query!(
             r#"
