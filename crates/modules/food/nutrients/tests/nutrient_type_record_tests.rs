@@ -1,4 +1,5 @@
 use nutrients::{records::nutrient_type_record::NutrientTypeRecord, schema::{carbohydrate::{Carbohydrate, CarbohydrateNutrient}, energy::EnergyYieldingNutrients, lipid::{Fat, Lipid, LipidNutrient, Sterol, TransFat}, nutrient_classes::{ChemicalType, EssentialityType, QuantityType}, nutrient_type::NutrientType, protein::ProteinNutrient}};
+use utils::database::DatabaseService;
 
 #[test]
 fn test_from_nutrient_type() {
@@ -318,6 +319,25 @@ fn test_to_nutrient_type() {
     ); 
 }
 
-#[test]
-fn test_database_operations() {
+#[tokio::test]
+async fn test_database_operations() {
+    let pool = DatabaseService::new().await.unwrap().get_pool();
+
+    let water_values_record = NutrientTypeRecord::from_values(Some(1), 3, 2, None, None, None, None, None, None, None);
+    let water_record = NutrientTypeRecord::from_nutrient_type(
+        NutrientType::new(Some(EssentialityType::Essential), QuantityType::NonNutrient, ChemicalType::Water)
+    );
+
+    let save_res = water_record.save_to_database(&pool).await;
+    assert!(save_res.is_ok());
+        
+    let response_record = NutrientTypeRecord::load_from_database_from_nutrient_type_ids(Some(1), 3, 2, &pool).await;
+    println!("{:#?}", response_record);
+    assert!(response_record.is_ok());
+
+    assert_eq!(response_record.unwrap(), water_values_record);
+
+    let delete_res = water_record.delete_from_database_from_nutrient_type_id(&pool).await;
+
+    assert!(delete_res.is_ok());
 }

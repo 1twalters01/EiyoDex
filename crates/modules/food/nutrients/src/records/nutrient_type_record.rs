@@ -232,17 +232,27 @@ impl NutrientTypeRecord {
     pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         let chemical_id = match self.energy_type_id {
             Some(1) => {
-                let carbohydrate_id = sqlx::query!(
+                assert!(self.carbohydrate_type_id.is_some());
+                let carbohydrate_id = match sqlx::query!(
                     r#"
-                        INSERT INTO nutrients_carbohydrate_nutrients (carbohydrate_id)
+                        INSERT INTO nutrients_carbohydrate_nutrients (carbohydrate_type_id)
                         VALUES (?)
                         RETURNING id
                     "#,
                     self.carbohydrate_type_id
                 )
-                .fetch_one(pool)
+                .fetch_optional(pool)
                 .await?
-                .id;
+                {
+                    Some(row) => row.id,
+                    None => sqlx::query!(
+                        r#"
+                            SELECT id FROM nutrients_carbohydrate_nutrients
+                            WHERE carbohydrate_type_id = ?
+                        "#,
+                        self.carbohydrate_type_id
+                    ).fetch_one(pool).await?.id
+                };
 
                 let energy_id = sqlx::query!(
                     r#"
@@ -363,38 +373,52 @@ impl NutrientTypeRecord {
                 ).fetch_one(pool).await?.id
             }
             None => {
-                sqlx::query!(
+                let chemical_row = sqlx::query!(
                     r#"
-                        INSERT INTO nutrients_chemical_type_table (chemical_type_id)
-                        VALUES (?)
-                        RETURNING id
+                        SELECT chemical_type_id, id FROM nutrients_chemical_type_table
+                        WHERE chemical_type_id = ?
                     "#,
                     self.chemical_type_id,
                 )
-                .fetch_one(pool)
-                .await?
-                .id
+                .fetch_optional(pool)
+                .await?;
+
+                match chemical_row {
+                    Some(row) => row.id,
+                    None => {
+                        sqlx::query!(
+                            r#"
+                                INSERT INTO nutrients_chemical_type_table (chemical_type_id)
+                                VALUES (?)
+                                    RETURNING id
+                            "#,
+                            self.chemical_type_id,
+                        ).fetch_one(pool).await?.id
+                    }
+                }
             }
             _ => panic!("Unknown energy type id"),
         };
 
-        sqlx::query!(
+        let rows = sqlx::query!(
             r#"
-                INSERT INTO nutrients_nutrient_types (quantity_type_id, essentiality_type_id, chemical_id)
+                INSERT INTO nutrients_nutrient_types (essentiality_type_id, quantity_type_id, chemical_id)
                 VALUES (?, ?, ?)
+                ON CONFLICT(essentiality_type_id, quantity_type_id, chemical_id) DO NOTHING
             "#,
-            self.quantity_type_id,
             self.essentiality_type_id,
+            self.quantity_type_id,
             chemical_id
         ).execute(pool).await?;
 
         Ok(())
     }
 
-    pub async fn load_from_database_from_nutrient_type_composite_key(
-        quantity_type_id: i64,
+    pub async fn load_from_database_from_nutrient_type_ids(
         essentiality_type_id: Option<i64>,
-        chemical_id: i64, pool: &Pool<Sqlite>,
+        quantity_type_id: i64,
+        chemical_type_id: i64,
+        pool: &Pool<Sqlite>,
     ) -> Result<Self, sqlx::Error> {
         let row = sqlx::query_as!(
             NutrientTypeRecord,
@@ -404,7 +428,7 @@ impl NutrientTypeRecord {
                     n.essentiality_type_id,
                     ch_t.chemical_type_id,
                     e.energy_yielding_nutrient_type_id as energy_type_id,
-                    c.carbohydrate_id as carbohydrate_type_id,
+                    c.carbohydrate_type_id,
                     p.is_bcaa,
                     lt.lipid_type_id,
                     lt.sterol_type_id,
@@ -425,12 +449,12 @@ impl NutrientTypeRecord {
                     ON l.lipid_id = lt.id
                 WHERE
                     n.quantity_type_id = ?
-                    AND n.essentiality_type_id = ?
-                    AND n.chemical_id = ?
+                    AND n.essentiality_type_id IS ?
+                    AND ch_t.chemical_type_id = ?
             "#,
             quantity_type_id,
             essentiality_type_id,
-            chemical_id
+            chemical_type_id
         )
         .fetch_one(pool)
         .await?;
@@ -438,25 +462,55 @@ impl NutrientTypeRecord {
         return Ok(row);
     }
 
-    pub async fn get_chemical_id(&self, pool: &Pool<Sqlite>) -> Result<i64, sqlx::Error> {
-        let row = sqlx::query!(
+    pub async fn delete_from_database_from_nutrient_type_id(
+        &self,
+        pool: &Pool<Sqlite>,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!(
             r#"
-                SELECT ch_t.id 
-                FROM nutrients_chemical_type_table ch_t
-                INNER JOIN nutrients_nutrient_types n
-                    ON n.chemical_id = ch_t.id
-                WHERE
-                    n.quantity_type_id = ?
-                    AND n.essentiality_type_id = ?
-                    AND n.chemical_id = ?
+                DELETE FROM nutrients_nutrient_types
+                WHERE 
+                    quantity_type_id = ?
+                    AND (
+                        essentiality_type_id = ?
+                        OR (? IS NULL AND essentiality_type_id IS NULL)
+                    )
+                    AND chemical_id IN (
+                        SELECT id
+                            FROM nutrients_chemical_type_table
+                            WHERE chemical_type_id = ?
+                    )
             "#,
-            self.quantity_type_id,
             self.essentiality_type_id,
+            self.essentiality_type_id,
+            self.quantity_type_id,
             self.chemical_type_id
         )
-        .fetch_one(pool)
+        .execute(pool)
         .await?;
 
-        Ok(row.id.expect("Invalid record"))
+        Ok(())
     }
+
+    // pub async fn get_chemical_id(&self, pool: &Pool<Sqlite>) -> Result<i64, sqlx::Error> {
+    //     let row = sqlx::query!(
+    //         r#"
+    //             SELECT ch_t.id 
+    //             FROM nutrients_chemical_type_table ch_t
+    //             INNER JOIN nutrients_nutrient_types n
+    //                 ON n.chemical_id = ch_t.id
+    //             WHERE
+    //                 n.quantity_type_id = ?
+    //                 AND n.essentiality_type_id = ?
+    //                 AND n.chemical_id = ?
+    //         "#,
+    //         self.quantity_type_id,
+    //         self.essentiality_type_id,
+    //         self.chemical_type_id
+    //     )
+    //     .fetch_one(pool)
+    //     .await?;
+    //
+    //     Ok(row.id.expect("Invalid record"))
+    // }
 }
