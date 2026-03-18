@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS nutrients_carbohydrate_nutrients (
     id INTEGER PRIMARY KEY,
-    carbohydrate_id INTEGER UNIQUE NOT NULL,
-    FOREIGN KEY(carbohydrate_id)
+    carbohydrate_type_id INTEGER UNIQUE NOT NULL,
+    FOREIGN KEY(carbohydrate_type_id)
         REFERENCES nutrients_carbohydrate_types (id)
         ON DELETE CASCADE
 );

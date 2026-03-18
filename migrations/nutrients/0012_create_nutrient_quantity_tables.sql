@@ -7,6 +7,6 @@ CREATE TABLE IF NOT EXISTS nutrients_nutrient_quantity_table (
         REFERENCES nutrients_nutrient_table(id)
         ON DELETE CASCADE,
     FOREIGN KEY (output_unit_id)
-        REFERENCES nutrients_unit_table(id)
+        REFERENCES nutrients_nutrient_units(id)
         ON DELETE CASCADE
 );

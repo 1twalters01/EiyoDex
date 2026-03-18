@@ -13,7 +13,7 @@ INSERT OR IGNORE INTO nutrients_chemical_types (id, name) VALUES
 (7, 'other');
 
 CREATE TABLE IF NOT EXISTS nutrients_chemical_type_table (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY NOT NULL,
     chemical_type_id INTEGER NOT NULL,
     energy_yielding_nutrient_id INTEGER,
     UNIQUE (chemical_type_id, energy_yielding_nutrient_id),

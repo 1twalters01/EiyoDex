@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS nutrients_nutrient_table (
     essentiality_type_id INTEGER,
     chemical_id INTEGER UNIQUE NOT NULL,
     FOREIGN KEY (main_unit_id)
-        REFERENCES nutrients_unit_table(id)
+        REFERENCES nutrients_nutrient_units(id)
         ON DELETE CASCADE,
     FOREIGN KEY (quantity_type_id, essentiality_type_id, chemical_id)
         REFERENCES nutrients_nutrient_types (quantity_type_id, essentiality_type_id, chemical_id)
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS nutrients_unit_conversions (
         REFERENCES nutrients_nutrient_table(id)
         ON DELETE CASCADE,
     FOREIGN KEY (unit_id)
-        REFERENCES nutrients_unit_table(id)
+        REFERENCES nutrients_nutrient_units(id)
         ON DELETE CASCADE
 );
 
