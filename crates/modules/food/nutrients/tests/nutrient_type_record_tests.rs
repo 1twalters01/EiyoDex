@@ -320,7 +320,7 @@ fn test_to_nutrient_type() {
 }
 
 #[tokio::test]
-async fn test_database_operations() {
+async fn test_database_operations_for_water() {
     let pool = DatabaseService::new().await.unwrap().get_pool();
 
     let water_values_record = NutrientTypeRecord::from_values(Some(1), 3, 2, None, None, None, None, None, None, None);
@@ -341,3 +341,181 @@ async fn test_database_operations() {
 
     assert!(delete_res.is_ok());
 }
+
+#[tokio::test]
+async fn test_database_operations_for_vitamin() {
+    let pool = DatabaseService::new().await.unwrap().get_pool();
+
+    let vitamin_values_record = NutrientTypeRecord::from_values(Some(1), 2, 3, None, None, None, None, None, None, None);
+    let vitamin_record = NutrientTypeRecord::from_nutrient_type(
+        NutrientType::new(Some(EssentialityType::Essential), QuantityType::Micronutrient, ChemicalType::Vitamin)
+    );
+
+    let save_res = vitamin_record.save_to_database(&pool).await;
+    assert!(save_res.is_ok());
+        
+    let response_record = NutrientTypeRecord::load_from_database_from_nutrient_type_ids(Some(1), 2, 3, &pool).await;
+    println!("{:#?}", response_record);
+    assert!(response_record.is_ok());
+
+    assert_eq!(response_record.unwrap(), vitamin_values_record);
+
+    let delete_res = vitamin_record.delete_from_database_from_nutrient_type_id(&pool).await;
+
+    assert!(delete_res.is_ok());
+}
+
+#[tokio::test]
+async fn test_database_operations_for_mineral() {
+    let pool = DatabaseService::new().await.unwrap().get_pool();
+
+    let mineral_values_record = NutrientTypeRecord::from_values(Some(2), 2, 4, None, None, None, None, None, None, None);
+    let mineral_record = NutrientTypeRecord::from_nutrient_type(
+        NutrientType::new(Some(EssentialityType::ConditionallyEssential), QuantityType::Micronutrient, ChemicalType::Mineral)
+    );
+
+    let save_res = mineral_record.save_to_database(&pool).await;
+    assert!(save_res.is_ok());
+        
+    let response_record = NutrientTypeRecord::load_from_database_from_nutrient_type_ids(Some(2), 2, 4, &pool).await;
+    println!("{:#?}", response_record);
+    assert!(response_record.is_ok());
+
+    assert_eq!(response_record.unwrap(), mineral_values_record);
+
+    let delete_res = mineral_record.delete_from_database_from_nutrient_type_id(&pool).await;
+
+    assert!(delete_res.is_ok());
+}
+
+#[tokio::test]
+async fn test_database_operations_for_phytonutrient() {
+    let pool = DatabaseService::new().await.unwrap().get_pool();
+
+    let phytonutrient_values_record = NutrientTypeRecord::from_values(None, 3, 5, None, None, None, None, None, None, None);
+    let phytonutrient_record = NutrientTypeRecord::from_nutrient_type(
+        NutrientType::new(None, QuantityType::NonNutrient, ChemicalType::Phytonutrient)
+    );
+
+    let save_res = phytonutrient_record.save_to_database(&pool).await;
+    assert!(save_res.is_ok());
+        
+    let response_record = NutrientTypeRecord::load_from_database_from_nutrient_type_ids(None, 3, 5, &pool).await;
+    println!("{:#?}", response_record);
+    assert!(response_record.is_ok());
+
+    assert_eq!(response_record.unwrap(), phytonutrient_values_record);
+
+    let delete_res = phytonutrient_record.delete_from_database_from_nutrient_type_id(&pool).await;
+
+    assert!(delete_res.is_ok());
+}
+
+#[tokio::test]
+async fn test_database_operations_for_carbohydrate() {
+    let pool = DatabaseService::new().await.unwrap().get_pool();
+
+    let starch_values_record = NutrientTypeRecord::from_values(Some(1), 1, 1, Some(1), Some(2), None, None, None, None, None);
+    let starch_record = NutrientTypeRecord::from_nutrient_type(
+        NutrientType::new(
+            Some(EssentialityType::Essential),
+            QuantityType::Macronutrient,
+            ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Carbohydrate(CarbohydrateNutrient { carbohydrate_type: Carbohydrate::Starch } ))
+        )
+    );
+
+    let save_res = starch_record.save_to_database(&pool).await;
+    assert!(save_res.is_ok());
+        
+    let response_record = NutrientTypeRecord::load_from_database_from_nutrient_type_ids(None, 3, 5, &pool).await;
+    println!("{:#?}", response_record);
+    assert!(response_record.is_ok());
+
+    assert_eq!(response_record.unwrap(), starch_values_record);
+
+    let delete_res = starch_record.delete_from_database_from_nutrient_type_id(&pool).await;
+
+    assert!(delete_res.is_ok());
+}
+
+#[tokio::test]
+async fn test_database_operations_for_protein() {
+    let pool = DatabaseService::new().await.unwrap().get_pool();
+
+    let protein_values_record = NutrientTypeRecord::from_values(Some(1), 1, 1, Some(2), None, Some(false), None, None, None, None);
+    let protein_record = NutrientTypeRecord::from_nutrient_type(
+        NutrientType::new(
+            Some(EssentialityType::Essential),
+            QuantityType::Macronutrient,
+            ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Protein(ProteinNutrient { is_bcaa: false }))
+        ),
+    );
+
+    let save_res = protein_record.save_to_database(&pool).await;
+    assert!(save_res.is_ok());
+        
+    let response_record = NutrientTypeRecord::load_from_database_from_nutrient_type_ids(None, 3, 5, &pool).await;
+    println!("{:#?}", response_record);
+    assert!(response_record.is_ok());
+
+    assert_eq!(response_record.unwrap(), protein_values_record);
+
+    let delete_res = protein_record.delete_from_database_from_nutrient_type_id(&pool).await;
+
+    assert!(delete_res.is_ok());
+}
+
+#[tokio::test]
+async fn test_database_operations_for_lipid() {
+    let pool = DatabaseService::new().await.unwrap().get_pool();
+
+    let polyunsaturated_fat_values_record = NutrientTypeRecord::from_values(Some(1), 1, 1, Some(3), None, None, Some(2), None, Some(2), None);
+    let polyunsaturated_fat_record = NutrientTypeRecord::from_nutrient_type(
+        NutrientType::new(
+            Some(EssentialityType::Essential),
+            QuantityType::Macronutrient,
+            ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Lipid(LipidNutrient { lipid_type: Lipid::Fats(Fat::Polyunsaturated) }))
+        ),
+    );
+
+    let save_res = polyunsaturated_fat_record.save_to_database(&pool).await;
+    assert!(save_res.is_ok());
+        
+    let response_record = NutrientTypeRecord::load_from_database_from_nutrient_type_ids(None, 3, 5, &pool).await;
+    println!("{:#?}", response_record);
+    assert!(response_record.is_ok());
+
+    assert_eq!(response_record.unwrap(), polyunsaturated_fat_values_record);
+
+    let delete_res = polyunsaturated_fat_record.delete_from_database_from_nutrient_type_id(&pool).await;
+
+    assert!(delete_res.is_ok());
+}
+
+#[tokio::test]
+async fn test_database_operations_for_alcohol() {
+    let pool = DatabaseService::new().await.unwrap().get_pool();
+
+    let alcohol_values_record = NutrientTypeRecord::from_values(Some(1), 1, 1, Some(4), None, None, None, None, None, None);
+    let alcohol_record = NutrientTypeRecord::from_nutrient_type(
+        NutrientType::new(
+            Some(EssentialityType::Essential),
+            QuantityType::Macronutrient,
+            ChemicalType::EnergyYieldingNutrients(EnergyYieldingNutrients::Alcohol)
+        )
+    );
+
+    let save_res = alcohol_record.save_to_database(&pool).await;
+    assert!(save_res.is_ok());
+        
+    let response_record = NutrientTypeRecord::load_from_database_from_nutrient_type_ids(None, 3, 5, &pool).await;
+    println!("{:#?}", response_record);
+    assert!(response_record.is_ok());
+
+    assert_eq!(response_record.unwrap(), alcohol_values_record);
+
+    let delete_res = alcohol_record.delete_from_database_from_nutrient_type_id(&pool).await;
+
+    assert!(delete_res.is_ok());
+}
+

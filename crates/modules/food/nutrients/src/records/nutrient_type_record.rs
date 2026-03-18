@@ -411,6 +411,24 @@ impl NutrientTypeRecord {
             chemical_id
         ).execute(pool).await?;
 
+        let row = sqlx::query!(
+            r#"
+                SELECT n.quantity_type_id
+                FROM nutrients_nutrient_types n
+                INNER JOIN nutrients_chemical_type_table ch_t
+                    ON n.chemical_id = ch_t.id
+                WHERE n.quantity_type_id = ?
+                AND n.essentiality_type_id IS ?
+                AND ch_t.chemical_type_id = ?
+            "#,
+            self.quantity_type_id,
+            self.essentiality_type_id,
+            self.chemical_type_id,
+        )
+            .fetch_one(pool)
+            .await?;
+
+        println!("quantity type id: {:#?}", row.quantity_type_id);
         Ok(())
     }
 
@@ -420,46 +438,49 @@ impl NutrientTypeRecord {
         chemical_type_id: i64,
         pool: &Pool<Sqlite>,
     ) -> Result<Self, sqlx::Error> {
-        let row = sqlx::query_as!(
-            NutrientTypeRecord,
-            r#"
-                SELECT
-                    n.quantity_type_id,
-                    n.essentiality_type_id,
-                    ch_t.chemical_type_id,
-                    e.energy_yielding_nutrient_type_id as energy_type_id,
-                    c.carbohydrate_type_id,
-                    p.is_bcaa,
-                    lt.lipid_type_id,
-                    lt.sterol_type_id,
-                    lt.fat_type_id,
-                    lt.transfat_type_id
-                FROM nutrients_nutrient_types n
-                INNER JOIN nutrients_chemical_type_table ch_t
-                    ON n.chemical_id = ch_t.id
-                INNER JOIN nutrients_energy_yielding_nutrients e
-                    ON ch_t.energy_yielding_nutrient_id = e.id
-                INNER JOIN nutrients_carbohydrate_nutrients c 
-                    ON e.carbohydrate_nutrient_id = c.id
-                INNER JOIN nutrients_protein_nutrients p
-                    ON e.protein_nutrient_id = p.id
-                INNER JOIN nutrients_lipid_nutrients l 
-                    ON e.lipid_nutrient_id = l.id
-                INNER JOIN nutrients_lipid_table lt
-                    ON l.lipid_id = lt.id
-                WHERE
-                    n.quantity_type_id = ?
-                    AND n.essentiality_type_id IS ?
+        Ok(
+            sqlx::query_as!(
+                NutrientTypeRecord,
+                r#"
+                    SELECT
+                        n.quantity_type_id,
+                        n.essentiality_type_id,
+                        ch_t.chemical_type_id,
+                        e.energy_yielding_nutrient_type_id as "energy_type_id?",
+                        c.carbohydrate_type_id as "carbohydrate_type_id?",
+                        p.is_bcaa as "is_bcaa?",
+                        lt.lipid_type_id as "lipid_type_id?",
+                        lt.sterol_type_id as "sterol_type_id?",
+                        lt.fat_type_id as "fat_type_id?",
+                        lt.transfat_type_id as "transfat_type_id?"
+                    FROM nutrients_nutrient_types n
+                    LEFT JOIN nutrients_chemical_type_table ch_t
+                        ON n.chemical_id = ch_t.id
+                    LEFT JOIN nutrients_energy_yielding_nutrients e
+                        ON ch_t.energy_yielding_nutrient_id = e.id
+                    LEFT JOIN nutrients_carbohydrate_nutrients c 
+                        ON e.carbohydrate_nutrient_id = c.id
+                    LEFT JOIN nutrients_protein_nutrients p
+                        ON e.protein_nutrient_id = p.id
+                    LEFT JOIN nutrients_lipid_nutrients l 
+                        ON e.lipid_nutrient_id = l.id
+                    LEFT JOIN nutrients_lipid_table lt
+                        ON l.lipid_id = lt.id
+                    WHERE n.quantity_type_id = ?
+                    AND (
+                        (n.essentiality_type_id = ?)
+                        OR (n.essentiality_type_id IS NULL AND ? IS NULL)
+                    )
                     AND ch_t.chemical_type_id = ?
-            "#,
-            quantity_type_id,
-            essentiality_type_id,
-            chemical_type_id
+                "#,
+                quantity_type_id,
+                essentiality_type_id,
+                essentiality_type_id,
+                chemical_type_id
+            )
+            .fetch_one(pool)
+            .await?
         )
-        .fetch_one(pool)
-        .await?;
-
-        return Ok(row);
     }
 
     pub async fn delete_from_database_from_nutrient_type_id(
@@ -491,26 +512,4 @@ impl NutrientTypeRecord {
 
         Ok(())
     }
-
-    // pub async fn get_chemical_id(&self, pool: &Pool<Sqlite>) -> Result<i64, sqlx::Error> {
-    //     let row = sqlx::query!(
-    //         r#"
-    //             SELECT ch_t.id 
-    //             FROM nutrients_chemical_type_table ch_t
-    //             INNER JOIN nutrients_nutrient_types n
-    //                 ON n.chemical_id = ch_t.id
-    //             WHERE
-    //                 n.quantity_type_id = ?
-    //                 AND n.essentiality_type_id = ?
-    //                 AND n.chemical_id = ?
-    //         "#,
-    //         self.quantity_type_id,
-    //         self.essentiality_type_id,
-    //         self.chemical_type_id
-    //     )
-    //     .fetch_one(pool)
-    //     .await?;
-    //
-    //     Ok(row.id.expect("Invalid record"))
-    // }
 }
