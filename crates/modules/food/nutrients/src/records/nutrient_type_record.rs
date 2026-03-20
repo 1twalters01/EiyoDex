@@ -1,4 +1,4 @@
-use sqlx::{Pool, Sqlite};
+use sqlx::{Pool, Sqlite, SqliteConnection, Transaction};
 
 use crate::schema::{
     carbohydrate::{Carbohydrate, CarbohydrateNutrient},
@@ -11,7 +11,7 @@ use crate::schema::{
 
 #[derive(Debug, PartialEq)]
 pub struct NutrientTypeRecord {
-    essentiality_type_id: Option<i64>,
+    essentiality_type_id: i64,
     quantity_type_id: i64,
     chemical_type_id: i64,
 
@@ -29,7 +29,7 @@ pub struct NutrientTypeRecord {
 
 impl NutrientTypeRecord {
     pub fn from_values(
-        essentiality_type_id: Option<i64>,
+        essentiality_type_id: i64,
         quantity_type_id: i64,
         chemical_type_id: i64,
         energy_type_id: Option<i64>,
@@ -62,10 +62,10 @@ impl NutrientTypeRecord {
         };
 
         let essentiality_type_id = match nutrient_type.essentiality_type {
-            Some(EssentialityType::Essential) => Some(1),
-            Some(EssentialityType::ConditionallyEssential) => Some(2),
-            Some(EssentialityType::NonEssential) => Some(3),
-            None => None,
+            Some(EssentialityType::Essential) => 1,
+            Some(EssentialityType::ConditionallyEssential) => 2,
+            Some(EssentialityType::NonEssential) => 3,
+            None => 4,
         };
 
         let chemical_type_id: i64;
@@ -219,401 +219,359 @@ impl NutrientTypeRecord {
         };
 
         let essentiality_type = match self.essentiality_type_id {
-            Some(1) => Some(EssentialityType::Essential),
-            Some(2) => Some(EssentialityType::ConditionallyEssential),
-            Some(3) => Some(EssentialityType::NonEssential),
-            None => None,
-            Some(_) => panic!("Unknown essentiality_id"),
+            1 => Some(EssentialityType::Essential),
+            2 => Some(EssentialityType::ConditionallyEssential),
+            3 => Some(EssentialityType::NonEssential),
+            4 => None,
+            _ => panic!("Unknown essentiality_id"),
         };
 
         NutrientType::new(essentiality_type, quantity_type, chemical_type)
     }
 
     pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let mut tx: Transaction<Sqlite> = pool.begin().await?;
         let chemical_id = match self.energy_type_id {
             Some(1) => {
-                assert!(self.carbohydrate_type_id.is_some());
-
-                let carbohydrate_row = sqlx::query!(
-                    r#"
-                        SELECT id FROM nutrients_carbohydrate_nutrients
-                        WHERE carbohydrate_type_id = ?
-                    "#,
-                    self.carbohydrate_type_id
-                ).fetch_optional(pool).await?;
-
-                let carbohydrate_id = match carbohydrate_row {
-                    Some(row) => row.id,
-                    None => {
-                        sqlx::query!(
-                            r#"
-                                INSERT INTO nutrients_carbohydrate_nutrients (carbohydrate_type_id)
-                                VALUES (?)
-                                RETURNING id
-                            "#,
-                            self.carbohydrate_type_id
-                        )
-                        .fetch_one(pool)
-                        .await?.id
-                    }
-                };
-
-                let energy_row = sqlx::query!(
-                    r#"
-                        SELECT id FROM nutrients_energy_yielding_nutrients
-                        WHERE energy_yielding_nutrient_type_id = ?
-                        AND carbohydrate_nutrient_id = ?
-                    "#,
-                    self.energy_type_id,
-                    carbohydrate_id,
-                ).fetch_optional(pool).await?;
-
-                let energy_id = match energy_row {
-                    Some(row) => row.id,
-                    None => {
-                        sqlx::query!(
-                            r#"
-                                INSERT INTO nutrients_energy_yielding_nutrients (energy_yielding_nutrient_type_id, carbohydrate_nutrient_id)
-                                VALUES (?, ?)
-                                RETURNING id
-                            "#,
-                            self.energy_type_id,
-                            carbohydrate_id
-                        ).fetch_one(pool).await?.id
-                    }
-                };
-
-                let chemical_row = sqlx::query!(
-                    r#"
-                        SELECT id FROM nutrients_chemical_type_table
-                        WHERE chemical_type_id = ?
-                        AND energy_yielding_nutrient_id = ?
-                    "#,
-                    self.chemical_type_id,
-                    energy_id,
-                )
-                .fetch_optional(pool)
-                .await?;
-
-                match chemical_row {
-                    Some(row) => row.id,
-                    None => {
-                        sqlx::query!(
-                            r#"
-                                INSERT INTO nutrients_chemical_type_table (chemical_type_id, energy_yielding_nutrient_id)
-                                VALUES (?, ?)
-                                RETURNING id
-                            "#,
-                            self.chemical_type_id,
-                            energy_id
-                        ).fetch_one(pool).await?.id
-                    }    
-                }
+                let carbohydrate_id = Self::get_or_save_and_return_carbohydrate_id(&mut *tx, self.carbohydrate_type_id).await?;
+                let energy_id = Self::get_or_save_and_return_energy_id_using_carbohydrate_id(&mut *tx, self.energy_type_id, carbohydrate_id).await?;
+                Self::get_or_save_and_return_chemical_id_using_energy_id(&mut *tx, self.chemical_type_id, energy_id).await?
             }
             Some(2) => {
-                let protein_row = sqlx::query!(
-                    r#"
-                        SELECT id FROM nutrients_protein_nutrients
-                        WHERE is_bcaa = ?
-                    "#,
-                    self.is_bcaa,
-                ).fetch_optional(pool).await?;
-
-                let protein_id = match protein_row {
-                    Some(row) => row.id,
-                    None => {
-                        sqlx::query!(
-                            r#"
-                                INSERT INTO nutrients_protein_nutrients (is_bcaa)
-                                VALUES (?)
-                                RETURNING id
-                            "#,
-                            self.is_bcaa
-                        )
-                        .fetch_one(pool)
-                        .await?
-                        .id
-                    }
-                };
-
-                let energy_row = sqlx::query!(
-                    r#"
-                        SELECT id FROM nutrients_energy_yielding_nutrients
-                        WHERE energy_yielding_nutrient_type_id = ?
-                        AND protein_nutrient_id = ?
-                    "#,
-                    self.energy_type_id,
-                    protein_id,
-                ).fetch_optional(pool).await?;
-
-                let energy_id = match energy_row {
-                    Some(row) => row.id,
-                    None => {
-                        sqlx::query!(
-                            r#"
-                                INSERT INTO nutrients_energy_yielding_nutrients (energy_yielding_nutrient_type_id, protein_nutrient_id)
-                                VALUES (?, ?)
-                                RETURNING id
-                            "#,
-                            self.energy_type_id,
-                            protein_id
-                        ).fetch_one(pool).await?.id
-                    }
-                };
-
-                let chemical_row = sqlx::query!(
-                    r#"
-                        SELECT id FROM nutrients_chemical_type_table
-                        WHERE chemical_type_id = ?
-                        AND energy_yielding_nutrient_id = ?
-                    "#,
-                    self.chemical_type_id,
-                    energy_id,
-                )
-                .fetch_optional(pool)
-                .await?;
-
-                match chemical_row {
-                    Some(row) => row.id,
-                    None => {
-                        sqlx::query!(
-                            r#"
-                                INSERT INTO nutrients_chemical_type_table (chemical_type_id, energy_yielding_nutrient_id)
-                                VALUES (?, ?)
-                                RETURNING id
-                            "#,
-                            self.chemical_type_id,
-                            energy_id
-                        ).fetch_one(pool).await?.id
-                    }    
-                }
+                let protein_id = Self::get_or_save_and_return_protein_id(&mut *tx, self.is_bcaa).await?;
+                let energy_id = Self::get_or_save_and_return_energy_id_using_protein_id(&mut *tx, self.energy_type_id, protein_id).await?;
+                Self::get_or_save_and_return_chemical_id_using_energy_id(&mut *tx, self.chemical_type_id, energy_id).await?
             }
             Some(3) => {
-                let lipid_table_row = sqlx::query!(
-                    r#"
-                        SELECT id FROM nutrients_lipid_table
-                        WHERE lipid_type_id = ?
-                        AND sterol_type_id IS ?
-                        AND fat_type_id IS ?
-                        AND transfat_type_id IS ?
-                    "#,
-                        self.lipid_type_id,
-                        self.sterol_type_id,
-                        self.fat_type_id,
-                        self.transfat_type_id
-                )
-                .fetch_optional(pool).await?;
-
-                let lipid_table_id = match lipid_table_row {
-                    Some(row) => row.id,
-                    None => {
-                        println!("yoo");
-                        sqlx::query!(
-                            r#"
-                                INSERT INTO nutrients_lipid_table (lipid_type_id, sterol_type_id, fat_type_id, transfat_type_id)
-                                VALUES (?, ?, ?, ?)
-                                RETURNING id
-                            "#,
-                            self.lipid_type_id,
-                            self.sterol_type_id,
-                            self.fat_type_id,
-                            self.transfat_type_id
-                        ).fetch_one(pool).await?.id
-                    }
-                };
-
-                let lipid_row = sqlx::query!(
-                    r#"
-                        SELECT id FROM nutrients_lipid_nutrients
-                        WHERE lipid_id = ?
-                    "#,
-                    lipid_table_id
-                ).fetch_optional(pool).await?;
-
-                let lipid_id = match lipid_row {
-                    Some(row) => row.id,
-                    None => {
-                        sqlx::query!(
-                            r#"
-                                INSERT INTO nutrients_lipid_nutrients (lipid_id)
-                                VALUES (?)
-                                RETURNING id
-                            "#,
-                            lipid_table_id
-                        )
-                        .fetch_one(pool)
-                        .await?
-                        .id
-                    }
-                };
-
-                let energy_row = sqlx::query!(
-                    r#"
-                        SELECT id FROM nutrients_energy_yielding_nutrients
-                        WHERE energy_yielding_nutrient_type_id = ?
-                        AND lipid_nutrient_id = ?
-                    "#,
-                    self.energy_type_id,
-                    lipid_id,
-                ).fetch_optional(pool).await?;
-
-                let energy_id = match energy_row {
-                    Some(row) => row.id,
-                    None => {
-                        sqlx::query!(
-                            r#"
-                                INSERT INTO nutrients_energy_yielding_nutrients (energy_yielding_nutrient_type_id, lipid_nutrient_id)
-                                VALUES (?, ?)
-                                RETURNING id
-                            "#,
-                            self.energy_type_id,
-                            lipid_id
-                        ).fetch_one(pool).await?.id
-                    }
-                };
-
-                let chemical_row = sqlx::query!(
-                    r#"
-                        SELECT id FROM nutrients_chemical_type_table
-                        WHERE chemical_type_id = ?
-                        AND energy_yielding_nutrient_id = ?
-                    "#,
-                    self.chemical_type_id,
-                    energy_id,
-                )
-                .fetch_optional(pool)
-                .await?;
-
-                match chemical_row {
-                    Some(row) => row.id,
-                    None => {
-                        sqlx::query!(
-                            r#"
-                                INSERT INTO nutrients_chemical_type_table (chemical_type_id, energy_yielding_nutrient_id)
-                                VALUES (?, ?)
-                                RETURNING id
-                            "#,
-                            self.chemical_type_id,
-                            energy_id
-                        ).fetch_one(pool).await?.id
-                    }    
-                }
+                let lipid_id = Self::get_or_save_and_return_lipid_id(&mut *tx, self.lipid_type_id, self.sterol_type_id, self.fat_type_id, self.transfat_type_id).await?;
+                let energy_id = Self::get_or_save_and_return_energy_id_using_lipid_id(&mut *tx, self.energy_type_id, lipid_id).await?;
+                Self::get_or_save_and_return_chemical_id_using_energy_id(&mut *tx, self.chemical_type_id, energy_id).await?
             }
             Some(4) => {
-                println!("energy type id: {:#?}", self.energy_type_id);
-                let energy_row = sqlx::query!(
-                    r#"
-                        SELECT id FROM nutrients_energy_yielding_nutrients
-                        WHERE energy_yielding_nutrient_type_id = ?
-                    "#,
-                    self.energy_type_id,
-                )
-                    .fetch_optional(pool)
-                    .await?;
-
-                let energy_id = match energy_row {
-                    Some(row) => row.id,
-                    None => {
-                        sqlx::query!(
-                            r#"
-                                INSERT INTO nutrients_energy_yielding_nutrients (energy_yielding_nutrient_type_id)
-                                VALUES (?)
-                                RETURNING id
-                            "#,
-                            self.energy_type_id,
-                        ).fetch_one(pool).await?.id
-                    },
-                };
-
-                let chemical_row = sqlx::query!(
-                    r#"
-                        SELECT id FROM nutrients_chemical_type_table
-                        WHERE chemical_type_id = ?
-                        AND energy_yielding_nutrient_id = ?
-                    "#,
-                    self.chemical_type_id,
-                    energy_id,
-                )
-                .fetch_optional(pool)
-                .await?;
-
-                match chemical_row {
-                    Some(row) => row.id,
-                    None => {
-                        sqlx::query!(
-                            r#"
-                                INSERT INTO nutrients_chemical_type_table (chemical_type_id, energy_yielding_nutrient_id)
-                                VALUES (?, ?)
-                                RETURNING id
-                            "#,
-                            self.chemical_type_id,
-                            energy_id
-                        ).fetch_one(pool).await?.id
-                    }    
-                }
+                let energy_id = Self::get_or_save_and_return_energy_id(&mut *tx, self.energy_type_id).await?;
+                Self::get_or_save_and_return_chemical_id_using_energy_id(&mut *tx, self.chemical_type_id, energy_id).await?
             }
             None => {
-                let chemical_row = sqlx::query!(
-                    r#"
-                        SELECT id FROM nutrients_chemical_type_table
-                        WHERE chemical_type_id = ?
-                    "#,
-                    self.chemical_type_id,
-                )
-                .fetch_optional(pool)
-                .await?;
-
-                match chemical_row {
-                    Some(row) => row.id,
-                    None => {
-                        sqlx::query!(
-                            r#"
-                                INSERT INTO nutrients_chemical_type_table (chemical_type_id)
-                                VALUES (?)
-                                    RETURNING id
-                            "#,
-                            self.chemical_type_id,
-                        ).fetch_one(pool).await?.id
-                    }
-                }
+                Self::get_or_save_and_return_chemical_id(&mut *tx, self.chemical_type_id).await?
             }
             _ => panic!("Unknown energy type id"),
         };
 
-        let rows = sqlx::query!(
+        Self::save_nutrient_type(&mut *tx, self.essentiality_type_id, self.quantity_type_id, chemical_id).await?;
+
+        tx.commit().await?;
+        Ok(())
+    }
+
+    pub async fn get_or_save_and_return_carbohydrate_id(tx: &mut SqliteConnection, carbohydrate_type_id: Option<i64>) -> Result<i64, sqlx::Error> {
+        let carbohydrate_row = sqlx::query!(
+            r#"
+                SELECT id FROM nutrients_carbohydrate_nutrients
+                WHERE carbohydrate_type_id = ?
+            "#,
+            carbohydrate_type_id
+        ).fetch_optional(&mut *tx).await?;
+
+        match carbohydrate_row {
+            Some(row) => Ok(row.id),
+            None => {
+                Ok(
+                    sqlx::query!(
+                        r#"
+                            INSERT INTO nutrients_carbohydrate_nutrients (carbohydrate_type_id)
+                            VALUES (?)
+                            RETURNING id
+                        "#,
+                        carbohydrate_type_id
+                    )
+                    .fetch_one(&mut *tx)
+                    .await?.id
+                )
+            }
+        }
+    }
+
+    pub async fn get_or_save_and_return_protein_id(tx: &mut SqliteConnection, is_bcaa: Option<bool>) -> Result<i64, sqlx::Error> {
+        let protein_row = sqlx::query!(
+            r#"
+                SELECT id FROM nutrients_protein_nutrients
+                WHERE is_bcaa = ?
+            "#,
+            is_bcaa,
+        ).fetch_optional(&mut *tx).await?;
+
+        match protein_row {
+            Some(row) => Ok(row.id),
+            None => {
+                Ok(
+                    sqlx::query!(
+                        r#"
+                            INSERT INTO nutrients_protein_nutrients (is_bcaa)
+                            VALUES (?)
+                            RETURNING id
+                        "#,
+                        is_bcaa
+                    )
+                    .fetch_one(&mut *tx)
+                    .await?
+                    .id
+                )
+            }
+        }
+    }
+
+    pub async fn get_or_save_and_return_lipid_id(tx: &mut SqliteConnection, lipid_type_id: Option<i64>, sterol_type_id: Option<i64>, fat_type_id: Option<i64>, transfat_type_id: Option<i64>) -> Result<i64, sqlx::Error> {
+        let lipid_table_row = sqlx::query!(
+            r#"
+                SELECT id FROM nutrients_lipid_table
+                WHERE lipid_type_id = ?
+                AND sterol_type_id IS ?
+                AND fat_type_id IS ?
+                AND transfat_type_id IS ?
+            "#,
+                lipid_type_id,
+                sterol_type_id,
+                fat_type_id,
+                transfat_type_id
+        )
+        .fetch_optional(&mut *tx).await?;
+
+        let lipid_table_id = match lipid_table_row {
+            Some(row) => row.id,
+            None => {
+                sqlx::query!(
+                    r#"
+                        INSERT INTO nutrients_lipid_table (lipid_type_id, sterol_type_id, fat_type_id, transfat_type_id)
+                        VALUES (?, ?, ?, ?)
+                        RETURNING id
+                    "#,
+                    lipid_type_id,
+                    sterol_type_id,
+                    fat_type_id,
+                    transfat_type_id
+                ).fetch_one(&mut *tx).await?.id
+            }
+        };
+
+        let lipid_row = sqlx::query!(
+            r#"
+                SELECT id FROM nutrients_lipid_nutrients
+                WHERE lipid_id = ?
+            "#,
+            lipid_table_id
+        ).fetch_optional(&mut *tx).await?;
+
+        match lipid_row {
+            Some(row) => Ok(row.id),
+            None => {
+                Ok(
+                    sqlx::query!(
+                        r#"
+                            INSERT INTO nutrients_lipid_nutrients (lipid_id)
+                            VALUES (?)
+                            RETURNING id
+                        "#,
+                        lipid_table_id
+                    )
+                    .fetch_one(&mut *tx)
+                    .await?
+                    .id
+                )
+            }
+        }
+    }
+
+    pub async fn get_or_save_and_return_energy_id_using_carbohydrate_id(tx: &mut SqliteConnection, energy_type_id: Option<i64>, carbohydrate_id: i64) -> Result<i64, sqlx::Error> {
+        let energy_row = sqlx::query!(
+            r#"
+                SELECT id FROM nutrients_energy_yielding_nutrients
+                WHERE energy_yielding_nutrient_type_id = ?
+                AND carbohydrate_nutrient_id = ?
+            "#,
+            energy_type_id,
+            carbohydrate_id,
+        ).fetch_optional(&mut *tx).await?;
+
+        match energy_row {
+            Some(row) => Ok(row.id),
+            None => {
+                Ok(
+                    sqlx::query!(
+                        r#"
+                            INSERT INTO nutrients_energy_yielding_nutrients (energy_yielding_nutrient_type_id, carbohydrate_nutrient_id)
+                            VALUES (?, ?)
+                            RETURNING id
+                        "#,
+                        energy_type_id,
+                        carbohydrate_id
+                    ).fetch_one(&mut *tx).await?.id
+                )
+            }
+        }
+    }
+
+    pub async fn get_or_save_and_return_energy_id_using_protein_id(tx: &mut SqliteConnection, energy_type_id: Option<i64>, protein_id: i64) -> Result<i64, sqlx::Error> {
+        let energy_row = sqlx::query!(
+            r#"
+                SELECT id FROM nutrients_energy_yielding_nutrients
+                WHERE energy_yielding_nutrient_type_id = ?
+                AND protein_nutrient_id = ?
+            "#,
+            energy_type_id,
+            protein_id,
+        ).fetch_optional(&mut *tx).await?;
+
+        match energy_row {
+            Some(row) => Ok(row.id),
+            None => {
+                Ok(
+                    sqlx::query!(
+                        r#"
+                            INSERT INTO nutrients_energy_yielding_nutrients (energy_yielding_nutrient_type_id, protein_nutrient_id)
+                            VALUES (?, ?)
+                            RETURNING id
+                        "#,
+                        energy_type_id,
+                        protein_id
+                    ).fetch_one(&mut *tx).await?.id
+                )
+            },
+        }
+    }
+
+    pub async fn get_or_save_and_return_energy_id_using_lipid_id(tx: &mut SqliteConnection, energy_type_id: Option<i64>, lipid_id: i64) -> Result<i64, sqlx::Error> {
+        let energy_row = sqlx::query!(
+            r#"
+                SELECT id FROM nutrients_energy_yielding_nutrients
+                WHERE energy_yielding_nutrient_type_id = ?
+                AND lipid_nutrient_id = ?
+            "#,
+            energy_type_id,
+            lipid_id,
+        ).fetch_optional(&mut *tx).await?;
+
+        match energy_row {
+            Some(row) => Ok(row.id),
+            None => {
+                Ok(
+                    sqlx::query!(
+                        r#"
+                            INSERT INTO nutrients_energy_yielding_nutrients (energy_yielding_nutrient_type_id, lipid_nutrient_id)
+                            VALUES (?, ?)
+                            RETURNING id
+                        "#,
+                        energy_type_id,
+                        lipid_id
+                    ).fetch_one(&mut *tx).await?.id
+                )
+            }
+        }
+    }
+
+    pub async fn get_or_save_and_return_energy_id(tx: &mut SqliteConnection, energy_type_id: Option<i64>) -> Result<i64, sqlx::Error> {
+        let energy_row = sqlx::query!(
+            r#"
+                SELECT id FROM nutrients_energy_yielding_nutrients
+                WHERE energy_yielding_nutrient_type_id = ?
+            "#,
+            energy_type_id,
+        )
+            .fetch_optional(&mut *tx)
+            .await?;
+
+        match energy_row {
+            Some(row) => Ok(row.id),
+            None => {
+                Ok(
+                    sqlx::query!(
+                        r#"
+                            INSERT INTO nutrients_energy_yielding_nutrients (energy_yielding_nutrient_type_id)
+                            VALUES (?)
+                            RETURNING id
+                        "#,
+                        energy_type_id,
+                    ).fetch_one(&mut *tx).await?.id
+                )
+            },
+        }
+    }
+
+    pub async fn get_or_save_and_return_chemical_id_using_energy_id(tx: &mut SqliteConnection, chemical_type_id: i64, energy_id: i64) -> Result<i64, sqlx::Error> {
+        let chemical_row = sqlx::query!(
+            r#"
+                SELECT id FROM nutrients_chemical_type_table
+                WHERE chemical_type_id = ?
+                AND energy_yielding_nutrient_id = ?
+            "#,
+            chemical_type_id,
+            energy_id,
+        )
+        .fetch_optional(&mut *tx)
+        .await?;
+
+        match chemical_row {
+            Some(row) => Ok(row.id),
+            None => {
+                Ok(
+                    sqlx::query!(
+                        r#"
+                            INSERT INTO nutrients_chemical_type_table (chemical_type_id, energy_yielding_nutrient_id)
+                            VALUES (?, ?)
+                            RETURNING id
+                        "#,
+                        chemical_type_id,
+                        energy_id
+                    ).fetch_one(&mut *tx).await?.id
+                )
+            }    
+        }
+    }
+
+    pub async fn get_or_save_and_return_chemical_id(tx: &mut SqliteConnection, chemical_type_id: i64) -> Result<i64, sqlx::Error> {
+        let chemical_row = sqlx::query!(
+            r#"
+                SELECT id FROM nutrients_chemical_type_table
+                WHERE chemical_type_id = ?
+            "#,
+            chemical_type_id,
+        )
+        .fetch_optional(&mut *tx)
+        .await?;
+
+        match chemical_row {
+            Some(row) => Ok(row.id),
+            None => {
+                Ok(
+                    sqlx::query!(
+                        r#"
+                            INSERT INTO nutrients_chemical_type_table (chemical_type_id)
+                            VALUES (?)
+                            RETURNING id
+                        "#,
+                        chemical_type_id,
+                    ).fetch_one(&mut *tx).await?.id
+                )
+            }
+        }
+    }
+
+    pub async fn save_nutrient_type(tx: &mut SqliteConnection, essentiality_type_id: i64, quantity_type_id: i64, chemical_id: i64) -> Result<(), sqlx::Error>{
+        sqlx::query!(
             r#"
                 INSERT INTO nutrients_nutrient_types (essentiality_type_id, quantity_type_id, chemical_id)
                 VALUES (?, ?, ?)
                 ON CONFLICT(essentiality_type_id, quantity_type_id, chemical_id) DO NOTHING
             "#,
-            self.essentiality_type_id,
-            self.quantity_type_id,
+            essentiality_type_id,
+            quantity_type_id,
             chemical_id
-        ).execute(pool).await?;
+        ).execute(&mut *tx).await?;
 
-        let row = sqlx::query!(
-            r#"
-                SELECT n.quantity_type_id
-                FROM nutrients_nutrient_types n
-                INNER JOIN nutrients_chemical_type_table ch_t
-                    ON n.chemical_id = ch_t.id
-                WHERE n.quantity_type_id = ?
-                AND n.essentiality_type_id IS ?
-                AND ch_t.chemical_type_id = ?
-            "#,
-            self.quantity_type_id,
-            self.essentiality_type_id,
-            self.chemical_type_id,
-        )
-            .fetch_one(pool)
-            .await?;
-
-        println!("save quantity type id: {:#?}", row.quantity_type_id);
         Ok(())
     }
 
     pub async fn load_from_database_from_nutrient_type_ids(
-        essentiality_type_id: Option<i64>,
+        essentiality_type_id:i64,
         quantity_type_id: i64,
         chemical_type_id: i64,
         pool: &Pool<Sqlite>,
@@ -647,14 +605,10 @@ impl NutrientTypeRecord {
                     LEFT JOIN nutrients_lipid_table lt
                         ON l.lipid_id = lt.id
                     WHERE n.quantity_type_id = ?
-                    AND (
-                        (n.essentiality_type_id = ?)
-                        OR (n.essentiality_type_id IS NULL AND ? IS NULL)
-                    )
+                    AND n.essentiality_type_id = ?
                     AND ch_t.chemical_type_id = ?
                 "#,
                 quantity_type_id,
-                essentiality_type_id,
                 essentiality_type_id,
                 chemical_type_id
             )
@@ -681,10 +635,7 @@ impl NutrientTypeRecord {
                     LEFT JOIN nutrients_lipid_table lt
                         ON l.lipid_id = lt.id
                     WHERE n.quantity_type_id = ?
-                        AND (
-                            (n.essentiality_type_id = ?)
-                            OR (n.essentiality_type_id IS NULL AND ? IS NULL)
-                        )
+                        AND n.essentiality_type_id = ?
                         AND ch.chemical_type_id = ?
                         AND e.energy_yielding_nutrient_type_id = ?
                         AND c.carbohydrate_type_id = ?
@@ -695,7 +646,6 @@ impl NutrientTypeRecord {
                         AND lt.transfat_type_id = ?
                 "#,
                 self.quantity_type_id,
-                self.essentiality_type_id,
                 self.essentiality_type_id,
                 self.chemical_type_id,
                 self.energy_type_id,
@@ -721,10 +671,7 @@ impl NutrientTypeRecord {
                 DELETE FROM nutrients_nutrient_types
                 WHERE 
                     quantity_type_id = ?
-                    AND (
-                        essentiality_type_id = ?
-                        OR (? IS NULL AND essentiality_type_id IS NULL)
-                    )
+                    AND essentiality_type_id = ?
                     AND chemical_id IN (
                         SELECT ch.id
                         FROM nutrients_chemical_type_table ch
@@ -749,7 +696,6 @@ impl NutrientTypeRecord {
                     )
             "#,
             self.quantity_type_id,
-            self.essentiality_type_id,
             self.essentiality_type_id,
             self.chemical_type_id,
             self.energy_type_id,
