@@ -9,7 +9,7 @@ INSERT OR IGNORE INTO nutrients_energy_yielding_nutrient_types (id, name) VALUES
 (4, 'alcohol');
 
 CREATE TABLE IF NOT EXISTS nutrients_energy_yielding_nutrients (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY NOT NULL,
     energy_yielding_nutrient_type_id INTEGER NOT NULL,
     carbohydrate_nutrient_id INTEGER,
     protein_nutrient_id INTEGER,
@@ -33,3 +33,8 @@ CREATE TABLE IF NOT EXISTS nutrients_energy_yielding_nutrients (
         <= 1
     )
 );
+
+CREATE UNIQUE INDEX nutrients_unique_energy_yielding_type_for_alcohol
+ON nutrients_energy_yielding_nutrients(energy_yielding_nutrient_type_id)
+WHERE energy_yielding_nutrient_type_id != 4;
+

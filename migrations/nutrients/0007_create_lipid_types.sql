@@ -10,11 +10,11 @@ INSERT OR IGNORE INTO nutrients_lipid_types (id, name) VALUES
 (4, 'phospholipid');
 
 CREATE TABLE IF NOT EXISTS nutrients_lipid_table (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY NOT NULL,
     lipid_type_id INTEGER NOT NULL,
-    sterol_type_id INTEGER UNIQUE,
-    fat_type_id INTEGER UNIQUE,
-    transfat_type_id INTEGER UNIQUE,
+    sterol_type_id INTEGER,
+    fat_type_id INTEGER,
+    transfat_type_id INTEGER,
     FOREIGN KEY (lipid_type_id)
         REFERENCES nutrients_lipid_types(id)
         ON DELETE CASCADE,

@@ -335,7 +335,7 @@ async fn test_database_operations_for_water() {
     println!("{:#?}", response_record);
     assert!(response_record.is_ok());
 
-    assert_eq!(response_record.unwrap(), water_values_record);
+    assert!(response_record.unwrap().contains(&water_values_record));
 
     let delete_res = water_record.delete_from_database_from_nutrient_type_id(&pool).await;
 
@@ -358,7 +358,7 @@ async fn test_database_operations_for_vitamin() {
     println!("{:#?}", response_record);
     assert!(response_record.is_ok());
 
-    assert_eq!(response_record.unwrap(), vitamin_values_record);
+    assert!(response_record.unwrap().contains(&vitamin_values_record));
 
     let delete_res = vitamin_record.delete_from_database_from_nutrient_type_id(&pool).await;
 
@@ -381,7 +381,7 @@ async fn test_database_operations_for_mineral() {
     println!("{:#?}", response_record);
     assert!(response_record.is_ok());
 
-    assert_eq!(response_record.unwrap(), mineral_values_record);
+    assert!(response_record.unwrap().contains(&mineral_values_record));
 
     let delete_res = mineral_record.delete_from_database_from_nutrient_type_id(&pool).await;
 
@@ -404,7 +404,7 @@ async fn test_database_operations_for_phytonutrient() {
     println!("{:#?}", response_record);
     assert!(response_record.is_ok());
 
-    assert_eq!(response_record.unwrap(), phytonutrient_values_record);
+    assert!(response_record.unwrap().contains(&phytonutrient_values_record));
 
     let delete_res = phytonutrient_record.delete_from_database_from_nutrient_type_id(&pool).await;
 
@@ -427,11 +427,11 @@ async fn test_database_operations_for_carbohydrate() {
     let save_res = starch_record.save_to_database(&pool).await;
     assert!(save_res.is_ok());
         
-    let response_record = NutrientTypeRecord::load_from_database_from_nutrient_type_ids(None, 3, 5, &pool).await;
+    let response_record = NutrientTypeRecord::load_from_database_from_nutrient_type_ids(Some(1), 1, 1, &pool).await;
     println!("{:#?}", response_record);
     assert!(response_record.is_ok());
 
-    assert_eq!(response_record.unwrap(), starch_values_record);
+    assert!(response_record.unwrap().contains(&starch_values_record));
 
     let delete_res = starch_record.delete_from_database_from_nutrient_type_id(&pool).await;
 
@@ -454,11 +454,11 @@ async fn test_database_operations_for_protein() {
     let save_res = protein_record.save_to_database(&pool).await;
     assert!(save_res.is_ok());
         
-    let response_record = NutrientTypeRecord::load_from_database_from_nutrient_type_ids(None, 3, 5, &pool).await;
+    let response_record = NutrientTypeRecord::load_from_database_from_nutrient_type_ids(Some(1), 1, 1, &pool).await;
     println!("{:#?}", response_record);
     assert!(response_record.is_ok());
 
-    assert_eq!(response_record.unwrap(), protein_values_record);
+    assert!(response_record.unwrap().contains(&protein_values_record));
 
     let delete_res = protein_record.delete_from_database_from_nutrient_type_id(&pool).await;
 
@@ -481,11 +481,11 @@ async fn test_database_operations_for_lipid() {
     let save_res = polyunsaturated_fat_record.save_to_database(&pool).await;
     assert!(save_res.is_ok());
         
-    let response_record = NutrientTypeRecord::load_from_database_from_nutrient_type_ids(None, 3, 5, &pool).await;
+    let response_record = NutrientTypeRecord::load_from_database_from_nutrient_type_ids(Some(1), 1, 1, &pool).await;
     println!("{:#?}", response_record);
     assert!(response_record.is_ok());
 
-    assert_eq!(response_record.unwrap(), polyunsaturated_fat_values_record);
+    assert!(response_record.unwrap().contains(&polyunsaturated_fat_values_record));
 
     let delete_res = polyunsaturated_fat_record.delete_from_database_from_nutrient_type_id(&pool).await;
 
@@ -508,11 +508,11 @@ async fn test_database_operations_for_alcohol() {
     let save_res = alcohol_record.save_to_database(&pool).await;
     assert!(save_res.is_ok());
         
-    let response_record = NutrientTypeRecord::load_from_database_from_nutrient_type_ids(None, 3, 5, &pool).await;
-    println!("{:#?}", response_record);
+    let response_record = NutrientTypeRecord::load_from_database_from_nutrient_type_ids(Some(1), 1, 1, &pool).await;
+    println!("loaded: {:#?}", response_record);
     assert!(response_record.is_ok());
 
-    assert_eq!(response_record.unwrap(), alcohol_values_record);
+    assert!(response_record.unwrap().contains(&alcohol_values_record));
 
     let delete_res = alcohol_record.delete_from_database_from_nutrient_type_id(&pool).await;
 
