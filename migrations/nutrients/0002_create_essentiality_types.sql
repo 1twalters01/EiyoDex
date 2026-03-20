@@ -6,4 +6,5 @@ CREATE TABLE IF NOT EXISTS nutrients_essentiality_types (
 INSERT OR IGNORE INTO nutrients_essentiality_types (id, name) VALUES
 (1, 'essential'),
 (2, 'conditionally_essential'),
-(3, 'non_essential');
+(3, 'non_essential'),
+(4, 'not_applicable');

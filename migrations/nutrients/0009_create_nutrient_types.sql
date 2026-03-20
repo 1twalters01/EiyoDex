@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS nutrients_nutrient_types (
-    essentiality_type_id INTEGER,
+    essentiality_type_id INTEGER NOT NULL,
     quantity_type_id INTEGER NOT NULL,
     chemical_id INTEGER NOT NULL,
     PRIMARY KEY (essentiality_type_id, quantity_type_id, chemical_id),
