@@ -1,4 +1,7 @@
-use units::power::quantity::PowerQuantity;
+use units::{
+    record::Id,
+    power::quantity::PowerQuantity,
+};
 use uuid::Uuid;
 
 #[derive(Clone, PartialEq)]
@@ -6,7 +9,7 @@ pub struct Exercise {
     id: Uuid,
     name: String,
     description: String,
-    power: PowerQuantity, // EnergyQuantity burned per time unit
+    power: Id<PowerQuantity>, // EnergyQuantity burned per time unit
 }
 
 impl Exercise {

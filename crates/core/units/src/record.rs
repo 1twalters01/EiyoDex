@@ -1,36 +1,7 @@
 use sqlx::{Pool, Sqlite};
 use std::{future::Future, marker::PhantomData};
 use uuid::Uuid;
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct Id<T> {
-    uuid: Uuid,
-    _marker: PhantomData<T>,
-}
-
-impl<T: Clone + PartialEq> Id<T> {
-    pub fn new() -> Self {
-        Self {
-            uuid: Uuid::new_v4(),
-            _marker: PhantomData,
-        }
-    }
-
-    pub fn from_uuid(uuid: Uuid, _type: T) -> Self {
-        Self {
-            uuid,
-            _marker: PhantomData::<T>,
-        }
-    }
-
-    pub fn get_uuid(&self) -> Uuid {
-        self.uuid.clone()
-    }
-
-    pub fn set_uuid(&mut self, value: Uuid) {
-        self.uuid = value;
-    }
-}
+use identity::{ Id, InnerId };
 
 pub trait SaveToDatabase<T: Clone + PartialEq> {
     fn save_to_database<'a>(
@@ -80,12 +51,12 @@ impl<T: Clone + PartialEq> Record<T> {
         self.id = id;
     }
 
-    pub fn get_uuid(&self) -> Uuid {
-        self.id.get_uuid()
+    pub fn get_uuid(&self) -> InnerId {
+        self.id.get_inner()
     }
 
-    pub fn set_uuid(&mut self, uuid: Uuid) {
-        self.id.set_uuid(uuid);
+    pub fn set_uuid(&mut self, id: InnerId) {
+        self.id.from_inner(id);
     }
 
     pub fn get_inner(&self) -> T {

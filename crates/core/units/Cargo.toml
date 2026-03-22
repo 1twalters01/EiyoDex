@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+identity = { path = "../identity" }
 units_macro = { path = "../../../proc_macros/units_macro" }
 utils = { path = "../utils" }
 serde = { version = "1.0", features = ["derive"] }
