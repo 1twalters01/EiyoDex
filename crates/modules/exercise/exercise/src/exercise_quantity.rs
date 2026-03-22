@@ -11,7 +11,7 @@ use crate::exercise::Exercise;
 pub struct ExerciseQuantity {
     id: Uuid,
     duration_quantity: DurationQuantity,
-    exercise: Rc<RefCell<Exercise>>,
+    exercise: Rc<RefCell<Id<Exercise>>>,
 }
 
 impl ExerciseQuantity {

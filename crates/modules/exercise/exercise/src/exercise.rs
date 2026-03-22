@@ -6,7 +6,6 @@ use uuid::Uuid;
 
 #[derive(Clone, PartialEq)]
 pub struct Exercise {
-    id: Uuid,
     name: String,
     description: String,
     power: Id<PowerQuantity>, // EnergyQuantity burned per time unit

@@ -13,9 +13,8 @@ use crate::{nutrient::Nutrient, nutrient_units::NutrientUnit};
 
 #[derive(Debug, Clone)]
 pub struct NutrientQuantity {
-    id: Uuid,
     value: f64,
-    nutrient: Rc<RefCell<Nutrient>>,
+    nutrient: Rc<RefCell<Id<Nutrient>>>,
     output_unit: NutrientUnit,
 }
 
@@ -63,14 +62,6 @@ impl NutrientQuantity {
             }),
             Err(err) => Err(err),
         }
-    }
-
-    pub fn get_id(&self) -> Uuid {
-        self.id
-    }
-
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id;
     }
 
     pub fn get_value(&self) -> f64 {

@@ -5,7 +5,7 @@ use crate::nutrient::Nutrient;
 #[derive(Debug, Clone)]
 pub struct NutrientList {
     id: Uuid,
-    nutrients: Vec<Nutrient>,
+    nutrients: Vec<Id<Nutrient>>,
 }
 
 impl NutrientList {

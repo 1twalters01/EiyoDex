@@ -17,7 +17,6 @@ use crate::{
 
 #[derive(Debug, Clone)]
 pub struct Nutrient {
-    id: Uuid,
     name: String,
     description: String,
     nutrient_type: NutrientType,
@@ -42,8 +41,7 @@ impl DFSTrait for Nutrient {}
 
 impl PartialEq for Nutrient {
     fn eq(&self, other: &Self) -> bool {
-        self.id == other.id
-            && self.name == other.name
+            self.name == other.name
             && self.description == other.description
             && self.nutrient_type == other.nutrient_type
             && self.main_unit == other.main_unit
@@ -59,7 +57,6 @@ impl Nutrient {
 
         let nutrient_type = NutrientType::new(essentiality_type, quantity_type, chemical_type);
         Nutrient {
-            id: Uuid::nil(),
             name: String::new(),
             description: String::new(),
             nutrient_type: nutrient_type,
@@ -71,12 +68,10 @@ impl Nutrient {
     }
 
     pub fn new(
-        id: Option<Uuid>,
         name: String,
         nutrient_type: NutrientType,
         main_unit: NutrientUnit,
     ) -> Self {
-        let id = id.unwrap_or_else(Uuid::new_v4);
         let unit_conversions: BTreeMap<NutrientUnit, f64> = match main_unit {
             NutrientUnit::Mass(mass_unit) => {
                 let mass_enums = MassUnit::get_enumerations();
@@ -124,7 +119,6 @@ impl Nutrient {
         };
 
         Nutrient {
-            id,
             name,
             description: String::new(),
             nutrient_type: nutrient_type,
@@ -136,12 +130,10 @@ impl Nutrient {
     }
 
     pub fn new_rc_refcell(
-        id: Option<Uuid>,
         name: String,
         nutrient_type: NutrientType,
         main_unit: NutrientUnit,
     ) -> Rc<RefCell<Self>> {
-        let id = id.unwrap_or_else(Uuid::new_v4);
         let unit_conversions: BTreeMap<NutrientUnit, f64> = match main_unit {
             NutrientUnit::Mass(mass_unit) => {
                 let mass_enums = MassUnit::get_enumerations();
@@ -189,7 +181,6 @@ impl Nutrient {
         };
 
         Rc::new(RefCell::new(Nutrient {
-            id,
             name,
             description: String::new(),
             nutrient_type: nutrient_type,
@@ -198,14 +189,6 @@ impl Nutrient {
             parents: Vec::new(),
             children: Vec::new(),
         }))
-    }
-
-    pub fn get_id(&self) -> Uuid {
-        self.id
-    }
-
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id
     }
 
     pub fn get_name(&self) -> String {
