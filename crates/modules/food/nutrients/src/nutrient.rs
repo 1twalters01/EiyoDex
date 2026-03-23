@@ -21,7 +21,7 @@ pub struct Nutrient {
     description: String,
     nutrient_type: NutrientType,
     unit_conversions: BTreeMap<NutrientUnit, f64>, // 1 unit = factor * main_unit
-    main_unit: Option<NutrientUnit>,
+    main_unit: NutrientUnit,
 
     parents: Vec<Weak<RefCell<Nutrient>>>,
     children: Vec<Rc<RefCell<Nutrient>>>,
@@ -61,7 +61,7 @@ impl Nutrient {
             description: String::new(),
             nutrient_type: nutrient_type,
             unit_conversions: BTreeMap::new(),
-            main_unit: None,
+            main_unit: NutrientUnit::Mass(MassUnit::Gram),
             parents: Vec::new(),
             children: Vec::new(),
         }
@@ -122,7 +122,7 @@ impl Nutrient {
             name,
             description: String::new(),
             nutrient_type: nutrient_type,
-            main_unit: Some(main_unit),
+            main_unit: main_unit,
             unit_conversions: unit_conversions,
             parents: Vec::new(),
             children: Vec::new(),
@@ -184,7 +184,7 @@ impl Nutrient {
             name,
             description: String::new(),
             nutrient_type: nutrient_type,
-            main_unit: Some(main_unit),
+            main_unit: main_unit,
             unit_conversions: unit_conversions,
             parents: Vec::new(),
             children: Vec::new(),
@@ -266,10 +266,7 @@ impl Nutrient {
     }
 
     pub fn remove_conversion(&mut self, unit: NutrientUnit) -> Result<(), &'static str> {
-        let main_unit = match self.main_unit {
-            Some(main_unit) => main_unit,
-            None => return Err("Main unit is empty"),
-        };
+        let main_unit = self.main_unit;
 
         if unit == main_unit {
             return Err("Cannot remove a conversion if it is the main unit");
@@ -328,7 +325,7 @@ impl Nutrient {
         self.unit_conversions.keys().cloned().collect()
     }
 
-    pub fn get_main_unit(&self) -> Option<NutrientUnit> {
+    pub fn get_main_unit(&self) -> NutrientUnit {
         self.main_unit
     }
 
@@ -343,7 +340,7 @@ impl Nutrient {
             *value /= conversion_factor;
         }
 
-        self.main_unit = Some(new_main_unit);
+        self.main_unit = new_main_unit;
         Ok(())
     }
 

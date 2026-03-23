@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS nutrients_nutrient_table (
     main_unit_id INTEGER NOT NULL,
 
     quantity_type_id INTEGER NOT NULL,
-    essentiality_type_id INTEGER,
+    essentiality_type_id INTEGER NOT NULL,
     chemical_id INTEGER UNIQUE NOT NULL,
     FOREIGN KEY (main_unit_id)
         REFERENCES nutrients_nutrient_units(id)

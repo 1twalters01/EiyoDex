@@ -191,7 +191,7 @@ impl SaveToDatabase<SpecificCurrencyQuantity> for SpecificCurrencyQuantity {
         id: Id<SpecificCurrencyQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         let currency_type_id = self
             .get_unit()
             .get_currency_unit()
@@ -236,7 +236,7 @@ impl GetFromDatabaseUsingId<SpecificCurrencyQuantity> for SpecificCurrencyQuanti
         id: Id<SpecificCurrencyQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<Record<Self>, sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         let row = sqlx::query!(
             r#"
                 SELECT 
@@ -276,7 +276,8 @@ impl GetFromDatabaseUsingId<SpecificCurrencyQuantity> for SpecificCurrencyQuanti
 
         let inner = Self { unit, value };
         let new_uuid = Uuid::from_slice(&row.id.to_vec()).unwrap();
-        let id = Id::from_uuid(new_uuid, inner);
+        let new_inner = InnerId::Uuid(new_uuid);
+        let id = Id::from_inner(new_inner);
         let specific_currency_record = Record::new_with_id(id, inner);
         Ok(specific_currency_record)
     }
@@ -287,7 +288,7 @@ impl DeleteFromDatabaseUsingId<SpecificCurrencyQuantity> for SpecificCurrencyQua
         id: Id<SpecificCurrencyQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         sqlx::query!(
             "DELETE FROM units_specific_currency_quantities  WHERE id = ?",
             uuid
@@ -522,9 +523,12 @@ use uuid::Uuid;
 
 use crate::{
     mass::unit::MassUnit,
-    record::{DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase},
+    record::{DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Record, SaveToDatabase},
     volume::unit::VolumeUnit,
 };
+
+use identity::{Id, InnerId};
+
 include_specific_currencies_from_json!(
     CurrencyUnit => "data/units/currency",
     VolumeUnit => "data/units/volume",

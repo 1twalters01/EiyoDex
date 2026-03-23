@@ -149,7 +149,7 @@ impl SaveToDatabase<PowerQuantity> for PowerQuantity {
         id: Id<PowerQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         let energy_type_id = self
             .get_unit()
             .get_energy_variant()
@@ -189,7 +189,7 @@ impl GetFromDatabaseUsingId<PowerQuantity> for PowerQuantity {
         id: Id<PowerQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<Record<Self>, sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         let row = sqlx::query!(
             r#"
                 SELECT 
@@ -217,7 +217,7 @@ impl GetFromDatabaseUsingId<PowerQuantity> for PowerQuantity {
 
         let inner = Self { unit, value };
         let new_uuid = Uuid::from_slice(&row.id.to_vec()).unwrap();
-        let id = Id::from_uuid(new_uuid, inner);
+        let id = Id::from_inner(InnerId::Uuid(new_uuid));
         let density_record = Record::new_with_id(id, inner);
         Ok(density_record)
     }
@@ -228,7 +228,7 @@ impl DeleteFromDatabaseUsingId<PowerQuantity> for PowerQuantity {
         id: Id<PowerQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         sqlx::query!("DELETE FROM units_power_quantities WHERE id = ?", uuid)
             .execute(pool)
             .await?;
@@ -343,8 +343,11 @@ use units_macro::include_powers_from_json;
 use uuid::Uuid;
 
 use crate::record::{
-    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase,
+    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Record, SaveToDatabase,
 };
+
+use identity::{Id, InnerId};
+
 include_powers_from_json!(
     EnergyUnit => "data/units/energy",
     PowerUnit => "data/units/power",

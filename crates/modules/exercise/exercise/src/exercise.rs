@@ -1,25 +1,17 @@
 use units::{
-    record::Id,
     power::quantity::PowerQuantity,
 };
 use uuid::Uuid;
+use identity::Id;
 
 #[derive(Clone, PartialEq)]
 pub struct Exercise {
     name: String,
     description: String,
-    power: Id<PowerQuantity>, // EnergyQuantity burned per time unit
+    power: PowerQuantity, // EnergyQuantity burned per time unit
 }
 
 impl Exercise {
-    pub fn get_id(&self) -> Uuid {
-        self.id
-    }
-
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id;
-    }
-
     pub fn get_name(&self) -> String {
         self.name.clone()
     }

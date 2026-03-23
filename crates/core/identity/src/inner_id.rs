@@ -1,45 +1,55 @@
-use std::str::FromStr;
+use std::fmt;
 
-#[cfg(feature = "uuid")]
+use ulid::Ulid;
 use uuid::Uuid;
 
-#[cfg(feature = "ulid")]
-use ulid::Ulid;
-
-#[cfg(all(feature = "uuid", feature = "ulid"))]
-compile_error!("Enable only one of: `uuid` or `ulid`");
-
-#[cfg(not(any(feature = "uuid", feature = "ulid")))]
-compile_error!("You must enable one of: `uuid` or `ulid`");
-
-
-#[cfg(feature = "uuid")]
-pub(crate) type InnerId = Uuid;
-
-#[cfg(feature = "ulid")]
-pub(crate) type InnerId = Ulid;
-
-pub(crate) trait InnerIdExt: Sized {
-    fn from_bytes(bytes: [u8;16]) -> Self;
-    fn to_bytes(&self) -> [u8;16];
+pub enum InnerIdType{
+    Uuid,
+    Ulid,
 }
 
-#[cfg(feature = "uuid")]
-impl InnerIdExt for Uuid {
-    fn from_bytes(bytes: [u8;16]) -> Self { Uuid::from_bytes(bytes) }
-    fn to_bytes(&self) -> [u8;16] { *self.as_bytes() }
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+pub enum InnerId {
+    Uuid(Uuid),
+    Ulid(Ulid),
 }
 
-#[cfg(feature = "ulid")]
-impl InnerIdExt for Ulid {
-    fn from_bytes(bytes: [u8;16]) -> Self { Ulid::from_bytes(bytes) }
-    fn to_bytes(&self) -> [u8;16] { self.to_bytes() }
+impl InnerId {
+    pub fn new(id_type: InnerIdType) -> InnerId {
+        match id_type {
+            InnerIdType::Ulid => InnerId::Ulid(Ulid::new()),
+            InnerIdType::Uuid => InnerId::Uuid(Uuid::new_v4()),
+        }
+    }
+    pub fn from_bytes(id_type: InnerIdType, bytes: [u8;16]) -> Self {
+        match id_type {
+            InnerIdType::Ulid => InnerId::Ulid(Ulid::from_bytes(bytes)),
+            InnerIdType::Uuid => InnerId::Uuid(Uuid::from_bytes(bytes)),
+        }
+    }
+
+    pub fn to_bytes(&self) -> [u8;16] {
+        match self {
+            InnerId::Ulid(ulid) => ulid.to_bytes(),
+            InnerId::Uuid(uuid) => *uuid.as_bytes(),
+        }
+    }
 }
 
-pub(crate) fn new_inner() -> InnerId {
-    #[cfg(feature = "uuid")]
-    { Uuid::new_v4() }
+impl fmt::Debug for InnerId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Ulid(ulid) => ulid.fmt(f),
+            Self::Uuid(uuid) => uuid.fmt(f),
+        }
+    }
+}
 
-    #[cfg(feature = "ilid")]
-    { Ulid::new() }
+impl fmt::Display for InnerId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Ulid(ulid) => ulid.fmt(f),
+            Self::Uuid(uuid) => uuid.fmt(f),
+        }
+    }
 }

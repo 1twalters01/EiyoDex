@@ -123,7 +123,7 @@ impl SaveToDatabase<EnergyQuantity> for EnergyQuantity {
         id: Id<EnergyQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         let energy_type_id = self.get_unit().get_database_id(pool).await.unwrap();
         let value = self.get_value();
         sqlx::query!(
@@ -150,7 +150,7 @@ impl GetFromDatabaseUsingId<EnergyQuantity> for EnergyQuantity {
         id: Id<EnergyQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<Record<Self>, sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         let row = sqlx::query!(
             r#"
                 SELECT 
@@ -172,7 +172,7 @@ impl GetFromDatabaseUsingId<EnergyQuantity> for EnergyQuantity {
 
         let inner = Self { unit, value };
         let new_uuid = Uuid::from_slice(&row.id.to_vec()).unwrap();
-        let id = Id::from_uuid(new_uuid, inner);
+        let id = Id::from_inner(InnerId::Uuid(new_uuid));
         let energy_record = Record::new_with_id(id, inner);
         Ok(energy_record)
     }
@@ -183,7 +183,7 @@ impl DeleteFromDatabaseUsingId<EnergyQuantity> for EnergyQuantity {
         id: Id<EnergyQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         sqlx::query!("DELETE FROM units_energy_quantities WHERE id = ?", uuid,)
             .execute(pool)
             .await?;
@@ -260,6 +260,9 @@ impl PartialOrd for EnergyQuantity {
 use units_macro::include_energies_from_json;
 
 use crate::record::{
-    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase,
+    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Record, SaveToDatabase,
 };
+
+use identity::{Id, InnerId};
+
 include_energies_from_json!("data/units/energy");

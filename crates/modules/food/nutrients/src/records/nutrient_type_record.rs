@@ -147,6 +147,14 @@ impl NutrientTypeRecord {
         }
     }
 
+    pub fn get_essentiality_type_id(&self) -> i64 {
+        self.essentiality_type_id
+    }
+
+    pub fn get_quantity_type_id(&self) -> i64 {
+        self.quantity_type_id
+    }
+
     pub fn to_nutrient_type(&self) -> NutrientType {
         let chemical_type = match self.chemical_type_id {
             1 => match self.energy_type_id.unwrap() {
@@ -613,6 +621,53 @@ impl NutrientTypeRecord {
                 chemical_type_id
             )
             .fetch_all(pool)
+            .await?
+        )
+    }
+
+    pub async fn load_from_database_from_nutrient_composite_id(
+        essentiality_type_id:i64,
+        quantity_type_id: i64,
+        chemical_id: i64,
+        pool: &Pool<Sqlite>,
+    ) -> Result<Self, sqlx::Error> {
+        Ok(
+            sqlx::query_as!(
+                NutrientTypeRecord,
+                r#"
+                    SELECT
+                        n.quantity_type_id,
+                        n.essentiality_type_id,
+                        ch_t.chemical_type_id,
+                        e.energy_yielding_nutrient_type_id as "energy_type_id?",
+                        c.carbohydrate_type_id as "carbohydrate_type_id?",
+                        p.is_bcaa as "is_bcaa?",
+                        lt.lipid_type_id as "lipid_type_id?",
+                        lt.sterol_type_id as "sterol_type_id?",
+                        lt.fat_type_id as "fat_type_id?",
+                        lt.transfat_type_id as "transfat_type_id?"
+                    FROM nutrients_nutrient_types n
+                    LEFT JOIN nutrients_chemical_type_table ch_t
+                        ON n.chemical_id = ch_t.id
+                    LEFT JOIN nutrients_energy_yielding_nutrients e
+                        ON ch_t.energy_yielding_nutrient_id = e.id
+                    LEFT JOIN nutrients_carbohydrate_nutrients c 
+                        ON e.carbohydrate_nutrient_id = c.id
+                    LEFT JOIN nutrients_protein_nutrients p
+                        ON e.protein_nutrient_id = p.id
+                    LEFT JOIN nutrients_lipid_nutrients l 
+                        ON e.lipid_nutrient_id = l.id
+                    LEFT JOIN nutrients_lipid_table lt
+                        ON l.lipid_id = lt.id
+                    WHERE n.quantity_type_id = ?
+                    AND n.essentiality_type_id = ?
+                    AND n.chemical_id = ?
+                "#,
+                quantity_type_id,
+                essentiality_type_id,
+                chemical_id
+            )
+            .fetch_one(pool)
             .await?
         )
     }

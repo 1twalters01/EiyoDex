@@ -165,7 +165,7 @@ impl NutrientUnitRecord {
     pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         sqlx::query!(
             r#"
-                INSERT INTO nutrients_nutrient_units (unit_type_id, mass_type_id, volume_type_id, energy_type_id)
+                INSERT OR IGNORE INTO nutrients_nutrient_units (unit_type_id, mass_type_id, volume_type_id, energy_type_id)
                 VALUES (?, ?, ?, ?)
             "#,
             self.unit_type_id,

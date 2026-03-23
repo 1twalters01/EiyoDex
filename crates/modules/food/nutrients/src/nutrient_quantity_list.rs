@@ -6,7 +6,7 @@ use uuid::Uuid;
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct NutrientQuantityList {
     id: Uuid,
-    nutrient_quantities: BTreeSet<Id<NutrientQuantity>>,
+    nutrient_quantities: BTreeSet<NutrientQuantity>,
 }
 
 impl NutrientQuantityList {

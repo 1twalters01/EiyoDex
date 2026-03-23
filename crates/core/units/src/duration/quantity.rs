@@ -135,7 +135,7 @@ impl SaveToDatabase<DurationQuantity> for DurationQuantity {
         id: Id<DurationQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         let duration_type_id = self.get_unit().get_database_id(pool).await.unwrap();
         let duration = self.get_duration();
         sqlx::query!(
@@ -162,7 +162,7 @@ impl GetFromDatabaseUsingId<DurationQuantity> for DurationQuantity {
         id: Id<DurationQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<Record<Self>, sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         let row = sqlx::query!(
             r#"
                 SELECT 
@@ -184,7 +184,7 @@ impl GetFromDatabaseUsingId<DurationQuantity> for DurationQuantity {
 
         let inner = Self::new(value, unit);
         let new_uuid = Uuid::from_slice(&row.id.to_vec()).unwrap();
-        let id = Id::from_uuid(new_uuid, inner);
+        let id = Id::from_inner(InnerId::Uuid(new_uuid));
         let distance_record = Record::new_with_id(id, inner);
         Ok(distance_record)
     }
@@ -195,7 +195,7 @@ impl DeleteFromDatabaseUsingId<DurationQuantity> for DurationQuantity {
         id: Id<DurationQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         sqlx::query!("DELETE FROM units_duration_quantities WHERE id = ?", uuid)
             .execute(pool)
             .await?;
@@ -267,6 +267,9 @@ use units_macro::include_durations_from_json;
 use uuid::Uuid;
 
 use crate::record::{
-    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase,
+    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Record, SaveToDatabase,
 };
+
+use identity::{Id, InnerId};
+
 include_durations_from_json!("data/units/duration");

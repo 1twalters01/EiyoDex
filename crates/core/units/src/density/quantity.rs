@@ -143,7 +143,7 @@ impl SaveToDatabase<DensityQuantity> for DensityQuantity {
         id: Id<DensityQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         let mass_type_id = self
             .get_unit()
             .get_mass_variant()
@@ -183,7 +183,7 @@ impl GetFromDatabaseUsingId<DensityQuantity> for DensityQuantity {
         id: Id<DensityQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<Record<Self>, sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         let row = sqlx::query!(
             r#"
                 SELECT 
@@ -211,7 +211,7 @@ impl GetFromDatabaseUsingId<DensityQuantity> for DensityQuantity {
 
         let inner = Self { unit, value };
         let new_uuid = Uuid::from_slice(&row.id.to_vec()).unwrap();
-        let id = Id::from_uuid(new_uuid, inner);
+        let id = Id::from_inner(InnerId::Uuid(new_uuid));
         let density_record = Record::new_with_id(id, inner);
         Ok(density_record)
     }
@@ -222,7 +222,7 @@ impl DeleteFromDatabaseUsingId<DensityQuantity> for DensityQuantity {
         id: Id<DensityQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         sqlx::query!("DELETE FROM units_density_quantities WHERE id = ?", uuid)
             .execute(pool)
             .await?;
@@ -335,8 +335,11 @@ use units_macro::include_densities_from_json;
 use uuid::Uuid;
 
 use crate::record::{
-    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase,
+    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Record, SaveToDatabase,
 };
+
+use identity::{Id, InnerId};
+
 include_densities_from_json!(
     DensityUnit => "data/units/density",
     MassUnit => "data/units/mass",

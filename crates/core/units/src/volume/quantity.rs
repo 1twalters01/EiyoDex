@@ -120,7 +120,7 @@ impl SaveToDatabase<VolumeQuantity> for VolumeQuantity {
         id: Id<VolumeQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         let volume_type_id = self.get_unit().get_database_id(pool).await.unwrap();
         let value = self.get_value();
         sqlx::query!(
@@ -147,7 +147,7 @@ impl GetFromDatabaseUsingId<VolumeQuantity> for VolumeQuantity {
         id: Id<VolumeQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<Record<Self>, sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         let row = sqlx::query!(
             r#"
                 SELECT 
@@ -169,7 +169,8 @@ impl GetFromDatabaseUsingId<VolumeQuantity> for VolumeQuantity {
 
         let inner = Self { unit, value };
         let new_uuid = Uuid::from_slice(&row.id.to_vec()).unwrap();
-        let id = Id::from_uuid(new_uuid, inner);
+        let new_inner = InnerId::Uuid(new_uuid);
+        let id = Id::from_inner(new_inner);
         let distance_record = Record::new_with_id(id, inner);
         Ok(distance_record)
     }
@@ -180,7 +181,7 @@ impl DeleteFromDatabaseUsingId<VolumeQuantity> for VolumeQuantity {
         id: Id<VolumeQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         sqlx::query!("DELETE FROM units_volume_quantities WHERE id = ?", uuid,)
             .execute(pool)
             .await?;
@@ -253,6 +254,9 @@ impl PartialOrd for VolumeQuantity {
 use units_macro::include_volumes_from_json;
 
 use crate::record::{
-    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase,
+    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Record, SaveToDatabase,
 };
+
+use identity::{Id, InnerId};
+
 include_volumes_from_json!("data/units/volume",);

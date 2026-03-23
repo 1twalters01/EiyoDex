@@ -1,9 +1,8 @@
 use std::{
-    marker::PhantomData,
-    str::FromStr
+    fmt, marker::PhantomData
 };
 
-use crate::inner_id{InnerId, InnerIdExt, new_inner};
+use crate::inner_id::{InnerId, InnerIdType};
 
 
 #[repr(transparent)]
@@ -14,9 +13,9 @@ pub struct Id<T> {
 }
 
 impl<T> Id<T> {
-    pub fn new() -> Self {
+    pub fn new(id_type: InnerIdType) -> Self {
         Self {
-            inner: new_inner(),
+            inner: InnerId::new(id_type),
             _marker: PhantomData,
         }
     }
@@ -39,18 +38,18 @@ impl<T> Id<T> {
         self.inner.to_bytes()
     }
 
-    pub fn from_bytes(bytes: [u8; 16]) -> Self {
-        Self::from_inner(InnerId::from_bytes(bytes))
+    pub fn from_bytes(id_type: InnerIdType, bytes: [u8; 16]) -> Self {
+        Self::from_inner(InnerId::from_bytes(id_type, bytes))
     }
 
-    pub fn from_slice(slice: &[u8]) -> Result<Self, &'static str> {
+    pub fn from_slice(id_type: InnerIdType, slice: &[u8]) -> Result<Self, &'static str> {
         if slice.len() != 16 {
             return Err("Slice length must be 16 bytes");
         }
 
         let mut bytes = [0u8; 16];
         bytes.copy_from_slice(slice);
-        Ok(Self::from_bytes(bytes))
+        Ok(Self::from_bytes(id_type, bytes))
     }
 }
 
@@ -75,14 +74,6 @@ impl<T> From<InnerId> for Id<T> {
 impl<T> From<Id<T>> for InnerId {
     fn from(id: Id<T>) -> Self {
         id.inner
-    }
-}
-
-impl<T> FromStr for Id<T> {
-    type Err = <InnerId as FromStr>::Err;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self::from_inner(s.parse()?))
     }
 }
 

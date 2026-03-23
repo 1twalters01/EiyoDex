@@ -120,7 +120,7 @@ impl SaveToDatabase<DistanceQuantity> for DistanceQuantity {
         id: Id<DistanceQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         let distance_type_id = self.get_unit().get_database_id(pool).await.unwrap();
         let value = self.get_value();
         sqlx::query!(
@@ -147,7 +147,7 @@ impl GetFromDatabaseUsingId<DistanceQuantity> for DistanceQuantity {
         id: Id<DistanceQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<Record<Self>, sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         let row = sqlx::query!(
             r#"
                 SELECT 
@@ -169,7 +169,7 @@ impl GetFromDatabaseUsingId<DistanceQuantity> for DistanceQuantity {
 
         let inner = Self { unit, value };
         let new_uuid = Uuid::from_slice(&row.id.to_vec()).unwrap();
-        let id = Id::from_uuid(new_uuid, inner);
+        let id = Id::from_inner(InnerId::Uuid(new_uuid));
         let distance_record = Record::new_with_id(id, inner);
         Ok(distance_record)
     }
@@ -180,7 +180,7 @@ impl DeleteFromDatabaseUsingId<DistanceQuantity> for DistanceQuantity {
         id: Id<DistanceQuantity>,
         pool: &Pool<Sqlite>,
     ) -> Result<(), sqlx::Error> {
-        let uuid = id.get_uuid();
+        let uuid = id.get_inner().to_bytes().to_vec();
         sqlx::query!("DELETE FROM units_distance_quantities WHERE id = ?", uuid)
             .execute(pool)
             .await?;
@@ -255,6 +255,9 @@ impl PartialOrd for DistanceQuantity {
 use units_macro::include_distances_from_json;
 
 use crate::record::{
-    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Id, Record, SaveToDatabase,
+    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Record, SaveToDatabase,
 };
+
+use identity::{Id, InnerId};
+
 include_distances_from_json!("data/units/distance",);

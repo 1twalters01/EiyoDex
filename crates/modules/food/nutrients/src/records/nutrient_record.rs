@@ -10,30 +10,52 @@ use crate::{
     records::{nutrient_unit_record::NutrientUnitRecord, nutrient_type_record::NutrientTypeRecord},
 };
 
+#[derive(Debug, PartialEq)]
 pub struct NutrientRecord {
     pub nutrient_id: Vec<u8>,
     pub name: String,
     pub description: String,
     pub main_unit_id: i64,
-    pub essentiality_type_id: Option<i64>,
+    pub essentiality_type_id: i64,
     pub quantity_type_id: i64,
     pub chemical_id: i64,
 }
 
 impl NutrientRecord {
+    pub fn from_values(
+        nutrient_id: Vec<u8>,
+        name: String,
+        description: String,
+        main_unit_id: i64,
+        essentiality_type_id: i64,
+        quantity_type_id: i64,
+        chemical_id: i64,
+    ) -> Self {
+        Self {
+            nutrient_id,
+            name,
+            description,
+            main_unit_id,
+            essentiality_type_id,
+            quantity_type_id,
+            chemical_id,
+        }
+    }
+
     pub async fn from_nutrient(nutrient: Nutrient, pool: &Pool<Sqlite>) -> Result<Self, &'static str> {
         let nutrient_id = nutrient.get_id().as_bytes().to_vec();
         let name = nutrient.get_name();
         let description = nutrient.get_description();
-        let nutrient_type = NutrientTypeRecord::from_nutrient_type(nutrient.get_nutrient_type());
-        let main_unit_id = NutrientUnitRecord::from_nutrient_unit(nutrient.get_main_unit(), pool)
+        let nutrient_type_record = NutrientTypeRecord::from_nutrient_type(nutrient.get_nutrient_type());
+        let main_unit_id = NutrientUnitRecord::from_nutrient_unit(nutrient.get_main_unit().expect("No main unit found"), pool)
             .await
-            .get_unit_type_id()
+            .get_database_id(&pool)
+            .await
             .unwrap();
 
-        let essentiality_type_id = nutrient_type.get_essentiality_type_id();
-        let quantity_type_id = nutrient_type.get_quantity_type_id();
-        let chemical_id = nutrient_type.get_chemical_id(pool).await.unwrap();
+        let essentiality_type_id = nutrient_type_record.get_essentiality_type_id();
+        let quantity_type_id = nutrient_type_record.get_quantity_type_id();
+        let chemical_id = nutrient_type_record.get_chemical_id_from_database(&pool).await.unwrap();
 
         Ok(Self {
             nutrient_id,
@@ -51,9 +73,9 @@ impl NutrientRecord {
         let name = self.name.clone();
         let description = self.description.clone();
         let nutrient_type_record =
-            NutrientTypeRecord::load_from_database_from_nutrient_type_composite_key(
-                self.quantity_type_id,
+            NutrientTypeRecord::load_from_database_from_nutrient_composite_id(
                 self.essentiality_type_id,
+                self.quantity_type_id,
                 self.chemical_id,
                 pool,
             )
@@ -123,8 +145,6 @@ impl NutrientRecord {
     }
 
     pub async fn delete_nutrient(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
-        let database_service = DatabaseService::new().await.unwrap();
-
         sqlx::query!(
             "DELETE FROM nutrients_nutrient_table WHERE id = ?",
             self.nutrient_id
@@ -150,7 +170,8 @@ impl NutrientConversionsRecord {
         for (unit, factor) in nutrient.get_unit_conversions().iter() {
             let unit_id = NutrientUnitRecord::from_nutrient_unit(*unit, pool)
                 .await
-                .get_unit_type_id()
+                .get_database_id(&pool)
+                .await
                 .expect("invalid nutrient");
             let factor = *factor;
             let conversion = Self {
