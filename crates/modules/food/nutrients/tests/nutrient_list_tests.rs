@@ -13,8 +13,6 @@ use uuid::Uuid;
 
 #[test]
 fn test_id_funcs() {
-    let iron_id = None;
-    let potassium_id = None;
     let nutrient_list_id = Uuid::from_u128(15u128);
     let nutrient_type = NutrientType {
         chemical_type: ChemicalType::Mineral,
@@ -27,7 +25,6 @@ fn test_id_funcs() {
     let iron: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value,
         Nutrient::new_rc_refcell(
-            iron_id,
             String::from("Iron"),
             nutrient_type.clone(),
             NutrientUnit::Mass(MassUnit::Milligram),
@@ -39,7 +36,6 @@ fn test_id_funcs() {
     let potassium: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value,
         Nutrient::new_rc_refcell(
-            potassium_id,
             String::from("Potassium"),
             nutrient_type.clone(),
             NutrientUnit::Mass(MassUnit::Milligram),
@@ -57,8 +53,6 @@ fn test_id_funcs() {
 
 #[test]
 fn test_push_and_remove_from_nutrient_list() {
-    let iron_id = None;
-    let potassium_id = None;
     let nutrient_list_id = Uuid::from_u128(15u128);
     let nutrient_type = NutrientType {
         chemical_type: ChemicalType::Mineral,
@@ -71,7 +65,6 @@ fn test_push_and_remove_from_nutrient_list() {
     let iron: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value,
         Nutrient::new_rc_refcell(
-            iron_id,
             String::from("Iron"),
             nutrient_type.clone(),
             NutrientUnit::Mass(MassUnit::Milligram),
@@ -83,7 +76,6 @@ fn test_push_and_remove_from_nutrient_list() {
     let potassium: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value,
         Nutrient::new_rc_refcell(
-            potassium_id,
             String::from("Potassium"),
             nutrient_type.clone(),
             NutrientUnit::Mass(MassUnit::Milligram),
@@ -129,7 +121,6 @@ fn test_sum_ascendants_vec() {}
 
 #[test]
 fn test_sum_descendants_vec() {
-    let id = None;
     let nutrient_type = NutrientType {
         chemical_type: ChemicalType::Mineral,
         quantity_type: QuantityType::Micronutrient,
@@ -139,7 +130,6 @@ fn test_sum_descendants_vec() {
     // Create iron, heme iron and non-heme iron
     let value_1 = 1f64;
     let iron = Nutrient::new_rc_refcell(
-        id,
         String::from("Iron"),
         nutrient_type.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -153,7 +143,6 @@ fn test_sum_descendants_vec() {
 
     let value_2 = 10f64;
     let heme_iron = Nutrient::new_rc_refcell(
-        id,
         String::from("Heme Iron"),
         nutrient_type.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -167,7 +156,6 @@ fn test_sum_descendants_vec() {
 
     let value_3 = 100f64;
     let non_heme_iron = Nutrient::new_rc_refcell(
-        id,
         String::from("Non-heme Iron"),
         nutrient_type.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -181,7 +169,6 @@ fn test_sum_descendants_vec() {
 
     let value_4 = 1_000f64;
     let non_heme_iron_a = Nutrient::new_rc_refcell(
-        id,
         String::from("Non-heme Iron A"),
         nutrient_type.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -195,7 +182,6 @@ fn test_sum_descendants_vec() {
 
     let value_5 = 10_000f64;
     let non_heme_iron_b = Nutrient::new_rc_refcell(
-        id,
         String::from("Non-heme Iron B"),
         nutrient_type.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -209,7 +195,6 @@ fn test_sum_descendants_vec() {
 
     let value_6 = 100_000f64;
     let potassium = Nutrient::new_rc_refcell(
-        id,
         String::from("Potassium"),
         nutrient_type,
         NutrientUnit::Mass(MassUnit::Milligram),

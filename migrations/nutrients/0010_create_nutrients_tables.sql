@@ -1,12 +1,12 @@
 CREATE TABLE IF NOT EXISTS nutrients_nutrient_table (
     id BLOB PRIMARY KEY NOT NULL,
-    name TEXT NOT NULL,
+    name TEXT NOT NULL UNIQUE,
     description TEXT NOT NULL,
     main_unit_id INTEGER NOT NULL,
 
     quantity_type_id INTEGER NOT NULL,
     essentiality_type_id INTEGER NOT NULL,
-    chemical_id INTEGER UNIQUE NOT NULL,
+    chemical_id INTEGER NOT NULL,
     FOREIGN KEY (main_unit_id)
         REFERENCES nutrients_nutrient_units(id)
         ON DELETE CASCADE,

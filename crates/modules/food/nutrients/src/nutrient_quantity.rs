@@ -7,7 +7,6 @@ use std::{
 };
 
 use units::{energy::quantity::EnergyQuantity, mass::unit::MassUnit};
-use uuid::Uuid;
 
 use crate::{nutrient::Nutrient, nutrient_units::NutrientUnit};
 

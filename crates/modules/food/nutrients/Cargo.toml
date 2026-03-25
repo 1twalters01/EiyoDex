@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+identity = { path = "../../../core/identity" }
 nutrients_macro = { path = "../../../../proc_macros/nutrients_macro" }
 units = { path = "../../../core/units" }
 utils = { path = "../../../core/utils" }

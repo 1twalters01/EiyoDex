@@ -3,7 +3,6 @@ use std::{
     collections::{BTreeMap, BTreeSet, HashSet},
     rc::{Rc, Weak},
 };
-use uuid::Uuid;
 
 use units::{energy::{quantity::EnergyQuantity, unit::EnergyUnit}, mass::unit::MassUnit, volume::unit::VolumeUnit};
 use utils::dsa::{dfs::DFSTrait, node::GraphNode};

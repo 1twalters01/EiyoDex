@@ -11,20 +11,17 @@ use units::mass::unit::MassUnit;
 
 #[test]
 fn test_nutrient() {
-    let id = None;
     let nutrient_type = NutrientType {
         chemical_type: ChemicalType::Mineral,
         quantity_type: QuantityType::Micronutrient,
         essentiality_type: Some(EssentialityType::Essential),
     };
     let potassium = Nutrient::new_rc_refcell(
-        id,
         String::from("Potassium"),
         nutrient_type.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),
     );
     let calcium = Nutrient::new_rc_refcell(
-        id,
         String::from("Calcium"),
         nutrient_type.clone(),
         NutrientUnit::Mass(MassUnit::Microgram),
@@ -46,14 +43,12 @@ fn test_nutrient() {
 
 #[test]
 fn test_rounding() {
-    let id = None;
     let nutrient_type = NutrientType {
         chemical_type: ChemicalType::Mineral,
         quantity_type: QuantityType::Micronutrient,
         essentiality_type: Some(EssentialityType::Essential),
     };
     let potassium = Nutrient::new(
-        id,
         String::from("Potassium"),
         nutrient_type,
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -76,14 +71,12 @@ fn test_rounding() {
 
 #[test]
 fn test_multiply() {
-    let id = None;
     let nutrient_type = NutrientType {
         chemical_type: ChemicalType::Mineral,
         quantity_type: QuantityType::Micronutrient,
         essentiality_type: Some(EssentialityType::Essential),
     };
     let potassium = Nutrient::new(
-        id,
         String::from("Potassium"),
         nutrient_type,
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -99,14 +92,12 @@ fn test_multiply() {
 
 #[test]
 fn test_division() {
-    let id = None;
     let nutrient_type = NutrientType {
         chemical_type: ChemicalType::Mineral,
         quantity_type: QuantityType::Micronutrient,
         essentiality_type: Some(EssentialityType::Essential),
     };
     let potassium = Nutrient::new_rc_refcell(
-        id,
         String::from("Potassium"),
         nutrient_type,
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -126,14 +117,12 @@ fn test_division() {
 
 #[test]
 fn test_add() {
-    let id = None;
     let nutrient_type = NutrientType {
         chemical_type: ChemicalType::Mineral,
         quantity_type: QuantityType::Micronutrient,
         essentiality_type: Some(EssentialityType::Essential),
     };
     let potassium = Nutrient::new_rc_refcell(
-        id,
         String::from("Potassium"),
         nutrient_type,
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -171,14 +160,12 @@ fn test_add() {
 
 #[test]
 fn test_subtract() {
-    let id = None;
     let nutrient_type = NutrientType {
         chemical_type: ChemicalType::Mineral,
         quantity_type: QuantityType::Micronutrient,
         essentiality_type: Some(EssentialityType::Essential),
     };
     let potassium = Nutrient::new_rc_refcell(
-        id,
         String::from("Potassium"),
         nutrient_type,
         NutrientUnit::Mass(MassUnit::Milligram),
@@ -216,14 +203,12 @@ fn test_subtract() {
 
 #[test]
 fn test_ordering() {
-    let id = None;
     let nutrient_type = NutrientType {
         chemical_type: ChemicalType::Mineral,
         quantity_type: QuantityType::Micronutrient,
         essentiality_type: Some(EssentialityType::Essential),
     };
     let potassium = Nutrient::new_rc_refcell(
-        id,
         String::from("Potassium"),
         nutrient_type.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),

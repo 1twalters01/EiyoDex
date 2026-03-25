@@ -692,13 +692,13 @@ impl NutrientTypeRecord {
                     WHERE n.quantity_type_id = ?
                         AND n.essentiality_type_id = ?
                         AND ch.chemical_type_id = ?
-                        AND e.energy_yielding_nutrient_type_id = ?
-                        AND c.carbohydrate_type_id = ?
-                        AND p.is_bcaa = ?
-                        AND lt.lipid_type_id = ?
-                        AND lt.sterol_type_id = ?
-                        AND lt.fat_type_id = ?
-                        AND lt.transfat_type_id = ?
+                        AND e.energy_yielding_nutrient_type_id IS ?
+                        AND c.carbohydrate_type_id IS ?
+                        AND p.is_bcaa IS ?
+                        AND lt.lipid_type_id IS ?
+                        AND lt.sterol_type_id IS ?
+                        AND lt.fat_type_id IS ?
+                        AND lt.transfat_type_id IS ?
                 "#,
                 self.quantity_type_id,
                 self.essentiality_type_id,
@@ -741,13 +741,13 @@ impl NutrientTypeRecord {
                         LEFT JOIN nutrients_lipid_table lt
                             ON l.lipid_id = lt.id
                         WHERE ch.chemical_type_id = ?
-                        AND e.energy_yielding_nutrient_type_id = ?
-                        AND c.carbohydrate_type_id = ?
-                        AND p.is_bcaa = ?
-                        AND lt.lipid_type_id = ?
-                        AND lt.sterol_type_id = ?
-                        AND lt.fat_type_id = ?
-                        AND lt.transfat_type_id = ?
+                        AND e.energy_yielding_nutrient_type_id Is ?
+                        AND c.carbohydrate_type_id IS ?
+                        AND p.is_bcaa IS ?
+                        AND lt.lipid_type_id IS ?
+                        AND lt.sterol_type_id IS ?
+                        AND lt.fat_type_id IS ?
+                        AND lt.transfat_type_id IS ?
                     )
             "#,
             self.quantity_type_id,

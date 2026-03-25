@@ -1,13 +1,12 @@
 use std::collections::BTreeMap;
 
+use identity::{inner_id::InnerIdType, Id};
 use sqlx::{Pool, Sqlite};
-use utils::{database::DatabaseService, dsa::node::GraphNode};
+use utils::dsa::node::GraphNode;
 use uuid::Uuid;
 
 use crate::{
-    nutrient::Nutrient,
-    nutrient_units::NutrientUnit,
-    records::{nutrient_unit_record::NutrientUnitRecord, nutrient_type_record::NutrientTypeRecord},
+    entity::Entity, nutrient::Nutrient, nutrient_units::NutrientUnit, records::{nutrient_type_record::NutrientTypeRecord, nutrient_unit_record::NutrientUnitRecord}
 };
 
 #[derive(Debug, PartialEq)]
@@ -43,11 +42,40 @@ impl NutrientRecord {
     }
 
     pub async fn from_nutrient(nutrient: Nutrient, pool: &Pool<Sqlite>) -> Result<Self, &'static str> {
-        let nutrient_id = nutrient.get_id().as_bytes().to_vec();
+        let nutrient_id = Id::<Nutrient>::new(InnerIdType::Uuid).to_bytes().to_vec();
+
         let name = nutrient.get_name();
         let description = nutrient.get_description();
         let nutrient_type_record = NutrientTypeRecord::from_nutrient_type(nutrient.get_nutrient_type());
-        let main_unit_id = NutrientUnitRecord::from_nutrient_unit(nutrient.get_main_unit().expect("No main unit found"), pool)
+        let main_unit_id = NutrientUnitRecord::from_nutrient_unit(nutrient.get_main_unit(), pool)
+            .await
+            .get_database_id(&pool)
+            .await
+            .unwrap();
+
+        let essentiality_type_id = nutrient_type_record.get_essentiality_type_id();
+        let quantity_type_id = nutrient_type_record.get_quantity_type_id();
+        let chemical_id = nutrient_type_record.get_chemical_id_from_database(&pool).await.unwrap();
+
+        Ok(Self {
+            nutrient_id,
+            name,
+            description,
+            essentiality_type_id,
+            quantity_type_id,
+            chemical_id,
+            main_unit_id,
+        })
+    }
+
+    pub async fn from_nutrient_entity(nutrient_entity: Entity<Nutrient>, pool: &Pool<Sqlite>) -> Result<Self, &'static str> {
+        let nutrient_id = nutrient_entity.get_id().get_inner().to_bytes().to_vec();
+
+        let nutrient = nutrient_entity.get_inner();
+        let name = nutrient.get_name();
+        let description = nutrient.get_description();
+        let nutrient_type_record = NutrientTypeRecord::from_nutrient_type(nutrient.get_nutrient_type());
+        let main_unit_id = NutrientUnitRecord::from_nutrient_unit(nutrient.get_main_unit(), pool)
             .await
             .get_database_id(&pool)
             .await
@@ -69,7 +97,6 @@ impl NutrientRecord {
     }
 
     pub async fn to_nutrient(&self, pool: &Pool<Sqlite>) -> Nutrient {
-        let id = Some(Uuid::from_slice(&self.nutrient_id).unwrap());
         let name = self.name.clone();
         let description = self.description.clone();
         let nutrient_type_record =
@@ -88,10 +115,39 @@ impl NutrientRecord {
             .to_nutrient_unit(pool)
             .await;
 
-        let mut nutrient = Nutrient::new(id, name, nutrient_type, main_unit_id);
+        let mut nutrient = Nutrient::new(name, nutrient_type, main_unit_id);
         nutrient.set_description(description);
 
         return nutrient;
+    }
+
+    pub async fn to_nutrient_entity(&self, pool: &Pool<Sqlite>) -> Entity<Nutrient> {
+        let name = self.name.clone();
+        let description = self.description.clone();
+        let nutrient_type_record =
+            NutrientTypeRecord::load_from_database_from_nutrient_composite_id(
+                self.essentiality_type_id,
+                self.quantity_type_id,
+                self.chemical_id,
+                pool,
+            )
+            .await
+            .unwrap();
+        let nutrient_type = nutrient_type_record.to_nutrient_type();
+        let main_unit_id = NutrientUnitRecord::load_from_database(self.main_unit_id, pool)
+            .await
+            .unwrap()
+            .to_nutrient_unit(pool)
+            .await;
+
+        let mut nutrient = Nutrient::new(name, nutrient_type, main_unit_id);
+        nutrient.set_description(description);
+
+        // let id = Uuid::from_slice(&self.nutrient_id).unwrap();
+        let id = Id::<Nutrient>::from_slice(InnerIdType::Uuid, &self.nutrient_id).unwrap();
+        let nutrient_entity = Entity::<Nutrient>::new_with_id(id, nutrient);
+
+        return nutrient_entity;
     }
 
     pub async fn load_from_database(id: Uuid, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
@@ -164,7 +220,31 @@ pub struct NutrientConversionsRecord {
 
 impl NutrientConversionsRecord {
     pub async fn from_nutrient(nutrient: Nutrient, pool: &Pool<Sqlite>) -> Result<Vec<Self>, &'static str> {
-        let nutrient_id = nutrient.get_id().as_bytes().to_vec().clone();
+        let nutrient_id = Id::<Nutrient>::new(InnerIdType::Uuid).to_bytes().to_vec();
+        let mut conversion_vec = Vec::new();
+
+        for (unit, factor) in nutrient.get_unit_conversions().iter() {
+            let unit_id = NutrientUnitRecord::from_nutrient_unit(*unit, pool)
+                .await
+                .get_database_id(&pool)
+                .await
+                .expect("invalid nutrient");
+            let factor = *factor;
+            let conversion = Self {
+                nutrient_id: nutrient_id.clone(),
+                unit_id,
+                factor,
+            };
+            conversion_vec.push(conversion);
+        }
+
+        Ok(conversion_vec)
+    }
+
+    pub async fn from_nutrient_entity(nutrient_entity: Entity<Nutrient>, pool: &Pool<Sqlite>) -> Result<Vec<Self>, &'static str> {
+        let nutrient_id = nutrient_entity.get_id().get_inner().to_bytes().to_vec();
+        let nutrient = nutrient_entity.get_inner();
+
         let mut conversion_vec = Vec::new();
 
         for (unit, factor) in nutrient.get_unit_conversions().iter() {
@@ -310,7 +390,42 @@ pub struct NutrientLinkRecord {
 
 impl NutrientLinkRecord {
     pub async fn from_nutrient(nutrient: Nutrient, pool: &Pool<Sqlite>) -> Result<Self, &'static str> {
-        let nutrient_id = nutrient.get_id().as_bytes().to_vec().clone();
+        let nutrient_id = Id::<Nutrient>::new(InnerIdType::Uuid).to_bytes().to_vec();
+        let mut child_ids: Vec<Vec<u8>> = Vec::new();
+        for child in nutrient.get_children() {
+            child_ids.push(
+                NutrientRecord::from_nutrient(child.borrow().clone(), pool)
+                    .await
+                    .unwrap()
+                    .nutrient_id,
+            )
+        }
+
+        let mut parent_ids: Vec<Vec<u8>> = Vec::new();
+        for parent_weak in nutrient.get_parents() {
+            if let Some(parent) = parent_weak.upgrade() {
+                parent_ids.push(
+                    NutrientRecord::from_nutrient(parent.borrow().clone(), pool)
+                        .await
+                        .unwrap()
+                        .nutrient_id,
+                )
+            } else {
+                return Err("Weak parent");
+            }
+        }
+
+        Ok(NutrientLinkRecord {
+            nutrient_id,
+            parent_ids,
+            child_ids,
+        })
+    }
+
+    pub async fn from_nutrient_entity(nutrient_entity: Entity<Nutrient>, pool: &Pool<Sqlite>) -> Result<Self, &'static str> {
+        let nutrient_id = nutrient_entity.get_id().get_inner().to_bytes().to_vec();
+        let nutrient = nutrient_entity.get_inner();
+
         let mut child_ids: Vec<Vec<u8>> = Vec::new();
         for child in nutrient.get_children() {
             child_ids.push(
