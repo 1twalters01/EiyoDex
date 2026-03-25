@@ -1,7 +1,7 @@
 use units::{
     duration::{quantity::DurationQuantity, unit::DurationUnit},
     measurement_system::MeasurementSystem,
-    record::{GetFromDatabaseUsingId, Record},
+    entity::{GetFromDatabaseUsingId, Entity},
 };
 
 #[test]
@@ -354,7 +354,7 @@ async fn test_save_to_database() {
     let _ = DurationUnit::save_enumerations_to_database(&pool).await;
 
     let duration_hr = DurationQuantity::from_hr(6.78f64);
-    let duration_record = Record::new(duration_hr);
+    let duration_record = Entity::new(duration_hr);
 
     let res = duration_record.save_to_database(&pool).await;
     assert!(res.is_ok());

@@ -1,7 +1,7 @@
 use units::{
     energy::{quantity::EnergyQuantity, unit::EnergyUnit},
     measurement_system::MeasurementSystem,
-    record::{GetFromDatabaseUsingId, Record},
+    entity::{GetFromDatabaseUsingId, Entity},
 };
 use utils::database::DatabaseService;
 
@@ -273,7 +273,7 @@ async fn test_save_to_database() {
     let _ = EnergyUnit::save_enumerations_to_database(&pool).await;
 
     let energy_kcal = EnergyQuantity::from_kcal(6700f64);
-    let energy_record = Record::new(energy_kcal);
+    let energy_record = Entity::new(energy_kcal);
 
     let res = energy_record.save_to_database(&pool).await;
     assert!(res.is_ok());

@@ -146,7 +146,7 @@ impl GetFromDatabaseUsingId<VolumeQuantity> for VolumeQuantity {
     async fn get_from_database_using_id(
         id: Id<VolumeQuantity>,
         pool: &Pool<Sqlite>,
-    ) -> Result<Record<Self>, sqlx::Error> {
+    ) -> Result<Entity<Self>, sqlx::Error> {
         let uuid = id.get_inner().to_bytes().to_vec();
         let row = sqlx::query!(
             r#"
@@ -171,7 +171,7 @@ impl GetFromDatabaseUsingId<VolumeQuantity> for VolumeQuantity {
         let new_uuid = Uuid::from_slice(&row.id.to_vec()).unwrap();
         let new_inner = InnerId::Uuid(new_uuid);
         let id = Id::from_inner(new_inner);
-        let distance_record = Record::new_with_id(id, inner);
+        let distance_record = Entity::new_with_id(id, inner);
         Ok(distance_record)
     }
 }
@@ -253,8 +253,8 @@ impl PartialOrd for VolumeQuantity {
 
 use units_macro::include_volumes_from_json;
 
-use crate::record::{
-    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Record, SaveToDatabase,
+use crate::entity::{
+    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Entity, SaveToDatabase,
 };
 
 use identity::{Id, InnerId};

@@ -3,7 +3,7 @@ use units::{
     energy::{quantity::EnergyQuantity, unit::EnergyUnit},
     measurement_system::MeasurementSystem,
     power::{measurement_system::PowerMeasurementSystem, quantity::PowerQuantity, unit::PowerUnit},
-    record::{GetFromDatabaseUsingId, Record},
+    entity::{GetFromDatabaseUsingId, Entity},
 };
 use utils::database::DatabaseService;
 
@@ -520,7 +520,7 @@ async fn test_save_to_database() {
     let _ = DurationUnit::save_enumerations_to_database(&pool).await;
 
     let power_kcal_per_week = PowerQuantity::from_kcal_per_week(6700f64);
-    let power_record = Record::new(power_kcal_per_week);
+    let power_record = Entity::new(power_kcal_per_week);
 
     let res = power_record.save_to_database(&pool).await;
     assert!(res.is_ok());

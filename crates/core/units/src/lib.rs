@@ -10,4 +10,4 @@ pub mod power;
 pub mod specific_currency;
 pub mod volume;
 
-pub mod record;
+pub mod entity;

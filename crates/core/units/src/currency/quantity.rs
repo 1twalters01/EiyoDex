@@ -173,7 +173,7 @@ impl GetFromDatabaseUsingId<CurrencyQuantity> for CurrencyQuantity {
     async fn get_from_database_using_id(
         id: Id<CurrencyQuantity>,
         pool: &Pool<Sqlite>,
-    ) -> Result<Record<Self>, sqlx::Error> {
+    ) -> Result<Entity<Self>, sqlx::Error> {
         let uuid = id.get_inner().to_bytes().to_vec();
         let row = sqlx::query!(
             r#"
@@ -203,7 +203,7 @@ impl GetFromDatabaseUsingId<CurrencyQuantity> for CurrencyQuantity {
         let inner = Self { unit, value };
         let new_uuid = Uuid::from_slice(&row.id.to_vec()).unwrap();
         let id = Id::from(InnerId::Uuid(new_uuid));
-        let distance_record = Record::new_with_id(id, inner);
+        let distance_record = Entity::new_with_id(id, inner);
         Ok(distance_record)
     }
 }
@@ -278,8 +278,8 @@ use sqlx::{Pool, Sqlite};
 use units_macro::include_currencies_from_json;
 use uuid::Uuid;
 
-use crate::record::{
-    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Record, SaveToDatabase,
+use crate::entity::{
+    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Entity, SaveToDatabase,
 };
 
 use identity::{Id, InnerId};

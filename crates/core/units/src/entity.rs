@@ -14,7 +14,7 @@ pub trait GetFromDatabaseUsingId<T: Clone + PartialEq> {
     fn get_from_database_using_id<'a>(
         id: Id<T>,
         pool: &'a Pool<Sqlite>,
-    ) -> impl Future<Output = Result<Record<T>, sqlx::Error>> + Send + 'a;
+    ) -> impl Future<Output = Result<Entity<T>, sqlx::Error>> + Send + 'a;
 }
 
 pub trait DeleteFromDatabaseUsingId<T: Clone + PartialEq> {
@@ -25,20 +25,20 @@ pub trait DeleteFromDatabaseUsingId<T: Clone + PartialEq> {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Record<T: Clone + PartialEq> {
+pub struct Entity<T: Clone + PartialEq> {
     pub id: Id<T>,
     pub inner: T,
 }
 
-impl<T: Clone + PartialEq> Record<T> {
-    pub fn new(inner: T) -> Record<T> {
+impl<T: Clone + PartialEq> Entity<T> {
+    pub fn new(inner: T) -> Entity<T> {
         Self {
             id: Id::<T>::new(InnerIdType::Uuid),
             inner: inner,
         }
     }
 
-    pub fn new_with_id(id: Id<T>, inner: T) -> Record<T> {
+    pub fn new_with_id(id: Id<T>, inner: T) -> Entity<T> {
         Self { id, inner }
     }
 
@@ -67,7 +67,7 @@ impl<T: Clone + PartialEq> Record<T> {
     }
 }
 
-impl<T> Record<T>
+impl<T> Entity<T>
 where
     T: SaveToDatabase<T> + Clone + PartialEq,
 {
@@ -77,16 +77,16 @@ where
     }
 }
 
-// impl<T> Record<T>
+// impl<T> Entity<T>
 // where
 //     T: GetFromDatabaseUsingId<T> + Clone + PartialEq, {
 //     pub async fn get_from_database_using_id(&self, pool: &Pool<Sqlite>) ->
-// Result<Record<T>, sqlx::Error> {         let uuid = self.get_uuid();
+// Result<Entity<T>, sqlx::Error> {         let uuid = self.get_uuid();
 //         T::get_from_database_using_id(uuid, pool).await
 //     }
 // }
 
-impl<T> Record<T>
+impl<T> Entity<T>
 where
     T: DeleteFromDatabaseUsingId<T> + Clone + PartialEq,
 {

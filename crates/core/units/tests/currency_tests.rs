@@ -1,7 +1,7 @@
 // use chrono::NaiveDate;
 use units::{
     currency::{quantity::CurrencyQuantity, unit::CurrencyUnit},
-    record::{GetFromDatabaseUsingId, Record},
+    entity::{GetFromDatabaseUsingId, Entity},
 };
 use utils::database::DatabaseService;
 
@@ -289,7 +289,7 @@ async fn test_save_to_database() {
     let _ = CurrencyUnit::save_enumerations_to_database(&pool).await;
 
     let currency_gbp = CurrencyQuantity::from_gbp(6700f64);
-    let currency_record = Record::new(currency_gbp);
+    let currency_record = Entity::new(currency_gbp);
 
     let res = currency_record.save_to_database(&pool).await;
     assert!(res.is_ok());

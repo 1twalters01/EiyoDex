@@ -3,7 +3,7 @@ use units::{
     density::{quantity::DensityQuantity, unit::DensityUnit},
     mass::{quantity::MassQuantity, unit::MassUnit},
     measurement_system::MeasurementSystem,
-    record::{GetFromDatabaseUsingId, Record},
+    entity::{GetFromDatabaseUsingId, Entity},
     specific_currency::{
         quantity::SpecificCurrencyQuantity,
         unit::{Denominator, DenominatorType, SpecificCurrencyUnit},
@@ -293,7 +293,7 @@ async fn test_save_to_database() {
     let _ = VolumeUnit::save_enumerations_to_database(&pool).await;
 
     let specific_currency_eur_per_ug = SpecificCurrencyQuantity::from_eur_per_ug(6700f64);
-    let specific_currency_record = Record::new(specific_currency_eur_per_ug);
+    let specific_currency_record = Entity::new(specific_currency_eur_per_ug);
 
     let res = specific_currency_record.save_to_database(&pool).await;
     assert!(res.is_ok());

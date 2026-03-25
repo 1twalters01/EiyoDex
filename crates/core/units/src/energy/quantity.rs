@@ -149,7 +149,7 @@ impl GetFromDatabaseUsingId<EnergyQuantity> for EnergyQuantity {
     async fn get_from_database_using_id(
         id: Id<EnergyQuantity>,
         pool: &Pool<Sqlite>,
-    ) -> Result<Record<Self>, sqlx::Error> {
+    ) -> Result<Entity<Self>, sqlx::Error> {
         let uuid = id.get_inner().to_bytes().to_vec();
         let row = sqlx::query!(
             r#"
@@ -173,7 +173,7 @@ impl GetFromDatabaseUsingId<EnergyQuantity> for EnergyQuantity {
         let inner = Self { unit, value };
         let new_uuid = Uuid::from_slice(&row.id.to_vec()).unwrap();
         let id = Id::from_inner(InnerId::Uuid(new_uuid));
-        let energy_record = Record::new_with_id(id, inner);
+        let energy_record = Entity::new_with_id(id, inner);
         Ok(energy_record)
     }
 }
@@ -259,8 +259,8 @@ impl PartialOrd for EnergyQuantity {
 
 use units_macro::include_energies_from_json;
 
-use crate::record::{
-    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Record, SaveToDatabase,
+use crate::entity::{
+    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Entity, SaveToDatabase,
 };
 
 use identity::{Id, InnerId};

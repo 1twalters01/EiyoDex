@@ -1,6 +1,6 @@
 use units::{
     measurement_system::MeasurementSystem,
-    record::{GetFromDatabaseUsingId, Record},
+    entity::{GetFromDatabaseUsingId, Entity},
     volume::{quantity::VolumeQuantity, unit::VolumeUnit},
 };
 use utils::database::DatabaseService;
@@ -374,7 +374,7 @@ async fn test_save_to_database() {
     let _ = VolumeUnit::save_enumerations_to_database(&pool).await;
 
     let volume_l = VolumeQuantity::from_l(6700f64);
-    let distance_record = Record::new(volume_l);
+    let distance_record = Entity::new(volume_l);
 
     let res = distance_record.save_to_database(&pool).await;
     assert!(res.is_ok());

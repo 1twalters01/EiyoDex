@@ -4,7 +4,7 @@ use units::{
     },
     mass::{quantity::MassQuantity, unit::MassUnit},
     measurement_system::MeasurementSystem,
-    record::{GetFromDatabaseUsingId, Record},
+    entity::{GetFromDatabaseUsingId, Entity},
     volume::{quantity::VolumeQuantity, unit::VolumeUnit},
 };
 use utils::database::DatabaseService;
@@ -1205,7 +1205,7 @@ async fn test_save_to_database() {
     let _ = VolumeUnit::save_enumerations_to_database(&pool).await;
 
     let density_oz_per_tsp = DensityQuantity::from_oz_per_tsp(6700f64);
-    let density_record = Record::new(density_oz_per_tsp);
+    let density_record = Entity::new(density_oz_per_tsp);
 
     let res = density_record.save_to_database(&pool).await;
     assert!(res.is_ok());

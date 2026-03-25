@@ -1,7 +1,7 @@
 use units::{
     mass::{quantity::MassQuantity, unit::MassUnit},
     measurement_system::MeasurementSystem,
-    record::{GetFromDatabaseUsingId, Record},
+    entity::{GetFromDatabaseUsingId, Entity},
 };
 use utils::database::DatabaseService;
 
@@ -332,7 +332,7 @@ async fn test_save_to_database() {
     let _ = MassUnit::save_enumerations_to_database(&pool).await;
 
     let mass_g = MassQuantity::from_g(6700f64);
-    let mass_record = Record::new(mass_g);
+    let mass_record = Entity::new(mass_g);
 
     let res = mass_record.save_to_database(&pool).await;
     assert!(res.is_ok());
