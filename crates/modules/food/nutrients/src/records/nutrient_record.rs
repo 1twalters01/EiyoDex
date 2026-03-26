@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use identity::{inner_id::InnerIdType, Id};
+use identity::{inner_id::InnerIdType, Id, InnerId};
 use sqlx::{Pool, Sqlite};
 use utils::dsa::node::GraphNode;
 use uuid::Uuid;
@@ -150,7 +150,9 @@ impl NutrientRecord {
         return nutrient_entity;
     }
 
-    pub async fn load_from_database(id: Uuid, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
+    pub async fn load_from_database_using_id(id: Id<Nutrient>, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
+        let id = id.get_inner().to_bytes().to_vec();
+
         Ok(sqlx::query_as!(
             NutrientRecord,
             r#"
@@ -200,7 +202,7 @@ impl NutrientRecord {
         Ok(())
     }
 
-    pub async fn delete_nutrient(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+    pub async fn delete_nutrient_from_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         sqlx::query!(
             "DELETE FROM nutrients_nutrient_table WHERE id = ?",
             self.nutrient_id

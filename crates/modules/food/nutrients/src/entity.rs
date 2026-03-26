@@ -2,8 +2,8 @@ use identity::{inner_id::InnerIdType, Id};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Entity<T: Clone + PartialEq> {
-    pub id: Id<T>,
-    pub inner: T,
+    id: Id<T>,
+    inner: T,
 }
 
 impl<T: Clone + PartialEq> Entity<T> {
