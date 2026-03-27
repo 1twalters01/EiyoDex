@@ -2,13 +2,13 @@ use std::io;
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::{
+    DefaultTerminal, Frame,
     buffer::Buffer,
     layout::Rect,
     style::Stylize,
     symbols::border,
     text::{Line, Text},
     widgets::{Block, Paragraph, Widget},
-    DefaultTerminal, Frame,
 };
 
 fn main() -> io::Result<()> {
@@ -22,7 +22,6 @@ pub struct App {
 }
 
 impl App {
-
     /// runs the application's main loop until the user quits
     pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
         while !self.exit {
@@ -68,7 +67,6 @@ impl App {
     fn decrement_counter(&mut self) {
         self.counter -= 1;
     }
-
 }
 
 impl Widget for &App {

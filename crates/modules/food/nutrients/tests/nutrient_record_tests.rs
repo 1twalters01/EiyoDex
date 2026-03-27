@@ -1,3 +1,4 @@
+use identity::{inner_id::InnerIdType, Id};
 use nutrients::{entity::Entity, nutrient::Nutrient, nutrient_units::NutrientUnit, records::{nutrient_record::NutrientRecord, nutrient_type_record::NutrientTypeRecord, nutrient_unit_record::NutrientUnitRecord }, schema::{nutrient_classes::{ChemicalType, EssentialityType, QuantityType}, nutrient_type::NutrientType}};
 use units::mass::unit::MassUnit;
 use utils::database::DatabaseService;
@@ -22,6 +23,7 @@ async fn test_from_nutrient() {
 
     let nutrient_type_record = NutrientTypeRecord::from_nutrient_type(nutrient_type.clone());
     let type_res = nutrient_type_record.save_to_database(&pool).await;
+    println!("type res: {:#?}", type_res);
     assert!(type_res.is_ok());
 
     let main_unit_id = main_unit_record.get_database_id(&pool).await.unwrap();
@@ -29,10 +31,10 @@ async fn test_from_nutrient() {
     let quantity_type_id = nutrient_type_record.get_quantity_type_id();
     let chemical_id = nutrient_type_record.get_chemical_id_from_database(&pool).await.unwrap();
 
-    let mut nutrient = Nutrient::new_rc_refcell(name.clone(), nutrient_type, main_unit);
+    let nutrient = Nutrient::new_rc_refcell(name.clone(), nutrient_type, main_unit);
     nutrient.borrow_mut().set_description(description.clone());
-
     let nutrient_entity = Entity::new(nutrient.borrow().clone());
+
     let nutrient_record = NutrientRecord::from_nutrient_entity(nutrient_entity.clone(), &pool).await.unwrap();
     let manual_record = NutrientRecord::from_values(
         nutrient_entity.get_id().to_bytes().to_vec(),
@@ -74,7 +76,7 @@ async fn test_to_nutrient() {
     let quantity_type_id = nutrient_type_record.get_quantity_type_id();
     let chemical_id = nutrient_type_record.get_chemical_id_from_database(&pool).await.unwrap();
 
-    let mut nutrient = Nutrient::new_rc_refcell(name.clone(), nutrient_type, main_unit);
+    let nutrient = Nutrient::new_rc_refcell(name.clone(), nutrient_type, main_unit);
     nutrient.borrow_mut().set_description(description.clone());
     let nutrient_entity = Entity::new(nutrient.borrow().clone());
     
@@ -115,28 +117,27 @@ async fn test_database_operations() {
 
     let nutrient_type_record = NutrientTypeRecord::from_nutrient_type(nutrient_type.clone());
     let type_res = nutrient_type_record.save_to_database(&pool).await;
+    println!("type res: {:#?}", type_res);
     assert!(type_res.is_ok());
 
-    let main_unit_id = main_unit_record.get_database_id(&pool).await.unwrap();
-    let essentiality_type_id = nutrient_type_record.get_essentiality_type_id();
-    let quantity_type_id = nutrient_type_record.get_quantity_type_id();
-    let chemical_id = nutrient_type_record.get_chemical_id_from_database(&pool).await.unwrap();
-
-    let mut nutrient = Nutrient::new_rc_refcell(name.clone(), nutrient_type, main_unit);
+    let nutrient = Nutrient::new_rc_refcell(name.clone(), nutrient_type, main_unit);
     nutrient.borrow_mut().set_description(description.clone());
-    let nutrient_entity = Entity::new(nutrient.borrow().clone());
-    let nutrient_record = NutrientRecord::from_nutrient_entity(nutrient_entity.clone(), &pool).await.unwrap();
+    let mut nutrient_entity = Entity::new(nutrient.borrow().clone());
+    let mut nutrient_record = NutrientRecord::from_nutrient_entity(nutrient_entity.clone(), &pool).await.unwrap();
 
     let save_res = nutrient_record.save_to_database(&pool).await;
-    assert!(save_res.is_ok());
+    let new_entity_id = save_res.unwrap();
+    nutrient_entity.set_id(Id::from_bytes(InnerIdType::Uuid, new_entity_id.clone().try_into().unwrap()));
+    nutrient_record.nutrient_id = new_entity_id;
     
-    let id = nutrient_entity.get_id();
-    let load_res = NutrientRecord::load_from_database_using_id(id, &pool).await;
+    let nutrient_id = nutrient_entity.get_id();
+    let load_res = NutrientRecord::load_from_database_using_id(nutrient_id, &pool).await;
     assert!(load_res.is_ok());
 
     let loaded_nutrient_record = load_res.unwrap();
     assert_eq!(loaded_nutrient_record, nutrient_record);
 
-    let res = nutrient_record.delete_nutrient_from_database(&pool).await;
+    let delete_res = nutrient_record.delete_nutrient_from_database(&pool).await;
+    assert!(delete_res.is_ok())
 }
 

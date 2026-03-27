@@ -1,7 +1,7 @@
 use units::{
     energy::{quantity::EnergyQuantity, unit::EnergyUnit},
+    entity::{Entity, GetFromDatabaseUsingId},
     measurement_system::MeasurementSystem,
-    entity::{GetFromDatabaseUsingId, Entity},
 };
 use utils::database::DatabaseService;
 

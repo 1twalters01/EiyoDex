@@ -1,9 +1,9 @@
 use units::{
     duration::{quantity::DurationQuantity, unit::DurationUnit},
     energy::{quantity::EnergyQuantity, unit::EnergyUnit},
+    entity::{Entity, GetFromDatabaseUsingId},
     measurement_system::MeasurementSystem,
     power::{measurement_system::PowerMeasurementSystem, quantity::PowerQuantity, unit::PowerUnit},
-    entity::{GetFromDatabaseUsingId, Entity},
 };
 use utils::database::DatabaseService;
 

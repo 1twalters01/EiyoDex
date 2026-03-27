@@ -254,9 +254,7 @@ impl PartialOrd for DistanceQuantity {
 
 use units_macro::include_distances_from_json;
 
-use crate::entity::{
-    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Entity, SaveToDatabase,
-};
+use crate::entity::{DeleteFromDatabaseUsingId, Entity, GetFromDatabaseUsingId, SaveToDatabase};
 
 use identity::{Id, InnerId};
 

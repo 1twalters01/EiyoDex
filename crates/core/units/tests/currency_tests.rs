@@ -1,7 +1,7 @@
 // use chrono::NaiveDate;
 use units::{
     currency::{quantity::CurrencyQuantity, unit::CurrencyUnit},
-    entity::{GetFromDatabaseUsingId, Entity},
+    entity::{Entity, GetFromDatabaseUsingId},
 };
 use utils::database::DatabaseService;
 

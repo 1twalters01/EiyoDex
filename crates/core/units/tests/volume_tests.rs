@@ -1,6 +1,6 @@
 use units::{
+    entity::{Entity, GetFromDatabaseUsingId},
     measurement_system::MeasurementSystem,
-    entity::{GetFromDatabaseUsingId, Entity},
     volume::{quantity::VolumeQuantity, unit::VolumeUnit},
 };
 use utils::database::DatabaseService;

@@ -2,9 +2,9 @@ use units::{
     density::{
         measurement_system::DensityMeasurementSystem, quantity::DensityQuantity, unit::DensityUnit,
     },
+    entity::{Entity, GetFromDatabaseUsingId},
     mass::{quantity::MassQuantity, unit::MassUnit},
     measurement_system::MeasurementSystem,
-    entity::{GetFromDatabaseUsingId, Entity},
     volume::{quantity::VolumeQuantity, unit::VolumeUnit},
 };
 use utils::database::DatabaseService;

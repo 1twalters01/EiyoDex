@@ -1,9 +1,9 @@
 use units::{
     currency::{quantity::CurrencyQuantity, unit::CurrencyUnit},
     density::{quantity::DensityQuantity, unit::DensityUnit},
+    entity::{Entity, GetFromDatabaseUsingId},
     mass::{quantity::MassQuantity, unit::MassUnit},
     measurement_system::MeasurementSystem,
-    entity::{GetFromDatabaseUsingId, Entity},
     specific_currency::{
         quantity::SpecificCurrencyQuantity,
         unit::{Denominator, DenominatorType, SpecificCurrencyUnit},

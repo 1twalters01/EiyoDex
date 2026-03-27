@@ -1,7 +1,7 @@
 use units::{
+    entity::{Entity, GetFromDatabaseUsingId},
     mass::{quantity::MassQuantity, unit::MassUnit},
     measurement_system::MeasurementSystem,
-    entity::{GetFromDatabaseUsingId, Entity},
 };
 use utils::database::DatabaseService;
 

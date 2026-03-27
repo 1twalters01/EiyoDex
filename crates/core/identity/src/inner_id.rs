@@ -3,7 +3,7 @@ use std::fmt;
 use ulid::Ulid;
 use uuid::Uuid;
 
-pub enum InnerIdType{
+pub enum InnerIdType {
     Uuid,
     Ulid,
 }
@@ -21,14 +21,14 @@ impl InnerId {
             InnerIdType::Uuid => InnerId::Uuid(Uuid::new_v4()),
         }
     }
-    pub fn from_bytes(id_type: InnerIdType, bytes: [u8;16]) -> Self {
+    pub fn from_bytes(id_type: InnerIdType, bytes: [u8; 16]) -> Self {
         match id_type {
             InnerIdType::Ulid => InnerId::Ulid(Ulid::from_bytes(bytes)),
             InnerIdType::Uuid => InnerId::Uuid(Uuid::from_bytes(bytes)),
         }
     }
 
-    pub fn to_bytes(&self) -> [u8;16] {
+    pub fn to_bytes(&self) -> [u8; 16] {
         match self {
             InnerId::Ulid(ulid) => ulid.to_bytes(),
             InnerId::Uuid(uuid) => *uuid.as_bytes(),

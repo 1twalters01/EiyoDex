@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use identity::{inner_id::InnerIdType, Id, InnerId};
+use identity::{inner_id::InnerIdType, Id};
 use sqlx::{Pool, Sqlite};
 use utils::dsa::node::GraphNode;
 use uuid::Uuid;
@@ -150,8 +150,30 @@ impl NutrientRecord {
         return nutrient_entity;
     }
 
-    pub async fn load_from_database_using_id(id: Id<Nutrient>, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
-        let id = id.get_inner().to_bytes().to_vec();
+    pub async fn load_from_database_using_name(name: String, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
+        Ok(sqlx::query_as!(
+            NutrientRecord,
+            r#"
+                    SELECT
+                        id as nutrient_id,
+                        name,
+                        description,
+                        main_unit_id,
+                        quantity_type_id,
+                        essentiality_type_id,
+                        chemical_id
+                    FROM nutrients_nutrient_table
+                    WHERE
+                        name = ?
+                "#,
+            name
+        )
+        .fetch_one(pool)
+        .await?)
+    }
+
+    pub async fn load_from_database_using_id(nutrient_id: Id<Nutrient>, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
+        let id = nutrient_id.get_inner().to_bytes().to_vec();
 
         Ok(sqlx::query_as!(
             NutrientRecord,
@@ -174,20 +196,19 @@ impl NutrientRecord {
         .await?)
     }
 
-    pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
-        sqlx::query!(
+    pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<Vec<u8>, sqlx::Error> {
+        let row = sqlx::query!(
             r#"
                 INSERT INTO nutrients_nutrient_table (id, name, description, main_unit_id, quantity_type_id, essentiality_type_id, chemical_id)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-                ON CONFLICT (id)
+                ON CONFLICT (name)
                 DO UPDATE SET
-                    id = excluded.id,
-                    name = excluded.name,
                     description = excluded.description,
                     main_unit_id = excluded.main_unit_id,
                     quantity_type_id = excluded.quantity_type_id,
                     essentiality_type_id = excluded.essentiality_type_id,
                     chemical_id = excluded.chemical_id
+                RETURNING id
             "#,
             self.nutrient_id,
             self.name,
@@ -197,9 +218,9 @@ impl NutrientRecord {
             self.essentiality_type_id,
             self.chemical_id,
         )
-            .execute(pool)
+            .fetch_one(pool)
             .await?;
-        Ok(())
+        Ok(row.id)
     }
 
     pub async fn delete_nutrient_from_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
@@ -214,13 +235,18 @@ impl NutrientRecord {
     }
 }
 
-pub struct NutrientConversionsRecord {
+#[derive(Debug, PartialEq)]
+pub struct NutrientConversionRecord {
     pub(crate) nutrient_id: Vec<u8>,
     pub(crate) unit_id: i64,
     pub(crate) factor: f64,
 }
 
-impl NutrientConversionsRecord {
+impl NutrientConversionRecord {
+    pub fn from_values(nutrient_id: Vec<u8>, unit_id: i64, factor: f64) -> Self {
+        Self { nutrient_id, unit_id, factor }
+    }
+
     pub async fn from_nutrient(nutrient: Nutrient, pool: &Pool<Sqlite>) -> Result<Vec<Self>, &'static str> {
         let nutrient_id = Id::<Nutrient>::new(InnerIdType::Uuid).to_bytes().to_vec();
         let mut conversion_vec = Vec::new();
@@ -250,6 +276,7 @@ impl NutrientConversionsRecord {
         let mut conversion_vec = Vec::new();
 
         for (unit, factor) in nutrient.get_unit_conversions().iter() {
+            println!("unit: {:#?}", unit);
             let unit_id = NutrientUnitRecord::from_nutrient_unit(*unit, pool)
                 .await
                 .get_database_id(&pool)
@@ -267,24 +294,34 @@ impl NutrientConversionsRecord {
         Ok(conversion_vec)
     }
 
-    pub async fn to_btree_map_from_vec(items: Vec<Self>, pool: &Pool<Sqlite>) -> BTreeMap<NutrientUnit, f64> {
+    pub async fn to_btree_map_from_vec(items: Vec<Self>, pool: &Pool<Sqlite>) -> Result<BTreeMap<NutrientUnit, f64>, sqlx::Error> {
         let mut map: BTreeMap<NutrientUnit, f64> = BTreeMap::new();
         for conversion in items.iter() {
             let unit = NutrientUnitRecord::load_from_database(conversion.unit_id, pool)
-                .await
-                .unwrap()
+                .await?
                 .to_nutrient_unit(pool)
                 .await;
             let factor = conversion.factor;
             map.insert(unit, factor);
         }
 
-        return map;
+        return Ok(map);
     }
 
-    pub async fn load_from_sqlite(nutrient_id: Uuid, pool: &Pool<Sqlite>) -> Result<Vec<Self>, sqlx::Error> {
+    pub fn sort_records(items: &mut Vec<Self>) {
+        items.sort_by(|a, b| {
+            a.nutrient_id
+                .cmp(&b.nutrient_id)
+                .then(a.unit_id.cmp(&b.unit_id))
+                .then(a.factor.partial_cmp(&b.factor).unwrap())
+        });
+    }
+
+    pub async fn load_from_database(nutrient_id: Id<Nutrient>, pool: &Pool<Sqlite>) -> Result<Vec<Self>, sqlx::Error> {
+        let id = nutrient_id.get_inner().to_bytes().to_vec();
+
         Ok(sqlx::query_as!(
-            NutrientConversionsRecord,
+            NutrientConversionRecord,
             r#"
                     SELECT
                         nutrient_id,
@@ -294,7 +331,7 @@ impl NutrientConversionsRecord {
                     WHERE
                         nutrient_id = ?
                 "#,
-            nutrient_id
+            id
         )
         .fetch_all(pool)
         .await?)
@@ -320,7 +357,7 @@ impl NutrientConversionsRecord {
         Ok(())
     }
 
-    pub async fn save_vec_to_database(items: Vec<&Self>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+    pub async fn save_vec_to_database(items: &Vec<Self>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         let mut tx = pool.begin().await?;
 
         for item in items {
@@ -330,7 +367,6 @@ impl NutrientConversionsRecord {
                     VALUES (?, ?, ?)
                     ON CONFLICT (nutrient_id, unit_id)
                     DO UPDATE SET
-                        nutrient_id = excluded.nutrient_id,
                         unit_id = excluded.unit_id,
                         factor = excluded.factor
                 "#,
@@ -341,10 +377,12 @@ impl NutrientConversionsRecord {
             .execute(&mut *tx)
             .await?;
         }
+
+        tx.commit().await?;
         Ok(())
     }
 
-    pub async fn delete_conversion(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+    pub async fn delete_conversion_from_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         sqlx::query!(
             r#"
                 DELETE FROM nutrients_unit_conversions 
@@ -361,7 +399,24 @@ impl NutrientConversionsRecord {
         Ok(())
     }
 
-    pub async fn delete_conversion_vec(items: Vec<&Self>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+    pub async fn delete_all_conversions_from_database(nutrient_id: Id<Nutrient>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let id = nutrient_id.get_inner().to_bytes().to_vec();
+
+        sqlx::query!(
+            r#"
+                DELETE FROM nutrients_unit_conversions 
+                WHERE
+                    nutrient_id = ?
+            "#,
+            id,
+        )
+        .execute(pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn delete_conversion_vec_from_database(items: Vec<&Self>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         let mut tx = pool.begin().await?;
 
         for item in items {

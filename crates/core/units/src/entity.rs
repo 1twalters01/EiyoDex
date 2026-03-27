@@ -1,6 +1,6 @@
+use identity::{inner_id::InnerIdType, Id, InnerId};
 use sqlx::{Pool, Sqlite};
 use std::future::Future;
-use identity::{ inner_id::InnerIdType, Id, InnerId };
 
 pub trait SaveToDatabase<T: Clone + PartialEq> {
     fn save_to_database<'a>(

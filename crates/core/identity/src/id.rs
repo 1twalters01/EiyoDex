@@ -1,9 +1,6 @@
-use std::{
-    fmt, marker::PhantomData
-};
+use std::{fmt, marker::PhantomData};
 
 use crate::inner_id::{InnerId, InnerIdType};
-
 
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]

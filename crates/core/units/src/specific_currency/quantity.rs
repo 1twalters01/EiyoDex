@@ -522,8 +522,8 @@ use units_macro::include_specific_currencies_from_json;
 use uuid::Uuid;
 
 use crate::{
+    entity::{DeleteFromDatabaseUsingId, Entity, GetFromDatabaseUsingId, SaveToDatabase},
     mass::unit::MassUnit,
-    entity::{DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Entity, SaveToDatabase},
     volume::unit::VolumeUnit,
 };
 

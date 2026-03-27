@@ -9,7 +9,6 @@ use nutrients::{
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
 use units::{mass::unit::MassUnit, volume::unit::VolumeUnit};
 use utils::dsa::node::GraphNode;
-use uuid::Uuid;
 
 #[test]
 fn test_nutrient_new_nutrient_unit() {

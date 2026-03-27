@@ -334,9 +334,7 @@ use sqlx::{Pool, Sqlite};
 use units_macro::include_densities_from_json;
 use uuid::Uuid;
 
-use crate::entity::{
-    DeleteFromDatabaseUsingId, GetFromDatabaseUsingId, Entity, SaveToDatabase,
-};
+use crate::entity::{DeleteFromDatabaseUsingId, Entity, GetFromDatabaseUsingId, SaveToDatabase};
 
 use identity::{Id, InnerId};
 
