@@ -43,22 +43,26 @@ async fn test_from_nutrients() {
 
     
     // Create nutrients
-    let mut iron = Nutrient::new_rc_refcell(String::from("Iron"), nutrient_type.clone(), main_unit);
-    let mut heme_iron = Nutrient::new_rc_refcell(String::from("Heme Iron"), nutrient_type.clone(), main_unit);
-    let mut non_heme_iron = Nutrient::new_rc_refcell(String::from("Non-heme Iron"), nutrient_type.clone(), main_unit);
-    // let mut non_heme_iron_a = Nutrient::new_rc_refcell(String::from("Non-heme Iron A"), nutrient_type.clone(), main_unit);
-    // let mut non_heme_iron_b = Nutrient::new_rc_refcell(String::from("Non-heme Iron B"), nutrient_type.clone(), main_unit);
+    let iron = Nutrient::new_rc_refcell(String::from("Iron"), nutrient_type.clone(), main_unit);
+    let heme_iron = Nutrient::new_rc_refcell(String::from("Heme Iron"), nutrient_type.clone(), main_unit);
+    let non_heme_iron = Nutrient::new_rc_refcell(String::from("Non-heme Iron"), nutrient_type.clone(), main_unit);
+    let non_heme_iron_a = Nutrient::new_rc_refcell(String::from("Non-heme Iron A"), nutrient_type.clone(), main_unit);
+    let non_heme_iron_b = Nutrient::new_rc_refcell(String::from("Non-heme Iron B"), nutrient_type.clone(), main_unit);
+
 
     // link nutrients
     link_parent_child(&iron, &heme_iron).unwrap();
     link_parent_child(&iron, &non_heme_iron).unwrap();
-    // link_parent_child(&non_heme_iron, &non_heme_iron_a).unwrap();
+    link_parent_child(&non_heme_iron, &non_heme_iron_a).unwrap();
+    link_parent_child(&non_heme_iron, &non_heme_iron_b).unwrap();
 
 
     // Create entities from nutrients
     let mut iron_entity = Entity::new(iron.borrow().clone());
     let mut heme_iron_entity = Entity::new(heme_iron.borrow().clone());
     let mut non_heme_iron_entity = Entity::new(non_heme_iron.borrow().clone());
+    let mut non_heme_iron_a_entity = Entity::new(non_heme_iron_a.borrow().clone());
+    let mut non_heme_iron_b_entity = Entity::new(non_heme_iron_b.borrow().clone());
     // println!("iron_entity: {:#?}", iron_entity);
 
 
@@ -72,17 +76,19 @@ async fn test_from_nutrients() {
     let non_heme_iron_record = NutrientRecord::from_nutrient_entity(non_heme_iron_entity.clone(), &pool).await.unwrap();
     let non_heme_iron_entity_id = non_heme_iron_record.save_to_database(&pool).await.unwrap();
 
+    let non_heme_iron_a_record = NutrientRecord::from_nutrient_entity(non_heme_iron_a_entity.clone(), &pool).await.unwrap();
+    let non_heme_iron_a_entity_id = non_heme_iron_a_record.save_to_database(&pool).await.unwrap();
 
-    // store old entity ids
-    let old_iron_entity_id = iron_entity.get_id();
-    let old_heme_iron_entity_id = heme_iron_entity.get_id();
-    let old_non_heme_iron_entity_id = non_heme_iron_entity.get_id();
+    let non_heme_iron_b_record = NutrientRecord::from_nutrient_entity(non_heme_iron_b_entity.clone(), &pool).await.unwrap();
+    let non_heme_iron_b_entity_id = non_heme_iron_b_record.save_to_database(&pool).await.unwrap();
 
 
     // update entity ids
     iron_entity.set_id(Id::from_bytes(InnerIdType::Uuid, iron_entity_id.clone().try_into().unwrap()));
     heme_iron_entity.set_id(Id::from_bytes(InnerIdType::Uuid, heme_iron_entity_id.clone().try_into().unwrap()));
     non_heme_iron_entity.set_id(Id::from_bytes(InnerIdType::Uuid, non_heme_iron_entity_id.clone().try_into().unwrap()));
+    non_heme_iron_a_entity.set_id(Id::from_bytes(InnerIdType::Uuid, non_heme_iron_a_entity_id.clone().try_into().unwrap()));
+    non_heme_iron_b_entity.set_id(Id::from_bytes(InnerIdType::Uuid, non_heme_iron_b_entity_id.clone().try_into().unwrap()));
     // println!("iron_entity_id: {:#?}", iron_entity_id.clone());
     // println!("heme_iron_entity_id: {:#?}", heme_iron_entity_id.clone());
     // println!("non_heme_iron_entity_id: {:#?}", non_heme_iron_entity_id.clone());
@@ -94,18 +100,24 @@ async fn test_from_nutrients() {
     let (mut iron_link_record, iron_link_names) = NutrientLinkRecord::from_nutrient_entity(iron_entity.clone(), &pool).await.unwrap();
     let (mut heme_iron_link_record, heme_iron_link_names) = NutrientLinkRecord::from_nutrient_entity(heme_iron_entity.clone(), &pool).await.unwrap();
     let (mut non_heme_iron_link_record, non_heme_iron_link_names) = NutrientLinkRecord::from_nutrient_entity(non_heme_iron_entity.clone(), &pool).await.unwrap();
+    let (mut non_heme_iron_a_link_record, non_heme_iron_a_link_names) = NutrientLinkRecord::from_nutrient_entity(non_heme_iron_a_entity.clone(), &pool).await.unwrap();
+    let (mut non_heme_iron_b_link_record, non_heme_iron_b_link_names) = NutrientLinkRecord::from_nutrient_entity(non_heme_iron_b_entity.clone(), &pool).await.unwrap();
     // println!("iron link record: {:#?}", iron_link_record);
     // println!("iron link names: {:#?}", iron_link_names);
     println!("heme iron link names: {:#?}", heme_iron_link_names);
     println!("non heme iron link names: {:#?}", non_heme_iron_link_names);
     // println!("heme iron link record: {:#?}", heme_iron_link_record);
 
+
     // Get nutrient entity Vec
     let nutrient_name_id_map: HashMap<String, Vec<u8>> = HashMap::from([
         (iron_entity.clone().get_inner().get_name(), iron_entity_id.clone()),
         (heme_iron_entity.clone().get_inner().get_name(), heme_iron_entity_id.clone()),
         (non_heme_iron_entity.clone().get_inner().get_name(), non_heme_iron_entity_id.clone()),
+        (non_heme_iron_a_entity.clone().get_inner().get_name(), non_heme_iron_a_entity_id.clone()),
+        (non_heme_iron_b_entity.clone().get_inner().get_name(), non_heme_iron_b_entity_id.clone()),
     ]);
+
 
     // Update link records with new ids
     for id in &mut iron_link_record.child_ids {
@@ -132,6 +144,29 @@ async fn test_from_nutrients() {
         }
     }
 
+    for id in &mut non_heme_iron_link_record.child_ids {
+        if let Some(name) = non_heme_iron_link_names.child_map.get(id) {
+            if let Some(new_id) = nutrient_name_id_map.get(name) {
+                *id = new_id.clone();
+            }
+        }
+    }
+
+    for id in &mut non_heme_iron_a_link_record.parent_ids {
+        if let Some(name) = non_heme_iron_a_link_names.parent_map.get(id) {
+            if let Some(new_id) = nutrient_name_id_map.get(name) {
+                *id = new_id.clone();
+            }
+        }
+    }
+
+    for id in &mut non_heme_iron_b_link_record.parent_ids {
+        if let Some(name) = non_heme_iron_b_link_names.parent_map.get(id) {
+            if let Some(new_id) = nutrient_name_id_map.get(name) {
+                *id = new_id.clone();
+            }
+        }
+    }
 
 
     // Create from value
@@ -152,11 +187,27 @@ async fn test_from_nutrients() {
     );
 
     let non_heme_iron_parent_ids = Vec::from([iron_entity_id.clone()]);
-    let non_heme_iron_child_ids = Vec::new();
+    let non_heme_iron_child_ids = Vec::from([non_heme_iron_a_entity_id.clone(), non_heme_iron_b_entity_id.clone()]);
     let non_heme_iron_link_record_from_value = NutrientLinkRecord::from_values(
-        non_heme_iron_entity_id,
+        non_heme_iron_entity_id.clone(),
         non_heme_iron_parent_ids,
         non_heme_iron_child_ids,
+    );
+
+    let non_heme_iron_a_parent_ids = Vec::from([non_heme_iron_entity_id.clone()]);
+    let non_heme_iron_a_child_ids = Vec::new();
+    let non_heme_iron_a_link_record_from_value = NutrientLinkRecord::from_values(
+        non_heme_iron_a_entity_id,
+        non_heme_iron_a_parent_ids,
+        non_heme_iron_a_child_ids,
+    );
+
+    let non_heme_iron_b_parent_ids = Vec::from([non_heme_iron_entity_id.clone()]);
+    let non_heme_iron_b_child_ids = Vec::new();
+    let non_heme_iron_b_link_record_from_value = NutrientLinkRecord::from_values(
+        non_heme_iron_b_entity_id,
+        non_heme_iron_b_parent_ids,
+        non_heme_iron_b_child_ids,
     );
 
     // println!("iron link record: {:#?}", iron_link_record.clone());
@@ -166,6 +217,8 @@ async fn test_from_nutrients() {
     assert_eq!(iron_link_record, iron_link_record_from_value);
     assert_eq!(heme_iron_link_record, heme_iron_link_record_from_value);
     assert_eq!(non_heme_iron_link_record, non_heme_iron_link_record_from_value);
+    assert_eq!(non_heme_iron_a_link_record, non_heme_iron_a_link_record_from_value);
+    assert_eq!(non_heme_iron_b_link_record, non_heme_iron_b_link_record_from_value);
 }
 
 #[tokio::test]
