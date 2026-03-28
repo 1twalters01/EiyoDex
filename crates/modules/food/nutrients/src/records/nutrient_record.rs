@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
 use identity::{inner_id::InnerIdType, Id};
 use sqlx::{Pool, Sqlite};
@@ -439,79 +439,131 @@ impl NutrientConversionRecord {
     }
 }
 
+#[derive(Debug, PartialEq, Clone)]
 pub struct NutrientLinkRecord {
     pub nutrient_id: Vec<u8>,
     pub parent_ids: Vec<Vec<u8>>,
     pub child_ids: Vec<Vec<u8>>,
 }
 
+#[derive(Debug, PartialEq, Clone)]
+pub struct NutrientLinkNames {
+    pub nutrient_map: HashMap<Vec<u8>, String>,
+    pub parent_map: HashMap<Vec<u8>, String>,
+    pub child_map: HashMap<Vec<u8>, String>,
+}
+
 impl NutrientLinkRecord {
-    pub async fn from_nutrient(nutrient: Nutrient, pool: &Pool<Sqlite>) -> Result<Self, &'static str> {
-        let nutrient_id = Id::<Nutrient>::new(InnerIdType::Uuid).to_bytes().to_vec();
-        let mut child_ids: Vec<Vec<u8>> = Vec::new();
-        for child in nutrient.get_children() {
-            child_ids.push(
-                NutrientRecord::from_nutrient(child.borrow().clone(), pool)
-                    .await
-                    .unwrap()
-                    .nutrient_id,
-            )
-        }
-
-        let mut parent_ids: Vec<Vec<u8>> = Vec::new();
-        for parent_weak in nutrient.get_parents() {
-            if let Some(parent) = parent_weak.upgrade() {
-                parent_ids.push(
-                    NutrientRecord::from_nutrient(parent.borrow().clone(), pool)
-                        .await
-                        .unwrap()
-                        .nutrient_id,
-                )
-            } else {
-                return Err("Weak parent");
-            }
-        }
-
-        Ok(NutrientLinkRecord {
+    pub fn from_values(nutrient_id: Vec<u8>, parent_ids: Vec<Vec<u8>>, child_ids: Vec<Vec<u8>>) -> Self {
+        Self {
             nutrient_id,
             parent_ids,
             child_ids,
-        })
+        }
     }
 
-    pub async fn from_nutrient_entity(nutrient_entity: Entity<Nutrient>, pool: &Pool<Sqlite>) -> Result<Self, &'static str> {
-        let nutrient_id = nutrient_entity.get_id().get_inner().to_bytes().to_vec();
-        let nutrient = nutrient_entity.get_inner();
+    pub async fn from_nutrient(nutrient: Nutrient, pool: &Pool<Sqlite>) -> Result<(Self, NutrientLinkNames), &'static str> {
+        let nutrient_id = Id::<Nutrient>::new(InnerIdType::Uuid).to_bytes().to_vec();
+        let nutrient_name = nutrient.get_name();
+        let nutrient_map = HashMap::from([(nutrient_id.clone(), nutrient_name)]);
 
         let mut child_ids: Vec<Vec<u8>> = Vec::new();
+        let mut child_names: Vec<String> = Vec::new();
+        let mut child_map: HashMap<Vec<u8>, String> = HashMap::new();
         for child in nutrient.get_children() {
-            child_ids.push(
-                NutrientRecord::from_nutrient(child.borrow().clone(), pool)
-                    .await
-                    .unwrap()
-                    .nutrient_id,
-            )
+            let child_name = child.borrow().clone().get_name();
+            let child_id = NutrientRecord::from_nutrient(child.borrow().clone(), pool)
+                .await
+                .unwrap()
+                .nutrient_id;
+            child_names.push(child_name.clone());
+            child_ids.push(child_id.clone());
+            child_map.insert(child_id, child_name);
         }
 
         let mut parent_ids: Vec<Vec<u8>> = Vec::new();
+        let mut parent_names: Vec<String> = Vec::new();
+        let mut parent_map: HashMap<Vec<u8>, String> = HashMap::new();
         for parent_weak in nutrient.get_parents() {
             if let Some(parent) = parent_weak.upgrade() {
-                parent_ids.push(
-                    NutrientRecord::from_nutrient(parent.borrow().clone(), pool)
-                        .await
-                        .unwrap()
-                        .nutrient_id,
-                )
+                let parent_name = parent.borrow().clone().get_name();
+                let parent_id = NutrientRecord::from_nutrient(parent.borrow().clone(), pool)
+                    .await
+                    .unwrap()
+                    .nutrient_id;
+                parent_names.push(parent_name.clone());
+                parent_ids.push(parent_id.clone());
+                parent_map.insert(parent_id, parent_name);
             } else {
                 return Err("Weak parent");
             }
         }
 
-        Ok(NutrientLinkRecord {
+ 
+        let nutrient_link_record = NutrientLinkRecord {
             nutrient_id,
             parent_ids,
             child_ids,
-        })
+        };
+        let nutrient_link_names = NutrientLinkNames {
+            nutrient_map,
+            parent_map,
+            child_map,
+        };
+
+        Ok((nutrient_link_record, nutrient_link_names))
+    }
+
+    pub async fn from_nutrient_entity(nutrient_entity: Entity<Nutrient>, pool: &Pool<Sqlite>) -> Result<(Self, NutrientLinkNames), &'static str> {
+        let nutrient_id = nutrient_entity.get_id().get_inner().to_bytes().to_vec();
+        let nutrient = nutrient_entity.get_inner();
+        let nutrient_name = nutrient.get_name();
+        let nutrient_map = HashMap::from([(nutrient_id.clone(), nutrient_name)]);
+
+        let mut child_ids: Vec<Vec<u8>> = Vec::new();
+        let mut child_names: Vec<String> = Vec::new();
+        let mut child_map: HashMap<Vec<u8>, String> = HashMap::new();
+        for child in nutrient.get_children() {
+            let child_name = child.borrow().clone().get_name();
+            let child_id = NutrientRecord::from_nutrient(child.borrow().clone(), pool)
+                .await
+                .unwrap()
+                .nutrient_id;
+            child_names.push(child_name.clone());
+            child_ids.push(child_id.clone());
+            child_map.insert(child_id, child_name);
+        }
+
+        let mut parent_ids: Vec<Vec<u8>> = Vec::new();
+        let mut parent_names: Vec<String> = Vec::new();
+        let mut parent_map: HashMap<Vec<u8>, String> = HashMap::new();
+        for parent_weak in nutrient.get_parents() {
+            if let Some(parent) = parent_weak.upgrade() {
+                let parent_name = parent.borrow().clone().get_name();
+                let parent_id = NutrientRecord::from_nutrient(parent.borrow().clone(), pool)
+                    .await
+                    .unwrap()
+                    .nutrient_id;
+                parent_names.push(parent_name.clone());
+                parent_ids.push(parent_id.clone());
+                parent_map.insert(parent_id, parent_name);
+            } else {
+                return Err("Weak parent");
+            }
+        }
+
+        let nutrient_link_record = NutrientLinkRecord {
+            nutrient_id,
+            parent_ids,
+            child_ids,
+        };
+        let nutrient_link_names = NutrientLinkNames {
+            nutrient_map,
+            parent_map,
+            child_map,
+        };
+
+        Ok((nutrient_link_record, nutrient_link_names))
     }
 
     pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {

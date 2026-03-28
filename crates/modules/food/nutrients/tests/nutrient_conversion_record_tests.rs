@@ -24,7 +24,7 @@ async fn test_from_nutrient() {
     let _ = EnergyUnit::save_enumerations_to_database(&pool).await;
     let _ = NutrientUnitRecord::save_enumerations_to_database(&pool).await;
 
-    let name = String::from("Potassium2");
+    let name = String::from("Potassium");
     let description = "Test description".to_string();
     let nutrient_type = NutrientType {
         chemical_type: ChemicalType::Mineral,
@@ -113,7 +113,7 @@ async fn test_database_operations() {
     let _ = EnergyUnit::save_enumerations_to_database(&pool).await;
     let _ = NutrientUnitRecord::save_enumerations_to_database(&pool).await;
 
-    let name = String::from("Potassium db operations");
+    let name = String::from("Potassium");
     let description = "Test description".to_string();
     let nutrient_type = NutrientType {
         chemical_type: ChemicalType::Mineral,
