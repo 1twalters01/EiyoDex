@@ -1,12 +1,12 @@
-use std::collections::{BTreeMap, HashMap};
+use std::{cell::RefCell, collections::{BTreeMap, HashMap}, rc::Rc};
 
-use identity::{inner_id::InnerIdType, Id};
+use identity::{inner_id::InnerIdType, Id, InnerId};
 use sqlx::{Pool, Sqlite};
 use utils::dsa::node::GraphNode;
 use uuid::Uuid;
 
 use crate::{
-    entity::Entity, nutrient::Nutrient, nutrient_units::NutrientUnit, records::{nutrient_type_record::NutrientTypeRecord, nutrient_unit_record::NutrientUnitRecord}
+    entity::Entity, nutrient::{link_parent_child, Nutrient}, nutrient_list::NutrientList, nutrient_units::NutrientUnit, records::{nutrient_type_record::NutrientTypeRecord, nutrient_unit_record::NutrientUnitRecord}
 };
 
 #[derive(Debug, PartialEq)]
@@ -146,6 +146,27 @@ impl NutrientRecord {
         let nutrient_entity = Entity::<Nutrient>::new_with_id(id, nutrient);
 
         return nutrient_entity;
+    }
+
+    pub async fn select_nutrient_from_nutrient_list(&self, nutrient_list: NutrientList, pool: &Pool<Sqlite>) -> Option<Rc<RefCell<Nutrient>>> {
+        let nutrient_name = self.to_nutrient(pool).await.unwrap().get_name();
+
+        let nutrients: Vec<Rc<RefCell<Nutrient>>> = nutrient_list
+            .get_nutrients()
+            .iter()
+            .filter(|nutrient| nutrient.borrow().get_name() == nutrient_name)
+            .map(|nutrient| nutrient.clone())
+            .collect();
+
+        if nutrients.len() == 0 { panic!("No name found") }
+        let nutrient: Option<Rc<RefCell<Nutrient>>> = match nutrients.first() {
+            Some(nutrient) => {
+                if nutrients.iter().all(|n| Rc::ptr_eq(n, &nutrient)) == false { panic!("Different nutrient definitions found") };
+                Some(nutrient.clone())
+            },
+            None => None,
+        };
+        return nutrient;
     }
 
     pub async fn load_from_database_using_name(name: String, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
@@ -600,7 +621,6 @@ impl NutrientLinkRecord {
     pub async fn get_nutrient_link_names(&self, pool: &Pool<Sqlite>) -> Result<NutrientLinkNames, sqlx::Error> {
         let mut parent_names = Vec::new();
         let mut child_names = Vec::new();
-        println!("hi");
 
         for parent_id in &self.parent_ids {
             let parent_record = NutrientRecord::load_from_database_using_id(Id::from_bytes(InnerIdType::Uuid, parent_id.clone().try_into().unwrap()), pool).await?;
@@ -621,6 +641,67 @@ impl NutrientLinkRecord {
         };
 
         Ok(nutrient_links)
+    }
+
+    pub async fn to_hydrated_nutrient(&self, nutrient_list: NutrientList, pool: &Pool<Sqlite>) -> Result<Rc<RefCell<Nutrient>>, sqlx::Error> {
+        let nutrient_record = NutrientRecord::load_from_database_using_id(Id::from_inner(InnerId::Uuid(Uuid::from_slice(&self.nutrient_id).unwrap())), pool).await?;
+
+        let nutrient_name = nutrient_record.to_nutrient(pool).await.unwrap().get_name();
+        let nutrients: Vec<Rc<RefCell<Nutrient>>> = nutrient_list
+            .get_nutrients()
+            .iter()
+            .filter(|nutrient| nutrient.borrow().get_name() == nutrient_name)
+            .map(|nutrient| nutrient.clone())
+            .collect();
+
+        if nutrients.len() == 0 { panic!("No name found") }
+        let nutrient: Rc<RefCell<Nutrient>> = match nutrients.first() {
+            Some(n) => n.clone(),
+            None => panic!("Nutrient is empty"),
+        };
+        if nutrients.iter().all(|n| Rc::ptr_eq(n, &nutrient)) == false { panic!("Different nutrient definitions found") };
+
+        for parent_id in &self.parent_ids {
+            let parent_record = NutrientRecord::load_from_database_using_id(Id::from_bytes(InnerIdType::Uuid, parent_id.clone().try_into().unwrap()), pool).await?;
+            let parent_name = parent_record.to_nutrient(pool).await?.get_name();
+            let parents: Vec<Rc<RefCell<Nutrient>>> = nutrient_list
+                .get_nutrients()
+                .iter()
+                .filter(|nutrient| nutrient.borrow().get_name() == parent_name)
+                .map(|nutrient| nutrient.clone())
+                .collect();
+
+            if parents.len() == 0  { panic!("No name found") }
+            let parent: Rc<RefCell<Nutrient>> = match parents.first() {
+                Some(p) => p.clone(),
+                None => panic!("Parent is empty"),
+            };
+            if parents.iter().all(|p| Rc::ptr_eq(p, &parent)) == false { panic!("Different nutrient definitions found") };
+
+            link_parent_child(&parent, &nutrient).unwrap();
+        }
+
+        for child_id in &self.child_ids {
+            let child_record = NutrientRecord::load_from_database_using_id(Id::from_bytes(InnerIdType::Uuid, child_id.clone().try_into().unwrap()), pool).await?;
+            let child_name = child_record.to_nutrient(pool).await?.get_name();
+            let children: Vec<Rc<RefCell<Nutrient>>> = nutrient_list
+                .get_nutrients()
+                .iter()
+                .filter(|nutrient| nutrient.borrow().get_name() == child_name)
+                .map(|nutrient| nutrient.clone())
+                .collect();
+
+            if children.len() == 0  { panic!("No name found") }
+            let child: Rc<RefCell<Nutrient>> = match children.first() {
+                Some(c) => c.clone(),
+                None => panic!("Child is empty"),
+            };
+            if children.iter().all(|c| Rc::ptr_eq(c, &child)) == false { panic!("Different nutrient definitions found") };
+
+            link_parent_child(&nutrient, &child).unwrap();
+        }
+        
+        return Ok(nutrient);
     }
 
     pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
@@ -728,6 +809,7 @@ impl NutrientLinkRecord {
         tx.commit().await?;
         Ok(())
     }
+
 }
 
 pub struct NutrientLinkRecordUuid {
