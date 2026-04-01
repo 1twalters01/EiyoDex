@@ -96,7 +96,7 @@ impl NutrientRecord {
         })
     }
 
-    pub async fn to_nutrient(&self, pool: &Pool<Sqlite>) -> Nutrient {
+    pub async fn to_nutrient(&self, pool: &Pool<Sqlite>) -> Result<Nutrient, sqlx::Error> {
         let name = self.name.clone();
         let description = self.description.clone();
         let nutrient_type_record =
@@ -106,19 +106,17 @@ impl NutrientRecord {
                 self.chemical_id,
                 pool,
             )
-            .await
-            .unwrap();
+            .await?;
         let nutrient_type = nutrient_type_record.to_nutrient_type();
         let main_unit_id = NutrientUnitRecord::load_from_database(self.main_unit_id, pool)
-            .await
-            .unwrap()
+            .await?
             .to_nutrient_unit(pool)
             .await;
 
         let mut nutrient = Nutrient::new(name, nutrient_type, main_unit_id);
         nutrient.set_description(description);
 
-        return nutrient;
+        Ok(nutrient)
     }
 
     pub async fn to_nutrient_entity(&self, pool: &Pool<Sqlite>) -> Entity<Nutrient> {
@@ -447,10 +445,16 @@ pub struct NutrientLinkRecord {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct NutrientLinkNames {
+pub struct NutrientLinkHashes {
     pub nutrient_map: HashMap<Vec<u8>, String>,
     pub parent_map: HashMap<Vec<u8>, String>,
     pub child_map: HashMap<Vec<u8>, String>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct NutrientLinkNames {
+    pub parent_names: Vec<String>,
+    pub child_names: Vec<String>,
 }
 
 impl NutrientLinkRecord {
@@ -462,7 +466,7 @@ impl NutrientLinkRecord {
         }
     }
 
-    pub async fn from_nutrient(nutrient: Nutrient, pool: &Pool<Sqlite>) -> Result<(Self, NutrientLinkNames), &'static str> {
+    pub async fn from_nutrient(nutrient: Nutrient, pool: &Pool<Sqlite>) -> Result<(Self, NutrientLinkHashes), &'static str> {
         let nutrient_id = Id::<Nutrient>::new(InnerIdType::Uuid).to_bytes().to_vec();
         let nutrient_name = nutrient.get_name();
         let nutrient_map = HashMap::from([(nutrient_id.clone(), nutrient_name)]);
@@ -505,7 +509,7 @@ impl NutrientLinkRecord {
             parent_ids,
             child_ids,
         };
-        let nutrient_link_names = NutrientLinkNames {
+        let nutrient_link_names = NutrientLinkHashes {
             nutrient_map,
             parent_map,
             child_map,
@@ -514,7 +518,7 @@ impl NutrientLinkRecord {
         Ok((nutrient_link_record, nutrient_link_names))
     }
 
-    pub async fn from_nutrient_entity(nutrient_entity: Entity<Nutrient>, pool: &Pool<Sqlite>) -> Result<(Self, NutrientLinkNames), &'static str> {
+    pub async fn from_nutrient_entity(nutrient_entity: Entity<Nutrient>, pool: &Pool<Sqlite>) -> Result<(Self, NutrientLinkHashes), &'static str> {
         let nutrient_id = nutrient_entity.get_id().get_inner().to_bytes().to_vec();
         let nutrient = nutrient_entity.get_inner();
         let nutrient_name = nutrient.get_name();
@@ -557,13 +561,66 @@ impl NutrientLinkRecord {
             parent_ids,
             child_ids,
         };
-        let nutrient_link_names = NutrientLinkNames {
+        let nutrient_link_names = NutrientLinkHashes {
             nutrient_map,
             parent_map,
             child_map,
         };
 
         Ok((nutrient_link_record, nutrient_link_names))
+    }
+
+    pub fn update_nutrient_link_ids(&self, nutrient_link_hashes: &NutrientLinkHashes, nutrient_name_new_id_map: &HashMap<String, Vec<u8>>) -> NutrientLinkRecord {
+        let mut new_nutrient_link_record = self.clone();
+
+        for id in &mut new_nutrient_link_record.child_ids {
+            if let Some(name) = nutrient_link_hashes.child_map.get(id) {
+                if let Some(new_id) = nutrient_name_new_id_map.get(name) {
+                    *id = new_id.clone();
+                }
+            }
+        }
+
+        for id in &mut new_nutrient_link_record.parent_ids {
+            if let Some(name) = nutrient_link_hashes.parent_map.get(id) {
+                if let Some(new_id) = nutrient_name_new_id_map.get(name) {
+                    *id = new_id.clone();
+                }
+            }
+        }
+
+        return new_nutrient_link_record
+    }
+
+    pub fn sort(&mut self) {
+        self.child_ids.sort();
+        self.parent_ids.sort();
+    }
+
+    pub async fn get_nutrient_link_names(&self, pool: &Pool<Sqlite>) -> Result<NutrientLinkNames, sqlx::Error> {
+        let mut parent_names = Vec::new();
+        let mut child_names = Vec::new();
+        println!("hi");
+
+        for parent_id in &self.parent_ids {
+            let parent_record = NutrientRecord::load_from_database_using_id(Id::from_bytes(InnerIdType::Uuid, parent_id.clone().try_into().unwrap()), pool).await?;
+            let parent = parent_record.to_nutrient(&pool).await?;
+            parent_names.push(parent.get_name());
+        }
+
+        for child_id in &self.child_ids {
+            println!("child id: {:#?}", child_id);
+            let child_record = NutrientRecord::load_from_database_using_id(Id::from_bytes(InnerIdType::Uuid, child_id.clone().try_into().unwrap()), pool).await?;
+            let child = child_record.to_nutrient(&pool).await?;
+            child_names.push(child.get_name());
+        }
+
+        let nutrient_links = NutrientLinkNames {
+            parent_names,
+            child_names,
+        };
+
+        Ok(nutrient_links)
     }
 
     pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {

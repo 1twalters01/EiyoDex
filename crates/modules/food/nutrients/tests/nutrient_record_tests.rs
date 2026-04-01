@@ -93,7 +93,7 @@ async fn test_to_nutrient() {
     let manual_entity = manual_record.to_nutrient_entity(&pool).await;
     assert_eq!(nutrient_entity, manual_entity);
 
-    let manual_nutrient = manual_record.to_nutrient(&pool).await;
+    let manual_nutrient = manual_record.to_nutrient(&pool).await.unwrap();
     assert_eq!(nutrient.borrow().clone(), manual_nutrient);
 }
 
