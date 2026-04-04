@@ -59,18 +59,24 @@ impl NutrientListRecord {
     }
 }
 
+#[derive(Debug, PartialEq)]
 pub struct NutrientListItemRecord {
     nutrient_list_id: Vec<u8>,
     nutrient_id: Vec<u8>,
 }
 
 impl NutrientListItemRecord {
+    pub fn from_value(nutrient_list_id: Vec<u8>, nutrient_id: Vec<u8>) -> Self {
+        Self { nutrient_list_id, nutrient_id }
+    }
+
     pub async fn from_nutrient_list(nutrient_list: NutrientList, pool: &Pool<Sqlite>) -> Result<Vec<Self>, sqlx::Error> {
         let nutrient_list_id = nutrient_list.get_id().as_bytes().to_vec();
         let mut nutrient_list_item_vec: Vec<Self> = Vec::new();
 
         for nutrient in nutrient_list.get_nutrients() {
-            let nutrient_id = NutrientRecord::from_nutrient(nutrient.borrow().clone(), pool).await.unwrap().nutrient_id;
+            let nutrient_id = NutrientRecord::load_from_database_using_name(nutrient.borrow().get_name(), pool).await.unwrap().nutrient_id;
+            // let nutrient_id = NutrientRecord::from_nutrient(nutrient.borrow().clone(), pool).await.unwrap().nutrient_id;
             let item = Self {
                 nutrient_list_id: nutrient_list_id.clone(),
                 nutrient_id,
@@ -178,23 +184,23 @@ impl NutrientListItemRecord {
 //         Ok(nutrient_map)
 //     }
 //
-//     pub async fn load_all_from_sqlite(nutrient_list_id: Uuid, pool: &Pool<Sqlite>) -> Result<Vec<Self>, sqlx::Error> {
-//         Ok(sqlx::query_as!(
-//             NutrientListItemRecord,
-//             r#"
-//                     SELECT
-//                         nutrient_list_id,
-//                         nutrient_id
-//                     FROM nutrients_nutrient_list_items
-//                     WHERE
-//                         nutrient_list_id = ?
-//                 "#,
-//             nutrient_list_id
-//         )
-//         .fetch_all(pool)
-//         .await?)
-//     }
-//
+    pub async fn load_all_from_sqlite(nutrient_list_id: Uuid, pool: &Pool<Sqlite>) -> Result<Vec<Self>, sqlx::Error> {
+        Ok(sqlx::query_as!(
+            NutrientListItemRecord,
+            r#"
+                SELECT
+                    nutrient_list_id,
+                    nutrient_id
+                FROM nutrients_nutrient_list_items
+                WHERE
+                    nutrient_list_id = ?
+            "#,
+            nutrient_list_id
+        )
+        .fetch_all(pool)
+        .await?)
+    }
+
 //     pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
 //         sqlx::query!(
 //             r#"
