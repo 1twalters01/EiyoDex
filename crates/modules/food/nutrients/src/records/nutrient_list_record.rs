@@ -2,9 +2,8 @@ use sqlx::{Pool, Sqlite};
 use uuid::Uuid;
 
 use crate::{
-    nutrient::Nutrient,
     nutrient_list::NutrientList,
-    records::nutrient_record::{NutrientConversionRecord, NutrientLinkRecordUuid, NutrientRecord},
+    records::nutrient_record::NutrientRecord,
 };
 
 #[derive(Debug, PartialEq)]

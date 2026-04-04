@@ -2,7 +2,17 @@ use std::collections::HashMap;
 
 use identity::{inner_id::InnerIdType, Id};
 use nutrients::{
-    entity::Entity, nutrient::{link_parent_child, Nutrient}, nutrient_list::NutrientList, nutrient_units::NutrientUnit, records::{nutrient_list_record::{NutrientListItemRecord, NutrientListRecord}, nutrient_record::{NutrientLinkRecord, NutrientRecord}, nutrient_type_record::NutrientTypeRecord, nutrient_unit_record::NutrientUnitRecord}, schema::{nutrient_classes::{ChemicalType, EssentialityType, QuantityType}, nutrient_type::NutrientType}};
+    entity::Entity,
+    nutrient::{link_parent_child, Nutrient},
+    nutrient_list::NutrientList,
+    nutrient_units::NutrientUnit,
+    records::{
+        nutrient_list_record::{NutrientListItemRecord},
+        nutrient_record::{NutrientLinkRecord, NutrientRecord},
+        nutrient_type_record::NutrientTypeRecord,
+        nutrient_unit_record::NutrientUnitRecord
+    },
+    schema::{nutrient_classes::{ChemicalType, EssentialityType, QuantityType}, nutrient_type::NutrientType}};
 use units::{energy::unit::EnergyUnit, mass::unit::MassUnit, volume::unit::VolumeUnit};
 use utils::database::DatabaseService;
 
@@ -130,9 +140,8 @@ async fn test_from_nutrient_list() {
     nutrient_list.push(non_heme_iron_b);
 
 
-    // Create nutrient list record and nutrient list items record
-    let nutrient_list_record = NutrientListRecord::from_nutrient_list(nutrient_list.clone());
-    let mut nutrient_list_item_record_vec = NutrientListItemRecord::from_nutrient_list(nutrient_list.clone(), &pool).await.unwrap();
+    // Create nutrient list items record
+    let nutrient_list_item_record_vec = NutrientListItemRecord::from_nutrient_list(nutrient_list.clone(), &pool).await.unwrap();
 
     let nutrient_list_id = nutrient_list.get_id().as_bytes().to_vec();
     let manual_vec = Vec::from([

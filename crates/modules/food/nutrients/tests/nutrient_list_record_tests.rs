@@ -1,8 +1,11 @@
-use std::collections::HashMap;
-
 use identity::{inner_id::InnerIdType, Id};
 use nutrients::{
-    entity::Entity, nutrient::{link_parent_child, Nutrient}, nutrient_list::NutrientList, nutrient_units::NutrientUnit, records::{nutrient_list_record::NutrientListRecord, nutrient_record::{NutrientLinkRecord, NutrientRecord}, nutrient_type_record::NutrientTypeRecord, nutrient_unit_record::NutrientUnitRecord}, schema::{nutrient_classes::{ChemicalType, EssentialityType, QuantityType}, nutrient_type::NutrientType}};
+    entity::Entity, nutrient::{ link_parent_child, Nutrient }, nutrient_list::NutrientList, nutrient_units::NutrientUnit,
+    records::{
+        nutrient_list_record::NutrientListRecord,
+        nutrient_record::{NutrientRecord},
+        nutrient_type_record::NutrientTypeRecord, nutrient_unit_record::NutrientUnitRecord},
+    schema::{nutrient_classes::{ChemicalType, EssentialityType, QuantityType}, nutrient_type::NutrientType}};
 use units::{energy::unit::EnergyUnit, mass::unit::MassUnit, volume::unit::VolumeUnit};
 use utils::database::DatabaseService;
 
@@ -80,32 +83,6 @@ async fn test_from_nutrient_list() {
     non_heme_iron_b_entity.set_id(Id::from_bytes(InnerIdType::Uuid, non_heme_iron_b_entity_id.clone().try_into().unwrap()));
 
 
-    // Create link records
-    let (mut iron_link_record, iron_link_hashes) = NutrientLinkRecord::from_nutrient_entity(iron_entity.clone(), &pool).await.unwrap();
-    let (mut heme_iron_link_record, heme_iron_link_hashes) = NutrientLinkRecord::from_nutrient_entity(heme_iron_entity.clone(), &pool).await.unwrap();
-    let (mut non_heme_iron_link_record, non_heme_iron_link_hashes) = NutrientLinkRecord::from_nutrient_entity(non_heme_iron_entity.clone(), &pool).await.unwrap();
-    let (mut non_heme_iron_a_link_record, non_heme_iron_a_link_hashes) = NutrientLinkRecord::from_nutrient_entity(non_heme_iron_a_entity.clone(), &pool).await.unwrap();
-    let (mut non_heme_iron_b_link_record, non_heme_iron_b_link_hashes) = NutrientLinkRecord::from_nutrient_entity(non_heme_iron_b_entity.clone(), &pool).await.unwrap();
-
-
-    // Get nutrient entity Vec
-    let nutrient_name_new_id_map: HashMap<String, Vec<u8>> = HashMap::from([
-        (iron_entity.clone().get_inner().get_name(), iron_entity_id.clone()),
-        (heme_iron_entity.clone().get_inner().get_name(), heme_iron_entity_id.clone()),
-        (non_heme_iron_entity.clone().get_inner().get_name(), non_heme_iron_entity_id.clone()),
-        (non_heme_iron_a_entity.clone().get_inner().get_name(), non_heme_iron_a_entity_id.clone()),
-        (non_heme_iron_b_entity.clone().get_inner().get_name(), non_heme_iron_b_entity_id.clone()),
-    ]);
-
-
-    // Update link records with new ids
-    iron_link_record = iron_link_record.update_nutrient_link_ids(&iron_link_hashes, &nutrient_name_new_id_map);
-    heme_iron_link_record = heme_iron_link_record.update_nutrient_link_ids(&heme_iron_link_hashes, &nutrient_name_new_id_map);
-    non_heme_iron_link_record = non_heme_iron_link_record.update_nutrient_link_ids(&non_heme_iron_link_hashes, &nutrient_name_new_id_map);
-    non_heme_iron_a_link_record = non_heme_iron_a_link_record.update_nutrient_link_ids(&non_heme_iron_a_link_hashes, &nutrient_name_new_id_map);
-    non_heme_iron_b_link_record = non_heme_iron_b_link_record.update_nutrient_link_ids(&non_heme_iron_b_link_hashes, &nutrient_name_new_id_map);
-
-
     // Add nutrients to nutrient list
     nutrient_list.push(iron);
     nutrient_list.push(heme_iron);
@@ -123,7 +100,7 @@ async fn test_from_nutrient_list() {
 
 #[tokio::test]
 async fn test_to_nutrient_list() {
-    let mut nutrient_list = NutrientList::new();
+    let nutrient_list = NutrientList::new();
     let nutrient_list_record = NutrientListRecord::from_nutrient_list(nutrient_list.clone());
     let converted_list = nutrient_list_record.to_nutrient_quantity_list();
 

@@ -6,7 +6,7 @@ use nutrients::{
     nutrient::{link_parent_child, Nutrient},
     nutrient_units::NutrientUnit,
     records::{
-        nutrient_record::{NutrientConversionRecord, NutrientLinkNames, NutrientLinkRecord, NutrientRecord},
+        nutrient_record::{NutrientLinkNames, NutrientLinkRecord, NutrientRecord},
         nutrient_type_record::NutrientTypeRecord,
         nutrient_unit_record::NutrientUnitRecord
     },
@@ -15,7 +15,7 @@ use nutrients::{
         nutrient_type::NutrientType
     },
 };
-use units::{energy::unit::EnergyUnit, mass::{quantity::MassQuantity, unit::MassUnit}, volume::unit::VolumeUnit};
+use units::{energy::unit::EnergyUnit, mass::unit::MassUnit, volume::unit::VolumeUnit};
 use utils::database::DatabaseService;
 use uuid::Uuid;
 
@@ -497,5 +497,9 @@ async fn test_get_link_names() {
         child_names: Vec::new(),
     };
     assert_eq!(iron_nutrient_names, iron_manual_names);
+    assert_eq!(heme_iron_nutrient_names, heme_iron_manual_names);
+    assert_eq!(non_heme_iron_nutrient_names, non_heme_iron_manual_names);
+    assert_eq!(non_heme_iron_a_nutrient_names, non_heme_iron_a_manual_names);
+    assert_eq!(non_heme_iron_b_nutrient_names, non_heme_iron_b_manual_names);
 }
 
