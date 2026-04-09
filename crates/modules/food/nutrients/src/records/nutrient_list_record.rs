@@ -6,19 +6,21 @@ use crate::{
     records::nutrient_record::NutrientRecord,
 };
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct NutrientListRecord {
     id: Vec<u8>,
+    name: String,
 }
 
 impl NutrientListRecord {
-    pub fn from_value(id: Vec<u8>) -> Self {
-        Self { id }
+    pub fn from_value(id: Vec<u8>, name: String) -> Self {
+        Self { id, name }
     }
 
     pub fn from_nutrient_list(nutrient_list: NutrientList) -> Self {
         let id = nutrient_list.get_id().as_bytes().to_vec();
-        Self { id }
+        let name = nutrient_list.get_name();
+        Self { id, name }
     }
 
     pub fn to_nutrient_quantity_list(&self) -> NutrientList {
@@ -32,24 +34,46 @@ impl NutrientListRecord {
         self.id.clone()
     }
 
-    pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+    pub async fn save_or_update_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         sqlx::query!(
             r#"
-                INSERT INTO nutrients_nutrient_list_table (id)
-                VALUES (?)
-                ON CONFLICT DO NOTHING
+                INSERT INTO nutrients_nutrient_list_table (id, name)
+                VALUES (?, ?)
+                ON CONFLICT(id) DO UPDATE set name = excluded.name
             "#,
             self.id,
+            self.name,
         )
         .execute(pool)
         .await?;
         Ok(())
     }
 
+    pub async fn get_all_databases_from_sqlite(pool: &Pool<Sqlite>) -> Result<Vec<NutrientListRecord>, sqlx::Error> {
+        let rows = sqlx::query!(
+            r#"
+                Select id, "name" FROM nutrients_nutrient_list_table
+            "#,
+        )
+            .fetch_all(pool)
+            .await?;
+
+        let nutrient_list_record_vec: Vec<NutrientListRecord> = rows
+        .into_iter()
+        .map(|row| NutrientListRecord {
+            id: row.id,
+            name: row.name,
+        })
+        .collect();
+        
+        Ok(nutrient_list_record_vec)
+    }
+
     pub async fn delete_from_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         sqlx::query!(
-            "DELETE FROM nutrients_nutrient_list_table WHERE id = ?",
-            self.id
+            "DELETE FROM nutrients_nutrient_list_table WHERE id = ? AND name = ?",
+            self.id,
+            self.name,
         )
         .execute(pool)
         .await?;

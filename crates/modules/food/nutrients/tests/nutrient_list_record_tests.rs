@@ -18,6 +18,7 @@ async fn test_from_nutrient_list() {
     let _ = NutrientUnitRecord::save_enumerations_to_database(&pool).await;
 
     let mut nutrient_list = NutrientList::new();
+    nutrient_list.set_name(String::from("test_list"));
     
     let nutrient_type = NutrientType {
         chemical_type: ChemicalType::Mineral,
@@ -93,7 +94,7 @@ async fn test_from_nutrient_list() {
 
     // Create nutrient list record
     let nutrient_list_record = NutrientListRecord::from_nutrient_list(nutrient_list.clone());
-    let manual_list_record = NutrientListRecord::from_value(nutrient_list.get_id().as_bytes().to_vec());
+    let manual_list_record = NutrientListRecord::from_value(nutrient_list.get_id().as_bytes().to_vec(), nutrient_list.get_name());
 
     assert_eq!(nutrient_list_record, manual_list_record);
 }
@@ -115,7 +116,9 @@ async fn test_database_operations() {
     let _ = EnergyUnit::save_enumerations_to_database(&pool).await;
     let _ = NutrientUnitRecord::save_enumerations_to_database(&pool).await;
 
-    let mut nutrient_list = NutrientList::new();
+    let mut nutrient_list_a = NutrientList::new();
+    let mut nutrient_list_b = NutrientList::new();
+    let mut nutrient_list_c = NutrientList::new();
     
     let nutrient_type = NutrientType {
         chemical_type: ChemicalType::Mineral,
@@ -149,21 +152,37 @@ async fn test_database_operations() {
 
 
     // Add nutrients to nutrient list
-    nutrient_list.push(iron);
-    nutrient_list.push(heme_iron);
-    nutrient_list.push(non_heme_iron);
-    nutrient_list.push(non_heme_iron_a);
-    nutrient_list.push(non_heme_iron_b);
+    nutrient_list_a.push(iron.clone());
+    nutrient_list_a.push(heme_iron.clone());
+    nutrient_list_a.push(non_heme_iron.clone());
+    nutrient_list_a.push(non_heme_iron_a);
+    nutrient_list_a.push(non_heme_iron_b);
+
+    nutrient_list_b.push(iron);
+    nutrient_list_b.push(heme_iron);
+    nutrient_list_b.push(non_heme_iron);
 
 
     // Create nutrient list record
-    let nutrient_list_record = NutrientListRecord::from_nutrient_list(nutrient_list.clone());
+    let nutrient_list_a_record = NutrientListRecord::from_nutrient_list(nutrient_list_a.clone());
+    let nutrient_list_b_record = NutrientListRecord::from_nutrient_list(nutrient_list_b.clone());
+    let nutrient_list_c_record = NutrientListRecord::from_nutrient_list(nutrient_list_c.clone());
 
 
-    // save and delete to db
-    let save_res = nutrient_list_record.save_to_database(&pool).await;
-    assert!(save_res.is_ok());
-    let delete_res = nutrient_list_record.delete_from_database(&pool).await;
-    assert!(delete_res.is_ok());
+    // save db
+    nutrient_list_a_record.save_or_update_to_database(&pool).await.unwrap();
+    nutrient_list_b_record.save_or_update_to_database(&pool).await.unwrap();
+    nutrient_list_c_record.save_or_update_to_database(&pool).await.unwrap();
+
+
+    // Get all
+    let retrieved_nutrient_list_records = NutrientListRecord::get_all_databases_from_sqlite(&pool).await.unwrap();
+    assert!(retrieved_nutrient_list_records.iter().any(|item| item == &nutrient_list_a_record || item == &nutrient_list_b_record || item == &nutrient_list_c_record));
+    
+
+    // delete from db
+    nutrient_list_a_record.delete_from_database(&pool).await.unwrap();
+    nutrient_list_b_record.delete_from_database(&pool).await.unwrap();
+    nutrient_list_c_record.delete_from_database(&pool).await.unwrap();
 }
 

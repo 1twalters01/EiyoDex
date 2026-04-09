@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS nutrients_nutrient_list_table (
-    id BLOB PRIMARY KEY NOT NULL
+    id BLOB PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS nutrients_nutrient_list_items (

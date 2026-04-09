@@ -7,6 +7,7 @@ use crate::nutrient::Nutrient;
 #[derive(Debug, Clone)]
 pub struct NutrientList {
     id: Uuid,
+    name: String,
     nutrients: Vec<Rc<RefCell<Nutrient>>>,
 }
 
@@ -14,6 +15,7 @@ impl NutrientList {
     pub fn new() -> Self {
         Self {
             id: Uuid::new_v4(),
+            name: String::new(),
             nutrients: Vec::new(),
         }
     }
@@ -21,6 +23,7 @@ impl NutrientList {
     pub fn from_vec(nutrients: Vec<Rc<RefCell<Nutrient>>>) -> Self {
         Self {
             id: Uuid::new_v4(),
+            name: String::new(),
             nutrients: nutrients,
         }
     }
@@ -31,6 +34,14 @@ impl NutrientList {
 
     pub fn set_id(&mut self, id: Uuid) {
         self.id = id;
+    }
+
+    pub fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
+    pub fn set_name(&mut self, name: String) {
+        self.name = name;
     }
 
     pub fn get_nutrients(&self) -> Vec<Rc<RefCell<Nutrient>>> {

@@ -7,7 +7,7 @@ use nutrients::{
     nutrient_list::NutrientList,
     nutrient_units::NutrientUnit,
     records::{
-        nutrient_list_record::{NutrientListItemRecord},
+        nutrient_list_record::{NutrientListItemRecord, NutrientListRecord},
         nutrient_record::{NutrientLinkRecord, NutrientRecord},
         nutrient_type_record::NutrientTypeRecord,
         nutrient_unit_record::NutrientUnitRecord
@@ -157,5 +157,163 @@ async fn test_from_nutrient_list() {
 
 #[tokio::test]
 async fn test_database_operations() {
+    let pool = DatabaseService::new().await.unwrap().get_pool();
+    let _ = MassUnit::save_enumerations_to_database(&pool).await;
+    let _ = VolumeUnit::save_enumerations_to_database(&pool).await;
+    let _ = EnergyUnit::save_enumerations_to_database(&pool).await;
+    let _ = NutrientUnitRecord::save_enumerations_to_database(&pool).await;
+
+    let mut nutrient_list_a = NutrientList::new();
+    let mut nutrient_list_b = NutrientList::new();
+    let mut nutrient_list_c = NutrientList::new();
+    
+    let nutrient_type = NutrientType {
+        chemical_type: ChemicalType::Mineral,
+        quantity_type: QuantityType::Micronutrient,
+        essentiality_type: Some(EssentialityType::Essential),
+    };
+    let main_unit = NutrientUnit::Mass(MassUnit::Milligram);
+
+    let main_unit_record = NutrientUnitRecord::from_nutrient_unit(main_unit, &pool).await;
+    let unit_res = main_unit_record.save_to_database(&pool).await;
+    assert!(unit_res.is_ok());
+
+    let nutrient_type_record = NutrientTypeRecord::from_nutrient_type(nutrient_type.clone());
+    let type_res = nutrient_type_record.save_to_database(&pool).await;
+    assert!(type_res.is_ok());
+
+    
+    // Create nutrients
+    let iron = Nutrient::new_rc_refcell(String::from("Iron"), nutrient_type.clone(), main_unit);
+    let heme_iron = Nutrient::new_rc_refcell(String::from("Heme Iron"), nutrient_type.clone(), main_unit);
+    let non_heme_iron = Nutrient::new_rc_refcell(String::from("Non-heme Iron"), nutrient_type.clone(), main_unit);
+    let non_heme_iron_a = Nutrient::new_rc_refcell(String::from("Non-heme Iron A"), nutrient_type.clone(), main_unit);
+    let non_heme_iron_b = Nutrient::new_rc_refcell(String::from("Non-heme Iron B"), nutrient_type.clone(), main_unit);
+
+
+    // link nutrients
+    link_parent_child(&iron, &heme_iron).unwrap();
+    link_parent_child(&iron, &non_heme_iron).unwrap();
+    link_parent_child(&non_heme_iron, &non_heme_iron_a).unwrap();
+    link_parent_child(&non_heme_iron, &non_heme_iron_b).unwrap();
+
+
+    // Create entities from nutrients
+    let mut iron_entity = Entity::new(iron.borrow().clone());
+    let mut heme_iron_entity = Entity::new(heme_iron.borrow().clone());
+    let mut non_heme_iron_entity = Entity::new(non_heme_iron.borrow().clone());
+    let mut non_heme_iron_a_entity = Entity::new(non_heme_iron_a.borrow().clone());
+    let mut non_heme_iron_b_entity = Entity::new(non_heme_iron_b.borrow().clone());
+
+
+    // Get real entity ids
+    let iron_record = NutrientRecord::from_nutrient_entity(iron_entity.clone(), &pool).await.unwrap();
+    let iron_entity_id = iron_record.save_to_database(&pool).await.unwrap();
+
+    let heme_iron_record = NutrientRecord::from_nutrient_entity(heme_iron_entity.clone(), &pool).await.unwrap();
+    let heme_iron_entity_id = heme_iron_record.save_to_database(&pool).await.unwrap();
+
+    let non_heme_iron_record = NutrientRecord::from_nutrient_entity(non_heme_iron_entity.clone(), &pool).await.unwrap();
+    let non_heme_iron_entity_id = non_heme_iron_record.save_to_database(&pool).await.unwrap();
+
+    let non_heme_iron_a_record = NutrientRecord::from_nutrient_entity(non_heme_iron_a_entity.clone(), &pool).await.unwrap();
+    let non_heme_iron_a_entity_id = non_heme_iron_a_record.save_to_database(&pool).await.unwrap();
+
+    let non_heme_iron_b_record = NutrientRecord::from_nutrient_entity(non_heme_iron_b_entity.clone(), &pool).await.unwrap();
+    let non_heme_iron_b_entity_id = non_heme_iron_b_record.save_to_database(&pool).await.unwrap();
+
+
+    // update entity ids
+    iron_entity.set_id(Id::from_bytes(InnerIdType::Uuid, iron_entity_id.clone().try_into().unwrap()));
+    heme_iron_entity.set_id(Id::from_bytes(InnerIdType::Uuid, heme_iron_entity_id.clone().try_into().unwrap()));
+    non_heme_iron_entity.set_id(Id::from_bytes(InnerIdType::Uuid, non_heme_iron_entity_id.clone().try_into().unwrap()));
+    non_heme_iron_a_entity.set_id(Id::from_bytes(InnerIdType::Uuid, non_heme_iron_a_entity_id.clone().try_into().unwrap()));
+    non_heme_iron_b_entity.set_id(Id::from_bytes(InnerIdType::Uuid, non_heme_iron_b_entity_id.clone().try_into().unwrap()));
+
+
+    // Create link records
+    let (mut iron_link_record, iron_link_hashes) = NutrientLinkRecord::from_nutrient_entity(iron_entity.clone(), &pool).await.unwrap();
+    let (mut heme_iron_link_record, heme_iron_link_hashes) = NutrientLinkRecord::from_nutrient_entity(heme_iron_entity.clone(), &pool).await.unwrap();
+    let (mut non_heme_iron_link_record, non_heme_iron_link_hashes) = NutrientLinkRecord::from_nutrient_entity(non_heme_iron_entity.clone(), &pool).await.unwrap();
+    let (mut non_heme_iron_a_link_record, non_heme_iron_a_link_hashes) = NutrientLinkRecord::from_nutrient_entity(non_heme_iron_a_entity.clone(), &pool).await.unwrap();
+    let (mut non_heme_iron_b_link_record, non_heme_iron_b_link_hashes) = NutrientLinkRecord::from_nutrient_entity(non_heme_iron_b_entity.clone(), &pool).await.unwrap();
+
+
+    // Get nutrient entity Vec
+    let nutrient_name_new_id_map: HashMap<String, Vec<u8>> = HashMap::from([
+        (iron_entity.clone().get_inner().get_name(), iron_entity_id.clone()),
+        (heme_iron_entity.clone().get_inner().get_name(), heme_iron_entity_id.clone()),
+        (non_heme_iron_entity.clone().get_inner().get_name(), non_heme_iron_entity_id.clone()),
+        (non_heme_iron_a_entity.clone().get_inner().get_name(), non_heme_iron_a_entity_id.clone()),
+        (non_heme_iron_b_entity.clone().get_inner().get_name(), non_heme_iron_b_entity_id.clone()),
+    ]);
+
+
+    // Update link records with new ids
+    iron_link_record = iron_link_record.update_nutrient_link_ids(&iron_link_hashes, &nutrient_name_new_id_map);
+    heme_iron_link_record = heme_iron_link_record.update_nutrient_link_ids(&heme_iron_link_hashes, &nutrient_name_new_id_map);
+    non_heme_iron_link_record = non_heme_iron_link_record.update_nutrient_link_ids(&non_heme_iron_link_hashes, &nutrient_name_new_id_map);
+    non_heme_iron_a_link_record = non_heme_iron_a_link_record.update_nutrient_link_ids(&non_heme_iron_a_link_hashes, &nutrient_name_new_id_map);
+    non_heme_iron_b_link_record = non_heme_iron_b_link_record.update_nutrient_link_ids(&non_heme_iron_b_link_hashes, &nutrient_name_new_id_map);
+
+
+    // Save nutrient record
+    iron_record.save_to_database(&pool).await.unwrap();
+    heme_iron_record.save_to_database(&pool).await.unwrap();
+    non_heme_iron_record.save_to_database(&pool).await.unwrap();
+    non_heme_iron_a_record.save_to_database(&pool).await.unwrap();
+    non_heme_iron_b_record.save_to_database(&pool).await.unwrap();
+
+
+    // Save nutrient record links to database
+    let _ = iron_link_record.save_to_database(&pool).await.unwrap(); 
+    let _ = heme_iron_link_record.save_to_database(&pool).await.unwrap(); 
+    let _ = non_heme_iron_link_record.save_to_database(&pool).await.unwrap(); 
+    let _ = non_heme_iron_a_link_record.save_to_database(&pool).await.unwrap(); 
+    let _ = non_heme_iron_b_link_record.save_to_database(&pool).await.unwrap(); 
+
+
+    // Add nutrients to nutrient list
+    nutrient_list_a.push(iron.clone());
+    nutrient_list_a.push(heme_iron.clone());
+    nutrient_list_a.push(non_heme_iron.clone());
+    nutrient_list_a.push(non_heme_iron_a);
+    nutrient_list_a.push(non_heme_iron_b);
+
+    nutrient_list_b.push(iron);
+    nutrient_list_b.push(heme_iron);
+    nutrient_list_b.push(non_heme_iron);
+
+
+    // Create nutrient list record
+    let nutrient_list_a_record = NutrientListRecord::from_nutrient_list(nutrient_list_a.clone());
+    let nutrient_list_b_record = NutrientListRecord::from_nutrient_list(nutrient_list_b.clone());
+    let nutrient_list_c_record = NutrientListRecord::from_nutrient_list(nutrient_list_c.clone());
+
+
+    // save nutrient list record
+    nutrient_list_a_record.save_or_update_to_database(&pool).await.unwrap();
+    nutrient_list_b_record.save_or_update_to_database(&pool).await.unwrap();
+    nutrient_list_c_record.save_or_update_to_database(&pool).await.unwrap();
+
+
+    // Create nutrient list items record
+    let nutrient_list_a_item_record_vec = NutrientListItemRecord::from_nutrient_list(nutrient_list_a.clone(), &pool).await.unwrap();
+    let nutrient_list_b_item_record_vec = NutrientListItemRecord::from_nutrient_list(nutrient_list_b.clone(), &pool).await.unwrap();
+    let nutrient_list_c_item_record_vec = NutrientListItemRecord::from_nutrient_list(nutrient_list_c.clone(), &pool).await.unwrap();
+
+
+    // save nutrient list items record
+    for item_record in nutrient_list_a_item_record {
+        item_record
+    }
+
+
+
+
+    // delete from db
+    nutrient_list_a_record.delete_from_database(&pool).await.unwrap();
+    nutrient_list_b_record.delete_from_database(&pool).await.unwrap();
+    nutrient_list_c_record.delete_from_database(&pool).await.unwrap();
 }
 
