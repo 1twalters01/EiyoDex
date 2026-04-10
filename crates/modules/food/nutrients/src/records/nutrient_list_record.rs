@@ -1,9 +1,9 @@
+use identity::{inner_id::InnerIdType, Id, InnerId};
 use sqlx::{Pool, Sqlite};
 use uuid::Uuid;
 
 use crate::{
-    nutrient_list::NutrientList,
-    records::nutrient_record::NutrientRecord,
+    nutrient::Nutrient, nutrient_list::NutrientList, records::nutrient_record::NutrientRecord
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -49,7 +49,7 @@ impl NutrientListRecord {
         Ok(())
     }
 
-    pub async fn get_all_databases_from_sqlite(pool: &Pool<Sqlite>) -> Result<Vec<NutrientListRecord>, sqlx::Error> {
+    pub async fn get_all_from_sqlite(pool: &Pool<Sqlite>) -> Result<Vec<NutrientListRecord>, sqlx::Error> {
         let rows = sqlx::query!(
             r#"
                 Select id, "name" FROM nutrients_nutrient_list_table
@@ -80,6 +80,18 @@ impl NutrientListRecord {
 
         Ok(())
     }
+
+    pub async fn load_nutrients_from_database(&self, pool: &Pool<Sqlite>) -> Result<Vec<Nutrient>, sqlx::Error> {
+        let nutrient_list_items_record = NutrientListItemRecord::load_all_from_sqlite(&self.get_id(), pool).await?;
+        
+        let mut nutrient_vec: Vec<Nutrient> = Vec::new();
+        for record in nutrient_list_items_record {
+            let nutrient = record.to_nutrient(&pool).await?;
+            nutrient_vec.push(nutrient);
+        }
+
+        Ok(nutrient_vec)
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -99,7 +111,6 @@ impl NutrientListItemRecord {
 
         for nutrient in nutrient_list.get_nutrients() {
             let nutrient_id = NutrientRecord::load_from_database_using_name(nutrient.borrow().get_name(), pool).await.unwrap().nutrient_id;
-            // let nutrient_id = NutrientRecord::from_nutrient(nutrient.borrow().clone(), pool).await.unwrap().nutrient_id;
             let item = Self {
                 nutrient_list_id: nutrient_list_id.clone(),
                 nutrient_id,
@@ -110,104 +121,12 @@ impl NutrientListItemRecord {
         return Ok(nutrient_list_item_vec)
     }
 
-//     pub async fn to_nutrient_vec_from_from_vec(
-//         items: Vec<&Self>,
-//         pool: &Pool<Sqlite>,
-//     ) -> Result<Vec<(Nutrient, NutrientLinkRecordUuid)>, sqlx::Error> {
-//         let mut tx = pool.begin().await?;
-//
-//         let mut nutrient_map: Vec<(Nutrient, NutrientLinkRecordUuid)> = Vec::new();
-//         for item in items {
-//             let nutrient_record = sqlx::query_as!(
-//                 NutrientRecord,
-//                 r#"
-//                     SELECT
-//                         id as nutrient_id,
-//                         name,
-//                         description,
-//                         main_unit_id,
-//                         quantity_type_id,
-//                         essentiality_type_id,
-//                         chemical_id
-//                     FROM nutrients_nutrient_table
-//                     WHERE
-//                         id = ?
-//                 "#,
-//                 item.nutrient_id
-//             )
-//             .fetch_one(&mut *tx)
-//             .await?;
-//
-//             let conversion_vec = sqlx::query_as!(
-//                 NutrientConversionRecord,
-//                 r#"
-//                     SELECT
-//                         nutrient_id,
-//                         unit_id,
-//                         factor
-//                     FROM nutrients_unit_conversions
-//                     WHERE
-//                         nutrient_id = ?
-//                 "#,
-//                 item.nutrient_id
-//             )
-//             .fetch_all(&mut *tx)
-//             .await?;
-//             let unit_conversions =
-//                 NutrientConversionRecord::to_btree_map_from_vec(conversion_vec, pool).await;
-//
-//             let parent_rows = sqlx::query!(
-//                 r#"
-//                 SELECT
-//                     parent_id
-//                 FROM nutrients_nutrient_relationships
-//                 WHERE
-//                     child_id = ?
-//             "#,
-//                 item.nutrient_id
-//             )
-//             .fetch_all(&mut *tx)
-//             .await?;
-//             let parent_id_vec: Vec<Uuid> = parent_rows
-//                 .iter()
-//                 .map(|row| Uuid::from_slice(&row.parent_id).unwrap())
-//                 .collect();
-//
-//             let child_rows = sqlx::query!(
-//                 r#"
-//                 SELECT
-//                     child_id
-//                 FROM nutrients_nutrient_relationships
-//                 WHERE
-//                     parent_id = ?
-//             "#,
-//                 item.nutrient_id
-//             )
-//             .fetch_all(&mut *tx)
-//             .await?;
-//             let child_id_vec: Vec<Uuid> = child_rows
-//                 .iter()
-//                 .map(|row| Uuid::from_slice(&row.child_id).unwrap())
-//                 .collect();
-//
-//             let nutrient_id = Uuid::from_slice(&item.nutrient_id).unwrap();
-//             let nutrient_link_record_uuid = NutrientLinkRecordUuid {
-//                 nutrient_id,
-//                 parent_id_vec,
-//                 child_id_vec,
-//             };
-//
-//             let mut nutrient = nutrient_record.to_nutrient(pool).await;
-//             nutrient.set_unit_conversions(unit_conversions);
-//             nutrient_map.push((nutrient, nutrient_link_record_uuid));
-//         }
-//
-//         let _ = tx.commit();
-//
-//         Ok(nutrient_map)
-//     }
-//
-    pub async fn load_all_from_sqlite(nutrient_list_id: Uuid, pool: &Pool<Sqlite>) -> Result<Vec<Self>, sqlx::Error> {
+    pub async fn to_nutrient(&self, pool: &Pool<Sqlite>) -> Result<Nutrient, sqlx::Error> {
+        let nutrient_record = NutrientRecord::load_from_database_using_id(Id::from_inner(InnerId::from_slice(InnerIdType::Uuid, &self.nutrient_id).unwrap()), pool);
+        nutrient_record.await?.to_nutrient(pool).await
+    }
+
+    pub async fn load_all_from_sqlite(nutrient_list_id: &Vec<u8>, pool: &Pool<Sqlite>) -> Result<Vec<Self>, sqlx::Error> {
         Ok(sqlx::query_as!(
             NutrientListItemRecord,
             r#"
@@ -260,44 +179,44 @@ impl NutrientListItemRecord {
         tx.commit().await?;
         Ok(())
     }
-//
-//     pub async fn delete_conversion(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
-//         sqlx::query!(
-//             r#"
-//                 DELETE FROM nutrients_nutrient_list_items 
-//                 WHERE
-//                     nutrient_list_id = ?
-//                     AND nutrient_id = ?
-//             "#,
-//             self.nutrient_list_id,
-//             self.nutrient_id,
-//         )
-//         .execute(pool)
-//         .await?;
-//
-//         Ok(())
-//     }
-//
-//     pub async fn delete_conversion_vec(items: Vec<&Self>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
-//         let mut tx = pool.begin().await?;
-//
-//         for item in items {
-//             sqlx::query!(
-//                 r#"
-//                     DELETE FROM nutrients_nutrient_list_items
-//                     WHERE
-//                         nutrient_list_id = ?
-//                         AND nutrient_id = ?
-//                 "#,
-//                 item.nutrient_list_id,
-//                 item.nutrient_id,
-//             )
-//             .execute(&mut *tx)
-//             .await?;
-//         }
-//
-//         let _ = tx.commit();
-//
-//         Ok(())
-//     }
+
+    pub async fn delete_item_from_sqlite(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            r#"
+                DELETE FROM nutrients_nutrient_list_items 
+                WHERE
+                    nutrient_list_id = ?
+                    AND nutrient_id = ?
+            "#,
+            self.nutrient_list_id,
+            self.nutrient_id,
+        )
+        .execute(pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn delete_item_vec_from_sqlite(items: Vec<&Self>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let mut tx = pool.begin().await?;
+
+        for item in items {
+            sqlx::query!(
+                r#"
+                    DELETE FROM nutrients_nutrient_list_items
+                    WHERE
+                        nutrient_list_id = ?
+                        AND nutrient_id = ?
+                "#,
+                item.nutrient_list_id,
+                item.nutrient_id,
+            )
+            .execute(&mut *tx)
+            .await?;
+        }
+
+        tx.commit().await?;
+
+        Ok(())
+    }
 }

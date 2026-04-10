@@ -497,10 +497,7 @@ impl NutrientLinkRecord {
         let mut child_map: HashMap<Vec<u8>, String> = HashMap::new();
         for child in nutrient.get_children() {
             let child_name = child.borrow().clone().get_name();
-            let child_id = NutrientRecord::from_nutrient(child.borrow().clone(), pool)
-                .await
-                .unwrap()
-                .nutrient_id;
+            let child_id = NutrientRecord::load_from_database_using_name(child.borrow().get_name(), pool).await.unwrap().nutrient_id;
             child_names.push(child_name.clone());
             child_ids.push(child_id.clone());
             child_map.insert(child_id, child_name);
@@ -512,10 +509,7 @@ impl NutrientLinkRecord {
         for parent_weak in nutrient.get_parents() {
             if let Some(parent) = parent_weak.upgrade() {
                 let parent_name = parent.borrow().clone().get_name();
-                let parent_id = NutrientRecord::from_nutrient(parent.borrow().clone(), pool)
-                    .await
-                    .unwrap()
-                    .nutrient_id;
+                let parent_id = NutrientRecord::load_from_database_using_name(parent.borrow().get_name(), pool).await.unwrap().nutrient_id;
                 parent_names.push(parent_name.clone());
                 parent_ids.push(parent_id.clone());
                 parent_map.insert(parent_id, parent_name);

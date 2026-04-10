@@ -21,11 +21,23 @@ impl InnerId {
             InnerIdType::Uuid => InnerId::Uuid(Uuid::new_v4()),
         }
     }
+
     pub fn from_bytes(id_type: InnerIdType, bytes: [u8; 16]) -> Self {
         match id_type {
             InnerIdType::Ulid => InnerId::Ulid(Ulid::from_bytes(bytes)),
             InnerIdType::Uuid => InnerId::Uuid(Uuid::from_bytes(bytes)),
         }
+    }
+
+    pub fn from_slice(id_type: InnerIdType, slice: &[u8]) -> Result<Self, &'static str> {
+        if slice.len() != 16 {
+            return Err("expected 16 bytes");
+        }
+
+        let array: [u8; 16] = slice.try_into()
+            .map_err(|_| "failed to convert slice to array")?;
+
+        Ok(Self::from_bytes(id_type, array))
     }
 
     pub fn to_bytes(&self) -> [u8; 16] {

@@ -2,8 +2,8 @@ use identity::{inner_id::InnerIdType, Id};
 use nutrients::{
     entity::Entity, nutrient::{ link_parent_child, Nutrient }, nutrient_list::NutrientList, nutrient_units::NutrientUnit,
     records::{
-        nutrient_list_record::NutrientListRecord,
-        nutrient_record::{NutrientRecord},
+        nutrient_list_record::{NutrientListItemRecord, NutrientListRecord},
+        nutrient_record::NutrientRecord,
         nutrient_type_record::NutrientTypeRecord, nutrient_unit_record::NutrientUnitRecord},
     schema::{nutrient_classes::{ChemicalType, EssentialityType, QuantityType}, nutrient_type::NutrientType}};
 use units::{energy::unit::EnergyUnit, mass::unit::MassUnit, volume::unit::VolumeUnit};
@@ -174,10 +174,20 @@ async fn test_database_operations() {
     nutrient_list_b_record.save_or_update_to_database(&pool).await.unwrap();
     nutrient_list_c_record.save_or_update_to_database(&pool).await.unwrap();
 
+    let nutrient_list_a_item_record_vec = NutrientListItemRecord::from_nutrient_list(nutrient_list_a.clone(), &pool).await.unwrap();
+    let mut refs: Vec<&NutrientListItemRecord> = nutrient_list_a_item_record_vec.iter().collect();
+    NutrientListItemRecord::save_vec_to_database(refs, &pool).await.unwrap();
+
 
     // Get all
-    let retrieved_nutrient_list_records = NutrientListRecord::get_all_databases_from_sqlite(&pool).await.unwrap();
+    let retrieved_nutrient_list_records = NutrientListRecord::get_all_from_sqlite(&pool).await.unwrap();
     assert!(retrieved_nutrient_list_records.iter().any(|item| item == &nutrient_list_a_record || item == &nutrient_list_b_record || item == &nutrient_list_c_record));
+
+    let retrieved_nutrients = nutrient_list_a_record.load_nutrients_from_database(&pool).await.unwrap();
+    let retrieved_nutrient_names: Vec<String> = retrieved_nutrients.iter().map(|nutrient| nutrient.get_name()).collect();
+    let nutrient_names: Vec<String> = nutrient_list_a.get_nutrients().iter().map(|nutrient| nutrient.borrow().get_name()).collect();
+    assert_eq!(nutrient_names.len(), retrieved_nutrient_names.len());
+    assert!(nutrient_names.iter().all(|name| retrieved_nutrient_names.contains(name)));
     
 
     // delete from db
