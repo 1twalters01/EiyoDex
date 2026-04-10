@@ -15,6 +15,7 @@ use nutrients::{
     schema::{nutrient_classes::{ChemicalType, EssentialityType, QuantityType}, nutrient_type::NutrientType}};
 use units::{energy::unit::EnergyUnit, mass::unit::MassUnit, volume::unit::VolumeUnit};
 use utils::database::DatabaseService;
+use uuid::Uuid;
 
 #[tokio::test]
 async fn test_from_nutrient_list() {
@@ -153,6 +154,10 @@ async fn test_from_nutrient_list() {
     ]);
 
     assert_eq!(nutrient_list_item_record_vec, manual_vec);
+}
+
+#[tokio::test]
+async fn test_to_nutrient_list() {
 }
 
 #[tokio::test]
@@ -304,11 +309,33 @@ async fn test_database_operations() {
 
 
     // save nutrient list items record
-    for item_record in nutrient_list_a_item_record {
-        item_record
+    let mut refs: Vec<&NutrientListItemRecord> = nutrient_list_a_item_record_vec.iter().collect();
+    NutrientListItemRecord::save_vec_to_database(refs, &pool).await.unwrap();
+    
+    for item_record in &nutrient_list_b_item_record_vec {
+        item_record.save_to_database(&pool).await.unwrap();
     }
 
+    refs = nutrient_list_c_item_record_vec.iter().collect();
+    NutrientListItemRecord::save_vec_to_database(refs, &pool).await.unwrap();
 
+
+    // load items from sqlite
+    let nutrient_list_a_uuid = Uuid::from_slice(&nutrient_list_a_record.get_id()).unwrap();
+    let retrieved_nutrient_list_a_items = NutrientListItemRecord::load_all_from_sqlite(nutrient_list_a_uuid, &pool).await.unwrap();
+
+    let nutrient_list_b_uuid = Uuid::from_slice(&nutrient_list_b_record.get_id()).unwrap();
+    let retrieved_nutrient_list_b_items = NutrientListItemRecord::load_all_from_sqlite(nutrient_list_b_uuid, &pool).await.unwrap();
+
+    let nutrient_list_c_uuid = Uuid::from_slice(&nutrient_list_c_record.get_id()).unwrap();
+    let retrieved_nutrient_list_c_items = NutrientListItemRecord::load_all_from_sqlite(nutrient_list_c_uuid, &pool).await.unwrap();
+
+    assert_eq!(retrieved_nutrient_list_a_items.len(), nutrient_list_a_item_record_vec.len());
+    assert!(retrieved_nutrient_list_a_items.iter().all(|item| nutrient_list_a_item_record_vec.contains(item)));
+    assert_eq!(retrieved_nutrient_list_b_items.len(), nutrient_list_b_item_record_vec.len());
+    assert!(retrieved_nutrient_list_b_items.iter().all(|item| nutrient_list_b_item_record_vec.contains(item)));
+    assert_eq!(retrieved_nutrient_list_c_items.len(), nutrient_list_c_item_record_vec.len());
+    assert!(retrieved_nutrient_list_c_items.iter().all(|item| nutrient_list_c_item_record_vec.contains(item)));
 
 
     // delete from db

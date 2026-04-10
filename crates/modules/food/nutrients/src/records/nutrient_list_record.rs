@@ -224,39 +224,42 @@ impl NutrientListItemRecord {
         .await?)
     }
 
-//     pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
-//         sqlx::query!(
-//             r#"
-//                 INSERT INTO nutrients_nutrient_list_items (nutrient_list_id, nutrient_id)
-//                 VALUES (?, ?)
-//                 ON CONFLICT DO NOTHING
-//             "#,
-//             self.nutrient_list_id,
-//             self.nutrient_id,
-//         )
-//         .execute(pool)
-//         .await?;
-//         Ok(())
-//     }
-//
-//     pub async fn save_vec_to_database(items: Vec<&Self>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
-//         let mut tx = pool.begin().await?;
-//
-//         for item in items {
-//             sqlx::query!(
-//                 r#"
-//                     INSERT INTO nutrients_nutrient_list_items (nutrient_list_id, nutrient_id)
-//                     VALUES (?, ?)
-//                     ON CONFLICT DO NOTHING
-//                 "#,
-//                 item.nutrient_list_id,
-//                 item.nutrient_id,
-//             )
-//             .execute(&mut *tx)
-//             .await?;
-//         }
-//         Ok(())
-//     }
+    pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            r#"
+                INSERT INTO nutrients_nutrient_list_items (nutrient_list_id, nutrient_id)
+                VALUES (?, ?)
+                ON CONFLICT DO NOTHING
+            "#,
+            self.nutrient_list_id,
+            self.nutrient_id,
+        )
+        .execute(pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn save_vec_to_database(items: Vec<&Self>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        let mut tx = pool.begin().await?;
+
+        for item in items {
+            sqlx::query!(
+                r#"
+                    INSERT INTO nutrients_nutrient_list_items (nutrient_list_id, nutrient_id)
+                    VALUES (?, ?)
+                    ON CONFLICT(nutrient_list_id, nutrient_id) DO NOTHING 
+                "#,
+                item.nutrient_list_id,
+                item.nutrient_id,
+            )
+            .execute(&mut *tx)
+            .await?;
+        }
+
+        tx.commit().await?;
+        Ok(())
+    }
 //
 //     pub async fn delete_conversion(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
 //         sqlx::query!(
