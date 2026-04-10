@@ -34,7 +34,8 @@ impl InnerId {
             return Err("expected 16 bytes");
         }
 
-        let array: [u8; 16] = slice.try_into()
+        let array: [u8; 16] = slice
+            .try_into()
             .map_err(|_| "failed to convert slice to array")?;
 
         Ok(Self::from_bytes(id_type, array))

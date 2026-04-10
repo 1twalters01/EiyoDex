@@ -1,3 +1,4 @@
+use identity::{inner_id::InnerIdType, Id};
 use sqlx::{Pool, Sqlite};
 use uuid::Uuid;
 
@@ -14,50 +15,36 @@ pub struct NutrientQuantityRecord {
 }
 
 impl NutrientQuantityRecord {
-    pub async fn from_nutrient_quantity(nutrient_quantity: NutrientQuantity, pool: &Pool<Sqlite>) -> Result<Self, &'static str> {
-        let id: Vec<u8> = nutrient_quantity.get_id().as_bytes().to_vec();
-        let quantity = nutrient_quantity.get_value();
-        let nutrient_id = nutrient_quantity
-            .get_nutrient()
-            .borrow()
-            .get_id()
-            .as_bytes()
-            .to_vec();
-
-        let output_unit_id = match NutrientUnitRecord::from_nutrient_unit(nutrient_quantity.get_output_unit(), pool).await {
-            Some(nutrient_quantity_record) => match nutrient_quantity_record.get_unit_type_id() {
-                Some(id) => id,
-                None => return Err("No id found for unit type"),
-            },
-            None => return Err("No main unit chosen for nutrient"),
-        };
-
-        Ok(Self {
-            id,
-            quantity,
-            nutrient_id,
-            output_unit_id,
-        })
+    pub fn from_values(id: Vec<u8>, quantity: f64, nutrient_id: Vec<u8>, output_unit_id: i64) -> Self {
+        Self { id, quantity, nutrient_id, output_unit_id }
     }
 
-    pub async fn to_nutrient_quantity(&self, pool: &Pool<Sqlite>) -> NutrientQuantity {
-        let id = Uuid::from_slice(&self.id).unwrap();
+    pub async fn from_nutrient_quantity(nutrient_quantity: NutrientQuantity, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
+        let id = Id::<NutrientQuantity>::new(InnerIdType::Uuid).to_bytes().to_vec();
+        let quantity = nutrient_quantity.get_value();
+        let nutrient_id = NutrientRecord::from_nutrient(nutrient_quantity.get_nutrient().borrow().clone(), pool).await?.nutrient_id;
+
+        let output_unit = nutrient_quantity.get_output_unit();
+        let output_unit_id = NutrientUnitRecord::from_nutrient_unit(output_unit, pool).await.get_database_id(pool).await?;
+
+        Ok(Self { id, quantity, nutrient_id, output_unit_id })
+    }
+
+
+    pub async fn to_nutrient_quantity(&self, pool: &Pool<Sqlite>) -> Result<NutrientQuantity, sqlx::Error> {
         let quantity = self.quantity;
         let nutrient =
-            NutrientRecord::load_from_database(Uuid::from_slice(&self.nutrient_id).unwrap(), pool)
-                .await
-                .unwrap()
+            NutrientRecord::load_from_database_using_id(Id::from_slice(InnerIdType::Uuid, &self.nutrient_id).unwrap(), pool)
+                .await?
                 .to_nutrient(pool)
-                .await;
+                .await?;
         let output_unit = NutrientUnitRecord::load_from_database(self.output_unit_id, pool)
-            .await
-            .unwrap()
+            .await?
             .to_nutrient_unit(pool)
             .await;
 
-        let mut nutrient_quantity = NutrientQuantity::new(quantity, nutrient, output_unit).unwrap();
-        nutrient_quantity.set_id(id);
-        return nutrient_quantity;
+        let nutrient_quantity = NutrientQuantity::new(quantity, nutrient, output_unit).unwrap();
+        Ok(nutrient_quantity)
     }
 
     pub async fn load_from_database(id: Uuid, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
@@ -86,7 +73,6 @@ impl NutrientQuantityRecord {
                 VALUES (?, ?, ?, ?)
                 ON CONFLICT (id)
                 DO UPDATE SET
-                    id = excluded.id,
                     quantity = excluded.quantity,
                     nutrient_id = excluded.nutrient_id,
                     output_unit_id = excluded.output_unit_id

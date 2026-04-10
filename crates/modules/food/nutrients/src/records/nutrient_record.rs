@@ -41,8 +41,13 @@ impl NutrientRecord {
         }
     }
 
-    pub async fn from_nutrient(nutrient: Nutrient, pool: &Pool<Sqlite>) -> Result<Self, &'static str> {
-        let nutrient_id = Id::<Nutrient>::new(InnerIdType::Uuid).to_bytes().to_vec();
+    pub async fn from_nutrient(nutrient: Nutrient, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
+        let nutrient_record_option = Self::load_from_database_using_name(nutrient.get_name(), &pool).await;
+        let nutrient_id = match nutrient_record_option {
+            Ok(record) => record.nutrient_id,
+            Err(sqlx::Error::RowNotFound) => Id::<Nutrient>::new(InnerIdType::Uuid).to_bytes().to_vec(),
+            Err(err) => return Err(err),
+        };
 
         let name = nutrient.get_name();
         let description = nutrient.get_description();
@@ -50,12 +55,11 @@ impl NutrientRecord {
         let main_unit_id = NutrientUnitRecord::from_nutrient_unit(nutrient.get_main_unit(), pool)
             .await
             .get_database_id(&pool)
-            .await
-            .unwrap();
+            .await?;
 
         let essentiality_type_id = nutrient_type_record.get_essentiality_type_id();
         let quantity_type_id = nutrient_type_record.get_quantity_type_id();
-        let chemical_id = nutrient_type_record.get_chemical_id_from_database(&pool).await.unwrap();
+        let chemical_id = nutrient_type_record.get_chemical_id_from_database(&pool).await?;
 
         Ok(Self {
             nutrient_id,
