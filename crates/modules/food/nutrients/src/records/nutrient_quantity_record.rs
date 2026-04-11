@@ -7,6 +7,7 @@ use crate::{
     records::{nutrient_record::NutrientRecord, nutrient_unit_record::NutrientUnitRecord},
 };
 
+#[derive(Debug, PartialEq, Clone)]
 pub struct NutrientQuantityRecord {
     pub id: Vec<u8>,
     pub quantity: f64,
@@ -47,7 +48,7 @@ impl NutrientQuantityRecord {
         Ok(nutrient_quantity)
     }
 
-    pub async fn load_from_database(id: Uuid, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
+    pub async fn load_from_database(id: Vec<u8>, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
         Ok(sqlx::query_as!(
             NutrientQuantityRecord,
             r#"
