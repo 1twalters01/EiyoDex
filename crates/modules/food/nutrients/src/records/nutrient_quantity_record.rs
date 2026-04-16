@@ -1,6 +1,5 @@
 use identity::{inner_id::InnerIdType, Id};
 use sqlx::{Pool, Sqlite};
-use uuid::Uuid;
 
 use crate::{
     nutrient_quantity::NutrientQuantity,

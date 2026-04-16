@@ -30,6 +30,6 @@ CREATE TABLE IF NOT EXISTS nutrients_chemical_type_table (
     )
 );
 
-CREATE UNIQUE INDEX nutrients_unique_chemical_type_bar_energy
+CREATE UNIQUE INDEX IF NOT EXISTS nutrients_unique_chemical_type_bar_energy
 ON nutrients_chemical_type_table(chemical_type_id)
 WHERE chemical_type_id != 1;

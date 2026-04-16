@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS nutrients_energy_yielding_nutrients (
     )
 );
 
-CREATE UNIQUE INDEX nutrients_unique_energy_yielding_type_for_alcohol
+CREATE UNIQUE INDEX IF NOT EXISTS nutrients_unique_energy_yielding_type_for_alcohol
 ON nutrients_energy_yielding_nutrients(energy_yielding_nutrient_type_id)
 WHERE energy_yielding_nutrient_type_id != 4;
 

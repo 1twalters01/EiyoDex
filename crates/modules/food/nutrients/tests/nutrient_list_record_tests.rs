@@ -94,7 +94,7 @@ async fn test_from_nutrient_list() {
 
     // Create nutrient list record
     let nutrient_list_record = NutrientListRecord::from_nutrient_list(nutrient_list.clone());
-    let manual_list_record = NutrientListRecord::from_value(nutrient_list.get_id().as_bytes().to_vec(), nutrient_list.get_name());
+    let manual_list_record = NutrientListRecord::from_value(nutrient_list.get_id().as_bytes().to_vec(), nutrient_list.get_name(), nutrient_list.get_description());
 
     assert_eq!(nutrient_list_record, manual_list_record);
 }

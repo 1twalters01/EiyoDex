@@ -10,22 +10,26 @@ use crate::{
 pub struct NutrientListRecord {
     id: Vec<u8>,
     name: String,
+    description: String,
 }
 
 impl NutrientListRecord {
-    pub fn from_value(id: Vec<u8>, name: String) -> Self {
-        Self { id, name }
+    pub fn from_value(id: Vec<u8>, name: String, description: String) -> Self {
+        Self { id, name, description }
     }
 
     pub fn from_nutrient_list(nutrient_list: NutrientList) -> Self {
         let id = nutrient_list.get_id().as_bytes().to_vec();
         let name = nutrient_list.get_name();
-        Self { id, name }
+        let description = nutrient_list.get_description();
+        Self { id, name, description }
     }
 
     pub fn to_nutrient_quantity_list(&self) -> NutrientList {
         let mut nutrient_list = NutrientList::new();
         nutrient_list.set_id(Uuid::from_slice(&self.id).unwrap());
+        nutrient_list.set_name(self.name.clone());
+        nutrient_list.set_description(self.description.clone());
 
         return nutrient_list;
     }
@@ -34,15 +38,34 @@ impl NutrientListRecord {
         self.id.clone()
     }
 
-    pub async fn save_or_update_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+    pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         sqlx::query!(
             r#"
-                INSERT INTO nutrients_nutrient_list_table (id, name)
-                VALUES (?, ?)
-                ON CONFLICT(id) DO UPDATE set name = excluded.name
+                INSERT INTO nutrients_nutrient_list_table (id, name, description)
+                VALUES (?, ?, ?)
+                ON CONFLICT (id) DO NOTHING
             "#,
             self.id,
             self.name,
+            self.description,
+        )
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
+
+    pub async fn save_or_update_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            r#"
+                INSERT INTO nutrients_nutrient_list_table (id, name, description)
+                VALUES (?, ?, ?)
+                ON CONFLICT (id) DO UPDATE SET
+                    name = excluded.name,
+                    description = excluded.description
+            "#,
+            self.id,
+            self.name,
+            self.description,
         )
         .execute(pool)
         .await?;
@@ -52,7 +75,7 @@ impl NutrientListRecord {
     pub async fn get_all_from_sqlite(pool: &Pool<Sqlite>) -> Result<Vec<NutrientListRecord>, sqlx::Error> {
         let rows = sqlx::query!(
             r#"
-                Select id, "name" FROM nutrients_nutrient_list_table
+                Select id, "name", "description" FROM nutrients_nutrient_list_table
             "#,
         )
             .fetch_all(pool)
@@ -63,6 +86,7 @@ impl NutrientListRecord {
         .map(|row| NutrientListRecord {
             id: row.id,
             name: row.name,
+            description: row.description,
         })
         .collect();
         
@@ -78,6 +102,20 @@ impl NutrientListRecord {
         .execute(pool)
         .await?;
 
+        Ok(())
+    }
+
+    pub async fn delete_all_items_from_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            r#"
+                DELETE FROM nutrients_nutrient_list_items
+                WHERE
+                    nutrient_list_id = ?
+            "#,
+            self.id,
+        )
+        .execute(pool)
+            .await?;
         Ok(())
     }
 

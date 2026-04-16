@@ -8,6 +8,7 @@ use crate::nutrient::Nutrient;
 pub struct NutrientList {
     id: Uuid,
     name: String,
+    description: String,
     nutrients: Vec<Rc<RefCell<Nutrient>>>,
 }
 
@@ -16,6 +17,7 @@ impl NutrientList {
         Self {
             id: Uuid::new_v4(),
             name: String::new(),
+            description: String::new(),
             nutrients: Vec::new(),
         }
     }
@@ -24,6 +26,7 @@ impl NutrientList {
         Self {
             id: Uuid::new_v4(),
             name: String::new(),
+            description: String::new(),
             nutrients: nutrients,
         }
     }
@@ -44,6 +47,14 @@ impl NutrientList {
         self.name = name;
     }
 
+    pub fn get_description(&self) -> String {
+        self.description.clone()
+    }
+
+    pub fn set_description(&mut self, description: String) {
+        self.description = description;
+    }
+
     pub fn get_nutrients(&self) -> Vec<Rc<RefCell<Nutrient>>> {
         self.nutrients.clone()
     }
@@ -52,8 +63,19 @@ impl NutrientList {
         self.nutrients = nutrients
     }
 
+    pub fn get_nutrient_names(&self) -> Vec<String> {
+        self.nutrients
+            .iter()
+            .map(|nutrient| nutrient.borrow().get_name())
+            .collect()
+    }
+
     pub fn push(&mut self, nutrient: Rc<RefCell<Nutrient>>) {
         self.nutrients.push(nutrient)
+    }
+
+    pub fn extend(&mut self, nutrients: Vec<Rc<RefCell<Nutrient>>>) {
+        self.nutrients.extend(nutrients);
     }
 
     pub fn remove(&mut self, nutrient: Rc<RefCell<Nutrient>>) {

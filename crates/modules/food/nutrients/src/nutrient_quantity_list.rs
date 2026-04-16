@@ -6,6 +6,8 @@ use uuid::Uuid;
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct NutrientQuantityList {
     id: Uuid,
+    name: String,
+    description: String,
     nutrient_quantities: BTreeSet<NutrientQuantity>,
 }
 
@@ -13,6 +15,8 @@ impl NutrientQuantityList {
     pub fn new() -> Self {
         Self {
             id: Uuid::new_v4(),
+            name: String::new(),
+            description: String::new(),
             nutrient_quantities: BTreeSet::new(),
         }
     }
@@ -20,8 +24,11 @@ impl NutrientQuantityList {
     pub fn from_vec(nutrient_amount_vec: Vec<NutrientQuantity>) -> Self {
         let nutrient_quantities: BTreeSet<NutrientQuantity> =
             nutrient_amount_vec.into_iter().collect();
+
         Self {
             id: Uuid::new_v4(),
+            name: String::new(),
+            description: String::new(),
             nutrient_quantities,
         }
     }
@@ -32,6 +39,22 @@ impl NutrientQuantityList {
 
     pub fn set_id(&mut self, id: Uuid) {
         self.id = id;
+    }
+
+    pub fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
+    pub fn set_name(&mut self, name: String) {
+        self.name = name;
+    }
+
+    pub fn get_description(&self) -> String {
+        self.description.clone()
+    }
+
+    pub fn set_description(&mut self, description: String) {
+        self.description = description;
     }
 
     pub fn get_nutrient_quantities(&self) -> BTreeSet<NutrientQuantity> {
@@ -74,7 +97,6 @@ impl NutrientQuantityList {
                     .iter()
                     .any(|n| Rc::ptr_eq(n, &nutrient_amount.get_nutrient()))
             })
-            // .filter(|nutrient_amount| nutrients.contains(&nutrient_amount.get_nutrient()))
             .cloned()
             .collect();
         println!(
