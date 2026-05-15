@@ -75,10 +75,10 @@ impl NutrientQuantityListRecord {
         Ok(())
     }
 
-    pub async fn get_all_from_sqlite(pool: &Pool<Sqlite>) -> Result<Vec<NutrientQuantityListRecord>, sqlx::Error> {
+    pub async fn get_all_from_sqlite(pool: &Pool<Sqlite>) -> Result<Vec<Self>, sqlx::Error> {
         let rows = sqlx::query!(
             r#"
-                Select id, "name", "description" FROM nutrients_nutrient_list_table
+                Select id, "name", "description" FROM nutrients_nutrient_quantity_list_table
             "#,
         )
             .fetch_all(pool)
@@ -139,9 +139,8 @@ impl NutrientQuantityListItemRecord {
         let nutrient_quantity_list_id = nutrient_quantity_list.get_id().as_bytes().to_vec();
         let mut nutrient_quantity_list_item_vec: Vec<Self> = Vec::new();
 
-        for nutrient_quantity in nutrient_quantity_list.get_nutrient_quantities() {
-            // Create new uuid each time as I don't know how to track values
-            let nutrient_quantity_id = Uuid::new_v4().as_bytes().to_vec();
+        for nutrient_quantity_entity in nutrient_quantity_list.get_nutrient_quantities() {
+            let nutrient_quantity_id = nutrient_quantity_entity.get_id().to_bytes().to_vec();
             let item = Self {
                 nutrient_quantity_list_id: nutrient_quantity_list_id.clone(),
                 nutrient_quantity_id,
@@ -216,7 +215,7 @@ impl NutrientQuantityListItemRecord {
             r#"
                 INSERT INTO nutrients_nutrient_quantity_list_items (nutrient_quantity_list_id, nutrient_quantity_id)
                 VALUES (?, ?)
-                ON CONFLICT DO NOTHING
+                ON CONFLICT(nutrient_quantity_list_id, nutrient_quantity_id) DO NOTHING
             "#,
             self.nutrient_quantity_list_id,
             self.nutrient_quantity_id,
@@ -229,19 +228,24 @@ impl NutrientQuantityListItemRecord {
     pub async fn save_vec_to_database(items: Vec<&Self>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         let mut tx = pool.begin().await?;
 
+        println!("items: {:#?}", items);
         for item in items {
-            sqlx::query!(
+            println!("item: {:?}", item);
+            let id = sqlx::query!(
                 r#"
                     INSERT INTO nutrients_nutrient_quantity_list_items (nutrient_quantity_list_id, nutrient_quantity_id)
                     VALUES (?, ?)
-                    ON CONFLICT DO NOTHING
+                    ON CONFLICT(nutrient_quantity_list_id, nutrient_quantity_id) DO NOTHING
                 "#,
                 item.nutrient_quantity_list_id,
                 item.nutrient_quantity_id,
             )
-                .execute(&mut *tx)
-                .await?;
+            .execute(&mut *tx)
+            .await?;
+            println!("id: {:#?}", id);
         }
+
+        tx.commit().await?;
         Ok(())
     }
 

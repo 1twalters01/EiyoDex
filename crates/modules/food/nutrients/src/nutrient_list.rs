@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::nutrient::Nutrient;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct NutrientList {
     id: Uuid,
     name: String,
@@ -79,6 +79,14 @@ impl NutrientList {
     }
 
     pub fn remove(&mut self, nutrient: Rc<RefCell<Nutrient>>) {
-        self.nutrients.retain(|n| Rc::ptr_eq(n, &nutrient))
+        self.nutrients.retain(|n| !Rc::ptr_eq(n, &nutrient))
+    }
+
+    pub fn sort_by_name(&mut self) {
+        self.nutrients.sort_by(|a, b| {
+            let name_a = a.borrow().get_name();
+            let name_b = b.borrow().get_name();
+            name_a.cmp(&name_b)
+        });
     }
 }

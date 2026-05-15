@@ -1,6 +1,6 @@
-use crate::{nutrient::Nutrient, nutrient_quantity::NutrientQuantity};
+use crate::{entity::Entity, nutrient::Nutrient, nutrient_quantity::NutrientQuantity};
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
-use units::energy::quantity::EnergyQuantity;
+use units::{energy::quantity::EnergyQuantity};
 use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -8,7 +8,7 @@ pub struct NutrientQuantityList {
     id: Uuid,
     name: String,
     description: String,
-    nutrient_quantities: BTreeSet<NutrientQuantity>,
+    nutrient_quantities: BTreeSet<Entity<NutrientQuantity>>,
 }
 
 impl NutrientQuantityList {
@@ -21,8 +21,8 @@ impl NutrientQuantityList {
         }
     }
 
-    pub fn from_vec(nutrient_amount_vec: Vec<NutrientQuantity>) -> Self {
-        let nutrient_quantities: BTreeSet<NutrientQuantity> =
+    pub fn from_vec(nutrient_amount_vec: Vec<Entity<NutrientQuantity>>) -> Self {
+        let nutrient_quantities: BTreeSet<Entity<NutrientQuantity>> =
             nutrient_amount_vec.into_iter().collect();
 
         Self {
@@ -57,30 +57,30 @@ impl NutrientQuantityList {
         self.description = description;
     }
 
-    pub fn get_nutrient_quantities(&self) -> BTreeSet<NutrientQuantity> {
+    pub fn get_nutrient_quantities(&self) -> BTreeSet<Entity<NutrientQuantity>> {
         self.nutrient_quantities.clone()
     }
 
-    pub fn set_nutrient_amounts(&mut self, nutrient_quantities: BTreeSet<NutrientQuantity>) {
+    pub fn set_nutrient_amounts(&mut self, nutrient_quantities: BTreeSet<Entity<NutrientQuantity>>) {
         self.nutrient_quantities = nutrient_quantities;
     }
 
     pub fn get_nutrient_names(&self) -> Vec<String> {
         self.nutrient_quantities
             .iter()
-            .map(|nutrient_amount| nutrient_amount.get_nutrient().borrow().get_name())
+            .map(|nutrient_amount| nutrient_amount.get_inner().get_nutrient().borrow().get_name())
             .collect()
     }
 
-    pub fn push(&mut self, nutrient_amount: NutrientQuantity) -> bool {
+    pub fn push(&mut self, nutrient_amount: Entity<NutrientQuantity>) -> bool {
         self.nutrient_quantities.insert(nutrient_amount)
     }
 
-    pub fn extend(&mut self, nutrient_quantities: Vec<NutrientQuantity>) {
+    pub fn extend(&mut self, nutrient_quantities: Vec<Entity<NutrientQuantity>>) {
         self.nutrient_quantities.extend(nutrient_quantities);
     }
 
-    pub fn remove(&mut self, nutrient_amount: &NutrientQuantity) {
+    pub fn remove(&mut self, nutrient_amount: &Entity<NutrientQuantity>) {
         self.nutrient_quantities.remove(nutrient_amount);
     }
 
@@ -92,13 +92,14 @@ impl NutrientQuantityList {
         let nutrient_quantities: Vec<NutrientQuantity> = self
             .nutrient_quantities
             .iter()
+            .map(|n| n.get_inner())
             .filter(|nutrient_amount| {
                 nutrients
                     .iter()
                     .any(|n| Rc::ptr_eq(n, &nutrient_amount.get_nutrient()))
             })
-            .cloned()
             .collect();
+
         println!(
             "nutrient_quantities: {:#?}",
             nutrient_quantities
@@ -115,8 +116,8 @@ impl NutrientQuantityList {
         let nutrient_quantities: Vec<NutrientQuantity> = self
             .nutrient_quantities
             .iter()
+            .map(|n| n.get_inner())
             .filter(|nutrient_amount| nutrients.contains(&nutrient_amount.get_nutrient()))
-            .cloned()
             .collect();
 
         return nutrient_quantities.into_iter().sum::<NutrientQuantity>();
@@ -127,16 +128,23 @@ impl NutrientQuantityList {
         nutrient: Rc<RefCell<Nutrient>>,
     ) -> NutrientQuantity {
         let nutrients: Vec<Rc<RefCell<Nutrient>>> = nutrient.borrow().get_descendants();
-        let nutrient_quantities: Vec<NutrientQuantity> = self
+        // println!("nutrients: {:#?}", nutrients.clone());
+        let all_nutrients: Vec<NutrientQuantity> = self
             .nutrient_quantities
             .iter()
+            .map(|n| n.get_inner())
+            .collect();
+        println!("all nutrients: {:#?}", all_nutrients.iter().map(|n| n.get_nutrient().borrow().get_name()).collect::<Vec<String>>());
+
+        let nutrient_quantities: Vec<NutrientQuantity> = all_nutrients
+            .into_iter()
             .filter(|nutrient_amount| {
                 nutrients
                     .iter()
                     .any(|n| Rc::ptr_eq(n, &nutrient_amount.get_nutrient()))
             })
-            .cloned()
             .collect();
+        println!("nq: {:#?}", nutrient_quantities);
 
         let sum = nutrient_quantities.into_iter().sum::<NutrientQuantity>();
         return sum;
@@ -147,8 +155,8 @@ impl NutrientQuantityList {
         let nutrient_quantities: Vec<NutrientQuantity> = self
             .nutrient_quantities
             .iter()
+            .map(|n| n.get_inner())
             .filter(|nutrient_amount| nutrients.contains(&nutrient_amount.get_nutrient()))
-            .cloned()
             .collect();
 
         return nutrient_quantities.into_iter().sum::<NutrientQuantity>();
@@ -157,7 +165,7 @@ impl NutrientQuantityList {
     pub fn get_calories(&self) -> Result<EnergyQuantity, &'static str> {
         let mut calories_sum = EnergyQuantity::new(0f64, units::energy::unit::EnergyUnit::Kilocalorie); 
         for nutrient_quantity in &self.nutrient_quantities {
-            let calories = nutrient_quantity.get_calories()?;
+            let calories = nutrient_quantity.get_inner().get_calories()?;
             calories_sum = calories_sum + calories;
         }
 

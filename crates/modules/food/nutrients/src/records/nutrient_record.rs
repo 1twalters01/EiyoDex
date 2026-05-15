@@ -72,6 +72,11 @@ impl NutrientRecord {
         })
     }
 
+    pub async fn from_nutrient_rc_refcell(nutrient_rc_ref: Rc<RefCell<Nutrient>>, pool: &Pool<Sqlite>) -> Result<Self, sqlx::Error> {
+        let nutrient = nutrient_rc_ref.borrow();
+        NutrientRecord::from_nutrient(nutrient.clone(), pool).await
+    }
+
     pub async fn from_nutrient_entity(nutrient_entity: Entity<Nutrient>, pool: &Pool<Sqlite>) -> Result<Self, &'static str> {
         let nutrient_id = nutrient_entity.get_id().get_inner().to_bytes().to_vec();
 
@@ -535,6 +540,11 @@ impl NutrientLinkRecord {
         };
 
         Ok((nutrient_link_record, nutrient_link_names))
+    }
+
+    pub async fn from_nutrient_rc_refcell(nutrient_rc_refcell: Rc<RefCell<Nutrient>>, pool: &Pool<Sqlite>) -> Result<(Self, NutrientLinkHashes),  &'static str> {
+        let nutrient = nutrient_rc_refcell.borrow().clone();
+        Self::from_nutrient(nutrient, pool).await
     }
 
     pub async fn from_nutrient_entity(nutrient_entity: Entity<Nutrient>, pool: &Pool<Sqlite>) -> Result<(Self, NutrientLinkHashes), &'static str> {

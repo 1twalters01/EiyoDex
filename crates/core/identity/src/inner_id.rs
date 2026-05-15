@@ -8,7 +8,7 @@ pub enum InnerIdType {
     Ulid,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum InnerId {
     Uuid(Uuid),
     Ulid(Ulid),

@@ -72,7 +72,7 @@ impl NutrientListRecord {
         Ok(())
     }
 
-    pub async fn get_all_from_sqlite(pool: &Pool<Sqlite>) -> Result<Vec<NutrientListRecord>, sqlx::Error> {
+    pub async fn get_all_from_sqlite(pool: &Pool<Sqlite>) -> Result<Vec<Self>, sqlx::Error> {
         let rows = sqlx::query!(
             r#"
                 Select id, "name", "description" FROM nutrients_nutrient_list_table

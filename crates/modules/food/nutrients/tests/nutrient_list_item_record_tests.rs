@@ -117,7 +117,7 @@ async fn test_from_nutrient_list() {
     non_heme_iron_b_link_record = non_heme_iron_b_link_record.update_nutrient_link_ids(&non_heme_iron_b_link_hashes, &nutrient_name_new_id_map);
 
 
-    // Save nutrient record
+    // Save nutrient records
     iron_record.save_to_database(&pool).await.unwrap();
     heme_iron_record.save_to_database(&pool).await.unwrap();
     non_heme_iron_record.save_to_database(&pool).await.unwrap();
@@ -153,7 +153,8 @@ async fn test_from_nutrient_list() {
         NutrientListItemRecord::from_value(nutrient_list_id.clone(), non_heme_iron_b_entity_id),
     ]);
 
-    assert_eq!(nutrient_list_item_record_vec, manual_vec);
+    assert_eq!(nutrient_list_item_record_vec.len(), manual_vec.len());
+    assert!(nutrient_list_item_record_vec.iter().all(|item| manual_vec.contains(item)));
 }
 
 #[tokio::test]

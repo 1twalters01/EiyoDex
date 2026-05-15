@@ -1,9 +1,11 @@
 use std::{fmt, marker::PhantomData};
+use std::cmp::Ordering;
+use std::hash::{Hash, Hasher};
 
 use crate::inner_id::{InnerId, InnerIdType};
 
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy)]
 pub struct Id<T> {
     inner: InnerId,
     _marker: PhantomData<T>,
@@ -74,6 +76,32 @@ impl<T> From<Id<T>> for InnerId {
     }
 }
 
+impl<T> PartialEq for Id<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.inner == other.inner
+    }
+}
+
+impl<T> Eq for Id<T> {}
+
+impl<T> PartialOrd for Id<T> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl<T> Ord for Id<T> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.inner.cmp(&other.inner)
+    }
+}
+
+impl<T> Hash for Id<T> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.inner.hash(state);
+    }
+}
+
 #[cfg(feature = "serde")]
 mod serde_impl {
     use super::*;
@@ -98,3 +126,4 @@ mod serde_impl {
         }
     }
 }
+
