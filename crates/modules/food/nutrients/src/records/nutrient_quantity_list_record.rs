@@ -151,6 +151,27 @@ impl NutrientQuantityListItemRecord {
         return nutrient_quantity_list_item_vec
     }
 
+    pub async fn to_nutrient_quantity(self, pool: &Pool<Sqlite>) -> Result<NutrientQuantity, sqlx::Error> {
+            let nutrient_quantity_record = sqlx::query_as!(
+                NutrientQuantityRecord,
+                r#"
+                    SELECT
+                        id,
+                        quantity,
+                        nutrient_id,
+                        output_unit_id
+                    FROM nutrients_nutrient_quantity_table
+                    WHERE
+                        id = ?
+                "#,
+                self.nutrient_quantity_id
+            )
+            .fetch_one(pool)
+            .await?;
+
+            Ok(nutrient_quantity_record.to_nutrient_quantity(pool).await?)
+    }
+
     pub async fn to_btree_map_from_vec(
         items: Vec<&Self>, pool: &Pool<Sqlite>,
     ) -> Result<BTreeSet<NutrientQuantity>, sqlx::Error> {
@@ -249,7 +270,7 @@ impl NutrientQuantityListItemRecord {
         Ok(())
     }
 
-    pub async fn delete_conversion(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+    pub async fn delete_item_from_sqlite(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         sqlx::query!(
             r#"
                 DELETE FROM nutrients_nutrient_quantity_list_items 
@@ -266,7 +287,7 @@ impl NutrientQuantityListItemRecord {
         Ok(())
     }
 
-    pub async fn delete_conversion_vec(items: Vec<&Self>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+    pub async fn delete_item_vec_from_sqlite(items: Vec<&Self>, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         let mut tx = pool.begin().await?;
 
         for item in items {
