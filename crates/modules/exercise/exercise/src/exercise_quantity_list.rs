@@ -5,7 +5,6 @@ use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ExerciseQuantityList {
-    id: Uuid,
     name: String,
     description: String,
     exercise_quantities: BTreeSet<ExerciseQuantity>,
@@ -14,7 +13,6 @@ pub struct ExerciseQuantityList {
 impl ExerciseQuantityList {
     pub fn new() -> Self {
         Self {
-            id: Uuid::new_v4(),
             name: String::new(),
             description: String::new(),
             exercise_quantities: BTreeSet::new(),
@@ -26,19 +24,10 @@ impl ExerciseQuantityList {
             exercise_amount_vec.into_iter().collect();
 
         Self {
-            id: Uuid::new_v4(),
             name: String::new(),
             description: String::new(),
             exercise_quantities,
         }
-    }
-
-    pub fn get_id(&self) -> Uuid {
-        self.id
-    }
-
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id;
     }
 
     pub fn get_name(&self) -> String {
@@ -64,9 +53,4 @@ impl ExerciseQuantityList {
     pub fn set_exericise_amounts(&mut self, nutrient_quantities: BTreeSet<ExerciseQuantity>) {
         self.exercise_quantities = exercise_quantities;
     }
-
-
-
-  
-
 }

@@ -9,7 +9,6 @@ use crate::exercise::Exercise;
 
 #[derive(Clone, PartialEq)]
 pub struct ExerciseQuantity {
-    id: Uuid,
     duration_quantity: DurationQuantity,
     exercise: Rc<RefCell<Exercise>>,
 }
@@ -17,18 +16,9 @@ pub struct ExerciseQuantity {
 impl ExerciseQuantity {
     pub fn new(duration: DurationQuantity, exercise: Rc<RefCell<Exercise>>) -> Self {
         Self {
-            id: Uuid::new_v4(),
             duration_quantity: duration,
             exercise: exercise,
         }
-    }
-
-    pub fn get_id(&self) -> Uuid {
-        self.id
-    }
-
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id;
     }
 
     pub fn get_duration_quantity(&self) -> DurationQuantity {
