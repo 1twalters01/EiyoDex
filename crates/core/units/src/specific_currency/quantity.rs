@@ -190,7 +190,7 @@ impl SaveToDatabase<SpecificCurrencyQuantity> for SpecificCurrencyQuantity {
         &self,
         id: Id<SpecificCurrencyQuantity>,
         pool: &Pool<Sqlite>,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<Vec<u8>, sqlx::Error> {
         let uuid = id.get_inner().to_bytes().to_vec();
         let currency_type_id = self
             .get_unit()
@@ -208,7 +208,7 @@ impl SaveToDatabase<SpecificCurrencyQuantity> for SpecificCurrencyQuantity {
         };
         let value = self.get_value();
 
-        sqlx::query!(
+        let row = sqlx::query!(
             r#"
                 INSERT INTO units_specific_currency_quantities (id, currency_type_id, mass_type_id, volume_type_id, value)
                 VALUES (?, ?, ?, ?, ?)
@@ -217,6 +217,7 @@ impl SaveToDatabase<SpecificCurrencyQuantity> for SpecificCurrencyQuantity {
                     mass_type_id = excluded.mass_type_id,
                     volume_type_id = excluded.volume_type_id,
                     value = excluded.value
+                RETURNING id
             "#,
             uuid,
             currency_type_id,
@@ -224,10 +225,10 @@ impl SaveToDatabase<SpecificCurrencyQuantity> for SpecificCurrencyQuantity {
             volume_type_id,
             value,
         )
-        .execute(pool)
+        .fetch_one(pool)
         .await?;
 
-        return Ok(());
+        return Ok(row.id);
     }
 }
 

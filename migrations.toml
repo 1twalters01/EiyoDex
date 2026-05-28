@@ -116,3 +116,10 @@ file = "migrations/nutrients/0013_create_nutrient_quantity_list_tables.sql"
 description = "Create nutrient tables"
 environments = ["dev", "staging", "prod"]
 
+
+# exercises
+[[migration]]
+file = "migrations/exercises/0001_create_exercise_table.sql"
+description = "Create nutrient units table"
+environments = ["dev", "staging", "prod"]
+

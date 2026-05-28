@@ -7,3 +7,4 @@ edition = "2021"
 identity = { path = "../../../core/identity" }
 uuid = { version = "1.8.0", features = ["v4", "fast-rng", "macro-diagnostics", "serde"] }
 units = { path = "../../../core/units" }
+sqlx = "0.8.6"

@@ -146,26 +146,27 @@ impl SaveToDatabase<CurrencyQuantity> for CurrencyQuantity {
         &self,
         id: Id<CurrencyQuantity>,
         pool: &Pool<Sqlite>,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<Vec<u8>, sqlx::Error> {
         let uuid = id.get_inner().to_bytes().to_vec();
         let currency_type_id = self.get_unit().get_database_id(pool).await.unwrap();
         let value = self.get_value();
-        sqlx::query!(
+        let row = sqlx::query!(
             r#"
                 INSERT INTO units_currency_quantities (id, currency_type_id, value)
                 VALUES (?, ?, ?)
                 ON CONFLICT (id) DO UPDATE SET
                     currency_type_id = excluded.currency_type_id,
                     value = excluded.value
+                RETURNING id
             "#,
             uuid,
             currency_type_id,
             value,
         )
-        .execute(pool)
+        .fetch_one(pool)
         .await?;
 
-        return Ok(());
+        return Ok(row.id);
     }
 }
 

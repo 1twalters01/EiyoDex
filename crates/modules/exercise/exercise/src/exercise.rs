@@ -1,17 +1,21 @@
 use units::{
-    power::quantity::PowerQuantity,
+    entity::Entity, power::{quantity::PowerQuantity, unit::PowerUnit}
 };
 use uuid::Uuid;
 use identity::Id;
 
-#[derive(Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Exercise {
     name: String,
     description: String,
-    power: PowerQuantity, // EnergyQuantity burned per time unit
+    power_quantity_entity: Entity<PowerQuantity>, // Energy burned per time unit
 }
 
 impl Exercise {
+    pub fn from_values(name: String, description: String, power_quantity_entity: Entity<PowerQuantity>) -> Self {
+        Self { name, description, power_quantity_entity }
+    }
+
     pub fn get_name(&self) -> String {
         self.name.clone()
     }
@@ -28,11 +32,19 @@ impl Exercise {
         self.description = description;
     }
 
-    pub fn get_power(&self) -> PowerQuantity {
-        self.power.clone()
+    pub fn get_power_quantity_entity(&self) -> Entity<PowerQuantity> {
+        self.power_quantity_entity.clone()
     }
 
-    pub fn set_power(&mut self, power: PowerQuantity) {
-        self.power = power;
+    pub fn get_power_quantity(&self) -> PowerQuantity {
+        self.power_quantity_entity.get_inner().clone()
+    }
+
+    pub fn get_power_unit(&self) -> PowerUnit {
+        self.power_quantity_entity.get_inner().get_unit()
+    }
+
+    pub fn set_power_quantity_entity(&mut self, power_quantity_entity: Entity<PowerQuantity>) {
+        self.power_quantity_entity = power_quantity_entity;
     }
 }

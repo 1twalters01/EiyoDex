@@ -119,26 +119,27 @@ impl SaveToDatabase<DistanceQuantity> for DistanceQuantity {
         &self,
         id: Id<DistanceQuantity>,
         pool: &Pool<Sqlite>,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<Vec<u8>, sqlx::Error> {
         let uuid = id.get_inner().to_bytes().to_vec();
         let distance_type_id = self.get_unit().get_database_id(pool).await.unwrap();
         let value = self.get_value();
-        sqlx::query!(
+        let row = sqlx::query!(
             r#"
                 INSERT INTO units_distance_quantities (id, distance_type_id, value)
                 VALUES (?, ?, ?)
                 ON CONFLICT (id) DO UPDATE SET
                     distance_type_id = excluded.distance_type_id,
                     value = excluded.value
+                RETURNING id
             "#,
             uuid,
             distance_type_id,
             value,
         )
-        .execute(pool)
+        .fetch_one(pool)
         .await?;
 
-        return Ok(());
+        return Ok(row.id);
     }
 }
 

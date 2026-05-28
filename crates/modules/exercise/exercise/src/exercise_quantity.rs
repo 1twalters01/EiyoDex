@@ -40,7 +40,7 @@ impl ExerciseQuantity {
     }
 
     pub fn get_calories(&self) -> EnergyQuantity {
-        self.exercise.borrow().get_power().clone() * self.get_duration_quantity()
+        self.exercise.borrow().get_power_quantity().clone() * self.get_duration_quantity()
     }
 }
 

@@ -148,7 +148,7 @@ impl SaveToDatabase<PowerQuantity> for PowerQuantity {
         &self,
         id: Id<PowerQuantity>,
         pool: &Pool<Sqlite>,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<Vec<u8>, sqlx::Error> {
         let uuid = id.get_inner().to_bytes().to_vec();
         let energy_type_id = self
             .get_unit()
@@ -163,7 +163,7 @@ impl SaveToDatabase<PowerQuantity> for PowerQuantity {
             .await
             .unwrap();
         let value = self.get_value();
-        sqlx::query!(
+        let row = sqlx::query!(
             r#"
                 INSERT INTO units_power_quantities (id, energy_type_id, duration_type_id, value)
                 VALUES (?, ?, ?, ?)
@@ -171,16 +171,17 @@ impl SaveToDatabase<PowerQuantity> for PowerQuantity {
                     energy_type_id = excluded.energy_type_id,
                     duration_type_id = excluded.duration_type_id,
                     value = excluded.value
+                RETURNING id
             "#,
             uuid,
             energy_type_id,
             duration_type_id,
             value,
         )
-        .execute(pool)
+        .fetch_one(pool)
         .await?;
 
-        return Ok(());
+        return Ok(row.id);
     }
 }
 

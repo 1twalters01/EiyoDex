@@ -134,26 +134,27 @@ impl SaveToDatabase<DurationQuantity> for DurationQuantity {
         &self,
         id: Id<DurationQuantity>,
         pool: &Pool<Sqlite>,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<Vec<u8>, sqlx::Error> {
         let uuid = id.get_inner().to_bytes().to_vec();
         let duration_type_id = self.get_unit().get_database_id(pool).await.unwrap();
         let duration = self.get_duration();
-        sqlx::query!(
+        let row = sqlx::query!(
             r#"
                 INSERT INTO units_duration_quantities (id, duration_type_id, value)
                 VALUES (?, ?, ?)
                 ON CONFLICT (id) DO UPDATE SET
                     duration_type_id = excluded.duration_type_id,
                     value = excluded.value
+                RETURNING id
             "#,
             uuid,
             duration_type_id,
             duration,
         )
-        .execute(pool)
+        .fetch_one(pool)
         .await?;
 
-        return Ok(());
+        return Ok(row.id);
     }
 }
 

@@ -364,6 +364,7 @@ name = "exercise"
 version = "0.1.0"
 dependencies = [
  "identity",
+ "sqlx",
  "units",
  "uuid",
 ]

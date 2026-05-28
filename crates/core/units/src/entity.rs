@@ -7,7 +7,7 @@ pub trait SaveToDatabase<T: Clone + PartialEq> {
         &'a self,
         id: Id<T>,
         pool: &'a Pool<Sqlite>,
-    ) -> impl Future<Output = Result<(), sqlx::Error>> + Send + 'a;
+    ) -> impl Future<Output = Result<Vec<u8>, sqlx::Error>> + Send + 'a;
 }
 
 pub trait GetFromDatabaseUsingId<T: Clone + PartialEq> {
@@ -50,11 +50,11 @@ impl<T: Clone + PartialEq> Entity<T> {
         self.id = id;
     }
 
-    pub fn get_uuid(&self) -> InnerId {
+    pub fn get_inner_id(&self) -> InnerId {
         self.id.get_inner()
     }
 
-    pub fn set_uuid(&mut self, id: InnerId) {
+    pub fn set_inner_id(&mut self, id: InnerId) {
         self.id = id.into();
     }
 
@@ -71,20 +71,20 @@ impl<T> Entity<T>
 where
     T: SaveToDatabase<T> + Clone + PartialEq,
 {
-    pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+    pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<Vec<u8>, sqlx::Error> {
         let id = self.get_id();
         self.inner.save_to_database(id, pool).await
     }
 }
 
-// impl<T> Entity<T>
-// where
-//     T: GetFromDatabaseUsingId<T> + Clone + PartialEq, {
-//     pub async fn get_from_database_using_id(&self, pool: &Pool<Sqlite>) ->
-// Result<Entity<T>, sqlx::Error> {         let uuid = self.get_uuid();
-//         T::get_from_database_using_id(uuid, pool).await
-//     }
-// }
+impl<T> Entity<T>
+where
+    T: GetFromDatabaseUsingId<T> + Clone + PartialEq, {
+    pub async fn get_from_database_using_id(&self, pool: &Pool<Sqlite>) -> Result<Entity<T>, sqlx::Error> {
+        let id = self.get_id();
+        T::get_from_database_using_id(id, pool).await
+    }
+}
 
 impl<T> Entity<T>
 where
