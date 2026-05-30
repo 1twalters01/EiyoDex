@@ -30,3 +30,35 @@ impl PreparationMethodRecord {
     pub async fn save_to_database() {}
     pub async fn delete_preparation_method_from_database() {}
 }
+
+struct FoodAttributeRecord {
+    id: Vec<u8>,
+    name: String,
+    description: String,
+}
+
+impl FoodAttributeRecord {
+    pub fn from_values(
+        id: Vec<u8>,
+        name: String,
+        description: String,
+    ) -> Self {
+        Self { id, name, description }
+    }
+}
+
+struct FoodTagRecord {
+    id: Vec<u8>,
+    name: String,
+    description: String,
+}
+
+impl FoodTagRecord {
+    pub fn from_values(
+        id: Vec<u8>,
+        name: String,
+        description: String,
+    ) -> Self {
+        Self { id, name, description }
+    }
+}
