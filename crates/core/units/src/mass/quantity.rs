@@ -256,8 +256,10 @@ impl PartialOrd for MassQuantity {
 
 use units_macro::include_masses_from_json;
 
-use crate::entity::{DeleteFromDatabaseUsingId, Entity, GetFromDatabaseUsingId, SaveToDatabase};
-
-use identity::{Id, InnerId};
+use identity::{
+    entity::{DeleteFromDatabaseUsingId, Entity, GetFromDatabaseUsingId, SaveToDatabase},
+    Id,
+    InnerId
+};
 
 include_masses_from_json!("data/units/mass");

@@ -9,5 +9,3 @@ pub mod measurement_system;
 pub mod power;
 pub mod specific_currency;
 pub mod volume;
-
-pub mod entity;

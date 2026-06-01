@@ -1,4 +1,4 @@
-use identity::{inner_id::InnerIdType, Id, InnerId};
+use crate::{inner_id::InnerIdType, Id, InnerId};
 use sqlx::{Pool, Sqlite};
 use std::future::Future;
 

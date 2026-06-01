@@ -25,17 +25,13 @@ impl NutrientListRecord {
         Self { id, name, description }
     }
 
-    pub fn to_nutrient_quantity_list(&self) -> NutrientList {
+    pub fn to_nutrient_list(&self) -> NutrientList {
         let mut nutrient_list = NutrientList::new();
         nutrient_list.set_id(Uuid::from_slice(&self.id).unwrap());
         nutrient_list.set_name(self.name.clone());
         nutrient_list.set_description(self.description.clone());
 
         return nutrient_list;
-    }
-
-    pub fn get_id(&self) -> Vec<u8> {
-        self.id.clone()
     }
 
     pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
@@ -129,6 +125,10 @@ impl NutrientListRecord {
         }
 
         Ok(nutrient_vec)
+    }
+
+    pub fn get_id(&self) -> Vec<u8> {
+        self.id.clone()
     }
 }
 

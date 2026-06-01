@@ -523,12 +523,15 @@ use units_macro::include_specific_currencies_from_json;
 use uuid::Uuid;
 
 use crate::{
-    entity::{DeleteFromDatabaseUsingId, Entity, GetFromDatabaseUsingId, SaveToDatabase},
     mass::unit::MassUnit,
     volume::unit::VolumeUnit,
 };
 
-use identity::{Id, InnerId};
+use identity::{
+    entity::{DeleteFromDatabaseUsingId, Entity, GetFromDatabaseUsingId, SaveToDatabase},
+    Id,
+    InnerId
+};
 
 include_specific_currencies_from_json!(
     CurrencyUnit => "data/units/currency",

@@ -1599,6 +1599,7 @@ name = "identity"
 version = "0.1.0"
 dependencies = [
  "serde",
+ "sqlx",
  "thiserror 2.0.18",
  "ulid",
  "uuid",

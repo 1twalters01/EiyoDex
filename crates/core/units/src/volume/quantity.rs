@@ -254,8 +254,10 @@ impl PartialOrd for VolumeQuantity {
 
 use units_macro::include_volumes_from_json;
 
-use crate::entity::{DeleteFromDatabaseUsingId, Entity, GetFromDatabaseUsingId, SaveToDatabase};
-
-use identity::{Id, InnerId};
+use identity::{
+    entity::{DeleteFromDatabaseUsingId, Entity, GetFromDatabaseUsingId, SaveToDatabase},
+    Id,
+    InnerId
+};
 
 include_volumes_from_json!("data/units/volume",);

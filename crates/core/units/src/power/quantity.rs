@@ -343,9 +343,11 @@ use sqlx::{Pool, Sqlite};
 use units_macro::include_powers_from_json;
 use uuid::Uuid;
 
-use crate::entity::{DeleteFromDatabaseUsingId, Entity, GetFromDatabaseUsingId, SaveToDatabase};
-
-use identity::{Id, InnerId};
+use identity::{
+    entity::{DeleteFromDatabaseUsingId, Entity, GetFromDatabaseUsingId, SaveToDatabase},
+    Id,
+    InnerId
+};
 
 include_powers_from_json!(
     EnergyUnit => "data/units/energy",

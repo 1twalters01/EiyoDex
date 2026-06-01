@@ -3,11 +3,10 @@ use std::{cell::RefCell, rc::Rc};
 use units::{
     duration::quantity::DurationQuantity, energy::quantity::EnergyQuantity,
 };
-use uuid::Uuid;
 
 use crate::exercise::Exercise;
 
-#[derive(Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ExerciseQuantity {
     duration_quantity: DurationQuantity,
     exercise: Rc<RefCell<Exercise>>,

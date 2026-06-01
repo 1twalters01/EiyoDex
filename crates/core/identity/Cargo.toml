@@ -10,5 +10,5 @@ serde = ["dep:serde"]
 serde = { version = "1.0", optional = true, features = ["derive"] }
 ulid = { version = "1" }
 uuid = { version = "1.8.0", features = ["v4", "fast-rng", "macro-diagnostics", "serde"] }
-
+sqlx = { version = "0.8.6", features = ["sqlite", "runtime-tokio", "uuid", "chrono", "macros"] }
 thiserror = "2.0.18"

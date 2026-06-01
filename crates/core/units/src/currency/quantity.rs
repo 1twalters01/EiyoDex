@@ -279,8 +279,11 @@ use sqlx::{Pool, Sqlite};
 use units_macro::include_currencies_from_json;
 use uuid::Uuid;
 
-use crate::entity::{DeleteFromDatabaseUsingId, Entity, GetFromDatabaseUsingId, SaveToDatabase};
+use identity::{
+    entity::{DeleteFromDatabaseUsingId, Entity, GetFromDatabaseUsingId, SaveToDatabase},
+    Id,
+    InnerId,
+};
 
-use identity::{Id, InnerId};
 
 include_currencies_from_json!("data/units/currency");

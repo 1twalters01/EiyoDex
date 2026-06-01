@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use identity::{inner_id::InnerIdType, Id};
 use sqlx::{Pool, Sqlite};
 

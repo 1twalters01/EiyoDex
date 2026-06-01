@@ -1,14 +1,19 @@
-use units::{
-    entity::Entity, power::{quantity::PowerQuantity, unit::PowerUnit}
-};
-use uuid::Uuid;
-use identity::Id;
+use units::power::{quantity::PowerQuantity, unit::PowerUnit};
+use identity::entity::Entity;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct Exercise {
     name: String,
     description: String,
     power_quantity_entity: Entity<PowerQuantity>, // Energy burned per time unit
+}
+
+impl PartialEq for Exercise {
+    fn eq(&self, other: &Self) -> bool {
+            self.name == other.name
+            && self.description == other.description
+            && self.power_quantity_entity == other.power_quantity_entity
+    }
 }
 
 impl Exercise {

@@ -1,7 +1,7 @@
-use crate::{nutrient::Nutrient, exercise_quantity::ExerciseQuantity};
+use crate::exercise_quantity::ExerciseQuantity;
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
-use units::energy::quantity::EnergyQuantity;
-use uuid::Uuid;
+// use units::energy::quantity::EnergyQuantity;
+// use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ExerciseQuantityList {
@@ -50,7 +50,7 @@ impl ExerciseQuantityList {
         self.exercise_quantities.clone()
     }
 
-    pub fn set_exericise_amounts(&mut self, nutrient_quantities: BTreeSet<ExerciseQuantity>) {
+    pub fn set_exericise_amounts(&mut self, exercise_quantities: BTreeSet<ExerciseQuantity>) {
         self.exercise_quantities = exercise_quantities;
     }
 }
