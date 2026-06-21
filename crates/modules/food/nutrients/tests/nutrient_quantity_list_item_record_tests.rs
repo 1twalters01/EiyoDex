@@ -129,10 +129,13 @@ async fn test_from_nutrient_quantity_list() {
     nutrient_quantity_list.push(non_heme_iron_b_quantity_entity);
 
 
-    // Create nutrient quantity list items record
-    let nutrient_quantity_list_item_record_vec = NutrientQuantityListItemRecord::from_nutrient_quantity_list(nutrient_quantity_list.clone()).await;
+    // Create nutrient quantity list entity
+    let nutrient_quantity_list_entity = Entity::new(nutrient_quantity_list);
 
-    let nutrient_quantity_list_id = nutrient_quantity_list.get_id().as_bytes().to_vec();
+    // Create nutrient quantity list items record
+    let nutrient_quantity_list_item_record_vec = NutrientQuantityListItemRecord::from_nutrient_quantity_list_entity(nutrient_quantity_list_entity.clone()).await;
+
+    let nutrient_quantity_list_id = nutrient_quantity_list_entity.get_id().to_bytes().to_vec();
     let manual_vec = Vec::from([
         NutrientQuantityListItemRecord::from_value(nutrient_quantity_list_id.clone(), iron_quantity_entity_id),
         NutrientQuantityListItemRecord::from_value(nutrient_quantity_list_id.clone(), heme_iron_quantity_entity_id),
@@ -270,8 +273,11 @@ async fn test_to_nutrient_quantity() {
     nutrient_quantity_list.push(non_heme_iron_b_quantity_entity);
 
 
+    // Create nutrient quantity list entity
+    let nutrient_quantity_list_entity = Entity::new(nutrient_quantity_list);
+
     // Create nutrient quantity list items record
-    let nutrient_quantity_list_item_record = NutrientQuantityListItemRecord::from_value(nutrient_quantity_list.get_id().as_bytes().to_vec(), iron_quantity_entity_id);
+    let nutrient_quantity_list_item_record = NutrientQuantityListItemRecord::from_value(nutrient_quantity_list_entity.get_id().to_bytes().to_vec(), iron_quantity_entity_id);
     let transformed_nutrient = nutrient_quantity_list_item_record.to_nutrient_quantity(&pool).await.unwrap();
     assert_eq!(transformed_nutrient.get_value(), value);
     assert_eq!(transformed_nutrient.get_output_unit(), NutrientUnit::Mass(MassUnit::Kilogram));
@@ -400,10 +406,15 @@ async fn test_database_operations() {
     nutrient_quantity_list_b.push(non_heme_iron_quantity_entity.clone());
 
 
+    // Create nutrient quantity list entities
+    let nutrient_quantity_list_a_entity = Entity::new(nutrient_quantity_list_a);
+    let nutrient_quantity_list_b_entity = Entity::new(nutrient_quantity_list_b);
+    let nutrient_quantity_list_c_entity = Entity::new(nutrient_quantity_list_c);
+
     // Create nutrient list record
-    let nutrient_quantity_list_a_record = NutrientQuantityListRecord::from_nutrient_quantity_list(nutrient_quantity_list_a.clone());
-    let nutrient_quantity_list_b_record = NutrientQuantityListRecord::from_nutrient_quantity_list(nutrient_quantity_list_b.clone());
-    let nutrient_quantity_list_c_record = NutrientQuantityListRecord::from_nutrient_quantity_list(nutrient_quantity_list_c.clone());
+    let nutrient_quantity_list_a_record = NutrientQuantityListRecord::from_nutrient_quantity_list_entity(nutrient_quantity_list_a_entity.clone());
+    let nutrient_quantity_list_b_record = NutrientQuantityListRecord::from_nutrient_quantity_list_entity(nutrient_quantity_list_b_entity.clone());
+    let nutrient_quantity_list_c_record = NutrientQuantityListRecord::from_nutrient_quantity_list_entity(nutrient_quantity_list_c_entity.clone());
 
 
     // save db
@@ -413,9 +424,9 @@ async fn test_database_operations() {
 
 
     // Create nutrient list items record
-    let nutrient_quantity_list_a_item_record_vec = NutrientQuantityListItemRecord::from_nutrient_quantity_list(nutrient_quantity_list_a.clone()).await;
-    let nutrient_quantity_list_b_item_record_vec = NutrientQuantityListItemRecord::from_nutrient_quantity_list(nutrient_quantity_list_b.clone()).await;
-    let nutrient_quantity_list_c_item_record_vec = NutrientQuantityListItemRecord::from_nutrient_quantity_list(nutrient_quantity_list_c.clone()).await;
+    let nutrient_quantity_list_a_item_record_vec = NutrientQuantityListItemRecord::from_nutrient_quantity_list_entity(nutrient_quantity_list_a_entity.clone()).await;
+    let nutrient_quantity_list_b_item_record_vec = NutrientQuantityListItemRecord::from_nutrient_quantity_list_entity(nutrient_quantity_list_b_entity.clone()).await;
+    let nutrient_quantity_list_c_item_record_vec = NutrientQuantityListItemRecord::from_nutrient_quantity_list_entity(nutrient_quantity_list_c_entity.clone()).await;
 
 
     // save nutrient list items record

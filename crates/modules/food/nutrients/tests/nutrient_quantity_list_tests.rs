@@ -1,5 +1,6 @@
 use std::rc::Rc;
 
+use identity::{entity::Entity, Id, InnerId};
 use nutrients::{
     nutrient::{link_parent_child, Nutrient}, nutrient_list::NutrientList, nutrient_quantity::NutrientQuantity, nutrient_quantity_list::NutrientQuantityList, nutrient_units::NutrientUnit, records::{nutrient_quantity_record::NutrientQuantityRecord, nutrient_record::{NutrientLinkRecord, NutrientRecord}, nutrient_unit_record::NutrientUnitRecord}, schema::{
         nutrient_classes::{ChemicalType, EssentialityType, QuantityType},
@@ -18,7 +19,7 @@ async fn test_id_funcs() {
     let _ = EnergyUnit::save_enumerations_to_database(&pool).await;
     let _ = NutrientUnitRecord::save_enumerations_to_database(&pool).await;
 
-    let nutrient_list_id = Uuid::from_u128(15u128);
+    let nutrient_quantity_list_id = Id::from_inner(InnerId::Uuid(Uuid::from_u128(15u128)));
     let nutrient_type = NutrientType {
         chemical_type: ChemicalType::Mineral,
         quantity_type: QuantityType::Micronutrient,
@@ -32,6 +33,7 @@ async fn test_id_funcs() {
         nutrient_type.clone(),
         NutrientUnit::Mass(MassUnit::Milligram),
     );
+
     let potassium = Nutrient::new_rc_refcell(
         String::from("Potassium"),
         nutrient_type.clone(),
@@ -44,6 +46,7 @@ async fn test_id_funcs() {
         NutrientUnit::Mass(MassUnit::Milligram),
     )
     .unwrap();
+    let iron_quantity_entity = Entity::new(iron_quantity);
 
     let potassium_quantity: NutrientQuantity = NutrientQuantity::from_rc_refcell(
         value,
@@ -51,21 +54,25 @@ async fn test_id_funcs() {
         NutrientUnit::Mass(MassUnit::Milligram),
     )
     .unwrap();
+    let potassium_quantity_entity = Entity::new(potassium_quantity);
 
     let main_nutrient_list: NutrientList = NutrientList::from_vec([iron, potassium].to_vec());
 
-    let iron_record = NutrientQuantityRecord::from_nutrient_quantity(iron_quantity, &pool).await.unwrap();
-    let potassium_record = NutrientQuantityRecord::from_nutrient_quantity(potassium_quantity, &pool).await.unwrap();
+    let iron_record = NutrientQuantityRecord::from_nutrient_quantity_entity(iron_quantity_entity, &pool).await.unwrap();
+    let potassium_record = NutrientQuantityRecord::from_nutrient_quantity_entity(potassium_quantity_entity, &pool).await.unwrap();
+
     iron_record.save_to_database(&pool);
     potassium_record.save_to_database(&pool);
+    
     let iron_entity = iron_record.to_nutrient_quantity_entity(&pool, main_nutrient_list.clone()).await.unwrap();
     let potassium_entity = potassium_record.to_nutrient_quantity_entity(&pool, main_nutrient_list).await.unwrap();
 
-    let mut nutrient_amount_list = NutrientQuantityList::from_vec(Vec::from([iron_entity, potassium_entity]));
+    let nutrient_quantity_list = NutrientQuantityList::from_vec(Vec::from([iron_entity, potassium_entity]));
+    let mut nutrient_quantity_list_entity = Entity::new(nutrient_quantity_list);
 
-    assert_ne!(nutrient_amount_list.get_id(), nutrient_list_id);
-    nutrient_amount_list.set_id(nutrient_list_id);
-    assert_eq!(nutrient_amount_list.get_id(), nutrient_list_id);
+    assert_ne!(nutrient_quantity_list_entity.get_id(), nutrient_quantity_list_id);
+    nutrient_quantity_list_entity.set_id(nutrient_quantity_list_id.clone());
+    assert_eq!(nutrient_quantity_list_entity.get_id(), nutrient_quantity_list_id);
 }
 
 #[tokio::test]
@@ -76,7 +83,7 @@ async fn test_push_and_remove_from_nutrient_list() {
     let _ = EnergyUnit::save_enumerations_to_database(&pool).await;
     let _ = NutrientUnitRecord::save_enumerations_to_database(&pool).await;
 
-    let nutrient_list_id = Uuid::from_u128(15u128);
+    let nutrient_quantity_list_id = Id::from_inner(InnerId::Uuid(Uuid::from_u128(15u128)));
     let nutrient_type = NutrientType {
         chemical_type: ChemicalType::Mineral,
         quantity_type: QuantityType::Micronutrient,
@@ -119,36 +126,44 @@ async fn test_push_and_remove_from_nutrient_list() {
     let iron_entity = iron_record.to_nutrient_quantity_entity(&pool, main_nutrient_list.clone()).await.unwrap();
     let potassium_entity = potassium_record.to_nutrient_quantity_entity(&pool, main_nutrient_list).await.unwrap();
 
-    let mut nutrient_amount_list_iron = NutrientQuantityList::from_vec(Vec::from([iron_entity.clone()]));
-    nutrient_amount_list_iron.set_id(nutrient_list_id);
-    let mut nutrient_amount_list_potassium =
+    let mut nutrient_quantity_list_iron = NutrientQuantityList::from_vec(Vec::from([iron_entity.clone()]));
+    let mut nutrient_quantity_list_iron_entity = Entity::new(nutrient_quantity_list_iron.clone());
+    nutrient_quantity_list_iron_entity.set_id(nutrient_quantity_list_id.clone());
+
+    let mut nutrient_quantity_list_potassium =
         NutrientQuantityList::from_vec(Vec::from([potassium_entity.clone()]));
-    nutrient_amount_list_potassium.set_id(nutrient_list_id);
-    let mut nutrient_amount_list_iron_and_potassium =
+    let mut nutrient_quantity_list_potassium_entity = Entity::new(nutrient_quantity_list_potassium.clone());
+    nutrient_quantity_list_potassium_entity.set_id(nutrient_quantity_list_id.clone());
+
+    let mut nutrient_quantity_list_iron_and_potassium =
         NutrientQuantityList::from_vec(Vec::from([iron_entity.clone(), potassium_entity.clone()]));
-    nutrient_amount_list_iron_and_potassium.set_id(nutrient_list_id);
-    let mut nutrient_amount_list_potassium_and_iron =
+    let mut nutrient_quantity_list_iron_and_potassium_entity = Entity::new(nutrient_quantity_list_iron_and_potassium.clone());
+    nutrient_quantity_list_iron_and_potassium_entity.set_id(nutrient_quantity_list_id.clone());
+
+    let mut nutrient_quantity_list_potassium_and_iron =
         NutrientQuantityList::from_vec(Vec::from([potassium_entity.clone(), iron_entity.clone()]));
-    nutrient_amount_list_potassium_and_iron.set_id(nutrient_list_id);
+    let mut nutrient_quantity_list_potassium_and_iron_entity = Entity::new(nutrient_quantity_list_potassium_and_iron.clone());
+    nutrient_quantity_list_potassium_and_iron_entity.set_id(nutrient_quantity_list_id.clone());
 
-    let mut nutrient_amount_list = NutrientQuantityList::from_vec(Vec::from([iron_entity.clone()]));
-    nutrient_amount_list.set_id(nutrient_list_id);
+    let mut nutrient_quantity_list = NutrientQuantityList::from_vec(Vec::from([iron_entity.clone()]));
+    let mut nutrient_quantity_list_entity = Entity::new(nutrient_quantity_list.clone());
+    nutrient_quantity_list_entity.set_id(nutrient_quantity_list_id.clone());
 
-    nutrient_amount_list.push(iron_entity.clone());
-    assert_eq!(nutrient_amount_list, nutrient_amount_list_iron);
+    nutrient_quantity_list.push(iron_entity.clone());
+    assert_eq!(nutrient_quantity_list, nutrient_quantity_list_iron);
 
-    nutrient_amount_list.push(potassium_entity);
+    nutrient_quantity_list.push(potassium_entity);
     assert_eq!(
-        nutrient_amount_list,
-        nutrient_amount_list_iron_and_potassium
+        nutrient_quantity_list,
+        nutrient_quantity_list_iron_and_potassium_entity.get_inner(),
     );
     assert_eq!(
-        nutrient_amount_list,
-        nutrient_amount_list_potassium_and_iron
+        nutrient_quantity_list,
+        nutrient_quantity_list_potassium_and_iron_entity.get_inner(),
     );
 
-    nutrient_amount_list.remove(&iron_entity);
-    assert_eq!(nutrient_amount_list, nutrient_amount_list_potassium);
+    nutrient_quantity_list.remove(&iron_entity);
+    assert_eq!(nutrient_quantity_list, nutrient_quantity_list_potassium_entity.get_inner());
 }
 
 #[test]

@@ -2,11 +2,9 @@ use crate::{nutrient::Nutrient, nutrient_quantity::NutrientQuantity};
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
 use identity::entity::Entity;
 use units::{energy::quantity::EnergyQuantity};
-use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct NutrientQuantityList {
-    id: Uuid,
     name: String,
     description: String,
     nutrient_quantities: BTreeSet<Entity<NutrientQuantity>>,
@@ -15,7 +13,6 @@ pub struct NutrientQuantityList {
 impl NutrientQuantityList {
     pub fn new() -> Self {
         Self {
-            id: Uuid::new_v4(),
             name: String::new(),
             description: String::new(),
             nutrient_quantities: BTreeSet::new(),
@@ -27,19 +24,10 @@ impl NutrientQuantityList {
             nutrient_amount_vec.into_iter().collect();
 
         Self {
-            id: Uuid::new_v4(),
             name: String::new(),
             description: String::new(),
             nutrient_quantities,
         }
-    }
-
-    pub fn get_id(&self) -> Uuid {
-        self.id
-    }
-
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id;
     }
 
     pub fn get_name(&self) -> String {

@@ -1,5 +1,6 @@
 use std::collections::BTreeSet;
 
+use identity::{entity::Entity, Id, InnerId};
 use sqlx::{Pool, Sqlite};
 use uuid::Uuid;
 
@@ -20,8 +21,9 @@ impl NutrientQuantityListRecord {
         Self { id, name, description }
     }
 
-    pub fn from_nutrient_quantity_list(nutrient_quantity_list: NutrientQuantityList) -> Self {
-        let id = nutrient_quantity_list.get_id().as_bytes().to_vec();
+    pub fn from_nutrient_quantity_list_entity(nutrient_quantity_list_entity: Entity<NutrientQuantityList>) -> Self {
+        let id = nutrient_quantity_list_entity.get_id().to_bytes().to_vec();
+        let nutrient_quantity_list = nutrient_quantity_list_entity.get_inner();
         let name = nutrient_quantity_list.get_name();
         let description = nutrient_quantity_list.get_description();
         Self { id, name, description }
@@ -29,11 +31,28 @@ impl NutrientQuantityListRecord {
 
     pub fn to_nutrient_quantity_list(&self) -> NutrientQuantityList {
         let mut nutrient_quantity_list = NutrientQuantityList::new();
-        nutrient_quantity_list.set_id(Uuid::from_slice(&self.id).unwrap());
         nutrient_quantity_list.set_name(self.name.clone());
         nutrient_quantity_list.set_description(self.description.clone());
 
         return nutrient_quantity_list;
+    }
+
+    pub fn to_nutrient_quantity_list_entity(&self) -> Result<Entity<NutrientQuantityList>, uuid::Error> {
+        let mut nutrient_quantity_list = NutrientQuantityList::new();
+        nutrient_quantity_list.set_name(self.name.clone());
+        nutrient_quantity_list.set_description(self.description.clone());
+
+        let id = Id::from_inner(InnerId::Uuid(Uuid::from_slice(&self.id)?));
+        Ok(Entity::new_with_id(id, nutrient_quantity_list))
+    }
+
+    pub fn to_nutrient_list_entity(&self) -> Result<Entity<NutrientQuantityList>, uuid::Error> {
+        let mut nutrient_quantity_list = NutrientQuantityList::new();
+        nutrient_quantity_list.set_name(self.name.clone());
+        nutrient_quantity_list.set_description(self.description.clone());
+
+        let id = Id::from_inner(InnerId::Uuid(Uuid::from_slice(&self.id)?));
+        Ok(Entity::new_with_id(id, nutrient_quantity_list))
     }
 
     pub fn get_id(&self) -> Vec<u8> {
@@ -133,10 +152,11 @@ impl NutrientQuantityListItemRecord {
         Self { nutrient_quantity_list_id, nutrient_quantity_id }
     }
 
-    pub async fn from_nutrient_quantity_list(
-        nutrient_quantity_list: NutrientQuantityList,
+    pub async fn from_nutrient_quantity_list_entity(
+        nutrient_quantity_list_entity: Entity<NutrientQuantityList>,
     ) -> Vec<Self> {
-        let nutrient_quantity_list_id = nutrient_quantity_list.get_id().as_bytes().to_vec();
+        let nutrient_quantity_list_id = nutrient_quantity_list_entity.get_id().to_bytes().to_vec();
+        let nutrient_quantity_list = nutrient_quantity_list_entity.get_inner();
         let mut nutrient_quantity_list_item_vec: Vec<Self> = Vec::new();
 
         for nutrient_quantity_entity in nutrient_quantity_list.get_nutrient_quantities() {

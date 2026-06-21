@@ -1,12 +1,9 @@
 use std::{cell::RefCell, rc::Rc};
 
-use uuid::Uuid;
-
 use crate::nutrient::Nutrient;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct NutrientList {
-    // id: Uuid,
     name: String,
     description: String,
     nutrients: Vec<Rc<RefCell<Nutrient>>>,
@@ -15,7 +12,6 @@ pub struct NutrientList {
 impl NutrientList {
     pub fn new() -> Self {
         Self {
-            // id: Uuid::new_v4(),
             name: String::new(),
             description: String::new(),
             nutrients: Vec::new(),
@@ -24,20 +20,11 @@ impl NutrientList {
 
     pub fn from_vec(nutrients: Vec<Rc<RefCell<Nutrient>>>) -> Self {
         Self {
-            // id: Uuid::new_v4(),
             name: String::new(),
             description: String::new(),
             nutrients: nutrients,
         }
     }
-
-    // pub fn get_id(&self) -> Uuid {
-    //     self.id
-    // }
-    //
-    // pub fn set_id(&mut self, id: Uuid) {
-    //     self.id = id;
-    // }
 
     pub fn get_name(&self) -> String {
         self.name.clone()
