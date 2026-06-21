@@ -1,5 +1,6 @@
-use crate::{entity::Entity, nutrient::Nutrient, nutrient_quantity::NutrientQuantity};
+use crate::{nutrient::Nutrient, nutrient_quantity::NutrientQuantity};
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
+use identity::entity::Entity;
 use units::{energy::quantity::EnergyQuantity};
 use uuid::Uuid;
 

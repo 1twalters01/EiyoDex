@@ -1,5 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
+use identity::{entity::Entity, Id, InnerId};
 use nutrients::{
     nutrient::{link_parent_child, Nutrient}, nutrient_list::NutrientList, nutrient_units::NutrientUnit, schema::{
         nutrient_classes::{ChemicalType, EssentialityType, QuantityType},
@@ -11,7 +12,7 @@ use uuid::Uuid;
 
 #[test]
 fn test_id_funcs() {
-    let nutrient_list_id = Uuid::from_u128(15u128);
+    let nutrient_list_id = Id::from_inner(InnerId::Uuid(Uuid::from_u128(15u128)));
     let nutrient_type = NutrientType {
         chemical_type: ChemicalType::Mineral,
         quantity_type: QuantityType::Micronutrient,
@@ -32,16 +33,16 @@ fn test_id_funcs() {
         NutrientUnit::Mass(MassUnit::Milligram),
     );
 
-    let mut nutrient_list = NutrientList::from_vec(Vec::from([iron, potassium]));
+    let nutrient_list = NutrientList::from_vec(Vec::from([iron, potassium]));
+    let mut nutrient_list_entity = Entity::new(nutrient_list);
 
-    assert_ne!(nutrient_list.get_id(), nutrient_list_id);
-    nutrient_list.set_id(nutrient_list_id);
-    assert_eq!(nutrient_list.get_id(), nutrient_list_id);
+    assert_ne!(nutrient_list_entity.get_id().to_bytes(), nutrient_list_id.to_bytes());
+    nutrient_list_entity.set_id(nutrient_list_id.clone());
+    assert_eq!(nutrient_list_entity.get_id().to_bytes(), nutrient_list_id.to_bytes());
 }
 
 #[test]
 fn test_push_and_remove_from_nutrient_list() {
-    let nutrient_list_id = Uuid::from_u128(15u128);
     let nutrient_type = NutrientType {
         chemical_type: ChemicalType::Mineral,
         quantity_type: QuantityType::Micronutrient,
@@ -63,22 +64,17 @@ fn test_push_and_remove_from_nutrient_list() {
     );
 
     let mut nutrient_list_iron = NutrientList::from_vec(Vec::from([iron.clone()]));
-    nutrient_list_iron.set_id(nutrient_list_id);
 
     let mut nutrient_list_potassium =
         NutrientList::from_vec(Vec::from([potassium.clone()]));
-    nutrient_list_potassium.set_id(nutrient_list_id);
 
     let mut nutrient_list_iron_and_potassium =
         NutrientList::from_vec(Vec::from([iron.clone(), potassium.clone()]));
-    nutrient_list_iron_and_potassium.set_id(nutrient_list_id);
 
     let mut nutrient_list_potassium_and_iron =
         NutrientList::from_vec(Vec::from([potassium.clone(), iron.clone()]));
-    nutrient_list_potassium_and_iron.set_id(nutrient_list_id);
 
     let mut nutrient_list = NutrientList::from_vec(Vec::from([iron.clone()]));
-    nutrient_list.set_id(nutrient_list_id);
     assert_eq!(nutrient_list, nutrient_list_iron);
 
     nutrient_list.push(potassium);

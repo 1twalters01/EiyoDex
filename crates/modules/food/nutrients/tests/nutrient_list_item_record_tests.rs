@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 
-use identity::{inner_id::InnerIdType, Id};
+use identity::{entity::Entity, inner_id::InnerIdType, Id};
 use nutrients::{
-    entity::Entity,
     nutrient::{link_parent_child, Nutrient},
     nutrient_list::NutrientList,
     nutrient_units::NutrientUnit,
@@ -140,11 +139,15 @@ async fn test_from_nutrient_list() {
     nutrient_list.push(non_heme_iron_a);
     nutrient_list.push(non_heme_iron_b);
 
+ 
+    // Create nutrient list entity
+    let nutrient_list_entity = Entity::new(nutrient_list);
+
 
     // Create nutrient list items record
-    let nutrient_list_item_record_vec = NutrientListItemRecord::from_nutrient_list(nutrient_list.clone(), &pool).await.unwrap();
+    let nutrient_list_item_record_vec = NutrientListItemRecord::from_nutrient_list_entity(nutrient_list_entity.clone(), &pool).await.unwrap();
 
-    let nutrient_list_id = nutrient_list.get_id().as_bytes().to_vec();
+    let nutrient_list_id = nutrient_list_entity.get_id().to_bytes().to_vec();
     let manual_vec = Vec::from([
         NutrientListItemRecord::from_value(nutrient_list_id.clone(), iron_entity_id),
         NutrientListItemRecord::from_value(nutrient_list_id.clone(), heme_iron_entity_id),
@@ -281,8 +284,12 @@ async fn test_to_nutrient() {
     nutrient_list.push(non_heme_iron_b);
 
 
+    // Create nutrient list entity
+    let nutrient_list_entity = Entity::new(nutrient_list);
+
+
     // Create nutrient list items record
-    let nutrient_list_item_record = NutrientListItemRecord::from_value(nutrient_list.get_id().as_bytes().to_vec(), iron_entity_id);
+    let nutrient_list_item_record = NutrientListItemRecord::from_value(nutrient_list_entity.get_id().to_bytes().to_vec(), iron_entity_id);
 
     let transformed_nutrient = nutrient_list_item_record.to_nutrient(&pool).await.unwrap();
     assert_eq!(transformed_nutrient.get_name(), iron.borrow().get_name());
@@ -419,10 +426,16 @@ async fn test_database_operations() {
     nutrient_list_b.push(non_heme_iron);
 
 
+    // Create nutrient list entity
+    let nutrient_list_a_entity = Entity::new(nutrient_list_a);
+    let nutrient_list_b_entity = Entity::new(nutrient_list_b);
+    let nutrient_list_c_entity = Entity::new(nutrient_list_c);
+
+
     // Create nutrient list record
-    let nutrient_list_a_record = NutrientListRecord::from_nutrient_list(nutrient_list_a.clone());
-    let nutrient_list_b_record = NutrientListRecord::from_nutrient_list(nutrient_list_b.clone());
-    let nutrient_list_c_record = NutrientListRecord::from_nutrient_list(nutrient_list_c.clone());
+    let nutrient_list_a_record = NutrientListRecord::from_nutrient_list_entity(nutrient_list_a_entity.clone());
+    let nutrient_list_b_record = NutrientListRecord::from_nutrient_list_entity(nutrient_list_b_entity.clone());
+    let nutrient_list_c_record = NutrientListRecord::from_nutrient_list_entity(nutrient_list_c_entity.clone());
 
 
     // save nutrient list record
@@ -432,9 +445,9 @@ async fn test_database_operations() {
 
 
     // Create nutrient list items record
-    let nutrient_list_a_item_record_vec = NutrientListItemRecord::from_nutrient_list(nutrient_list_a.clone(), &pool).await.unwrap();
-    let nutrient_list_b_item_record_vec = NutrientListItemRecord::from_nutrient_list(nutrient_list_b.clone(), &pool).await.unwrap();
-    let nutrient_list_c_item_record_vec = NutrientListItemRecord::from_nutrient_list(nutrient_list_c.clone(), &pool).await.unwrap();
+    let nutrient_list_a_item_record_vec = NutrientListItemRecord::from_nutrient_list_entity(nutrient_list_a_entity.clone(), &pool).await.unwrap();
+    let nutrient_list_b_item_record_vec = NutrientListItemRecord::from_nutrient_list_entity(nutrient_list_b_entity.clone(), &pool).await.unwrap();
+    let nutrient_list_c_item_record_vec = NutrientListItemRecord::from_nutrient_list_entity(nutrient_list_c_entity.clone(), &pool).await.unwrap();
 
 
     // save nutrient list items record

@@ -1,8 +1,8 @@
-use identity::{inner_id::InnerIdType, Id};
+use identity::{entity::Entity, inner_id::InnerIdType, Id};
 use sqlx::{Pool, Sqlite};
 
 use crate::{
-    entity::Entity, nutrient_list::NutrientList, nutrient_quantity::NutrientQuantity, records::{nutrient_record::NutrientRecord, nutrient_unit_record::NutrientUnitRecord}
+    nutrient_list::NutrientList, nutrient_quantity::NutrientQuantity, records::{nutrient_record::NutrientRecord, nutrient_unit_record::NutrientUnitRecord}
 };
 
 #[derive(Debug, PartialEq, Clone)]

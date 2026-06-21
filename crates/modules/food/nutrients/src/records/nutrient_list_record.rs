@@ -1,4 +1,4 @@
-use identity::{inner_id::InnerIdType, Id, InnerId};
+use identity::{entity::Entity, inner_id::InnerIdType, Id, InnerId};
 use sqlx::{Pool, Sqlite};
 use uuid::Uuid;
 
@@ -18,8 +18,9 @@ impl NutrientListRecord {
         Self { id, name, description }
     }
 
-    pub fn from_nutrient_list(nutrient_list: NutrientList) -> Self {
-        let id = nutrient_list.get_id().as_bytes().to_vec();
+    pub fn from_nutrient_list_entity(nutrient_list_entity: Entity<NutrientList>) -> Self {
+        let id = nutrient_list_entity.get_id().to_bytes().to_vec();
+        let nutrient_list = nutrient_list_entity.get_inner();
         let name = nutrient_list.get_name();
         let description = nutrient_list.get_description();
         Self { id, name, description }
@@ -27,11 +28,20 @@ impl NutrientListRecord {
 
     pub fn to_nutrient_list(&self) -> NutrientList {
         let mut nutrient_list = NutrientList::new();
-        nutrient_list.set_id(Uuid::from_slice(&self.id).unwrap());
+        // nutrient_list.set_id(Uuid::from_slice(&self.id).unwrap());
         nutrient_list.set_name(self.name.clone());
         nutrient_list.set_description(self.description.clone());
 
         return nutrient_list;
+    }
+
+    pub fn to_nutrient_list_entity(&self) -> Result<Entity<NutrientList>, uuid::Error> {
+        let mut nutrient_list = NutrientList::new();
+        nutrient_list.set_name(self.name.clone());
+        nutrient_list.set_description(self.description.clone());
+        
+        let id = Id::from_inner(InnerId::Uuid(Uuid::from_slice(&self.id)?));
+        Ok(Entity::new_with_id(id, nutrient_list))
     }
 
     pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
@@ -143,8 +153,9 @@ impl NutrientListItemRecord {
         Self { nutrient_list_id, nutrient_id }
     }
 
-    pub async fn from_nutrient_list(nutrient_list: NutrientList, pool: &Pool<Sqlite>) -> Result<Vec<Self>, sqlx::Error> {
-        let nutrient_list_id = nutrient_list.get_id().as_bytes().to_vec();
+    pub async fn from_nutrient_list_entity(nutrient_list_entity: Entity<NutrientList>, pool: &Pool<Sqlite>) -> Result<Vec<Self>, sqlx::Error> {
+        let nutrient_list_id = nutrient_list_entity.get_inner_id().to_bytes().to_vec();
+        let nutrient_list = nutrient_list_entity.get_inner();
         let mut nutrient_list_item_vec: Vec<Self> = Vec::new();
 
         for nutrient in nutrient_list.get_nutrients() {

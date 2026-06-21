@@ -24,7 +24,7 @@ pub trait DeleteFromDatabaseUsingId<T: Clone + PartialEq> {
     ) -> impl Future<Output = Result<(), sqlx::Error>> + Send + 'a;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Entity<T: Clone + PartialEq> {
     pub id: Id<T>,
     pub inner: T,

@@ -1,6 +1,5 @@
-use identity::{inner_id::InnerIdType, Id};
+use identity::{entity::Entity, inner_id::InnerIdType, Id};
 use nutrients::{
-    entity::Entity,
     nutrient::Nutrient,
     nutrient_units::NutrientUnit,
     records::{

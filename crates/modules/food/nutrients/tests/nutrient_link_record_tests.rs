@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 
-use identity::{inner_id::InnerIdType, Id};
+use identity::{entity::Entity, inner_id::InnerIdType, Id};
 use nutrients::{
-    entity::Entity,
     nutrient::{link_parent_child, Nutrient},
     nutrient_units::NutrientUnit,
     records::{

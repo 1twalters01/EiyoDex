@@ -1,6 +1,6 @@
-use identity::{inner_id::InnerIdType, Id};
+use identity::{entity::Entity, inner_id::InnerIdType, Id};
 use nutrients::{
-    entity::Entity, nutrient::{ link_parent_child, Nutrient }, nutrient_list::NutrientList, nutrient_units::NutrientUnit,
+    nutrient::{ link_parent_child, Nutrient }, nutrient_list::NutrientList, nutrient_units::NutrientUnit,
     records::{
         nutrient_list_record::{NutrientListItemRecord, NutrientListRecord},
         nutrient_record::NutrientRecord,
@@ -92,20 +92,24 @@ async fn test_from_nutrient_list() {
     nutrient_list.push(non_heme_iron_b);
 
 
+    // Create nutrient list entity
+    let nutrient_list_entity = Entity::new(nutrient_list.clone());
+
     // Create nutrient list record
-    let nutrient_list_record = NutrientListRecord::from_nutrient_list(nutrient_list.clone());
-    let manual_list_record = NutrientListRecord::from_value(nutrient_list.get_id().as_bytes().to_vec(), nutrient_list.get_name(), nutrient_list.get_description());
+    let nutrient_list_record = NutrientListRecord::from_nutrient_list_entity(nutrient_list_entity.clone());
+    let manual_list_record = NutrientListRecord::from_value(nutrient_list_entity.get_id().to_bytes().to_vec(), nutrient_list.get_name(), nutrient_list.get_description());
 
     assert_eq!(nutrient_list_record, manual_list_record);
 }
 
 #[tokio::test]
-async fn test_to_nutrient_list() {
+async fn test_to_nutrient_list_entity() {
     let nutrient_list = NutrientList::new();
-    let nutrient_list_record = NutrientListRecord::from_nutrient_list(nutrient_list.clone());
-    let converted_list = nutrient_list_record.to_nutrient_quantity_list();
+    let nutrient_list_entity = Entity::new(nutrient_list);
+    let nutrient_list_record = NutrientListRecord::from_nutrient_list_entity(nutrient_list_entity.clone());
+    let converted_list_entity = nutrient_list_record.to_nutrient_list_entity().unwrap();
 
-    assert_eq!(nutrient_list.get_id(), converted_list.get_id())
+    assert_eq!(nutrient_list_entity.get_id(), converted_list_entity.get_id())
 }
 
 #[tokio::test]
@@ -163,10 +167,15 @@ async fn test_database_operations() {
     nutrient_list_b.push(non_heme_iron);
 
 
+    // Create nutrient list entries
+    let nutrient_list_a_entity = Entity::new(nutrient_list_a.clone());
+    let nutrient_list_b_entity = Entity::new(nutrient_list_b);
+    let nutrient_list_c_entity = Entity::new(nutrient_list_c);
+
     // Create nutrient list record
-    let nutrient_list_a_record = NutrientListRecord::from_nutrient_list(nutrient_list_a.clone());
-    let nutrient_list_b_record = NutrientListRecord::from_nutrient_list(nutrient_list_b.clone());
-    let nutrient_list_c_record = NutrientListRecord::from_nutrient_list(nutrient_list_c.clone());
+    let nutrient_list_a_record = NutrientListRecord::from_nutrient_list_entity(nutrient_list_a_entity.clone());
+    let nutrient_list_b_record = NutrientListRecord::from_nutrient_list_entity(nutrient_list_b_entity.clone());
+    let nutrient_list_c_record = NutrientListRecord::from_nutrient_list_entity(nutrient_list_c_entity.clone());
 
 
     // save db
@@ -174,7 +183,7 @@ async fn test_database_operations() {
     nutrient_list_b_record.save_or_update_to_database(&pool).await.unwrap();
     nutrient_list_c_record.save_or_update_to_database(&pool).await.unwrap();
 
-    let nutrient_list_a_item_record_vec = NutrientListItemRecord::from_nutrient_list(nutrient_list_a.clone(), &pool).await.unwrap();
+    let nutrient_list_a_item_record_vec = NutrientListItemRecord::from_nutrient_list_entity(nutrient_list_a_entity.clone(), &pool).await.unwrap();
     let mut refs: Vec<&NutrientListItemRecord> = nutrient_list_a_item_record_vec.iter().collect();
     NutrientListItemRecord::save_vec_to_database(refs, &pool).await.unwrap();
 
