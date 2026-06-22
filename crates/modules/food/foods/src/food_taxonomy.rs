@@ -5,7 +5,6 @@ use uuid::Uuid;
 use crate::{food_category::FoodCategory, food_variant::FoodVariant, price_metadata::PriceMetadata};
 
 pub struct FoodTaxonomy {
-    id: Uuid,
     name: String,
     description: String,
     price_metadata: Vec<Rc<RefCell<PriceMetadata>>>,
@@ -16,7 +15,6 @@ pub struct FoodTaxonomy {
 impl FoodTaxonomy {
     pub fn new(name: String, parent: &Rc<RefCell<FoodCategory>>) -> Self {
         Self {
-            id: Uuid::new_v4(),
             name,
             description: String::new(),
             price_metadata: Vec::new(),
@@ -29,7 +27,6 @@ impl FoodTaxonomy {
         Rc::new(
             RefCell::new(
                 Self {
-                    id: Uuid::new_v4(),
                     name,
                     description: String::new(),
                     price_metadata: Vec::new(),
@@ -38,14 +35,6 @@ impl FoodTaxonomy {
                 }
             )
         )
-    }
-
-    pub fn get_id(&self) -> Uuid {
-        self.id
-    }
-
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id;
     }
 
     pub fn get_name(&self) -> String {
