@@ -2,7 +2,6 @@ use uuid::Uuid;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Merchant {
-    id: Uuid,
     name: String,
     description: String,
     website: Option<String>,
@@ -10,25 +9,11 @@ pub struct Merchant {
 
 impl Merchant {
     pub fn new(name: String, id: Option<Uuid>) -> Self {
-        let id: Uuid = match id {
-            Some(id) => id,
-            None => Uuid::new_v4(),
-        };
-
         Merchant {
-            id,
             name,
             description: String::new(),
             website: None,
         }
-    }
-
-    pub fn get_id(&self) -> Uuid {
-        self.id
-    }
-
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id;
     }
 
     pub fn get_name(&self) -> String {
