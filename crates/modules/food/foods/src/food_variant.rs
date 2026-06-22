@@ -5,10 +5,9 @@ use uuid::Uuid;
 use crate::{food_instance::FoodInstance, food_taxonomy::FoodTaxonomy, food_variant_modifiers::{FoodAttribute, FoodTag, PreparationMethod}};
 
 pub struct FoodVariant {
-    id: Uuid,
     name: String,
     description: String,
-    preparation_method: Rc<RefCell<PreparationMethod>>,
+    preparation_method: Option<Rc<RefCell<PreparationMethod>>>,// change to vec or btreeset? Something could be baked andfried
     food_attributes: BTreeSet<Rc<RefCell<FoodAttribute>>>,
     food_tags: Vec<Rc<RefCell<FoodTag>>>,
     food_instances: Vec<Rc<RefCell<FoodInstance>>>,
@@ -16,12 +15,32 @@ pub struct FoodVariant {
 }
 
 impl FoodVariant {
-    pub fn get_id(&self) -> Uuid {
-        self.id.clone()
+    pub fn new() -> Self {
+        Self {
+            name: String::new(),
+            description: String::new(),
+            preparation_method: None,
+            food_attributes: BTreeSet::new(),
+            food_tags: Vec::new(),
+            food_instances: Vec::new(),
+            parent: food_taxonomy,
+        }
     }
 
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id;
+    pub fm new_rc_refcell(food_taxonomy: Weak<RefCell<FoodTaxonomy>>) -> Self {
+        Rc::new(
+            RefCell::new(
+                Self {
+                    name: String::new(),
+                    description: String::new(),
+                    preparation_method: None,
+                    food_attributes: BTreeSet::new(),
+                    food_tags: Vec::new(),
+                    food_instances: Vec::new(),
+                    parent: food_taxonomy,
+                }
+            )
+        )
     }
 
     pub fn get_name(&self) -> String {
@@ -40,11 +59,11 @@ impl FoodVariant {
         self.description = description;
     }
 
-    pub fn get_preparation_method(&self) -> Rc<RefCell<PreparationMethod>> {
+    pub fn get_preparation_method(&self) -> Option<Rc<RefCell<PreparationMethod>>> {
         self.preparation_method.clone()
     }
 
-    pub fn set_preparation_method(&mut self, preparation_method: Rc<RefCell<PreparationMethod>>) {
+    pub fn set_preparation_method(&mut self, preparation_method: Option<Rc<RefCell<PreparationMethod>>>) {
         self.preparation_method = preparation_method;
     }
 
