@@ -5,24 +5,14 @@ use uuid::Uuid;
 use crate::food_quantity::FoodQuantity;
 
 pub struct FoodQuantityList {
-    id: Uuid,
     food_quantities: Vec<Rc<RefCell<FoodQuantity>>>,
 }
 
 impl FoodQuantityList {
     pub fn new() -> Self {
         Self {
-            id: Uuid::new_v4(),
             food_quantities: Vec::new(),
         }
-    }
-
-    pub fn get_id(&self) -> Uuid {
-        self.id
-    }
-
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id;
     }
 
     pub fn get_food_quantities(&self) -> Vec<Rc<RefCell<FoodQuantity>>> {
