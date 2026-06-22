@@ -6,33 +6,18 @@ use uuid::Uuid;
 
 #[derive(Debug, Clone)]
 pub struct DataSourceProvider {
-    id: Uuid,
     name: String,
     description: String,
     data_source_instances: Vec<Rc<RefCell<DataSourceInstance>>>,
 }
 
 impl DataSourceProvider {
-    pub fn new(id: Option<Uuid>, name: String) -> Self {
-        let id = match id {
-            Some(id) => id,
-            None => Uuid::new_v4(),
-        };
-
+    pub fn new(name: String) -> Self {
         Self {
-            id,
             name,
             description: String::new(),
             data_source_instances: Vec::new(),
         }
-    }
-
-    pub fn get_id(&self) -> Uuid {
-        self.id
-    }
-
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id;
     }
 
     pub fn get_name(&self) -> String {
@@ -91,7 +76,6 @@ impl DataSourceProvider {
 
 #[derive(Debug, Clone)]
 pub struct DataSourceVersion {
-    id: Uuid,
     version: String,
     description: String,
 }
@@ -99,18 +83,9 @@ pub struct DataSourceVersion {
 impl DataSourceVersion {
     pub fn new(version: String) -> Self {
         Self {
-            id: Uuid::new_v4(),
             version,
             description: String::new(),
         }
-    }
-
-    pub fn get_id(&self) -> Uuid {
-        self.id
-    }
-
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id;
     }
 
     pub fn version(&self) -> String {
@@ -132,7 +107,6 @@ impl DataSourceVersion {
 
 #[derive(Debug, Clone)]
 pub struct DataSourceInstance {
-    id: Uuid,
     description: String,
     data_source_provider: Weak<RefCell<DataSourceProvider>>,
     data_source_version: Weak<RefCell<DataSourceVersion>>,
@@ -144,20 +118,11 @@ impl DataSourceInstance {
         let data_source_provider_weak = Rc::downgrade(&data_source_provider);
         let data_source_version_weak = Rc::downgrade(&data_source_version);
         Self {
-            id: Uuid::new_v4(),
             description: String::new(),
             data_source_provider: data_source_provider_weak,
             data_source_version: data_source_version_weak,
             nutrient_quantity_list,
         }
-    }
-
-    pub fn get_id(&self) -> Uuid {
-        self.id
-    }
-
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id;
     }
 
     pub fn get_description(&self) -> String {
