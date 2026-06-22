@@ -25,6 +25,19 @@ impl FoodCategory {
             children: Vec::new(),
         }
     }
+    
+    pub fn new_rc_refcell(food_category: Option<Weak<RefCell<FoodCategory>>>) -> Rc<RefCell<Self>> {
+        Rc::new(
+            Refcell::new(
+                Self {
+                    name: String::new(),
+                    description: String::new(),
+                    parent: food_category,
+                    children: Vec::new(),
+                }
+            )
+        )
+    }
 
     pub fn get_name(&self) -> String {
         self.name.clone()
