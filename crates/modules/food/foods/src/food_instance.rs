@@ -5,20 +5,11 @@ use uuid::Uuid;
 use crate::{data_sources::DataSourceInstance, food_variant::FoodVariant};
 
 pub struct FoodInstance {
-    id: Uuid,
     food_variant: Weak<RefCell<FoodVariant>>,
     data_source_instance: Rc<RefCell<DataSourceInstance>>,
 }
 
 impl FoodInstance {
-    pub fn get_id(&self) -> Uuid {
-        self.id
-    }
-
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id
-    }
-
     pub fn get_food_variant(&self) -> Weak<RefCell<FoodVariant>> {
         self.food_variant.clone()
     }
