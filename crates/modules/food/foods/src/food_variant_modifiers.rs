@@ -1,20 +1,11 @@
 use uuid::Uuid;
 
 pub struct PreparationMethod {
-    id: Uuid,
     name: String,
     description: String,
 }
 
 impl PreparationMethod {
-    pub fn get_id(&self) -> Uuid {
-        self.id
-    }
-
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id;
-    }
-
     pub fn get_name(&self) -> String {
         self.name.clone()
     }
@@ -34,20 +25,11 @@ impl PreparationMethod {
 
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub struct FoodAttribute {
-    id: Uuid,
     name: String,
     description: String,
 }
 
 impl FoodAttribute {
-    pub fn get_id(&self) -> Uuid {
-        self.id
-    }
-
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id;
-    }
-
     pub fn get_name(&self) -> String {
         self.name.clone()
     }
@@ -66,20 +48,11 @@ impl FoodAttribute {
 }
 
 pub struct FoodTag {
-    id: Uuid,
     name: String,
     description: String,
 }
 
 impl FoodTag {
-    pub fn get_id(&self) -> Uuid {
-        self.id
-    }
-
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id;
-    }
-
     pub fn get_name(&self) -> String {
         self.name.clone()
     }
