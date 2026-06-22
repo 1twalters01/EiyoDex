@@ -10,7 +10,6 @@ pub enum FoodCategoryChild {
 }
 
 pub struct FoodCategory {
-    id: Uuid,
     name: String,
     description: String,
     parent: Option<Weak<RefCell<FoodCategory>>>,
@@ -20,20 +19,11 @@ pub struct FoodCategory {
 impl FoodCategory {
     pub fn new(food_category: Option<Weak<RefCell<FoodCategory>>>) -> Self {
         Self {
-            id: Uuid::new_v4(),
             name: String::new(),
             description: String::new(),
             parent: food_category,
             children: Vec::new(),
         }
-    }
-
-    pub fn get_id(&self) -> Uuid {
-        self.id.clone()
-    }
-
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id;
     }
 
     pub fn get_name(&self) -> String {
