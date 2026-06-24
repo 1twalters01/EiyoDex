@@ -7,7 +7,7 @@ use crate::{food_instance::FoodInstance, food_taxonomy::FoodTaxonomy, food_varia
 pub struct FoodVariant {
     name: String,
     description: String,
-    preparation_method: Option<Rc<RefCell<PreparationMethod>>>,// change to vec or btreeset? Something could be baked andfried
+    preparation_method: Option<Rc<RefCell<PreparationMethod>>>, // change to vec or btreeset? Something could be baked andfried
     food_attributes: BTreeSet<Rc<RefCell<FoodAttribute>>>,
     food_tags: Vec<Rc<RefCell<FoodTag>>>,
     food_instances: Vec<Rc<RefCell<FoodInstance>>>,
@@ -27,7 +27,7 @@ impl FoodVariant {
         }
     }
 
-    pub fm new_rc_refcell(food_taxonomy: Weak<RefCell<FoodTaxonomy>>) -> Self {
+    pub fn new_rc_refcell(food_taxonomy: Weak<RefCell<FoodTaxonomy>>) -> Self {
         Rc::new(
             RefCell::new(
                 Self {

@@ -1,11 +1,11 @@
 use crate::exercise_quantity::ExerciseQuantity;
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
-// use units::energy::quantity::EnergyQuantity;
+use identity::entity::Entity;
+use units::energy::quantity::EnergyQuantity;
 use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ExerciseQuantityList {
-    id: Uuid,
     name: String,
     description: String,
     exercise_quantities: BTreeSet<Entity<ExerciseQuantity>>,
@@ -14,31 +14,21 @@ pub struct ExerciseQuantityList {
 impl ExerciseQuantityList {
     pub fn new() -> Self {
         Self {
-            id: Uuid::new_v4(),
             name: String::new(),
             description: String::new(),
             exercise_quantities: BTreeSet::new(),
         }
     }
 
-    pub fn from_vec(exercise_amount_vec: Vec<ExerciseQuantity>) -> Self {
-        let exercise_quantities: BTreeSet<ExerciseQuantity> =
-            exercise_amount_vec.into_iter().collect();
+    pub fn from_vec(exercise_quantity_entity_vec: Vec<Entity<ExerciseQuantity>>) -> Self {
+        let exercise_quantities: BTreeSet<Entity<ExerciseQuantity>> =
+            exercise_quantity_entity_vec.into_iter().collect();
 
         Self {
-            id: Uuid::new_v4(),
             name: String::new(),
             description: String::new(),
             exercise_quantities,
         }
-    }
-
-    pub fn get_id(&self) -> Uuid {
-        self.id
-    }
-
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id;
     }
 
     pub fn get_name(&self) -> String {
@@ -57,11 +47,11 @@ impl ExerciseQuantityList {
         self.description = description;
     }
 
-    pub fn get_exercise_quantities(&self) -> BTreeSet<ExerciseQuantity> {
+    pub fn get_exercise_quantities(&self) -> BTreeSet<Entity<ExerciseQuantity>> {
         self.exercise_quantities.clone()
     }
 
-    pub fn set_exericise_amounts(&mut self, exercise_quantities: BTreeSet<ExerciseQuantity>) {
+    pub fn set_exericise_amounts(&mut self, exercise_quantities: BTreeSet<Entity<ExerciseQuantity>>) {
         self.exercise_quantities = exercise_quantities;
     }
 
@@ -88,7 +78,7 @@ impl ExerciseQuantityList {
     pub fn get_calories(&self) -> Result<EnergyQuantity, &'static str> {
         let mut calories_sum = EnergyQuantity::new(0f64, units::energy::unit::EnergyUnit::Kilocalorie); 
         for exercise_quantity in &self.exercise_quantities {
-            let calories = exercise_quantity.get_inner().get_calories()?;
+            let calories = exercise_quantity.get_inner().get_calories();
             calories_sum = calories_sum + calories;
         }
 

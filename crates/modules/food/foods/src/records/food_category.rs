@@ -25,7 +25,7 @@ impl FoodCategoryRecord {
     pub async fn delete_from_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {}
 }
 
-pub FoodCategoryRelationshipRecord {
+pub struct FoodCategoryRelationshipRecord {
     parent_category_id: Vec<u8>,
     child_id: Vec<u8>,
     child_type_id: i64,

@@ -1,4 +1,4 @@
-use identity::{inner_id::InnerIdType, Id, InnerId};
+use identity::{entity::Entity, inner_id::InnerIdType, Id, InnerId};
 use sqlx::{Pool, Sqlite};
 use uuid::Uuid;
 
@@ -16,8 +16,9 @@ impl ExerciseListRecord {
         Self { id, name, description }
     }
 
-    pub fn from_exercise_list(exercise_list: ExerciseList) -> Self {
-        let id = exercise_list.get_id().as_bytes().to_vec();
+    pub fn from_exercise_list_entity(exercise_list_entity: Entity<ExerciseList>) -> Self {
+        let id = exercise_list_entity.get_id().to_bytes().to_vec();
+        let exercise_list = exercise_list_entity.get_inner();
         let name = exercise_list.get_name();
         let description = exercise_list.get_description();
         Self { id, name, description }
@@ -25,11 +26,19 @@ impl ExerciseListRecord {
 
     pub fn to_nutrient_list(&self) -> ExerciseList {
         let mut exercise_list = ExerciseList::new();
-        exercise_list.set_id(Uuid::from_slice(&self.id).unwrap());
         exercise_list.set_name(self.name.clone());
         exercise_list.set_description(self.description.clone());
 
         return exercise_list;
+    }
+
+    pub fn to_nutrient_list_entity(&self) -> Entity<ExerciseList> {
+        let mut exercise_list = ExerciseList::new();
+        exercise_list.set_name(self.name.clone());
+        exercise_list.set_description(self.description.clone());
+
+        let id = Id::from_inner(InnerId::Uuid(Uuid::from_slice(&self.id).unwrap()));
+        Entity::new_with_id(id, exercise_list)
     }
 
     pub async fn save_to_database(&self, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
@@ -141,8 +150,9 @@ impl ExerciseListItemRecord {
         Self { exercise_list_id, exercise_id }
     }
 
-    pub async fn from_exercise_list(exercise_list: ExerciseList, pool: &Pool<Sqlite>) -> Result<Vec<Self>, sqlx::Error> {
-        let exercise_list_id = exercise_list.get_id().as_bytes().to_vec();
+    pub async fn from_exercise_list_entity(exercise_list_entity: Entity<ExerciseList>, pool: &Pool<Sqlite>) -> Result<Vec<Self>, sqlx::Error> {
+        let exercise_list_id = exercise_list_entity.get_id().to_bytes().to_vec();
+        let exercise_list = exercise_list_entity.get_inner();
         let mut exercise_list_item_vec: Vec<Self> = Vec::new();
 
         for exercise in exercise_list.get_exercises() {

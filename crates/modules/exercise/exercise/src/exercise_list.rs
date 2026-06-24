@@ -1,12 +1,9 @@
 use std::{cell::RefCell, rc::Rc};
 
-use uuid::Uuid;
-
 use crate::exercise::Exercise;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ExerciseList {
-    id: Uuid,
     name: String,
     description: String,
     exercises: Vec<Rc<RefCell<Exercise>>>,
@@ -15,7 +12,6 @@ pub struct ExerciseList {
 impl ExerciseList {
     pub fn new() -> Self {
         Self {
-            id: Uuid::new_v4(),
             name: String::new(),
             description: String::new(),
             exercises: Vec::new(),
@@ -24,19 +20,10 @@ impl ExerciseList {
 
     pub fn from_vec(exercises: Vec<Rc<RefCell<Exercise>>>) -> Self {
         Self {
-            id: Uuid::new_v4(),
             name: String::new(),
             description: String::new(),
             exercises: exercises,
         }
-    }
-
-    pub fn get_id(&self) -> Uuid {
-        self.id
-    }
-
-    pub fn set_id(&mut self, id: Uuid) {
-        self.id = id;
     }
 
     pub fn get_name(&self) -> String {
